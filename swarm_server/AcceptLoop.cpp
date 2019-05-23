@@ -26,6 +26,10 @@
 #include <string.h>
 #include <sys/wait.h>
 
+#include "ViCon.hpp"
+#include "Robot.hpp"
+
+
 // Setting global variables
 int server_port = 4321; // port number
 
