@@ -96,6 +96,14 @@ int main(int _argc, char** _argv)
 
   int lr; // loop rate
   nh.getParam("/find_marker_node/loop_rate", lr);
+  
+  int camWide;
+  int camHigh; // resolution width and height
+  nh.getParam("/find_marker_node/resolution_width", camWide);
+  nh.getParam("/find_marker_node/resolution_height", camHigh);
+  
+  bool autoFocus;
+  nh.getParam("/find_marker_node/auto_focus", autoFocus);
 
   float marker_size;
   nh.getParam("/find_marker_node/marker_size", marker_size);
@@ -108,23 +116,24 @@ int main(int _argc, char** _argv)
 
   // raw/original image publisher
   sensor_msgs::ImagePtr img_raw_msg;
-  image_transport::Publisher pub_raw_img = it.advertise("/camera/image_raw", 480*640);
+  image_transport::Publisher pub_raw_img = it.advertise("/camera/image_raw", camHigh*camWide);
 
   // drawn marker on image publisher
   sensor_msgs::ImagePtr img_marker_msg;
-  image_transport::Publisher pub_marker_img = it.advertise("/camera/image_marker", 480*640);
+  image_transport::Publisher pub_marker_img = it.advertise("/camera/image_marker", camHigh*camWide);
 
   image_transport::Subscriber sub_image;
   if (!use_video_device)
   {
     // subscribe to camera/image topic
-    sub_image = it.subscribe(image_topic, 640*480, image_clk, ros::VoidPtr());
+    sub_image = it.subscribe(image_topic, camWide*camHigh, image_clk, ros::VoidPtr());
   }
 
   // predefined aruco marker dictionary
   cv::Ptr<cv::aruco::Dictionary> dict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_5X5_50);
 
   // aruco markers parameters
+  cv::Ptr<cv::aruco::DetectorParameters> parameters = new cv::aruco::DetectorParameters();
   std::vector<int> marker_ids; // ids of markers detected
   std::vector<std::vector<cv::Point2f>> marker_corners; // vector locations of detected markers' corners (clockwise order; pixel coordinates)
   std::vector<cv::Vec3d> rvecs, tvecs; // rotation & translation vectors of detected markers
@@ -139,6 +148,18 @@ int main(int _argc, char** _argv)
     // opens up camera device
     capture.open(video_device_num);
   }
+
+  //use capture parameters from launchfile
+  capture.set(cv::CAP_PROP_FRAME_WIDTH, camWide);
+  capture.set(cv::CAP_PROP_FRAME_HEIGHT, camHigh);
+  capture.set(cv::CAP_PROP_AUTOFOCUS, autoFocus);	
+  
+  //change parameters to better handle full resolution
+  parameters->minMarkerPerimeterRate = 0.007; //smallest id will be 1920*0.007=13px
+  parameters->maxMarkerPerimeterRate = 0.1; //largest id will be 1920*0.1=192px
+  parameters->errorCorrectionRate = 0.9; //higher alpha errors, lower beta errors
+  parameters->adaptiveThreshConstant = 7; //default
+  parameters->maxErroneousBitsInBorderRate = 0.35; //default
 
   cv::Mat raw_img; // copied raw imag
 
@@ -160,7 +181,7 @@ int main(int _argc, char** _argv)
       marker_array.markers.clear();
       marker_ids.clear();
 
-      cv::aruco::detectMarkers(image_, dict, marker_corners, marker_ids);
+      cv::aruco::detectMarkers(image_, dict, marker_corners, marker_ids, parameters=parameters);
 
       if (marker_ids.size() > 0)
       {
