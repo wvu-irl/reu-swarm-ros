@@ -1,0 +1,8 @@
+prefix=/home/air/swarm_ws/devel
+
+Name: aruco_markers
+Description: Description of aruco_markers
+Version: 0.0.0
+Cflags: -I/home/air/swarm_ws/devel/include
+Libs: -L/home/air/swarm_ws/devel/lib 
+Requires: cv_bridge image_transport roscpp sensor_msgs std_msgs geometry_msgs
