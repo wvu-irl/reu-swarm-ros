@@ -1,2 +1,2 @@
 aruco_markers:vicon_bridge
--DCATKIN_DEVEL_PREFIX=/home/air/swarm_ws/devel -DCMAKE_INSTALL_PREFIX=/home/air/swarm_ws/install -G Unix Makefiles
+-DCATKIN_DEVEL_PREFIX=/home/air/reu-swarm-ros/swarm_ws/devel -DCMAKE_INSTALL_PREFIX=/home/air/reu-swarm-ros/swarm_ws/install -G Unix Makefiles
