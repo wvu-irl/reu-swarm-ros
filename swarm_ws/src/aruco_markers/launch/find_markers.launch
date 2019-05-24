@@ -1,0 +1,33 @@
+<launch>
+  <!-- Set to true if using image from video device
+       Set to false if using image from ROS image topic -->
+  <arg name="use_video_device" default="true" />
+  <!-- If subscribing to ROS image topic, set above arg use_video_device to false -->
+  <arg name="image_topic" default="/camera/image_raw" />
+
+  <!-- video device number from /dev/videoX (e.g. /dev/video0) -->
+  <arg name="video_device_num" default="0" />
+  <!-- loop rate ~ frames per second -->
+  <arg name="loop_rate" default="60" />
+  <!-- size of markers in meters -->
+  <arg name="marker_size" default="0.04" />
+  <!-- width of the opencv capture in pixels -->
+  <arg name="resolution_width" default="1600" />
+  <!-- height of the opencv capture in pixels -->
+  <arg name="resolution_height" default="900" />
+  <!-- should the camera autofocus -->
+  <arg name="auto_focus" default="true" />
+
+  <node name="find_marker_node" pkg="aruco_markers" type="find_marker_node" output="screen">
+    <rosparam command="load" file="$(find aruco_markers)/launch/launch_params/turtlebot3_picam.yaml" />
+    <param name="use_video_device" value="$(arg use_video_device)" />
+    <param name="image_topic" value="$(arg image_topic)" />
+    <param name="video_device_num" value="$(arg video_device_num)" />
+    <param name="loop_rate" value="$(arg loop_rate)" />
+    <param name="marker_size" value="$(arg marker_size)" />
+    <param name="resolution_width" value = "$(arg resolution_width)" />
+    <param name="resolution_height" value = "$(arg resolution_height)" />
+    <param name="auto_focus" value = "$(arg auto_focus)" />
+  </node>
+
+</launch>
