@@ -42,10 +42,13 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
+
 // aruco api: https://docs.opencv.org/3.4/d9/d53/aruco_8hpp.html
 #include <opencv2/aruco.hpp>
 #include <aruco_markers/Marker.h>
 #include <aruco_markers/MarkerArray.h>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 
 #include <ros/console.h>
 #include <iostream>
@@ -71,6 +74,39 @@ void image_clk(const sensor_msgs::ImageConstPtr& msg)
   image_ = cv_ptr->image;
   // cv::imshow("view", cv_ptr->image);
   // cv::waitKey(1);
+}
+
+/* Converts an aruco marker to an rviz marker */
+visualization_msgs::Marker arucoToRviz(aruco_markers::Marker arucoMark)
+{
+    visualization_msgs::Marker rvizMark;
+    
+    rvizMark.header = arucoMark.header;
+    rvizMark.header.frame_id = "world";
+    rvizMark.ns = "rviz";
+    rvizMark.id = arucoMark.id;
+    rvizMark.type = 0;
+    
+    //rvizMark.pose.position = arucoMark.tvec;
+    rvizMark.pose.position.x = arucoMark.tvec.x;
+    rvizMark.pose.position.y = arucoMark.tvec.y;
+    rvizMark.pose.position.z = arucoMark.tvec.z;
+    
+    //rvizMark.pose.orientation = arucoMark.rvec;
+    rvizMark.pose.orientation.w = 1;
+    
+    //size: 0.1 = 10cm
+    rvizMark.scale.x = 0.1;
+    rvizMark.scale.y = 0.1;
+    rvizMark.scale.z = 0.1;
+    
+    //color: 0-1 intensity
+    rvizMark.color.a = 1;
+    rvizMark.color.r = 1;
+    rvizMark.color.g = 0;
+    rvizMark.color.b = 0;
+    
+    return rvizMark;
 }
 
 int main(int _argc, char** _argv)
@@ -113,6 +149,10 @@ int main(int _argc, char** _argv)
   // Publishers
   aruco_markers::MarkerArray marker_array;
   ros::Publisher pub_marker = nh.advertise<aruco_markers::MarkerArray>("/markers", 1);
+  
+  // rviz publisher
+  visualization_msgs::MarkerArray rviz_array;
+  ros::Publisher pub_rviz = nh.advertise<visualization_msgs::MarkerArray>("/rviz", 1);
 
   // raw/original image publisher
   sensor_msgs::ImagePtr img_raw_msg;
@@ -155,11 +195,11 @@ int main(int _argc, char** _argv)
   capture.set(cv::CAP_PROP_AUTOFOCUS, autoFocus);	
   
   //change parameters to better handle full resolution
-  parameters->minMarkerPerimeterRate = 0.007; //smallest id will be 1920*0.007=13px
-  parameters->maxMarkerPerimeterRate = 0.1; //largest id will be 1920*0.1=192px
-  parameters->errorCorrectionRate = 0.9; //higher alpha errors, lower beta errors
-  parameters->adaptiveThreshConstant = 7; //default
-  parameters->maxErroneousBitsInBorderRate = 0.35; //default
+  parameters->minMarkerPerimeterRate = 0.01; //smallest id will be 1920*0.01=19px
+  parameters->maxMarkerPerimeterRate = 0.1;
+  parameters->errorCorrectionRate = 0.5; //higher alpha errors, lower beta errors, default 0.6
+  parameters->adaptiveThreshConstant = 7; //default 10
+  parameters->maxErroneousBitsInBorderRate = 0.30; //default is 0.35
 
   cv::Mat raw_img; // copied raw imag
 
@@ -176,107 +216,121 @@ int main(int _argc, char** _argv)
 
     if(!image_.empty() && cv::sum(image_-raw_img)[0] != 0) // checks if a new image
     {
-      image_.copyTo(raw_img);
+        image_.copyTo(raw_img);
 
-      marker_array.markers.clear();
-      marker_ids.clear();
+        marker_array.markers.clear();
+        marker_ids.clear();
+        rviz_array.markers.clear();
 
-      cv::aruco::detectMarkers(image_, dict, marker_corners, marker_ids, parameters=parameters);
+        cv::aruco::detectMarkers(image_, dict, marker_corners, marker_ids, parameters=parameters);
 
-      if (marker_ids.size() > 0)
-      {
-        aruco_markers::Marker marker;
-        geometry_msgs::Pose2D pixel_corners;
-
-        cv::aruco::drawDetectedMarkers(image_, marker_corners, marker_ids);
-        cv::aruco::estimatePoseSingleMarkers(marker_corners, marker_size, camera_matrix, distort_coeffs, rvecs, tvecs);
-
-        // publishes to /markers topic
-        for(int i = 0; i < marker_ids.size(); ++i)
+        if (marker_ids.size() > 0)
         {
-          marker.header.frame_id = "aruco_markers";
-          marker.header.stamp = ros::Time::now();
-          marker.header.seq = count;
+            aruco_markers::Marker marker;
+            visualization_msgs::Marker rvizMarker;
+            geometry_msgs::Pose2D pixel_corners;
 
-          marker.id = marker_ids[i];
+            cv::aruco::drawDetectedMarkers(image_, marker_corners, marker_ids);
+            cv::aruco::estimatePoseSingleMarkers(marker_corners, marker_size, camera_matrix, distort_coeffs, rvecs, tvecs);
 
-          marker.rvec.x = rvecs[i][0];
-          marker.rvec.y = rvecs[i][1];
-          marker.rvec.z = rvecs[i][2];
+            // publishes to /markers and /rviz topic
+            for(int i = 0; i < marker_ids.size(); ++i)
+            {
+              marker.header.frame_id = "aruco_markers";
+              marker.header.stamp = ros::Time::now();
+              marker.header.seq = count;
 
-          double angle = sqrt(marker.rvec.x*marker.rvec.x
-                              + marker.rvec.y*marker.rvec.y
-                              + marker.rvec.z*marker.rvec.z);
-          double x = marker.rvec.x/angle;
-          double y = marker.rvec.y/angle;
-          double z = marker.rvec.z/angle;
+              marker.id = marker_ids[i];
 
-          // from camera to marker ref frame
-          tf2::Quaternion q(x*sin(angle/2),
-                                       y*sin(angle/2),
-                                       z*sin(angle/2),
-                                       cos(angle/2));
+              marker.rvec.x = rvecs[i][0];
+              marker.rvec.y = rvecs[i][1];
+              marker.rvec.z = rvecs[i][2];
 
-          double roll, pitch, yaw;
-           // roll (x-axis rotation)
-         	double sinr_cosp = 2.0 * (q.w() * q.x() + q.y() * q.z());
-         	double cosr_cosp = 1.0 - 2.0 * (q.x() * q.x() + q.y() * q.y());
-         	roll = atan2(sinr_cosp, cosr_cosp);
+              double angle = sqrt(marker.rvec.x*marker.rvec.x
+                                  + marker.rvec.y*marker.rvec.y
+                                  + marker.rvec.z*marker.rvec.z);
+              double x = marker.rvec.x/angle;
+              double y = marker.rvec.y/angle;
+              double z = marker.rvec.z/angle;
 
-         	// pitch (y-axis rotation)
-         	double sinp = 2.0 * (q.w() * q.y() - q.z() * q.x());
-         	if (fabs(sinp) >= 1)
-         		pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-         	else
-         		pitch = asin(sinp);
+              // from camera to marker ref frame
+              tf2::Quaternion q(x*sin(angle/2),
+                                           y*sin(angle/2),
+                                           z*sin(angle/2),
+                                           cos(angle/2));
+              
+              cv::Vec3d tempTvec = tvecs[i];
+              
+              double roll, pitch, yaw;
+               // roll (x-axis rotation)
+                    double sinr_cosp = 2.0 * (q.w() * q.x() + q.y() * q.z());
+                    double cosr_cosp = 1.0 - 2.0 * (q.x() * q.x() + q.y() * q.y());
+                    roll = atan2(sinr_cosp, cosr_cosp);
 
-         	// yaw (z-axis rotation)
-         	double siny_cosp = 2.0 * (q.w() * q.z() + q.x() * q.y());
-         	double cosy_cosp = 1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z());
-         	yaw = atan2(siny_cosp, cosy_cosp);
+                    // pitch (y-axis rotation)
+                    double sinp = 2.0 * (q.w() * q.y() - q.z() * q.x());
+                    if (fabs(sinp) >= 1)
+                            pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+                    else
+                            pitch = asin(sinp);
 
-          marker.rpy.x = roll;
-          marker.rpy.y = pitch;
-          marker.rpy.z = yaw;
+                    // yaw (z-axis rotation)
+                    double siny_cosp = 2.0 * (q.w() * q.z() + q.x() * q.y());
+                    double cosy_cosp = 1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z());
+                    yaw = atan2(siny_cosp, cosy_cosp);
 
-          marker.tvec.x = tvecs[i][0];
-          marker.tvec.y = tvecs[i][1];
-          marker.tvec.z = tvecs[i][2];
+              marker.rpy.x = roll;
+              marker.rpy.y = pitch;
+              marker.rpy.z = yaw;
+              
+              marker.tvec.x = tvecs[i][0];
+              marker.tvec.y = tvecs[i][1];
+              marker.tvec.z = tvecs[i][2];
 
-          pixel_corners.x = marker_corners[i][0].x;
-          pixel_corners.y = marker_corners[i][0].y;
-          marker.pixel_corners.push_back(pixel_corners);
+              pixel_corners.x = marker_corners[i][0].x;
+              pixel_corners.y = marker_corners[i][0].y;
+              marker.pixel_corners.push_back(pixel_corners);
 
-          pixel_corners.x = marker_corners[i][1].x;
-          pixel_corners.y = marker_corners[i][1].y;
-          marker.pixel_corners.push_back(pixel_corners);
+              pixel_corners.x = marker_corners[i][1].x;
+              pixel_corners.y = marker_corners[i][1].y;
+              marker.pixel_corners.push_back(pixel_corners);
 
-          pixel_corners.x = marker_corners[i][2].x;
-          pixel_corners.y = marker_corners[i][2].y;
-          marker.pixel_corners.push_back(pixel_corners);
+              pixel_corners.x = marker_corners[i][2].x;
+              pixel_corners.y = marker_corners[i][2].y;
+              marker.pixel_corners.push_back(pixel_corners);
 
-          pixel_corners.x = marker_corners[i][3].x;
-          pixel_corners.y = marker_corners[i][3].y;
-          marker.pixel_corners.push_back(pixel_corners);
+              pixel_corners.x = marker_corners[i][3].x;
+              pixel_corners.y = marker_corners[i][3].y;
+              marker.pixel_corners.push_back(pixel_corners);
 
-          marker_array.markers.push_back(marker);
+              marker_array.markers.push_back(marker);
+              
+              rvizMarker = arucoToRviz(marker);
+              rvizMarker.pose.position.x = tempTvec[0];
+              rvizMarker.pose.position.y = tempTvec[1];
+              rvizMarker.pose.position.z = tempTvec[2];
+              rviz_array.markers.push_back(rvizMarker);
 
-          cv::aruco::drawAxis(image_, camera_matrix, distort_coeffs, rvecs[i], tvecs[i], marker_size);
+              cv::aruco::drawAxis(image_, camera_matrix, distort_coeffs, rvecs[i], tvecs[i], marker_size);
+            }
         }
-      }
 
-      // cv::namedWindow("image", CV_WINDOW_AUTOSIZE);
-      // cv::imshow("image", image);
-      // cv::waitKey(1);
+        // cv::namedWindow("image", CV_WINDOW_AUTOSIZE);
+        // cv::imshow("image", image);
+        // cv::waitKey(1);
 
-      img_raw_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", raw_img).toImageMsg();
-      pub_raw_img.publish(img_raw_msg);
+        img_raw_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", raw_img).toImageMsg();
+        pub_raw_img.publish(img_raw_msg);
 
-      img_marker_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image_).toImageMsg();
-      pub_marker_img.publish(img_marker_msg);
-      if (marker_ids.size()) pub_marker.publish(marker_array);
-      ++count;
-	  }
+        img_marker_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image_).toImageMsg();
+        pub_marker_img.publish(img_marker_msg);
+        if (marker_ids.size())
+        {
+            pub_marker.publish(marker_array);
+            pub_rviz.publish(rviz_array);
+        }
+        ++count;
+    }
 
     ros::spinOnce();
     loop_rate.sleep();

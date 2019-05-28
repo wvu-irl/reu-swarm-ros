@@ -12,9 +12,9 @@
   <!-- size of markers in meters -->
   <arg name="marker_size" default="0.04" />
   <!-- width of the opencv capture in pixels -->
-  <arg name="resolution_width" default="1600" />
+  <arg name="resolution_width" default="1920" />
   <!-- height of the opencv capture in pixels -->
-  <arg name="resolution_height" default="900" />
+  <arg name="resolution_height" default="108 0" />
   <!-- should the camera autofocus -->
   <arg name="auto_focus" default="true" />
 
