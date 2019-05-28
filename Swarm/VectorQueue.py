@@ -5,7 +5,7 @@ for that purpose. However, doing so means that it will not run properly in Robot
 """
 
 class VectorQueue:
-    #accepts vectors of the form (priorety, direction, distance)
+    #accepts vectors of the form (Direction, distance, priority)
     vector_queue = []
     '''
     def __init__(self, to_add): #for testing only
@@ -23,12 +23,13 @@ class VectorQueue:
         
         while len(self.vector_queue) != 0:
             current = self.returnFirst()
-            current_priority = current[1] / (current[2] + 1) ** 2 #factoring in distance
-            compromise = (compromise * priority + current[1] * current[0])/(priority + current[0])
-            priority += current[0]
+            current_priority = current[2] / (current[1] + 1) ** 2 #factoring in distance
+            compromise = (compromise * priority + current[0] * current[2])/(priority + current[2])
+            priority += current[2]
             
         return compromise
 '''
 tester = VectorQueue([(1, 1.45, 0), (0.2, 3.02, 5), (0.4, 3.03, 3), (0.6, 1.23, 4), (0.6, 3.10, 3)])
 print (tester.createCompromise())
+#This should print 0.42666666666666664. If it doesn't, come find Casey
 '''
