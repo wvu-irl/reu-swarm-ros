@@ -5,9 +5,10 @@ from Model import Model
 
 class Robot:
     running = True
+    speed = 0
 
     while running:
-        model = Model()
+        model = Model(speed)
         #run loops to update model
         vector_queue = VectorQueue() #create queue
         #accept sensor input to model
