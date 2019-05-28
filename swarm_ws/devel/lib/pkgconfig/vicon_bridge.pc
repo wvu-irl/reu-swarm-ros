@@ -1,8 +1,0 @@
-prefix=/home/air/swarm_ws/devel
-
-Name: vicon_bridge
-Description: Description of vicon_bridge
-Version: 1.0.1
-Cflags: -I/home/air/swarm_ws/devel/include
-Libs: -L/home/air/swarm_ws/devel/lib 
-Requires: dynamic_reconfigure geometry_msgs message_runtime roscpp
