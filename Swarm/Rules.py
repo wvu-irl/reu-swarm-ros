@@ -8,9 +8,12 @@ Don't hit other robots
 Avoid collions with objects
 Match speed with other robots
 Match angle with other robots
+
+if abs(avg_thing - my_thing) * tolerance > something:
 '''
 import math
-from statistics import median
+import cmath
+import statistics
 
 ROBOT_SIZE = 7
 
@@ -19,61 +22,65 @@ class Rules:
     '''
     Helper method for maintaining spacing
     '''
-    def findCenters(robots):
-        direction = 0
-        distance = 0
+    def findCenter(self, robots):
+        x = y = 0
         for robot in robots:
-            direction = direction + robot[0]/len(robots)
-            distance = distance + robot[1]/len(robots)
+            x += robot[1] * math.cos(robot[0])
+            y += robot[1] * math.sin(robot[0])
+        distance = (x**2 + y**2) ** 0.5
+        direction = math.atan(y/x)
         return direction, distance
+    
 
-    def maintainSpacing(robots, tolerance):
-        direction, distance = findCenters(robots)
-        if (tolerance * ROBOT_SIZE / 3 < distance): #This is mostly arbitrary and will need to be adjusted in simulation
+    def maintainSpacing(self, robots, tolerance):
+        direction, distance = self.findCenter(robots)
+        print(distance)
+        if (4 * ROBOT_SIZE / tolerance < distance): #This is mostly arbitrary and will need to be adjusted in simulation
+            print("Maintaining spacing")
             return  (direction, 1 - math.sin(direction))
         else:
             return None
 
-    def avoidRobots(robots, tolerance):
+    def avoidRobots(self, robots, tolerance):
         for robot in robots:
-            if (robot[1] > tolerance * ROBOT_SIZE / 5): #This is mostly arbitrary and will need to be adjusted in simulation
+            if ((robot[0] < math.pi/12 * tolerance) or (robot[0] > 11 * math.pi/12 - math.pi/12 *tolerance)) and (robot[1] < ROBOT_SIZE / 2 * tolerance): #This is mostly arbitrary and will need to be adjusted in simulation
+                print("Avoiding robots")
                 return ((robot[0] + math.pi/2)%math.pi, 1)
         return None
 
-    def avoidObjects(obstacles, tolerance):
+    def avoidObstacles(self, obstacles, tolerance):
         for obstacle in obstacles:
-            if ((obstacle[1] > math.pi/12) or obstacle[1] > 11*math.pi/12) and (obstacle[0] > tolerance * ROBOT_SIZE / 4):
-                return ((robot[0] + math.pi/2)%math.pi, 1/(1 + tolerance))
+            if ((obstacle[0] < math.pi/12 * tolerance) or (obstacle[0] > 11 * math.pi/12 - math.pi/12 *tolerance)) and (obstacle[1] < ROBOT_SIZE / 2 * tolerance):
+                print("Avoiding obstacles")
+                return ((obstacle[0] + math.pi/2)%math.pi, 1/(1 + tolerance))
         return None
-
+    
     '''
     Helper for matchSpeed
     '''
-    def findSpeedMedian(robots):
-        speed_list = []
-        for robot in robots:
-            speed_list += robot[2]
+    def findSpeedMedian(self, robots):
+        speed_list = [robot[2] for robot in robots]
         return statistics.median(speed_list)
         
-    def matchSpeed(robots, speed, tolerance):
-        avg_speed = findSpeedMedian(robots)
-        if not (speed - tolerance * 0.2 < avg_speed < speed + tolerance * 0.2):
+    def matchSpeed(self, robots, speed, tolerance):
+        avg_speed = self.findSpeedMedian(robots)
+        if abs(speed - avg_speed) * tolerance > 0.5:
+            print("Matching speed")
             return (0, avg_speed)
         return None
-
-    '''
+'''
+    This seems extraneous
     Helper for matchAngle
-    '''       
-    def findAngleMedian(robots):
-        angle_list = []
-        for robot in robots:
-            angle_list += robot[0]
+      
+    def findAngleMedian(self, robots):
+        angle_list = [robot[3] for robot in robots]
         return statistics.median(angle_list)
     
-    def matchAngle(robots, tolerance):
-        avg_angle = findAngleMedian(robots)
-        if not ((math.pi - tolerance * math.pi/12) < avg_angle or avg_angle < tolerance * math.pi/12):
+    def matchAngle(self, robots, tolerance):
+        avg_angle = self.findAngleMedian(robots)
+        if abs(avg_angle - math.pi/2) * tolerance > math.pi/2:
+            print("Matching angle")
             return (avg_angle, 1)
         return None
-            
+'''          
         
