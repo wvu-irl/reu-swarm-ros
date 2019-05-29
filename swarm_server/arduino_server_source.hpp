@@ -113,14 +113,14 @@ int beginServer(std::function<void(command)> command_callback,
 
       // Read data from connection into buffer. Continue to loop while message size is >0.
       int message_size = 0;
-      command buffer = {0, {'\0'}};
+      command *buffer = ((command *)malloc(sizeof(command)));
 
       int count = 0;
 
       //reading the message
       while ((message_size = read(connection_descriptor, &buffer, sizeof(buffer))) > 0)
       {
-        command_callback(buffer); // sending message to callback
+        command_callback(*buffer); // sending message to callback
       }
 
       // Display if there was an error
@@ -129,6 +129,8 @@ int beginServer(std::function<void(command)> command_callback,
         error_callback("Error receiving message.");
         exit(1);
       }
+
+      free(buffer);
     }
   }
   // only closes the socket if the process is the parent

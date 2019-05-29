@@ -41,8 +41,7 @@
 // this is using a struct as it is only a public data storing application
 typedef struct
 {
-  int rid;
-  char str[64];
+  char str[32];
 } command;
 
 // sends a command indescriminantly to all the robots
