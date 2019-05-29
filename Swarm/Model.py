@@ -30,7 +30,7 @@ class Model:
             #This will call each rule function in order of priority to create a list
             for rule in ideal_tuple:
                 if rule != None:
-                    ideal = (rule[0], rule[1], 0, (len(ideal_tuple) - ideal_tuple.index(rule) + 1)/(tolerance + 1)) #The +1 is so that priority is never zero, which would mess up VectorQueue
+                    ideal = (rule[0], rule[1], 0, (float(len(ideal_tuple) - ideal_tuple.index(rule) + 1))/(tolerance + 1)) #The +1 is so that priority is never zero, which would mess up VectorQueue
                     #If this method of setting priority ends up being problematic, we could also set priority as follows:
                     #ideal = (rule[0],  0, rule[1])
                     break;

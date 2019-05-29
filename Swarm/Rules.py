@@ -13,7 +13,6 @@ if abs(avg_thing - my_thing) * tolerance > something:
 '''
 import math
 import cmath
-import statistics
 
 ROBOT_SIZE = 7
 
@@ -34,7 +33,6 @@ class Rules:
 
     def maintainSpacing(self, robots, tolerance):
         direction, distance = self.findCenter(robots)
-        print(distance)
         if (4 * ROBOT_SIZE / tolerance < distance): #This is mostly arbitrary and will need to be adjusted in simulation
             print("Maintaining spacing")
             return  (direction, 1 - math.sin(direction))
@@ -58,12 +56,12 @@ class Rules:
     '''
     Helper for matchSpeed
     '''
-    def findSpeedMedian(self, robots):
+    def findSpeedMean(self, robots):
         speed_list = [robot[2] for robot in robots]
-        return statistics.median(speed_list)
+        return sum(speed_list)/len(speed_list)
         
     def matchSpeed(self, robots, speed, tolerance):
-        avg_speed = self.findSpeedMedian(robots)
+        avg_speed = self.findSpeedMean(robots)
         if abs(speed - avg_speed) * tolerance > 0.5:
             print("Matching speed")
             return (0, avg_speed)
