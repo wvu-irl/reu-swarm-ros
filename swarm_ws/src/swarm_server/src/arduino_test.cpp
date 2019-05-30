@@ -30,7 +30,9 @@ void *sendThread(void *arg0)
 {
     ros::Subscriber *sub = (ros::Subscriber*)arg0;
     
-    sleep(30);
+    sleep(1);
+    while(sockets->size() <= 0) {usleep(10000);}
+    
     puts("Sending messages");
 
     while (true)
