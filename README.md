@@ -8,4 +8,4 @@ This repository is for all the software for human swarm interaction for REU
 - **sfml_sim:** code for simulation
 - **documentation:** flow charts, etc
 - **arduino:** assorted example code, headers, etc
-- **FLocking sim:** code for flocking simulation using c++ and sfml
+- **Flocking sim:** code for flocking simulation using c++ and sfml
