@@ -9,6 +9,7 @@ char *rid_indexing[] = {"DE", "PA", "NJ", "GA", "CT", "MA", "MD", "SC", "NH", "V
                                 "NE", "CO", "ND", "SD", "MT", "WA", "ID", "WY", "UT", "OK", "NM", "AZ", 
                                 "AK", "HI"};
 
+// creating a map for all the string to integer values
 std::map<char*, int> inst()
 {
   std::map<char*, int> map;
@@ -18,6 +19,5 @@ std::map<char*, int> inst()
   }
   return map;
 }
-
-std::map<char*, int> rid_map = inst();
+std::map<char*, int> rid_map = inst(); // running before main to make sure this structure exists
 #endif
