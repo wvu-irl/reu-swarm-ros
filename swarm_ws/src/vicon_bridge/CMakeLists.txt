@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(vicon_bridge)
+add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
     message_generation
@@ -8,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     tf
     diagnostic_updater
+    wvu_swarm_std_msgs
 )
 
 find_package(Boost REQUIRED COMPONENTS thread)

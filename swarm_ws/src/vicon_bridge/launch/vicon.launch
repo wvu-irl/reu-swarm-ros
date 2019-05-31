@@ -3,5 +3,9 @@
 		<param name="stream_mode" value="ClientPull" type="str" />
 		<param name="datastream_hostport" value="192.168.10.1:801" type="str" />
 		<param name="tf_ref_frame_id" value="/world" type="str" />
+		
+		<!-- Don't publish individual points -->
+		<param name="publish_markers" value="false" type="bool" />
+		
 		</node>
 </launch>

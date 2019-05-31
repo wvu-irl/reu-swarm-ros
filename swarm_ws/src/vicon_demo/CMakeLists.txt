@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(vicon_demo)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+  add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2
   tf2_ros
   message_generation
+  visualization_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -144,6 +145,12 @@ include_directories(
     ${catkin_LIBRARIES}
   )
   add_dependencies(vicon_demo ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+  
+  add_executable(demo_vis src/demo_vis.cpp)
+  target_link_libraries(demo_vis
+    ${catkin_LIBRARIES}
+  )
+  add_dependencies(demo_vis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

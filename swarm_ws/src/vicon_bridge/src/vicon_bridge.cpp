@@ -3,6 +3,7 @@
  *
  *  Copyright (c) 2010, UC Regents
  *  Copyright (c) 2011, Markus Achtelik, ETH Zurich, Autonomous Systems Lab (modifications)
+ *  Copyright (c) 2019, WVU Interactive Robotics Lab (modifications)
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -40,8 +41,12 @@
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <wvu_swarm_std_msgs/viconBot.h>
+#include <wvu_swarm_std_msgs/viconBotArray.h>
 #include <vicon_bridge/viconGrabPose.h>
 #include <iostream>
+#include <string>
+#include <cstdint>
 
 #include <vicon_bridge/Markers.h>
 #include <vicon_bridge/Marker.h>
@@ -59,6 +64,7 @@ using std::map;
 
 using namespace ViconDataStreamSDK::CPP;
 
+// Puts Direction constants into readable format
 string Adapt(const Direction::Enum i_Direction)
 {
   switch (i_Direction)
@@ -80,6 +86,7 @@ string Adapt(const Direction::Enum i_Direction)
   }
 }
 
+// Puts Result constants into readable format
 string Adapt(const Result::Enum i_result)
 {
   switch (i_result)
@@ -129,6 +136,7 @@ string Adapt(const Result::Enum i_result)
   }
 }
 
+// Class to hold a ROS publisher with status information
 class SegmentPublisher
 {
 public:
@@ -148,6 +156,8 @@ typedef map<string, SegmentPublisher> SegmentMap;
 
 class ViconReceiver
 {
+    
+// Private variables
 private:
   ros::NodeHandle nh;
   ros::NodeHandle nh_priv;
@@ -163,6 +173,7 @@ private:
   string tracked_frame_suffix_;
   // Publisher
   ros::Publisher marker_pub_;
+  ros::Publisher swarm_pub_; // Publisher for all swarmbots
   // TF Broadcaster
   tf::TransformBroadcaster tf_broadcaster_;
   //geometry_msgs::PoseStamped vicon_pose;
@@ -191,7 +202,9 @@ private:
   boost::mutex segments_mutex_;
   std::vector<std::string> time_log_;
 
+// Public methods
 public:
+  // Starts getting frames from datastream
   void startGrabbing()
   {
     grab_frames_ = true;
@@ -206,6 +219,7 @@ public:
     //grab_frames_thread_.join();
   }
 
+  // Constructor. Automatically sets up connection to vicon and starts publishing
   ViconReceiver() :
     nh_priv("~"), diag_updater(), min_freq_(0.1), max_freq_(1000),
         freq_status_(diagnostic_updater::FrequencyStatusParam(&min_freq_, &max_freq_)), stream_mode_("ClientPull"),
@@ -219,34 +233,44 @@ public:
     diag_updater.add(freq_status_);
     diag_updater.setHardwareID("none");
     diag_updater.force_update();
-    // Parameters
+    
+    // Launchfile parameters
     nh_priv.param("stream_mode", stream_mode_, stream_mode_);
     nh_priv.param("datastream_hostport", host_name_, host_name_);
     nh_priv.param("tf_ref_frame_id", tf_ref_frame_id_, tf_ref_frame_id_);
     nh_priv.param("broadcast_transform", broadcast_tf_, true);
     nh_priv.param("publish_transform", publish_tf_, true);
     nh_priv.param("publish_markers", publish_markers_, true);
+    
+    // Initializes vicon
     if (init_vicon() == false){
       ROS_ERROR("Error while connecting to Vicon. Exiting now.");
       return;
     }
+    
     // Service Server
     ROS_INFO("setting up grab_vicon_pose service server ... ");
     m_grab_vicon_pose_service_server = nh_priv.advertiseService("grab_vicon_pose", &ViconReceiver::grabPoseCallback,
                                                                 this);
 
+    // Calibration server
     ROS_INFO("setting up segment calibration service server ... ");
     calibrate_segment_server_ = nh_priv.advertiseService("calibrate_segment", &ViconReceiver::calibrateSegmentCallback,
                                                          this);
 
-    // Publishers
+    // Publisher for swarmbots
+    swarm_pub_ = nh.advertise<wvu_swarm_std_msgs::viconBotArray>("/viconArray", 10);
+    
+    // Publisher for individual points
     if(publish_markers_)
     {
       marker_pub_ = nh.advertise<vicon_bridge::Markers>(tracked_frame_suffix_ + "/markers", 10);
     }
+    
     startGrabbing();
   }
 
+  // Deconstructor
   ~ViconReceiver()
   {
     for (size_t i = 0; i < time_log_.size(); i++)
@@ -258,6 +282,7 @@ public:
     }
   }
 
+// Private methods
 private:
   void diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat)
   {
@@ -269,6 +294,7 @@ private:
     stat.add("# unlabeled markers", n_unlabeled_markers);
   }
 
+  // Function to initialize datastream 
   bool init_vicon()
   {
     ROS_INFO_STREAM("Connecting to Vicon DataStream SDK at " << host_name_ << " ...");
@@ -276,6 +302,7 @@ private:
     ros::Duration d(1);
     Result::Enum result(Result::Unknown);
 
+    // Attempts to find an MS API datastream until one is connected
     while (!msvcbridge::IsConnected().Connected)
     {
       msvcbridge::Connect(host_name_);
@@ -285,10 +312,12 @@ private:
       if (!ros::ok())
         return false;
     }
+    
+    // Connection was successful
     ROS_ASSERT(msvcbridge::IsConnected().Connected);
     ROS_INFO_STREAM("... connected!");
 
-    // ClientPullPrefetch doesn't make much sense here, since we're only forwarding the data
+    // Sets the datastream to the mode specified in launchfile
     if (stream_mode_ == "ServerPush")
     {
       result = msvcbridge::SetStreamMode(StreamMode::ServerPush).Result;
@@ -305,25 +334,34 @@ private:
 
     ROS_INFO_STREAM("Setting Stream Mode to " << stream_mode_<< ": "<< Adapt(result));
 
+    // Sets up axes with black magic
     msvcbridge::SetAxisMapping(Direction::Forward, Direction::Left, Direction::Up); // 'Z-up'
     Output_GetAxisMapping _Output_GetAxisMapping = msvcbridge::GetAxisMapping();
 
+    // Prints results of axis mapping
     ROS_INFO_STREAM("Axis Mapping: X-" << Adapt(_Output_GetAxisMapping.XAxis) << " Y-"
         << Adapt(_Output_GetAxisMapping.YAxis) << " Z-" << Adapt(_Output_GetAxisMapping.ZAxis));
 
+    // Presumably sets up the datastream to output data??
     msvcbridge::EnableSegmentData();
     ROS_ASSERT(msvcbridge::IsSegmentDataEnabled().Enabled);
 
+    // Version logging
     Output_GetVersion _Output_GetVersion = msvcbridge::GetVersion();
     ROS_INFO_STREAM("Version: " << _Output_GetVersion.Major << "." << _Output_GetVersion.Minor << "."
         << _Output_GetVersion.Point);
+    
+    // At this point if still running, return true for success
     return true;
   }
 
+  // Sets up a Boost thread for EACH TRACKED SUBJECT as its own publisher
   void createSegmentThread(const string subject_name, const string segment_name)
   {
     ROS_INFO("creating new object %s/%s ...",subject_name.c_str(), segment_name.c_str() );
     boost::mutex::scoped_lock lock(segments_mutex_);
+    
+    // Publish the segment addressed by "subject/segment"
     SegmentPublisher & spub = segment_publishers_[subject_name + "/" + segment_name];
 
     // we don't need the lock anymore, since rest is protected by is_ready
@@ -331,10 +369,11 @@ private:
 
     if(publish_tf_)
     {
-      spub.pub = nh.advertise<geometry_msgs::TransformStamped>(tracked_frame_suffix_ + "/" + subject_name + "/"
-                                                                                                            + segment_name, 10);
+      spub.pub = nh.advertise<geometry_msgs::TransformStamped>(
+            tracked_frame_suffix_ + "/" + subject_name + "/" + segment_name, 10);
     }
-    // try to get zero pose from parameter server
+    
+    // Try to get zero pose from parameter server
     string param_suffix(subject_name + "/" + segment_name + "/zero_pose/");
     double qw, qx, qy, qz, x, y, z;
     bool have_params = true;
@@ -346,6 +385,7 @@ private:
     have_params = have_params && nh_priv.getParam(param_suffix + "position/y", y);
     have_params = have_params && nh_priv.getParam(param_suffix + "position/z", z);
 
+    // If successful, load the pose. Otherwise load arbitrary calibration
     if (have_params)
     {
       ROS_INFO("loaded zero pose for %s/%s", subject_name.c_str(), segment_name.c_str());
@@ -359,16 +399,19 @@ private:
       spub.calibration_pose.setIdentity();
     }
 
+    // I'm not completely sure how is_ready gets set to true, but it happens somehow
     spub.is_ready = true;
     ROS_INFO("... done, advertised as \" %s/%s/%s\" ", tracked_frame_suffix_.c_str(), subject_name.c_str(), segment_name.c_str());
 
   }
 
+  // Wraps createSegmentThread as a Boost thread
   void createSegment(const string subject_name, const string segment_name)
   {
     boost::thread(&ViconReceiver::createSegmentThread, this, subject_name, segment_name);
   }
 
+  // Tries to grab frames from the datastream
   void grabThread()
   {
     ros::Duration d(1.0 / 240.0);
@@ -376,8 +419,10 @@ private:
 //    double fps = 100.;
 //    ros::Duration diff;
 //    std::stringstream time_log;
+    
     while (ros::ok() && grab_frames_)
     {
+      // Tries to grab a frame from the datastream
       while (msvcbridge::GetFrame().Result != Result::Success && ros::ok())
       {
         ROS_INFO("getFrame returned false");
@@ -399,6 +444,7 @@ private:
     }
   }
 
+  // Shuts down the datastream api. Returns true on success.
   bool shutdown_vicon()
   {
     ROS_INFO_STREAM("stopping grabbing thread");
@@ -441,11 +487,13 @@ private:
       freq_status_.tick();
       ros::Duration vicon_latency(msvcbridge::GetLatencyTotal().Total);
 
+      // Publish each segment as its own topic
       if(publish_tf_ || broadcast_tf_)
       {
         process_subjects(now_time - vicon_latency);
       }
 
+      // Publish individual Markers as one topic
       if(publish_markers_)
       {
         process_markers(now_time - vicon_latency, lastFrameNumber);
@@ -456,90 +504,142 @@ private:
     }
   }
 
+  // Iterates through subjects in a frame, creates a Segment Publisher for each
   void process_subjects(const ros::Time& frame_time)
   {
     string tracked_frame, subject_name, segment_name;
-    unsigned int n_subjects = msvcbridge::GetSubjectCount().SubjectCount;
-    SegmentMap::iterator pub_it;
-    tf::Transform transform;
-    std::vector<tf::StampedTransform, std::allocator<tf::StampedTransform> > transforms;
-    geometry_msgs::TransformStampedPtr pose_msg(new geometry_msgs::TransformStamped);
+    
+    geometry_msgs::TransformStamped geoStampedTf;
+    
+    // No idea what this does, too afraid to delete it
     static unsigned int cnt = 0;
+    
+    // Set up variables to construct transforms and bots
+    tf::Transform transform;
+    wvu_swarm_std_msgs::viconBotArray botArray;
 
+    // Find the number of subjects being tracked
+    unsigned int n_subjects = msvcbridge::GetSubjectCount().SubjectCount;
+    
+    // Iterate through subjects
     for (unsigned int i_subjects = 0; i_subjects < n_subjects; i_subjects++)
     {
-
+      // Finds this subject's name
       subject_name = msvcbridge::GetSubjectName(i_subjects).SubjectName;
-      unsigned int n_segments = msvcbridge::GetSegmentCount(subject_name).SegmentCount;
-
-      for (unsigned int i_segments = 0; i_segments < n_segments; i_segments++)
+      
+      // Only continue if this is the right name for us
+      // TODO: make this parameter editable by the launchfile
+      if(subject_name.find("swarmbot_") != string::npos)
       {
-        segment_name = msvcbridge::GetSegmentName(subject_name, i_segments).SegmentName;
+        // Finds number of segments of this subject
+        unsigned int n_segments = msvcbridge::GetSegmentCount(subject_name).SegmentCount;
 
-        Output_GetSegmentGlobalTranslation trans = msvcbridge::GetSegmentGlobalTranslation(subject_name, segment_name);
-        Output_GetSegmentGlobalRotationQuaternion quat = msvcbridge::GetSegmentGlobalRotationQuaternion(subject_name,
-                                                                                                        segment_name);
-
-        if (trans.Result == Result::Success && quat.Result == Result::Success)
+        for (unsigned int i_segments = 0; i_segments < n_segments; i_segments++)
         {
-          if (!trans.Occluded && !quat.Occluded)
+          // Gets the name of this segment
+          segment_name = msvcbridge::GetSegmentName(subject_name, i_segments).SegmentName;
+          
+          // Get the id of this segment
+          //std::uint8_t botId[2];
+          //botId[0] = (std::uint8_t)segment_name.at(segment_name.find("_")+1); // Probably better ways to do this, sorry
+          //botId[1] = (std::uint8_t)segment_name.at(segment_name.find("_")+2);
+          //std::vector<std::uint8_t> botId = {(std::uint8_t)segment_name.at(segment_name.find("_")+1),
+          //                                   (std::uint8_t)segment_name.at(segment_name.find("_")+2)};
+          boost::array<std::uint8_t, 2> botId;
+          botId[0] = (std::uint8_t)segment_name.at(segment_name.find("_")+1); // Probably better ways to do this, sorry
+          if(segment_name.length() > segment_name.find("_")+2)
+            botId[1] = (std::uint8_t)segment_name.at(segment_name.find("_")+2);
+          else
+            botId[1] = (std::uint8_t)' ';
+
+          // Grabs orientation and translation from the datastream
+          Output_GetSegmentGlobalTranslation trans = msvcbridge::GetSegmentGlobalTranslation(subject_name, segment_name);
+          Output_GetSegmentGlobalRotationQuaternion quat = msvcbridge::GetSegmentGlobalRotationQuaternion(subject_name,
+                                                                                                          segment_name);
+
+          if (trans.Result == Result::Success && quat.Result == Result::Success)
           {
-            transform.setOrigin(tf::Vector3(trans.Translation[0] / 1000, trans.Translation[1] / 1000,
-                                                  trans.Translation[2] / 1000));
-            transform.setRotation(tf::Quaternion(quat.Rotation[0], quat.Rotation[1], quat.Rotation[2],
-                                                       quat.Rotation[3]));
-
-            tracked_frame = tracked_frame_suffix_ + "/" + subject_name + "/" + segment_name;
-
-            boost::mutex::scoped_try_lock lock(segments_mutex_);
-
-            if (lock.owns_lock())
+            if (!trans.Occluded && !quat.Occluded)
             {
-              pub_it = segment_publishers_.find(subject_name + "/" + segment_name);
-              if (pub_it != segment_publishers_.end())
+              // Define the transform using the datastream info
+              transform.setOrigin(tf::Vector3(trans.Translation[0] / 1000, trans.Translation[1] / 1000,
+                                                    trans.Translation[2] / 1000));
+              transform.setRotation(tf::Quaternion(quat.Rotation[0], quat.Rotation[1], quat.Rotation[2],
+                                                         quat.Rotation[3]));
+
+              tracked_frame = tracked_frame_suffix_ + "/" + subject_name + "/" + segment_name;
+              
+              // Stamp the transform
+              tf::StampedTransform stampTf(transform, frame_time, tf_ref_frame_id_, tracked_frame);
+              
+              // Convert to geometry_msgs type
+              tf::transformStampedTFToMsg(stampTf, geoStampedTf);
+              
+              // Create a swarmbot, add to vector
+              wvu_swarm_std_msgs::viconBot thisBot;
+              thisBot.botId = botId;
+              thisBot.botPose = geoStampedTf;
+              botArray.poseVect.push_back(thisBot);
+              
+              // Original code to do one topic per segment
+              /*
+              boost::mutex::scoped_try_lock lock(segments_mutex_);
+
+              if (lock.owns_lock())
               {
-                SegmentPublisher & seg = pub_it->second;
-                //ros::Time thisTime = now_time - ros::Duration(latencyInMs / 1000);
-
-                if (seg.is_ready)
+                pub_it = segment_publishers_.find(subject_name + "/" + segment_name);
+                if (pub_it != segment_publishers_.end())
                 {
-                  transform = transform * seg.calibration_pose;
-                  transforms.push_back(tf::StampedTransform(transform, frame_time, tf_ref_frame_id_, tracked_frame));
-//                  transform = tf::StampedTransform(flyer_transform, frame_time, tf_ref_frame_id_, tracked_frame);
-//                  tf_broadcaster_.sendTransform(transform);
+                  SegmentPublisher & seg = pub_it->second;
+                  //ros::Time thisTime = now_time - ros::Duration(latencyInMs / 1000);
 
-                  if(publish_tf_)
+                  if (seg.is_ready)
                   {
-                    tf::transformStampedTFToMsg(transforms.back(), *pose_msg);
-                    seg.pub.publish(pose_msg);
+                    transform = transform * seg.calibration_pose;
+                    transforms.push_back(tf::StampedTransform(transform, frame_time, tf_ref_frame_id_, tracked_frame));
+  //                  transform = tf::StampedTransform(flyer_transform, frame_time, tf_ref_frame_id_, tracked_frame);
+  //                  tf_broadcaster_.sendTransform(transform);
+
+                    if(publish_tf_)
+                    {
+                      tf::transformStampedTFToMsg(transforms.back(), *pose_msg);
+                      seg.pub.publish(pose_msg);
+                    }
                   }
                 }
+                else
+                {
+                  lock.unlock();
+                  createSegment(subject_name, segment_name);
+                }
               }
-              else
-              {
-                lock.unlock();
-                createSegment(subject_name, segment_name);
-              }
+              */
+            }
+            else
+            {
+              if (cnt % 100 == 0)
+                ROS_WARN_STREAM("" << subject_name <<" occluded, not publishing... " );
             }
           }
           else
           {
-            if (cnt % 100 == 0)
-              ROS_WARN_STREAM("" << subject_name <<" occluded, not publishing... " );
+            ROS_WARN("GetSegmentGlobalTranslation/Rotation failed (result = %s, %s), not publishing...",
+                Adapt(trans.Result).c_str(), Adapt(quat.Result).c_str());
           }
-        }
-        else
-        {
-          ROS_WARN("GetSegmentGlobalTranslation/Rotation failed (result = %s, %s), not publishing...",
-              Adapt(trans.Result).c_str(), Adapt(quat.Result).c_str());
         }
       }
     }
-
+    
+    /*
     if(broadcast_tf_)
     {
       tf_broadcaster_.sendTransform(transforms);
     }
+    */
+    
+    // Broadcast??
+    swarm_pub_.publish(botArray);
+    
     cnt++;
   }
 

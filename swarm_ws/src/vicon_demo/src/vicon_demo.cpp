@@ -10,6 +10,9 @@
 #include <tf2_ros/buffer_interface.h>
 #include <tf2/convert.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <wvu_swarm_std_msgs/rthetatest.h>
 
 void trackCallback(const geometry_msgs::TransformStamped &msg) {}
 void targetCallback(const geometry_msgs::TransformStamped &msg) {}
@@ -22,6 +25,7 @@ int main(int argc, char **argv)
     // Generates nodehandle, publisher, subscribers
     ros::NodeHandle n;
     ros::Publisher pub;
+    ros::Publisher visPub;
     ros::Subscriber trackerSub;
     ros::Subscriber targetSub;
     
@@ -35,7 +39,8 @@ int main(int argc, char **argv)
     // Subscribe to tracker's vicon topic, publish result vector
     trackerSub = n.subscribe("/vicon/tracker/tracker", 10, &trackCallback);
     targetSub = n.subscribe("/vicon/target/target", 10, &targetCallback);
-    pub = n.advertise<vicon_demo::rtheta>("vicon_demo", 1000);
+    pub = n.advertise<wvu_swarm_std_msgs::rthetatest>("vicon_demo", 1000);
+    visPub = n.advertise<visualization_msgs::MarkerArray>("demo_vis", 1000);
     //pub = n.advertise<geometry_msgs::Point>("vicon_demo", 1000);
     
     // Run while ros functions
@@ -86,11 +91,57 @@ int main(int argc, char **argv)
         if(degrees < 0) degrees += 360;
         
         // Put into data structure
-        vicon_demo::rtheta output;
+        wvu_swarm_std_msgs::rthetatest output;
         output.radius = radius;
         output.degrees = degrees;
         
         // Publish rtheta form
         pub.publish(output);
+        
+        // Build some Markers for visualization
+        visualization_msgs::Marker trackerMark, targetMark, trackerVectMark;
+        
+        trackerMark.header = trackerWorld.header;
+        trackerMark.ns = "demo";
+        trackerMark.id = 1;
+        trackerMark.type = visualization_msgs::Marker::ARROW;
+        trackerMark.pose.position.x = trackerWorld.transform.translation.x;
+        trackerMark.pose.position.y = trackerWorld.transform.translation.y;
+        trackerMark.pose.position.z = trackerWorld.transform.translation.z;
+        trackerMark.pose.orientation.x = trackerWorld.transform.rotation.x;
+        trackerMark.pose.orientation.y = trackerWorld.transform.rotation.y;
+        trackerMark.pose.orientation.z = trackerWorld.transform.rotation.z;
+        trackerMark.pose.orientation.w = trackerWorld.transform.rotation.w;
+        trackerMark.scale.x = -0.2;
+        trackerMark.scale.y = 0.04;
+        trackerMark.scale.z = 0.04;
+        trackerMark.color.r = 0;
+        trackerMark.color.g = 1;
+        trackerMark.color.b = 0;
+        trackerMark.color.a = 1;
+        
+        targetMark.header = targetWorld.header;
+        targetMark.ns = "demo";
+        targetMark.id = 2;
+        targetMark.type = visualization_msgs::Marker::SPHERE;
+        targetMark.pose.position.x = targetWorld.transform.translation.x;
+        targetMark.pose.position.y = targetWorld.transform.translation.y;
+        targetMark.pose.position.z = targetWorld.transform.translation.z;
+        targetMark.pose.orientation.x = targetWorld.transform.rotation.x;
+        targetMark.pose.orientation.y = targetWorld.transform.rotation.y;
+        targetMark.pose.orientation.z = targetWorld.transform.rotation.z;
+        targetMark.pose.orientation.w = targetWorld.transform.rotation.w;
+        targetMark.scale.x = 0.1;
+        targetMark.scale.y = 0.1;
+        targetMark.scale.z = 0.1;
+        targetMark.color.r = 1;
+        targetMark.color.g = 0;
+        targetMark.color.b = 0;
+        targetMark.color.a = 1;
+        
+        // Create a MarkerArray, publish it
+        visualization_msgs::MarkerArray visOutput;
+        visOutput.markers = {trackerMark, targetMark};
+        visPub.publish(visOutput);
     }
 }
