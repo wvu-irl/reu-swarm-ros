@@ -3,34 +3,36 @@
 #include "Processor.h"
 #include <stdlib.h>
 #include <map>
+#include "geometry_msgs/Vector3.h"
+#include "geometry_msgs/Quaternion.h"
+#include "tf/transform_datatypes.h"
+#include <tf/LinearMath/Matrix3x3.h>
+#include <math.h>
 
 
 
 
-
-
-
-Processor::Processor(){}
+Processor::Processor(int a){}
 
 void Processor::init(){}
 
-// creating a map for all the string to integer values
-std::map<char*, int> Processor::inst()
-{
-  char *LETTERARRAY[] = {"DE", "PA", "NJ", "GA", "CT", "MA", "MD", "SC", "NH", "VA", "NY", "NC",
-                                  "RI", "VT", "KY", "TN", "OH", "LA", "IN", "MS", "IL", "AL", "ME", "MO",
-                                  "AR", "MI", "FL", "TX", "IA", "WI", "CA", "MN", "OR", "KA", "WV", "NV",
-                                  "NE", "CO", "ND", "SD", "MT", "WA", "ID", "WY", "UT", "OK", "NM", "AZ",
-                                  "AK", "HI"};
-  std::map<char*, int> map;
-  for (size_t i = 0; i < sizeof(LETTERARRAY) / sizeof(LETTERARRAY[0]); i++)
-  {
-    map.insert(std::pair<char*, size_t>(LETTERARRAY[i], i));
-  }
-  return map;
-}
+
 
 void Processor::processVicon(wvu_swarm_std_msgs::viconBotArray data){
 
+    for(size_t i = 0; i< sizeof(data.poseVect)/ sizeof(data.poseVect[0]); i++)
+    {
+        char tempID[2] = {data.poseVect[i].botId[0],data.poseVect[i].botId[1]};
+        size_t numID = rid_map[tempID];
 
+        // the incoming geometry_msgs::Quaternion is transformed to a tf::Quaterion
+        tf::Quaternion quat;
+        tf::quaternionMsgToTF(data.poseVect[i].botPose.transform.rotation, quat);
+
+    // the tf::Quaternion has a method to acess roll pitch and yaw
+        double roll, pitch, yaw;
+        tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+        curBotArray[numID]=Bot(tempID,data.poseVect[i].botPose.transform.translation.x,
+          data.poseVect[i].botPose.transform.translation.y,yaw);
+    } 
 }

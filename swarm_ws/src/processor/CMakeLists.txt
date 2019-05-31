@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(processor)
 
+set (CMAKE_CXX_STANDARD 11)
+
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg message_generation wvu_swarm_std_msgs swarm_server)
 

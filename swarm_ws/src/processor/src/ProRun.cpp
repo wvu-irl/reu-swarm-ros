@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-#include "Processor.h"
+#include "Processor.cpp"
 #include <sstream>
 
 
@@ -20,7 +20,7 @@ void botCallback(const wvu_swarm_std_msgs::viconBotArray& msg)
 
 int main(int argc, char **argv){
 
-    Processor bigbrain();
+    Processor bigbrain(0);
     ros::init(argc, argv, "Processor");
     ros::NodeHandle n;
     ros::Subscriber sub = n.subscribe("BotStructs", 1000, botCallback);
@@ -28,11 +28,9 @@ int main(int argc, char **argv){
     while(true){
         std::cout << "yo we here";
         wvu_swarm_std_msgs::viconBotArray tempBotArray =
-        *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>("/BotStructs"));
+        *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>("/ViconArray"));
 
-
-
-
+        bigbrain.processVicon(tempBotArray);
     }
 
 
