@@ -55,6 +55,8 @@ find_package(catkin REQUIRED COMPONENTS
   add_message_files(
     FILES
     rthetatest.msg
+    viconBot.msg
+    viconBotArray.msg
   )
 
 ## Generate services in the 'srv' folder
@@ -77,6 +79,7 @@ find_package(catkin REQUIRED COMPONENTS
     geometry_msgs
     std_msgs
     visualization_msgs
+    wvu_swarm_std_msgs
   )
 
 ################################################
