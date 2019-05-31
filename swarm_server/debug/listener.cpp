@@ -40,6 +40,15 @@ int main()
     exit(1);
   }
 
+  char reg[32] = {'\0'};
+  sprintf(reg, "register %d", -2);
+  int bytes = write(socket_descriptor, (&reg), sizeof(reg));
+  if (bytes < 0)
+  {
+    puts("Failed registration");
+    return;
+  }
+
   while (true)
   {
     // TODO Recieve
