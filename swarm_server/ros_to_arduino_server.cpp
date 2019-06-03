@@ -12,7 +12,7 @@
 #include <functional>
 #include <signal.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
 

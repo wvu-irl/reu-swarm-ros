@@ -77,6 +77,9 @@ public:
  */
 void sendCommandToRobots(command cmd, int recip_rid);
 
+// overloaded for backwards compatability
+void sendCommandToRobots(command cmd);
+
 // function responsible for recieving information from a client
 void runClient(std::function<void(command)> command_callback,
                 std::function<void(const char *, void *)> info_callback,
