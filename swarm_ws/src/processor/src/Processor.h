@@ -8,23 +8,34 @@ typedef struct Bot
     Bot(){
       id[0]='\0';
       id[1]='\0';
-      xpos =0;
-      ypos=0;
+      x =0;
+      y=0;
       heading=0;
+      distance = 10000;
     }
 
-    Bot(char _id[2], float _xpos, float _ypos, float _heading) {
+    Bot(float _x, float _y,std::string name){
+      x =_x;
+      y=_y;
+      strcpy(id,name.c_str());
+      heading=0;
+      distance=10000;
+    }
+
+    Bot(char _id[2], float _x, float _y, float _heading, float _distance) {
       id[0]=_id[0];
       id[1]=_id[1];
-      xpos =_xpos;
-      ypos=_ypos;
+      x =_x;
+      y=_y;
       heading=_heading;
+      distance=_distance;
     }
 
     char id[2];
-    float xpos;
-    float ypos;
+    float x;
+    float y;
     float heading;
+    float distance;
 } Bot;
 
 typedef struct
@@ -32,6 +43,11 @@ typedef struct
     int id;
     //TODO
 } Mail;
+
+bool compareTwoBots(Bot& a, Bot& b)
+{
+    return (float) a.distance > (float) b.distance; // Reverse the > to sort smallest first instead
+}
 
 // creating a map for all the string to integer values
 std::map<char*, int> inst() {
@@ -49,22 +65,29 @@ std::map<char*, int> inst() {
 }
 std::map<char*, int> rid_map = inst();
 
+
+
+
+static const int BOT_COUNT = 10; // Number of bots in array
+static const int NEIGHBOR_COUNT = 4; // Number of neighbors desired
+
 class Processor {
 
   private:
-      Bot prevBotArray [50];
-      Bot curBotArray [50];
-      Mail mailbox [50];
+      Bot bots [BOT_COUNT];
+      Bot botMail [BOT_COUNT][NEIGHBOR_COUNT];
       std::vector<std::pair <float,float> > obs;
 
       ros::Timer timer;
       ros::Publisher pub;
       ros::Subscriber sub;
-
   public:
-    Processor(int a);
-    void init();
-    void processVicon(wvu_swarm_std_msgs::viconBotArray data);
+      Processor(int a);
+      Processor(Bot _bots []);
+      void init();
+      void processVicon(wvu_swarm_std_msgs::viconBotArray data);
+      void printBotMail();
+      void findNeighbors();
   //  void start();
 //    void stop();
 
