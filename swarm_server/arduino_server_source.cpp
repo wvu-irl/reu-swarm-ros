@@ -109,7 +109,7 @@ void *runClient(void *args)
 
         sockets->at(id).setRID(rid); // setting the RID of the related object
 
-        info_callback("Registered %s", rid_indexing[rid]);
+        info_callback("Registered %s", (void *) (rid_indexing[rid].c_str()));
       }
       else
         command_callback(*buffer); // sending message to callback

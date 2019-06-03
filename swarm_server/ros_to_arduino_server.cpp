@@ -19,9 +19,6 @@ ros::Publisher g_from_ard; // global publisher for data from the arduinos
 volatile sig_atomic_t g_flag = 0;
 void flagger(int sig)
 {
-#if DEBUG
-  ROS_INFO("FLAG");
-#endif
 	g_flag = 1;
 }
 
@@ -49,7 +46,7 @@ void commandCallback(command cmd)
 void info(const char *patt, void *dat)
 {
   std::ostringstream os;
-  os << "SERVER INFO: " << patt << "\n";
+  os << "SERVER INFO: " << patt;
   std::string full_pattern = os.str();
   const char *ch_pathh = full_pattern.c_str();
   ROS_INFO(ch_pathh, dat);

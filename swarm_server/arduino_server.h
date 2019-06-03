@@ -76,7 +76,6 @@ public:
  *  a recip_rid of -1 will send a command to all robots
  */
 void sendCommandToRobots(command cmd, int recip_rid);
-void sendCommandToRobots(command cmd);
 
 // function responsible for recieving information from a client
 void runClient(std::function<void(command)> command_callback,

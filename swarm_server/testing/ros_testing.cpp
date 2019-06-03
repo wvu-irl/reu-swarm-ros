@@ -114,14 +114,12 @@ int main(int argc, char **argv) {
 
 	ROS_INFO("Publishing command");
 	send.publish(test_send);
-
+	ROS_INFO("Published command");
 	ros::spinOnce();
 
 	ROS_INFO("Server waiting for clients");
-	// waiting for all clients to die
-	for (size_t i = 0;i < tids.size();i++) {
-		pthread_join(tids.at(i), NULL);
-	}
+	//waiting for all clients to die
+	sleep(10);
 
 	return 0;
 }
