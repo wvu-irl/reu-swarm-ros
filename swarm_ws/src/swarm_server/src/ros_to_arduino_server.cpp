@@ -34,7 +34,7 @@ void flagger(int sig)
 void commandCallback(command cmd)
 {
   ROS_INFO("Command: %s", cmd.str); // displaying recieved data
-  server_setup::sensor_data inf; // conversion container
+  wvu_swarm_std_msgs::sensor_data inf; // conversion container
   for (size_t i = 0;i < 32;i++)
   {
 	  inf.data[i] = cmd.str[i];
@@ -59,7 +59,7 @@ void info(const char *patt, void *dat)
 /**
  *  callback for a subscription to send data to the swarm
  */
-void sendToRobotCallback(server_setup::robotcommand msg)
+void sendToRobotCallback(wvu_swarm_std_msgs::robotcommand msg)
 {
 #if DEBUG
   ROS_INFO("Sending command to robots");
@@ -96,7 +96,7 @@ void *controlThread(void *arg0)
   signal(SIGINT, flagger);
   ros::NodeHandle *n = (ros::NodeHandle *)arg0; // passed node handle
   ros::Subscriber to_ard = n->subscribe("execute", 1000, sendToRobotCallback); // subscribing to movment datastream
-  g_from_ard = n->advertise<server_setup::sensor_data>("from_arduino", 1000); // advertising arduino data
+  g_from_ard = n->advertise<wvu_swarm_std_msgs::sensor_data>("from_arduino", 1000); // advertising arduino data
 
   while (true)
   {

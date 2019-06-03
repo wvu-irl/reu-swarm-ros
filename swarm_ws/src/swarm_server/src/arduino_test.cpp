@@ -1,96 +1,32 @@
-#include "arduino_server.h"
-#include <sstream>
-#include <string>
 #include <ros/ros.h>
-#include <ros/master.h>
-#include <vicon_demo/rtheta.h>
-#include <wvu_swarm_std_msgs/rthetatest.h>
- // ^C catch
-#include <signal.h>
-bool g_stay_alive = true;
-volatile sig_automatic_t g_flag = 0;
-void flagger(int sig)
+#include <wvu_swarm_std_msgs/robotcommand.h>
+#include <wvu_swarm_std_msgs/sensor_data.h>
+
+void sensorDatCallback(wvu_swarm_std_msgs::sensor_data msg)
 {
-	g_flag = 1;
-}
-// ^C catch
-
-void commandCallback(command cmd)
-{
-    printf("Robot[%d] head %s\n", 0, "asdg");
-}
-
-void messageCallback(const wvu_swarm_std_msgs::rthetatest &msg) {}
-
-void info(const char *patt, void *dat)
-{
-    std::ostringstream os;
-    os << "SERVER INFO: " << patt << "\n";
-    std::string full_pattern = os.str();
-    const char *ch_pathh = full_pattern.c_str();
-    printf(ch_pathh, dat);
-}
-
-bool keepalive()
-{
-    return g_stay_alive;
-}
-
-void *sendThread(void *arg0)
-{
-	ros::Subscriber *sub = (ros::Subscriber*)arg0;
-    
-	signal(SIGKILL, flagger);
-
-    sleep(1);
-    while(sockets->size() <= 0) {usleep(10000);}
-    
-    puts("Sending messages");
-
-    while (true)
-    {
-        wvu_swarm_std_msgs::rthetatest vector =
-                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::rthetatest>("/vicon_demo"));
-        
-        //command output = {"0,0.5,135.4"};
-        command output;
-        sprintf(output.str, "%d,%f,%f", 0, vector.radius, vector.degrees);
-        
-        sendCommandToRobots(output);
-
-        if (g_flag) // exit case
-        {
-        	ROS_INFO("Exiting");
-        	g_keep_alive = false;
-        	usleep(1000000);
-        	exit(0);
-        }
-
-
-        usleep(10000);
-    }
+	ROS_INFO("SENSOR DATA: %s", msg.data);
 }
 
 int main(int argc, char **argv)
 {
-    // Set up ros
-    ros::init(argc, argv, "arduino_test");
-    ros::NodeHandle n;
-    ros::Subscriber vectorSub;
-    ros::Rate rate(100);
-    
-    // Subscribe
-    vectorSub = n.subscribe("/vicon_demo", 10, &messageCallback);
-    
-    puts("Starting");
-    printf("Sending %d bytes per message\n", (int)sizeof(command));
+	ros::init(argc, argv, "arduino_test");
+	ros::NodeHandle n;
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_t tid;
-    pthread_create(&tid, &attr, sendThread, &vectorSub);
+	ros::Publisher exe = n.advertise< wvu_swarm_std_msgs::robotcommand >("execute", 1000);
+	ros::Subscriber sense = n.subscribe("from_arduino", 1000, sensorDataCallback);
 
-    beginServer(commandCallback, info, puts, keepalive);
+	ros::Rate loop_rate(100);
 
-    pthread_join(tid, NULL);
+	while (ros::ok())
+	{
+		wvu_swarm_std_msgs::robotcommand cmd;
+		cmd.rid = {'D', 'E'};
+		cmd.r = 1.0f;
+		cmd.theta = 123.4f;
+
+		exe.publish(cmd);
+
+		ros::spinOnce();
+		loop_rate.sleep();
+	}
 }
