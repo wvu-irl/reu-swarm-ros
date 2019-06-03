@@ -1,4 +1,6 @@
 #include <ros/ros.h>
+
+// TODO Change these to be the right package
 #include <server_setup/robotcommand.h>
 #include <server_setup/sensor_data.h>
 
@@ -70,7 +72,8 @@ void sendToRobotCallback(server_setup::robotcommand msg)
   ROS_INFO("Created vector string \"%s\"", cmd.str);
 #endif
   char id[3] = {'\0'};
-  strcpy(id, msg.rid.c_str()); // cpoying into message
+  id[0] = msg.rid[0];
+  id[1] = msg.rid[1];
 #if DEBUG
   ROS_INFO("Got ID: %s", id);
 #endif

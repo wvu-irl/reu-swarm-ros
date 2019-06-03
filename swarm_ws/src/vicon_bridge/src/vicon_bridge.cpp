@@ -516,6 +516,9 @@ private:
     
     // Set up variables to construct transforms and bots
     tf::Transform transform;
+    std::vector<tf::StampedTransform, std::allocator<tf::StampedTransform> > transforms;
+    geometry_msgs::TransformStampedPtr pose_msg(new geometry_msgs::TransformStamped);
+    SegmentMap::iterator pub_it;
     wvu_swarm_std_msgs::viconBotArray botArray;
 
     // Find the number of subjects being tracked
@@ -540,11 +543,6 @@ private:
           segment_name = msvcbridge::GetSegmentName(subject_name, i_segments).SegmentName;
           
           // Get the id of this segment
-          //std::uint8_t botId[2];
-          //botId[0] = (std::uint8_t)segment_name.at(segment_name.find("_")+1); // Probably better ways to do this, sorry
-          //botId[1] = (std::uint8_t)segment_name.at(segment_name.find("_")+2);
-          //std::vector<std::uint8_t> botId = {(std::uint8_t)segment_name.at(segment_name.find("_")+1),
-          //                                   (std::uint8_t)segment_name.at(segment_name.find("_")+2)};
           boost::array<std::uint8_t, 2> botId;
           botId[0] = (std::uint8_t)segment_name.at(segment_name.find("_")+1); // Probably better ways to do this, sorry
           if(segment_name.length() > segment_name.find("_")+2)
@@ -582,7 +580,7 @@ private:
               botArray.poseVect.push_back(thisBot);
               
               // Original code to do one topic per segment
-              /*
+              
               boost::mutex::scoped_try_lock lock(segments_mutex_);
 
               if (lock.owns_lock())
@@ -613,7 +611,7 @@ private:
                   createSegment(subject_name, segment_name);
                 }
               }
-              */
+              
             }
             else
             {
@@ -630,12 +628,12 @@ private:
       }
     }
     
-    /*
+    
     if(broadcast_tf_)
     {
       tf_broadcaster_.sendTransform(transforms);
     }
-    */
+    
     
     // Broadcast??
     swarm_pub_.publish(botArray);

@@ -4,8 +4,9 @@
 		<param name="datastream_hostport" value="192.168.10.1:801" type="str" />
 		<param name="tf_ref_frame_id" value="/world" type="str" />
 		
-		<!-- Don't publish individual points -->
+		<!-- Don't publish individual points or transforms -->
 		<param name="publish_markers" value="false" type="bool" />
+		<param name="publish_transform" value="false" type="bool" />
 		
 		</node>
 </launch>
