@@ -16,6 +16,10 @@
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
 
+/**
+ * This is a function that flaggs when an interrupt occurs
+ * This is used when "ctrl+C" is used to kill a program
+ */
 volatile sig_atomic_t g_flag = 0;
 void flagger(int sig)
 {
@@ -106,6 +110,10 @@ void *controlThread(void *arg0)
   pthread_exit(0); // exiting thread
 }
 
+/**
+ * Function for keeping all loops and threads alive
+ * Based on ros ok and the interrupt flag
+ */
 bool keepAlive()
 {
 	return ros::ok() || !g_flag;
@@ -114,9 +122,6 @@ bool keepAlive()
 // main
 int main(int argc, char **argv)
 {
-
-
-
   ros::init(argc, argv, "arduino_server");
   ros::NodeHandle n;
 
