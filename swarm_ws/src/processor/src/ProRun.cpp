@@ -38,10 +38,10 @@ int main(int argc, char **argv){
     ros::init(argc, argv, "Processor");
     ros::NodeHandle n;
     ros::Subscriber sub = n.subscribe("ViconArray", 1000, botCallback);
-    vector <ros::Publisher> pubVector;
+    std::vector <ros::Publisher> pubVector;
     for (int i=0; i<BOT_COUNT; i++){
 
-        ros::Publisher pub = n.advertise<std_msgs::String>("MailStructs/"+std::to_string(i), 1000);
+        ros::Publisher pub = n.advertise<std_msgs::String>("AliceStructs/"+std::to_string(i), 1000);
         pubVector.push_back(pub);
     }
 
@@ -53,17 +53,9 @@ int main(int argc, char **argv){
         bigbrain.processVicon(tempBotArray);
         bigbrain.findNeighbors();
 
-        for (int i=0; i<BOT_COUNT; i++){
-            wvu_swarm_std_msgs::aliceMailArray _aliceMailArray;
-            for (int j=0; j<NEIGHBOR_COUNT; j++){
-            _aliceMailArray.aliceMail[j].botId=;
-            _aliceMailArray.aliceMail[j].x;
-            _aliceMailArray.aliceMail[j].y;
-            _aliceMailArray.aliceMail[j].distance;
-            _aliceMailArray.aliceMail[j].heading;
-          }
-            pubVector.at(i).publish(_aliceMail);
-        }
+  for (int i=0; i<BOT_COUNT; i++){
+        pubVector.at(i).publish(bigbrain.createAliceMsg(i));
+}
         ros::spinOnce();
     }
 

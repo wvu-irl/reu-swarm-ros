@@ -109,3 +109,18 @@ void Processor::printBotMail()
             botIndex++;
         }
     }
+wvu_swarm_std_msgs::aliceMailArray Processor::createAliceMsg(int i){
+
+        wvu_swarm_std_msgs::aliceMailArray _aliceMailArray;
+        for (int j=0; j<NEIGHBOR_COUNT; j++){
+      //  uint8_t temp[2]={(uint8_t) botMail[i][j].id[0],(uint8_t) botMail[i][j].id[1]};
+        _aliceMailArray.aliceMail[j].botId[0]=(uint8_t) botMail[i][j].id[0];
+        _aliceMailArray.aliceMail[j].botId[1]=(uint8_t) botMail[i][j].id[1];
+        _aliceMailArray.aliceMail[j].x= botMail[i][j].x;
+        _aliceMailArray.aliceMail[j].y=botMail[i][j].y;
+        _aliceMailArray.aliceMail[j].distance=botMail[i][j].distance;
+        _aliceMailArray.aliceMail[j].heading=botMail[i][j].heading;
+      }
+      return _aliceMailArray;
+
+  }

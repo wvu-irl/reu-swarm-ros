@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-
+#include <wvu_swarm_std_msgs/aliceMail.h>
+#include <wvu_swarm_std_msgs/aliceMailArray.h>
 #include <wvu_swarm_std_msgs/viconBotArray.h>
 
 typedef struct Bot
@@ -88,6 +89,7 @@ class Processor {
       void processVicon(wvu_swarm_std_msgs::viconBotArray data);
       void printBotMail();
       void findNeighbors();
+      wvu_swarm_std_msgs::aliceMailArray createAliceMsg(int i);
   //  void start();
 //    void stop();
 
