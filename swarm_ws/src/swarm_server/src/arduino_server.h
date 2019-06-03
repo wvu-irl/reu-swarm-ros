@@ -13,8 +13,9 @@
  *	 The server will also pipe messages to the clients
  */
 
-
 // Includes
+#include "robot_id.h"
+#include <pthread.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -31,7 +32,6 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/wait.h>
-#include <errno.h>
 
 #include <functional>
 #include <vector>
@@ -45,8 +45,46 @@ typedef struct
   char str[32];
 } command;
 
-// sends a command indescriminantly to all the robots
+/**
+ *  Class contains all the data necessesary to talk with one robot
+ *  as well as act as a filter with the rid to reduce bandwidth usage
+ *
+ */
+class ConnectionInfo
+{
+private:
+  int connection_descriptor; // the connection connection_descriptor for the socket
+  int rid; // the id of the robot (or other client) connected
+
+public:
+  ConnectionInfo(int connection_descriptor);
+
+  int getRID(); // returns the RID of the client
+  void setRID(int rid); // sets the RID of the client
+
+  int getConnectionDescriptor(); // returns the connection descriptor of the client
+};
+
+/**
+ * Send command to robots sends commands to robots
+ *
+ * cmd is the content of the comannd
+ *
+ * recip_rid is the recipiant's RID
+ *  special cases:
+ *  a connection with registered id of -2 will recieve all sent commands
+ *  a recip_rid of -1 will send a command to all robots
+ */
+void sendCommandToRobots(command cmd, int recip_rid);
+
+// overloaded for backwards compatability
 void sendCommandToRobots(command cmd);
+
+// function responsible for recieving information from a client
+void runClient(std::function<void(command)> command_callback,
+                std::function<void(const char *, void *)> info_callback,
+                std::function<void(const char *)> error_callback,
+                std::function<bool()> exit_condition_callback, int id);
 
 /**
  * Begins accepting connections to the server and processes commands from them
@@ -61,6 +99,5 @@ int beginServer(std::function<void(command)> command_callback,
                 std::function<void(const char *, void *)> info_callback,
                 std::function<void(const char *)> error_callback,
                 std::function<bool()> exit_condition_callback);
-
 #include "arduino_server_source.cpp"
 #endif
