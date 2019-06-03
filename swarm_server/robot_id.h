@@ -18,6 +18,7 @@ std::map<std::string, int> initializeRIDs()
     map.insert(std::pair<std::string, int>(rid_indexing[i], i));
   }
   map.insert("XX", -1); // sending to all case
+  map.insert("YY", -2); // logging only
   return map;
 }
 
