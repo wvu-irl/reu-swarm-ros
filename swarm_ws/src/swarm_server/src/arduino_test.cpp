@@ -4,7 +4,7 @@
 #include <ros/ros.h>
 #include <ros/master.h>
 #include <vicon_demo/rtheta.h>
-#include <wvu_swarm_std_msgs/rthetatest.h>
+#include <wvu_swarm_std_msgs/rtheta.h>
  // ^C catch
 #include <signal.h>
 bool g_stay_alive = true;
