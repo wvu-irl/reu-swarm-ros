@@ -135,7 +135,7 @@ void Processor::findNeighbors()
     }
 
     int n = sizeof(botMail[botIndex]) / sizeof(botMail[botIndex][0]); // for sorting later
-    int curIndex = 0; // Becuase we're looping over the array, we have to track the index ourselves
+    int curIndex = 0; // Because we're looping over the array, we have to track the index ourselves
     for (auto &cur : bots)
     {
       if (cur.id[0] == bot.id[0] && cur.id[1] == bot.id[1]) // Check for duplicates

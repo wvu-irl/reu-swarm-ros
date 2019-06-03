@@ -31,19 +31,19 @@ int main(int argc, char **argv)
   Processor bigbrain(0);
   ros::init(argc, argv, "Processor");
   ros::NodeHandle n;
-  ros::Subscriber sub = n.subscribe("ViconArray", 1000, botCallback); //Subscribes to the Vicon
+  ros::Subscriber sub = n.subscribe("vicon_array", 1000, botCallback); //Subscribes to the Vicon
   std::vector <ros::Publisher> pubVector;
 
   for (int i = 0; i < BOT_COUNT; i++) //Starts publishing to all 50 topics
   {
-    ros::Publisher pub = n.advertise<std_msgs::String>("AliceStructs/" + std::to_string(i), 1000);
+    ros::Publisher pub = n.advertise<std_msgs::String>("alice_mail_" + std::to_string(i), 1000);
     pubVector.push_back(pub);
   }
 
   while (ros::ok())
   {
     wvu_swarm_std_msgs::viconBotArray tempBotArray = *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>
-            ("/ViconArray"));
+            ("vicon_array"));
 
     bigbrain.processVicon(tempBotArray);
     bigbrain.findNeighbors();
