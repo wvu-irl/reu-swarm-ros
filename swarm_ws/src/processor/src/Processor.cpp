@@ -65,6 +65,40 @@ void Processor::printBotMail()
     }
 }
 
+float getSeperation(Robot _bot, Obstacle _obs)//helper function for finding obstacles
+{
+    //obs positions are vector<float[2]> types. 
+    int i = 0;
+    int size = _obs.x.size(); //number of points in cloud (x and y are same size)
+    float r_min;
+    float loc_r;
+
+    float dx;
+    float dy;
+    
+    while(i < size) //runs for each point in an obstacles point cloud
+    {
+        dx = _obs.x.at(i)-_bot.x; //x separation.
+        dy = _obs.y.at(i)-_bot.y; //y separation.
+        
+        loc_r = sqrt(pow(dx,2)+pow(dy,2)); //magnitude of separation 
+
+        if (i==0)
+        {
+            r_min = loc_r;
+        }
+        else
+        {
+            if (loc_r < r_min)
+            { 
+                r_min = loc_r;
+            }
+        }
+        i++;
+    }
+    return r_min;
+}
+
 /*
      Exactly what it sounds like
      This function finds the nearest few neighbors
@@ -73,8 +107,31 @@ void Processor::printBotMail()
     void Processor::findNeighbors()
     {
         int botIndex = 0;
+        int j; //iterator for obs finding loop
+        int num_obs = sizeof(obs); 
+
+        float dist_to_obs; //dist b/w closest point of obs and robot (calculated in inner loop).
+        float tolerance = 12; //this value is supposed to be our actual tolerance (just made it 12). 
+        Obstacle neighbor_obs[50][num_obs]; //holds obs near a robot for each robot. 
+        //probably not our long term solution for storing the data.
+            
         for(auto& bot : bots)
         {
+            j = 0; 
+            while (j < num_obs) //runs for each obstacle in obs
+            {
+                Obstacle iter_obs = obs[j]; //current obs to test
+                if (&iter_obs != NULL)
+                {
+                    dist_to_obs = getSeperation(bot, iter_obs);//returns actual separation distance. 
+                    if(dist_to_obs<=tolerance) 
+                    {
+                        neighbor_obs[i][j] = iter_obs; //neighbor_obs is currently not initialized. 
+                    }   
+                }
+                j++;
+            }
+                
             int n = sizeof(botMail[botIndex])/sizeof(botMail[botIndex][0]); // for sorting later
             int curIndex = 0; // Becuase we're looping over the array, we have to track the index ourselves
             for(auto& cur : bots)
