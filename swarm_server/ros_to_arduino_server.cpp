@@ -10,10 +10,17 @@
 #include <sstream>
 #include <string>
 #include <functional>
+#include <signal.h>
 
 #define DEBUG 1
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
+
+volatile sig_automatic_t g_flag = 0;
+void flagger(int sig)
+{
+	g_flag = 1;
+}
 
 /**
  *  Callback for getting data from the arduino clients
@@ -85,9 +92,22 @@ void *controlThread(void *arg0)
   ros::Subscriber to_ard = n->subscribe("execute", 1000, sendToRobotCallback); // subscribing to movment datastream
   g_from_ard = n->advertise<server_setup::sensor_data>("from_arduino", 1000); // advertising arduino data
 
-  ros::spin(); // allowing subscriber callbacks to happen
+  while (true)
+  {
+	  if (flag || !ros::ok())
+	  {
+		  pthread_exit(0);
+	  }
+
+	  ros::spinOnce();
+  }
 
   pthread_exit(0); // exiting thread
+}
+
+bool keepAlive()
+{
+	return ros::ok() || !flag;
 }
 
 // main
@@ -106,8 +126,9 @@ int main(int argc, char **argv)
   pthread_create(&tid, &attr, controlThread, &n);
 
   // starting server
-  beginServer(commandCallback, info, errorCallBack, ros::ok);
+  beginServer(commandCallback, info, errorCallBack, keepAlive);
 
   // waiting for thread to die
   pthread_join(tid, NULL);
+  return 0;
 }
