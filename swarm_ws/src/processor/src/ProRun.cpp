@@ -37,14 +37,34 @@ int main(int argc, char **argv){
     Processor bigbrain(0);
     ros::init(argc, argv, "Processor");
     ros::NodeHandle n;
-    ros::Subscriber sub = n.subscribe("BotStructs", 1000, botCallback);
-    ros::Publisher pub = n.advertise<std_msgs::String>("MailStructs", 1000);
-    while(true){
+    ros::Subscriber sub = n.subscribe("ViconArray", 1000, botCallback);
+    vector <ros::Publisher> pubVector;
+    for (int i=0; i<BOT_COUNT; i++){
+
+        ros::Publisher pub = n.advertise<std_msgs::String>("MailStructs/"+std::to_string(i), 1000);
+        pubVector.push_back(pub);
+    }
+
+    while (ros::ok()){
         std::cout << "yo we here";
         wvu_swarm_std_msgs::viconBotArray tempBotArray =
         *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>("/ViconArray"));
 
         bigbrain.processVicon(tempBotArray);
+        bigbrain.findNeighbors();
+
+        for (int i=0; i<BOT_COUNT; i++){
+            wvu_swarm_std_msgs::aliceMailArray _aliceMailArray;
+            for (int j=0; j<NEIGHBOR_COUNT; j++){
+            _aliceMailArray.aliceMail[j].botId=;
+            _aliceMailArray.aliceMail[j].x;
+            _aliceMailArray.aliceMail[j].y;
+            _aliceMailArray.aliceMail[j].distance;
+            _aliceMailArray.aliceMail[j].heading;
+          }
+            pubVector.at(i).publish(_aliceMail);
+        }
+        ros::spinOnce();
     }
 
 
