@@ -8,7 +8,7 @@
  // ^C catch
 #include <signal.h>
 bool g_stay_alive = true;
-volatile sig_automatic_t g_flag = 0;
+volatile sig_atomic_t g_flag = 0;
 void flagger(int sig)
 {
 	g_flag = 1;
