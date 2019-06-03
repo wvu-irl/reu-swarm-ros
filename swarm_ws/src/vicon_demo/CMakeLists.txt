@@ -146,11 +146,11 @@ include_directories(
   )
   add_dependencies(vicon_demo ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
   
-  add_executable(demo_vis src/demo_vis.cpp)
-  target_link_libraries(demo_vis
+  add_executable(tracking_demo src/tracking_demo.cpp)
+  target_link_libraries(tracking_demo
     ${catkin_LIBRARIES}
   )
-  add_dependencies(demo_vis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+  add_dependencies(tracking_demo ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

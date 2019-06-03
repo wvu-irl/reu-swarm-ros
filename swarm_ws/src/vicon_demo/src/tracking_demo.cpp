@@ -16,8 +16,17 @@
 #include <wvu_swarm_std_msgs/rtheta.h>
 #include <wvu_swarm_std_msgs/viconBot.h>
 #include <wvu_swarm_std_msgs/viconBotArray.h>
+#include <wvu_swarm_std_msgs/typedPoint.h>
 
 void msgCallback(const wvu_swarm_std_msgs::viconBotArray &msg) {}
+
+// Method to find distance between two points
+double getDist(const geometry_msgs::Point first, const geometry_msgs::Point second);
+
+// Method to populate a vector with a Gerono Lemniscate
+//   Params: a vector to fill with the points, a value 'a' defining the curve,
+//   and a value for an increment in degrees to iterate through 360 degrees
+void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, const double incr);
 
 int main(int argc, char **argv)
 {
@@ -27,21 +36,27 @@ int main(int argc, char **argv)
     // Generates nodehandle, publisher, subscribers
     ros::NodeHandle n;
     ros::Publisher pub;
-    ros::Publisher visPub;
     ros::Subscriber sub;
-    
-    // Generate transform stuff
-    tf2_ros::Buffer tfBuffer;
-    tf2_ros::TransformListener tfListener(tfBuffer); // Receives tf2 transforms
     
     // Sets loop rate at 100Hz
     ros::Rate rate(100);
     
     // Subscribe to tracker's vicon topic, publish result vector
     sub = n.subscribe("/viconArray", 10, &msgCallback);
-    pub = n.advertise<wvu_swarm_std_msgs::rtheta>("vicon_demo", 1000);
-    visPub = n.advertise<visualization_msgs::MarkerArray>("demo_vis", 1000);
-    //pub = n.advertise<geometry_msgs::Point>("vicon_demo", 1000);
+    pub = n.advertise<wvu_swarm_std_msgs::rtheta>("tracker_demo", 1000);
+    
+    // Set up transform listener
+    tf2_ros::Buffer tfBuffer;
+    tf2_ros::TransformListener tfListener(tfBuffer);
+    
+    // Generate a Gerono Lemniscate (figure 8) as discrete points
+    std::vector<geometry_msgs::Point> path;
+    genGeronoLemn(path, 1, 10); // a = 1, increment 10 degrees per point
+    
+    // Pick one point out of the path
+    geometry_msgs::Point currentPoint = path.at(0);
+    int currentIndex = 0;
+    ROS_INFO("Point initialized at %f, %f\n", currentPoint.x, currentPoint.y);
     
     // Run while ros functions
     while(ros::ok())
@@ -50,136 +65,110 @@ int main(int argc, char **argv)
         wvu_swarm_std_msgs::viconBotArray viconArray =
                 *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>("/viconArray"));
         
-        // Look for two bots named AA and BB
-        bool botAAFound = false, botBBFound = false;
-        wvu_swarm_std_msgs::viconBot botAA, botBB;
+        // Look for bot named AA
+        bool botAAFound = false;
+        wvu_swarm_std_msgs::viconBot botAA;
         
         for(wvu_swarm_std_msgs::viconBot iteratorBot : viconArray.poseVect)
         {
-            //std::uint8_t varA[2] = {(std::uint8_t)'A', (std::uint8_t)'A'};
-            //std::uint8_t varB[2] = {(std::uint8_t)'B', (std::uint8_t)'B'};
             boost::array<std::uint8_t, 2> varA = {(std::uint8_t)'A', (std::uint8_t)'A'};
-            boost::array<std::uint8_t, 2> varB = {(std::uint8_t)'B', (std::uint8_t)'B'};
             
             if(iteratorBot.botId == varA)
             {
                 botAAFound = true;
                 botAA = iteratorBot;
             }
-            if(iteratorBot.botId == varB)
-            {
-                botBBFound = true;
-                botBB = iteratorBot;
-            }
         }
         
-        // Iterate again if both not found
-        if(!botAAFound || !botBBFound) {
+        // Iterate again if not found
+        if(!botAAFound) {
             usleep(1000);
             continue;
         }
         
-        // Pick out the geometry transforms from each bot relative to static frame
-        //   Bot AA is our tracker, bot BB is our target
-        geometry_msgs::TransformStamped trackerWorld = botAA.botPose;
-        geometry_msgs::TransformStamped targetWorld = botBB.botPose;
+        // Pick out the point from bot relative to static frame
+        geometry_msgs::Point trackerPt;
+        trackerPt.x = botAA.botPose.transform.translation.x;
+        trackerPt.y = botAA.botPose.transform.translation.y;
+        trackerPt.z = 0;
+        //ROS_INFO("   Tracker found at %f, %f\n", trackerPt.x, trackerPt.y);
         
-        // Get the transform of the tracker relative to origin
-        //geometry_msgs::TransformStamped trackerWorld =
-        //        *(ros::topic::waitForMessage<geometry_msgs::TransformStamped>("/vicon/tracker/tracker"));
+        // Find distance between bot and its target, convert to cm
+        double distance = getDist(trackerPt, currentPoint) * 50;
         
-        // Get the transform of the target relative to origin
-        //geometry_msgs::TransformStamped targetWorld = 
-        //        *(ros::topic::waitForMessage<geometry_msgs::TransformStamped>("/vicon/target/target"));
+        // If less than 5cm, move point
+        if(distance < 5) {
+            // Rotate through vector if needed
+            if(currentIndex + 1 >= path.size())
+                currentIndex = 0;
+            else
+                currentIndex++;
+            
+            currentPoint = path.at(currentIndex);
+            
+            // Recalculate distance
+            distance = getDist(trackerPt, currentPoint) * 50;
         
-        // Find transform from tracker to target
+            ROS_INFO("Point moved to %f, %f\n", currentPoint.x, currentPoint.y);
+        }
+        
+        // Find transform from tracker to target point
         geometry_msgs::TransformStamped trackerTarget;
         trackerTarget = tfBuffer.lookupTransform("vicon/swarmbot_AA/swarmbot_AA",
                 "world", ros::Time(0));
         
-        // Declare vectors for the target on the global frame and tracker frame
-        geometry_msgs::Point targetPtWorld, targetPtTracker;
-                
-        // Grab the global frame point for the target
-        targetPtWorld.x = targetWorld.transform.translation.x;
-        targetPtWorld.y = targetWorld.transform.translation.y;
-        targetPtWorld.z = targetWorld.transform.translation.z;
+        // Transform the point
+        geometry_msgs::Point pointTransformed;
+        tf2::doTransform<geometry_msgs::Point>(currentPoint, pointTransformed, botAA.botPose);
+        pointTransformed.z = 0; // why not
         
-        // Transform target's global coordinates into target's tracker coordinates
-        //   using the transform from global to tracker
-        tf2::doTransform<geometry_msgs::Point>(targetPtWorld, targetPtTracker, trackerTarget);
-        
-        // Set z to zero because we're taking a trip to Flatland
-        targetPtTracker.z = 0;
-        
-        // Publish the point of target relative to tracker
-        //pub.publish(targetPtTracker);
-        
-        // Convert point to rtheta form
-        float radius = sqrt(pow(targetPtTracker.x, 2) + pow(targetPtTracker.y, 2));
-        radius = radius *= 50; //convert to cm
-        
-        float degrees = 0;
-        
-        // Make atan continuous across 0 to 360 deg
-        if(targetPtTracker.x < 0)
-            degrees = atan(targetPtTracker.y / targetPtTracker.x) * 180 / 3.14159265;
+        // Find angle between bot and point
+        double degrees = 0;
+        if(pointTransformed.x < 0)
+            degrees = atan(pointTransformed.y / pointTransformed.x) * 180 / 3.14159265;
         else
-            degrees = (atan(targetPtTracker.y / targetPtTracker.x) * 180 / 3.14159265) + 180;
+            degrees = (atan(pointTransformed.y / pointTransformed.x) * 180 / 3.14159265) + 180;
         if(degrees < 0) degrees += 360;
         
-        // Put into data structure
+        // Put into rtheta form, publish
         wvu_swarm_std_msgs::rtheta output;
-        output.radius = radius;
+        output.radius = distance;
         output.degrees = degrees;
-        
-        // Publish rtheta form
         pub.publish(output);
         
-        // Build some Markers for visualization
-        visualization_msgs::Marker trackerMark, targetMark, trackerVectMark;
+        ros::spinOnce();
+        rate.sleep();
+    }
+}
+
+double getDist(const geometry_msgs::Point first, const geometry_msgs::Point second)
+{
+    double xDiff = first.x - second.x;
+    double yDiff = first.y - second.y;
+    double zDiff = first.z - second.z;
+    
+    return sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
+}
+
+void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, const double incr)
+{
+    // Iterate across 360 degrees
+    for(int t = 0; t < 360; t += incr)
+    {
+        // Create a point
+        geometry_msgs::Point temp;
         
-        trackerMark.header = trackerWorld.header;
-        trackerMark.ns = "demo";
-        trackerMark.id = 1;
-        trackerMark.type = visualization_msgs::Marker::ARROW;
-        trackerMark.pose.position.x = trackerWorld.transform.translation.x;
-        trackerMark.pose.position.y = trackerWorld.transform.translation.y;
-        trackerMark.pose.position.z = trackerWorld.transform.translation.z;
-        trackerMark.pose.orientation.x = trackerWorld.transform.rotation.x;
-        trackerMark.pose.orientation.y = trackerWorld.transform.rotation.y;
-        trackerMark.pose.orientation.z = trackerWorld.transform.rotation.z;
-        trackerMark.pose.orientation.w = trackerWorld.transform.rotation.w;
-        trackerMark.scale.x = -0.2;
-        trackerMark.scale.y = 0.04;
-        trackerMark.scale.z = 0.04;
-        trackerMark.color.r = 0;
-        trackerMark.color.g = 1;
-        trackerMark.color.b = 0;
-        trackerMark.color.a = 1;
+        double rads = t * 180 / 3.14156265;
         
-        targetMark.header = targetWorld.header;
-        targetMark.ns = "demo";
-        targetMark.id = 2;
-        targetMark.type = visualization_msgs::Marker::SPHERE;
-        targetMark.pose.position.x = targetWorld.transform.translation.x;
-        targetMark.pose.position.y = targetWorld.transform.translation.y;
-        targetMark.pose.position.z = targetWorld.transform.translation.z;
-        targetMark.pose.orientation.x = targetWorld.transform.rotation.x;
-        targetMark.pose.orientation.y = targetWorld.transform.rotation.y;
-        targetMark.pose.orientation.z = targetWorld.transform.rotation.z;
-        targetMark.pose.orientation.w = targetWorld.transform.rotation.w;
-        targetMark.scale.x = 0.1;
-        targetMark.scale.y = 0.1;
-        targetMark.scale.z = 0.1;
-        targetMark.color.r = 1;
-        targetMark.color.g = 0;
-        targetMark.color.b = 0;
-        targetMark.color.a = 1;
+        // Do math to find its location
+        //   This lemniscate is rotated 90 deg
+        temp.x = a * cos(rads) * sin(rads);
+        temp.y = a * sin(rads);
+        temp.z = 0; //flatworld
         
-        // Create a MarkerArray, publish it
-        visualization_msgs::MarkerArray visOutput;
-        visOutput.markers = {trackerMark, targetMark};
-        visPub.publish(visOutput);
+        // Add to vector
+        target.push_back(temp);
+        
+        ROS_INFO("Added point at %d degrees, or %f rads, at %f, %f, 0\n", t, rads, temp.x, temp.y);
     }
 }
