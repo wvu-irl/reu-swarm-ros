@@ -1,6 +1,4 @@
 #include <ros/ros.h>
-
-// TODO Change these to be the right package
 #include <wvu_swarm_std_msgs/robotcommand.h>
 #include <wvu_swarm_std_msgs/sensor_data.h>
 

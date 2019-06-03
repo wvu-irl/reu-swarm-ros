@@ -1,8 +1,6 @@
 #include <ros/ros.h>
-
-// TODO Change these to be the right package
-#include <server_setup/robotcommand.h>
-#include <server_setup/sensor_data.h>
+#include <wvu_swarm_std_msgs/robotcommand.h>
+#include <wvu_swarm_std_msgs/sensor_data.h>
 
 #include "arduino_server.h"
 #include "robot_id.h"
