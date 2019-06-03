@@ -20,7 +20,7 @@ void commandCallback(command cmd)
     printf("Robot[%d] head %s\n", 0, "asdg");
 }
 
-void messageCallback(const wvu_swarm_std_msgs::rthetatest &msg) {}
+void messageCallback(const wvu_swarm_std_msgs::rtheta &msg) {}
 
 void info(const char *patt, void *dat)
 {
@@ -49,8 +49,8 @@ void *sendThread(void *arg0)
 
     while (true)
     {
-        wvu_swarm_std_msgs::rthetatest vector =
-                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::rthetatest>("/vicon_demo"));
+        wvu_swarm_std_msgs::rtheta vector =
+                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::rtheta>("/vicon_demo"));
         
         //command output = {"0,0.5,135.4"};
         command output;
@@ -60,10 +60,10 @@ void *sendThread(void *arg0)
 
         if (g_flag) // exit case
         {
-        	ROS_INFO("Exiting");
-        	g_keep_alive = false;
-        	usleep(1000000);
-        	exit(0);
+            ROS_INFO("Exiting");
+            g_stay_alive = false;
+            usleep(1000000);
+            exit(0);
         }
 
 
