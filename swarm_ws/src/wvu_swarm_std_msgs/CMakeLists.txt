@@ -60,6 +60,8 @@ find_package(catkin REQUIRED COMPONENTS
     viconBot.msg
     viconBotArray.msg
     typedPoint.msg
+    robotcommand.msg
+    sensor_data.msg
   )
 
 ## Generate services in the 'srv' folder
