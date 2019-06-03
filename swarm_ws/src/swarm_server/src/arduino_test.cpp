@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 
 	ros::Publisher exe = n.advertise< wvu_swarm_std_msgs::robotcommand >("execute", 1000);
-	ros::Subscriber sense = n.subscribe("from_arduino", 1000, sensorDataCallback);
+	ros::Subscriber sense = n.subscribe("from_arduino", 1000, sensorDatCallback);
 
 	ros::Rate loop_rate(100);
 
