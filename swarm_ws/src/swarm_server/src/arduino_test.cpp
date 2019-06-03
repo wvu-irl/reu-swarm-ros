@@ -63,7 +63,7 @@ void *sendThread(void *arg0)
         	ROS_INFO("Exiting");
         	g_keep_alive = false;
         	usleep(1000000);
-        	pthread_exit(0);
+        	exit(0);
         }
 
 
