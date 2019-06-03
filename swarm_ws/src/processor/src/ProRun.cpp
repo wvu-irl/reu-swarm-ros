@@ -4,21 +4,15 @@
 #include <sstream>
 
 
-
-
-void botCallback(const wvu_swarm_std_msgs::viconBotArray& msg)
+void botCallback(const wvu_swarm_std_msgs::viconBotArray &msg)
 {
   //For Debug purposes. callback should do nothing by default.
   //ROS_INFO("I hear: [%i]", msg.id1);
 }
 
-// void botCallback(const std_msgs::String::ConstPtr& msg)
-// {
-//    ROS_INFO("I hear: [%s]", msg->data.c_str());
-// }
-
-
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
+  /* Test code for neighbor finding
   // Bot a(0, 0, "ab");
   //  Bot b(1, 1, "bc");
   //  Bot c(2, 2, "cd");
@@ -33,38 +27,32 @@ int main(int argc, char **argv){
   //  Processor test_pros = Processor(inputList);
   //  test_pros.findNeighbors();
   //  test_pros.printBotMail();
+  */
+  Processor bigbrain(0);
+  ros::init(argc, argv, "Processor");
+  ros::NodeHandle n;
+  ros::Subscriber sub = n.subscribe("ViconArray", 1000, botCallback); //Subscribes to the Vicon
+  std::vector <ros::Publisher> pubVector;
 
-    Processor bigbrain(0);
-    ros::init(argc, argv, "Processor");
-    ros::NodeHandle n;
-    ros::Subscriber sub = n.subscribe("ViconArray", 1000, botCallback);
-    std::vector <ros::Publisher> pubVector;
-    for (int i=0; i<BOT_COUNT; i++){
+  for (int i = 0; i < BOT_COUNT; i++) //Starts publishing to all 50 topics
+  {
+    ros::Publisher pub = n.advertise<std_msgs::String>("AliceStructs/" + std::to_string(i), 1000);
+    pubVector.push_back(pub);
+  }
 
-        ros::Publisher pub = n.advertise<std_msgs::String>("AliceStructs/"+std::to_string(i), 1000);
-        pubVector.push_back(pub);
+  while (ros::ok())
+  {
+    wvu_swarm_std_msgs::viconBotArray tempBotArray = *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>
+            ("/ViconArray"));
+
+    bigbrain.processVicon(tempBotArray);
+    bigbrain.findNeighbors();
+
+    for (int i = 0; i < BOT_COUNT; i++) //Publishes msgs to Alices
+    {
+      pubVector.at(i).publish(bigbrain.createAliceMsg(i));
     }
-
-    while (ros::ok()){
-        std::cout << "yo we here";
-        wvu_swarm_std_msgs::viconBotArray tempBotArray =
-        *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>("/ViconArray"));
-
-        bigbrain.processVicon(tempBotArray);
-        bigbrain.findNeighbors();
-
-  for (int i=0; i<BOT_COUNT; i++){
-        pubVector.at(i).publish(bigbrain.createAliceMsg(i));
-}
-        ros::spinOnce();
-    }
-
-
-
-    // std_msgs::String str;
-    // str.data = "hello world";
-    // std::cout << "yo";
-    // pub.publish(str);
-    // ros::spin();
-    return 0;
+    ros::spinOnce();
+  }
+  return 0;
 }
