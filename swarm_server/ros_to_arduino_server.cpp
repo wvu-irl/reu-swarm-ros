@@ -104,13 +104,14 @@ void *controlThread(void *arg0)
   {
 	  if (g_flag || !ros::ok())
 	  {
-		  exit(0);
+		  exit(0); // exiting program when it is supposed to
 	  }
 
 	  ros::spinOnce();
   }
 
   pthread_exit(0); // exiting thread
+  	  	  	  	   // this is probably unreachable
 }
 
 /**
