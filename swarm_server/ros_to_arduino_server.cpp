@@ -16,9 +16,12 @@
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
 
-volatile sig_automatic_t g_flag = 0;
+volatile sig_atomic_t g_flag = 0;
 void flagger(int sig)
 {
+#if DEBUG
+  ROS_INFO("FLAG");
+#endif
 	g_flag = 1;
 }
 
@@ -88,15 +91,16 @@ void errorCallBack(const char *msg)
  */
 void *controlThread(void *arg0)
 {
+  signal(SIGINT, flagger);
   ros::NodeHandle *n = (ros::NodeHandle *)arg0; // passed node handle
   ros::Subscriber to_ard = n->subscribe("execute", 1000, sendToRobotCallback); // subscribing to movment datastream
   g_from_ard = n->advertise<server_setup::sensor_data>("from_arduino", 1000); // advertising arduino data
 
   while (true)
   {
-	  if (flag || !ros::ok())
+	  if (g_flag || !ros::ok())
 	  {
-		  pthread_exit(0);
+		  exit(0);
 	  }
 
 	  ros::spinOnce();
@@ -107,12 +111,15 @@ void *controlThread(void *arg0)
 
 bool keepAlive()
 {
-	return ros::ok() || !flag;
+	return ros::ok() || !g_flag;
 }
 
 // main
 int main(int argc, char **argv)
 {
+
+
+
   ros::init(argc, argv, "arduino_server");
   ros::NodeHandle n;
 
