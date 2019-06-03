@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <boost/array.hpp>
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <vicon_demo/rtheta.h>
@@ -12,10 +13,11 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <wvu_swarm_std_msgs/rthetatest.h>
+#include <wvu_swarm_std_msgs/rtheta.h>
+#include <wvu_swarm_std_msgs/viconBot.h>
+#include <wvu_swarm_std_msgs/viconBotArray.h>
 
-void trackCallback(const geometry_msgs::TransformStamped &msg) {}
-void targetCallback(const geometry_msgs::TransformStamped &msg) {}
+void msgCallback(const wvu_swarm_std_msgs::viconBotArray &msg) {}
 
 int main(int argc, char **argv)
 {
@@ -26,8 +28,7 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     ros::Publisher pub;
     ros::Publisher visPub;
-    ros::Subscriber trackerSub;
-    ros::Subscriber targetSub;
+    ros::Subscriber sub;
     
     // Generate transform stuff
     tf2_ros::Buffer tfBuffer;
@@ -37,26 +38,63 @@ int main(int argc, char **argv)
     ros::Rate rate(100);
     
     // Subscribe to tracker's vicon topic, publish result vector
-    trackerSub = n.subscribe("/vicon/tracker/tracker", 10, &trackCallback);
-    targetSub = n.subscribe("/vicon/target/target", 10, &targetCallback);
-    pub = n.advertise<wvu_swarm_std_msgs::rthetatest>("vicon_demo", 1000);
+    sub = n.subscribe("/viconArray", 10, &msgCallback);
+    pub = n.advertise<wvu_swarm_std_msgs::rtheta>("vicon_demo", 1000);
     visPub = n.advertise<visualization_msgs::MarkerArray>("demo_vis", 1000);
     //pub = n.advertise<geometry_msgs::Point>("vicon_demo", 1000);
     
     // Run while ros functions
     while(ros::ok())
     {
+        // Get the information of the vicon array
+        wvu_swarm_std_msgs::viconBotArray viconArray =
+                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>("/viconArray"));
+        
+        // Look for two bots named AA and BB
+        bool botAAFound = false, botBBFound = false;
+        wvu_swarm_std_msgs::viconBot botAA, botBB;
+        
+        for(wvu_swarm_std_msgs::viconBot iteratorBot : viconArray.poseVect)
+        {
+            //std::uint8_t varA[2] = {(std::uint8_t)'A', (std::uint8_t)'A'};
+            //std::uint8_t varB[2] = {(std::uint8_t)'B', (std::uint8_t)'B'};
+            boost::array<std::uint8_t, 2> varA = {(std::uint8_t)'A', (std::uint8_t)'A'};
+            boost::array<std::uint8_t, 2> varB = {(std::uint8_t)'B', (std::uint8_t)'B'};
+            
+            if(iteratorBot.botId == varA)
+            {
+                botAAFound = true;
+                botAA = iteratorBot;
+            }
+            if(iteratorBot.botId == varB)
+            {
+                botBBFound = true;
+                botBB = iteratorBot;
+            }
+        }
+        
+        // Iterate again if both not found
+        if(!botAAFound || !botBBFound) {
+            usleep(1000);
+            continue;
+        }
+        
+        // Pick out the geometry transforms from each bot relative to static frame
+        //   Bot AA is our tracker, bot BB is our target
+        geometry_msgs::TransformStamped trackerWorld = botAA.botPose;
+        geometry_msgs::TransformStamped targetWorld = botBB.botPose;
+        
         // Get the transform of the tracker relative to origin
-        geometry_msgs::TransformStamped trackerWorld =
-                *(ros::topic::waitForMessage<geometry_msgs::TransformStamped>("/vicon/tracker/tracker"));
+        //geometry_msgs::TransformStamped trackerWorld =
+        //        *(ros::topic::waitForMessage<geometry_msgs::TransformStamped>("/vicon/tracker/tracker"));
         
         // Get the transform of the target relative to origin
-        geometry_msgs::TransformStamped targetWorld = 
-                *(ros::topic::waitForMessage<geometry_msgs::TransformStamped>("/vicon/target/target"));
+        //geometry_msgs::TransformStamped targetWorld = 
+        //        *(ros::topic::waitForMessage<geometry_msgs::TransformStamped>("/vicon/target/target"));
         
         // Find transform from tracker to target
         geometry_msgs::TransformStamped trackerTarget;
-        trackerTarget = tfBuffer.lookupTransform("vicon/tracker/tracker",
+        trackerTarget = tfBuffer.lookupTransform("vicon/swarmbot_AA/swarmbot_AA",
                 "world", ros::Time(0));
         
         // Declare vectors for the target on the global frame and tracker frame
@@ -72,7 +110,7 @@ int main(int argc, char **argv)
         tf2::doTransform<geometry_msgs::Point>(targetPtWorld, targetPtTracker, trackerTarget);
         
         // Set z to zero because we're taking a trip to Flatland
-        targetPtWorld.z = 0;
+        targetPtTracker.z = 0;
         
         // Publish the point of target relative to tracker
         //pub.publish(targetPtTracker);
@@ -91,7 +129,7 @@ int main(int argc, char **argv)
         if(degrees < 0) degrees += 360;
         
         // Put into data structure
-        wvu_swarm_std_msgs::rthetatest output;
+        wvu_swarm_std_msgs::rtheta output;
         output.radius = radius;
         output.degrees = degrees;
         

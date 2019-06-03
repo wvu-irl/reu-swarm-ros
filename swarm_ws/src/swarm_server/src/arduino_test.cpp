@@ -4,14 +4,14 @@
 #include <ros/ros.h>
 #include <ros/master.h>
 #include <vicon_demo/rtheta.h>
-#include <wvu_swarm_std_msgs/rthetatest.h>
+#include <wvu_swarm_std_msgs/rtheta.h>
 
 void commandCallback(command cmd)
 {
     printf("Robot[%d] head %s\n", 0, "asdg");
 }
 
-void messageCallback(const wvu_swarm_std_msgs::rthetatest &msg) {}
+void messageCallback(const wvu_swarm_std_msgs::rtheta &msg) {}
 
 void info(const char *patt, void *dat)
 {
@@ -38,8 +38,8 @@ void *sendThread(void *arg0)
 
     while (true)
     {
-        wvu_swarm_std_msgs::rthetatest vector =
-                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::rthetatest>("/vicon_demo"));
+        wvu_swarm_std_msgs::rtheta vector =
+                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::rtheta>("/vicon_demo"));
         
         //command output = {"0,0.5,135.4"};
         command output;
