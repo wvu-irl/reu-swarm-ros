@@ -14,6 +14,7 @@
  */
 
 // Includes
+#include "robot_id.h"
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -47,7 +48,7 @@ typedef struct
 /**
  *  Class contains all the data necessesary to talk with one robot
  *  as well as act as a filter with the rid to reduce bandwidth usage
- *  
+ *
  */
 class ConnectionInfo
 {
@@ -66,15 +67,18 @@ public:
 
 /**
  * Send command to robots sends commands to robots
- * 
- * cmd is the content of the comannd 
- * 
+ *
+ * cmd is the content of the comannd
+ *
  * recip_rid is the recipiant's RID
  *  special cases:
  *  a connection with registered id of -2 will recieve all sent commands
  *  a recip_rid of -1 will send a command to all robots
  */
 void sendCommandToRobots(command cmd, int recip_rid);
+
+// overloaded for backwards compatability
+void sendCommandToRobots(command cmd);
 
 // function responsible for recieving information from a client
 void runClient(std::function<void(command)> command_callback,

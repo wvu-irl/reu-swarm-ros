@@ -6,7 +6,7 @@
 #include "arduino_server.h"
 
 // struct not really useful to anything outside this file
-// this struct is used to pass information between the main accept loop 
+// this struct is used to pass information between the main accept loop
 // and the client processing thread
 struct client_param
 {
@@ -60,6 +60,11 @@ void sendCommandToRobots(command cmd, int recip_rid)
   }
 }
 
+void sendCommandToRobots(command cmd)
+{
+  sendCommandToRobots(cmd, -1);
+}
+
 void *runClient(void *args)
 {
 #if DEBUG_CPP
@@ -104,7 +109,7 @@ void *runClient(void *args)
 
         sockets->at(id).setRID(rid); // setting the RID of the related object
 
-        info_callback("Registered %s", num);
+        info_callback("Registered %s", (void *) (rid_indexing[rid].c_str()));
       }
       else
         command_callback(*buffer); // sending message to callback

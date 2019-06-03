@@ -10,31 +10,43 @@
 #include <sstream>
 #include <string>
 #include <functional>
+#include <signal.h>
+
+#define DEBUG 0
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
 
+volatile sig_atomic_t g_flag = 0;
+void flagger(int sig)
+{
+	g_flag = 1;
+}
+
 /**
  *  Callback for getting data from the arduino clients
- *  
+ *
  *  All recieved data will get published as soon as it comes
  */
 void commandCallback(command cmd)
 {
   ROS_INFO("Command: %s", cmd.str); // displaying recieved data
   server_setup::sensor_data inf; // conversion container
-  inf.data = cmd.str; // copying data to message
-  g_from_ard.publush(inf) // publishing
+  for (size_t i = 0;i < 32;i++)
+  {
+	  inf.data[i] = cmd.str[i];
+  }
+  g_from_ard.publish(inf); // publishing
 }
 
 /**
- *  Info callback 
- * 
+ *  Info callback
+ *
  *  Displays server information
  */
 void info(const char *patt, void *dat)
 {
   std::ostringstream os;
-  os << "SERVER INFO: " << patt << "\n";
+  os << "SERVER INFO: " << patt;
   std::string full_pattern = os.str();
   const char *ch_pathh = full_pattern.c_str();
   ROS_INFO(ch_pathh, dat);
@@ -45,10 +57,19 @@ void info(const char *patt, void *dat)
  */
 void sendToRobotCallback(server_setup::robotcommand msg)
 {
+#if DEBUG
+  ROS_INFO("Sending command to robots");
+#endif
   command cmd = {{'\0'}}; // creating command
   sprintf(cmd.str, "%f,%f", msg.r, msg.theta);
+#if DEBUG
+  ROS_INFO("Created vector string \"%s\"", cmd.str);
+#endif
   char id[3] = {'\0'};
   strcpy(id, msg.rid.c_str()); // cpoying into message
+#if DEBUG
+  ROS_INFO("Got ID: %s", id);
+#endif
   sendCommandToRobots(cmd, rid_map.at(id)); // sending to robots through TCP server
 }
 
@@ -62,23 +83,40 @@ void errorCallBack(const char *msg)
 
 /**
  *  Runs a loop separate from the server
- * 
+ *
  *  This is nessessary because the server contains a closed loop
  */
 void *controlThread(void *arg0)
 {
+  signal(SIGINT, flagger);
   ros::NodeHandle *n = (ros::NodeHandle *)arg0; // passed node handle
   ros::Subscriber to_ard = n->subscribe("execute", 1000, sendToRobotCallback); // subscribing to movment datastream
   g_from_ard = n->advertise<server_setup::sensor_data>("from_arduino", 1000); // advertising arduino data
 
-  ros::spin(); // allowing subscriber callbacks to happen
+  while (true)
+  {
+	  if (g_flag || !ros::ok())
+	  {
+		  exit(0);
+	  }
+
+	  ros::spinOnce();
+  }
 
   pthread_exit(0); // exiting thread
+}
+
+bool keepAlive()
+{
+	return ros::ok() || !g_flag;
 }
 
 // main
 int main(int argc, char **argv)
 {
+
+
+
   ros::init(argc, argv, "arduino_server");
   ros::NodeHandle n;
 
@@ -92,8 +130,9 @@ int main(int argc, char **argv)
   pthread_create(&tid, &attr, controlThread, &n);
 
   // starting server
-  beginServer(commandCallback, info, errorCallBack, ros::ok);
+  beginServer(commandCallback, info, errorCallBack, keepAlive);
 
   // waiting for thread to die
   pthread_join(tid, NULL);
+  return 0;
 }
