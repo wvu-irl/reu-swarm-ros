@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="swarm_ws" name="ard_test" type="arduino_test"/>
+	<node pkg="swarm_ws" name="ard_serv" type="ros_to_arduino_server"/>
+</launch>
