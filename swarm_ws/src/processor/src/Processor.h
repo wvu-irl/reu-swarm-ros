@@ -39,6 +39,19 @@ typedef struct Bot
     float distance;
 } Bot;
 
+//----------------new stuff add for Obstacle finding ----------------
+typedef struct Obstacle
+{ //has two vectors, which concurrently house a point cloud.
+    Obstacle(std::vector <float> _x, std::vector <float> _y){
+        std::vector <float> x = _x;
+        std::vector <float> y = _y; 
+    }
+    //Obstacle()
+} Obstacle;
+//-----------------------------------------------------
+
+
+
 typedef struct
 {
     int id;
@@ -90,6 +103,9 @@ class Processor {
       void printBotMail();
       void findNeighbors();
       wvu_swarm_std_msgs::aliceMailArray createAliceMsg(int i);
+    
+      float getSeperation(Bot _bot, Obstacle _obs); //finds sep b/w closest point of _obs and given _bot
+    
   //  void start();
 //    void stop();
 
