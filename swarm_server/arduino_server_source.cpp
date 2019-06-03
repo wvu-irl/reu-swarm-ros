@@ -60,6 +60,11 @@ void sendCommandToRobots(command cmd, int recip_rid)
   }
 }
 
+void sendCommandToRobots(command cmd)
+{
+  sendCommandToRobots(cmd, -1);
+}
+
 void *runClient(void *args)
 {
 #if DEBUG_CPP
