@@ -59,6 +59,7 @@ find_package(catkin REQUIRED COMPONENTS
     rtheta.msg
     viconBot.msg
     viconBotArray.msg
+    typedPoint.msg
   )
 
 ## Generate services in the 'srv' folder
