@@ -11,7 +11,7 @@ bool g_stay_alive = true;
 volatile sig_atomic_t g_flag = 0;
 void flagger(int sig)
 {
-	g_flag = 1;
+    g_flag = 1;
 }
 // ^C catch
 
@@ -38,12 +38,22 @@ bool keepalive()
 
 void *sendThread(void *arg0)
 {
-	ros::Subscriber *sub = (ros::Subscriber*)arg0;
-    
-	signal(SIGKILL, flagger);
+    ros::Subscriber *sub = (ros::Subscriber*)arg0;
+
+    signal(SIGINT, flagger);
 
     sleep(1);
-    while(sockets->size() <= 0) {usleep(10000);}
+    while(sockets->size() <= 0) 
+    {
+        if (g_flag) // exit case
+        {
+            ROS_INFO("Exiting");
+            g_stay_alive = false;
+            usleep(1000000);
+            exit(0);
+        }
+        usleep(10000);
+    }
     
     puts("Sending messages");
 
@@ -58,6 +68,8 @@ void *sendThread(void *arg0)
         
         sendCommandToRobots(output);
 
+        usleep(10000);
+        
         if (g_flag) // exit case
         {
             ROS_INFO("Exiting");
@@ -65,9 +77,6 @@ void *sendThread(void *arg0)
             usleep(1000000);
             exit(0);
         }
-
-
-        usleep(10000);
     }
 }
 
