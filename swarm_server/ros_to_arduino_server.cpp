@@ -11,24 +11,29 @@
 #include <string>
 #include <functional>
 
+#define DEBUG 1
+
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
 
 /**
  *  Callback for getting data from the arduino clients
- *  
+ *
  *  All recieved data will get published as soon as it comes
  */
 void commandCallback(command cmd)
 {
   ROS_INFO("Command: %s", cmd.str); // displaying recieved data
   server_setup::sensor_data inf; // conversion container
-  inf.data = cmd.str; // copying data to message
-  g_from_ard.publush(inf) // publishing
+  for (size_t i = 0;i < 32;i++)
+  {
+	  inf.data[i] = cmd.str[i];
+  }
+  g_from_ard.publish(inf); // publishing
 }
 
 /**
- *  Info callback 
- * 
+ *  Info callback
+ *
  *  Displays server information
  */
 void info(const char *patt, void *dat)
@@ -45,10 +50,19 @@ void info(const char *patt, void *dat)
  */
 void sendToRobotCallback(server_setup::robotcommand msg)
 {
+#if DEBUG
+  ROS_INFO("Sending command to robots");
+#endif
   command cmd = {{'\0'}}; // creating command
   sprintf(cmd.str, "%f,%f", msg.r, msg.theta);
+#if DEBUG
+  ROS_INFO("Created vector string \"%s\"", cmd.str);
+#endif
   char id[3] = {'\0'};
   strcpy(id, msg.rid.c_str()); // cpoying into message
+#if DEBUG
+  ROS_INFO("Got ID: %s", id);
+#endif
   sendCommandToRobots(cmd, rid_map.at(id)); // sending to robots through TCP server
 }
 
@@ -62,7 +76,7 @@ void errorCallBack(const char *msg)
 
 /**
  *  Runs a loop separate from the server
- * 
+ *
  *  This is nessessary because the server contains a closed loop
  */
 void *controlThread(void *arg0)
