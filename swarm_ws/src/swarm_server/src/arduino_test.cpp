@@ -4,14 +4,23 @@
 #include <ros/ros.h>
 #include <ros/master.h>
 #include <vicon_demo/rtheta.h>
-#include <wvu_swarm_std_msgs/rtheta.h>
+#include <wvu_swarm_std_msgs/rthetatest.h>
+ // ^C catch
+#include <signal.h>
+bool g_stay_alive = true;
+volatile sig_automatic_t g_flag = 0;
+void flagger(int sig)
+{
+	g_flag = 1;
+}
+// ^C catch
 
 void commandCallback(command cmd)
 {
     printf("Robot[%d] head %s\n", 0, "asdg");
 }
 
-void messageCallback(const wvu_swarm_std_msgs::rtheta &msg) {}
+void messageCallback(const wvu_swarm_std_msgs::rthetatest &msg) {}
 
 void info(const char *patt, void *dat)
 {
@@ -24,13 +33,15 @@ void info(const char *patt, void *dat)
 
 bool keepalive()
 {
-    return true;
+    return g_stay_alive;
 }
 
 void *sendThread(void *arg0)
 {
-    ros::Subscriber *sub = (ros::Subscriber*)arg0;
+	ros::Subscriber *sub = (ros::Subscriber*)arg0;
     
+	signal(SIGKILL, flagger);
+
     sleep(1);
     while(sockets->size() <= 0) {usleep(10000);}
     
@@ -38,14 +49,24 @@ void *sendThread(void *arg0)
 
     while (true)
     {
-        wvu_swarm_std_msgs::rtheta vector =
-                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::rtheta>("/vicon_demo"));
+        wvu_swarm_std_msgs::rthetatest vector =
+                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::rthetatest>("/vicon_demo"));
         
         //command output = {"0,0.5,135.4"};
         command output;
         sprintf(output.str, "%d,%f,%f", 0, vector.radius, vector.degrees);
         
         sendCommandToRobots(output);
+
+        if (g_flag) // exit case
+        {
+        	ROS_INFO("Exiting");
+        	g_keep_alive = false;
+        	usleep(1000000);
+        	pthread_exit(0);
+        }
+
+
         usleep(10000);
     }
 }
