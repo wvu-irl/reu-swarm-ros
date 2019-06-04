@@ -14,8 +14,8 @@
 #include <string.h>
 #include <sys/wait.h>
 
-#define PORT 54321
-#define IP "192.168.10.187"
+#define PORT 4321
+#define IP "127.0.0.1"
 
 int main()
 {
@@ -40,18 +40,16 @@ int main()
     exit(1);
   }
 
-  char reg[32] = {'\0'};
-  sprintf(reg, "register %d", -2);
+  char reg[32] = "register YY";
   int bytes = write(socket_descriptor, (&reg), sizeof(reg));
   if (bytes < 0)
   {
     puts("Failed registration");
-    return;
+    return 1;
   }
 
   while (true)
   {
-    // TODO Recieve
     int message_size = 0;
     char str[32];
 
@@ -60,16 +58,15 @@ int main()
     //reading the message
     while ((message_size = read(socket_descriptor, str, sizeof(str))) > 0)
     {
-    
       printf("CLIENT GOT: %s\n", str);
     }
 
     // Display if there was an error
     if (message_size == -1)
     {
-      
       puts("Error receiving message.");
-      exit(1);
+      return 1;
     }
   }
+  return 0;
 }
