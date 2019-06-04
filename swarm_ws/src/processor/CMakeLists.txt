@@ -13,12 +13,14 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg message_gen
 generate_messages(DEPENDENCIES std_msgs)
 
 ## Declare a catkin package
-catkin_package()
+catkin_package(
+)
 
 ## Build talker and listener
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_library(Processor src/Processor.cpp)
 add_executable(ProRun src/ProRun.cpp)
+target_link_libraries(Processor ${catkin_LIBRARIES})
 target_link_libraries(ProRun ${catkin_LIBRARIES})
   add_dependencies(ProRun ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

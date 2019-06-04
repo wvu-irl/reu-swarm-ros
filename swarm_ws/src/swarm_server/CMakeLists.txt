@@ -95,22 +95,6 @@ find_package(catkin REQUIRED COMPONENTS
 #   cfg/DynReconf2.cfg
 # )
 
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if your package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES swarm_server
-#  CATKIN_DEPENDS roscpp rospy std_msgs vicon_demo
-#  DEPENDS system_lib
-)
-
 ###########
 ## Build ##
 ###########
@@ -118,7 +102,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -136,6 +120,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 ## add_executable(${PROJECT_NAME}_node src/swarm_server_node.cpp)
+add_library(robot_id src/robot_id.cpp)
+target_link_libraries(robot_id ${catkin_LIBRARIES})
 
 add_library(arduino_server src/arduino_server_source.cpp)
   add_executable(arduino_test src/arduino_test.cpp)
@@ -165,6 +151,22 @@ add_library(arduino_server src/arduino_server_source.cpp)
 #   ${catkin_LIBRARIES}
 # )
 
+###################################
+## catkin specific configuration ##
+###################################
+## The catkin_package macro generates cmake config files for your package
+## Declare things to be passed to dependent projects
+## INCLUDE_DIRS: uncomment this if your package contains header files
+## LIBRARIES: libraries you create in this project that dependent projects also need
+## CATKIN_DEPENDS: catkin_packages dependent projects also need
+## DEPENDS: system dependencies of this project that dependent projects also need
+catkin_package(
+  INCLUDE_DIRS include
+#  LIBRARIES swarm_server
+#  CATKIN_DEPENDS roscpp rospy std_msgs vicon_demo
+#  DEPENDS system_lib
+)
+
 #############
 ## Install ##
 #############
@@ -185,6 +187,11 @@ add_library(arduino_server src/arduino_server_source.cpp)
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
+
+install(DIRECTORY include/${PROJECT_NAME}/
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+    PATTERN ".srv" EXCLUDE)
 
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
