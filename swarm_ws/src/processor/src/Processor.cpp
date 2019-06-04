@@ -24,7 +24,6 @@ std::pair<float,float> Processor::getSeparation(Bot _bot, std::pair<float,float>
 
   if (loc_r<=_tolerance)
   {
-    std::pair<float,float> polar_pt;
     theta = tan(dx/dy)*(M_PI/180);
     std::pair<float,float> polar_point (loc_r, theta);
     return polar_point;
