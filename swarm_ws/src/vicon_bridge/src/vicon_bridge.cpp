@@ -261,7 +261,7 @@ public:
                                                          this);
 
     // Publisher for swarmbots
-    swarm_pub_ = nh.advertise<wvu_swarm_std_msgs::viconBotArray>("/viconArray", 10);
+    swarm_pub_ = nh.advertise<wvu_swarm_std_msgs::viconBotArray>("/vicon_array", 10);
     
     // Publisher for individual points
     if(publish_markers_)
