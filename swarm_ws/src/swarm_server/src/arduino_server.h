@@ -30,11 +30,11 @@
 #include <time.h>
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <string.h>
 #include <sys/wait.h>
 
 #include <functional>
 #include <vector>
+#include <string>
 
 #define SERVER_PORT 4321 // port number
 

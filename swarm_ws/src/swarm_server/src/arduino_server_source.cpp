@@ -108,7 +108,7 @@ void *runClient(void *args)
 				char num[2];
 
 				sscanf(buffer->str, "register %s", num); // obtaining the ID
-				int rid = (int) strtol(num, NULL, 10);
+				int rid = rid_map.at(std::string(num));
 
 				sockets->at(id).setRID(rid); // setting the RID of the related object
 
