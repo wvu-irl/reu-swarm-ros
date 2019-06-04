@@ -10,37 +10,29 @@
 #include <math.h>
 
 
-float Processor::getSeparation(Bot _bot, Obstacle _obs)//helper function for finding obstacles
-{
-  //obs positions are vector<float[2]> types.
-  int i = 0;
-  int size = _obs.x.size(); //number of points in cloud (x and y are same size)
-  float r_min;
-  float loc_r;
+std::pair<float,float> Processor::getSeparation(Bot _bot, std::pair<float,float> _obs, float _tolerance)//helper function for finding obstacle points
+{// takes current
+  float loc_r; //|distance| b/w bot and current obstacle point.
+  float theta; //in radians
+  float dx; //x separation.
+  float dy; //y separation.
 
-  float dx;
-  float dy;
+  dx = _obs.first - _bot.x;
+  dy = _obs.second - _bot.y;
 
-  while (i < size) //runs for each point in an obstacles point cloud
+  loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
+
+  if (loc_r<=_tolerance)
   {
-    dx = _obs.x.at(i) - _bot.x; //x separation.
-    dy = _obs.y.at(i) - _bot.y; //y separation.
-
-    loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
-
-    if (i == 0)
-    {
-      r_min = loc_r;
-    } else
-    {
-      if (loc_r < r_min)
-      {
-        r_min = loc_r;
-      }
-    }
-    i++;
+    std::pair<float,float> polar_pt;
+    theta = tan(dx/dy)*(M_PI/180);
+    std::pair<float,float> polar_point (loc_r, theta);
+    return polar_point;
   }
-  return r_min;
+  else
+  {
+    return *((std::pair<float, float> *) NULL);
+  }
 }
 
 Processor::Processor(int a) //Default constructor, dummy parameter is there for compile reasons?
@@ -100,6 +92,20 @@ void Processor::printBotMail() //Prints the id's in botMail[] to the console
   }
 }
 
+void Processor::printAliceMail(wvu_swarm_std_msgs::aliceMailArray _msg)
+{
+  using namespace std;
+
+    std::cout << "[";
+    for (int j = 0; j < NEIGHBOR_COUNT; j++)
+    {
+      cout << " ";
+      cout << _msg.aliceMail[j].theta;
+      cout << " ";
+    }
+    cout << "]\n";
+
+}
 
 /*
      Exactly what it sounds like
@@ -110,31 +116,28 @@ void Processor::findNeighbors()
 {
   int botIndex = 0;
   int j; //iterator for obs finding loop
-  int num_obs = sizeof(obs);
+  int num_pts = static_cast<int>(obs.size());
 
-  float dist_to_obs; //dist b/w closest point of obs and robot (calculated in inner loop).
+  std::pair<float,float> new_pair; //holds the return pair
   float tolerance = 12; //this value is supposed to be our actual tolerance (just made it 12).
-  Obstacle neighbor_obs[50][num_obs]; //holds obs near a robot for each robot.
+  //holds obs near a robot for each robot.
   //probably not our long term solution for storing the data.
 
   for (auto &bot : bots)
   {
     j = 0;
-    while (j < num_obs) //runs for each obstacle in obs
+    while (j < num_pts) //runs for each point in the obs
     {
-      Obstacle iter_obs = obs[j]; //current obs to test
-      if (&iter_obs != NULL)
+      std::pair<float,float> iter_obs = obs.at(j); //current obs to test
+      new_pair = getSeparation(bot, iter_obs, tolerance);
+      if (&new_pair != NULL)
       {
-        dist_to_obs = getSeparation(bot, iter_obs);//returns actual separation distance.
-        if (dist_to_obs <= tolerance)
-        {
-          neighbor_obs[botIndex][j] = iter_obs; //neighbor_obs is currently not initialized.
-        }
+        polar_obs[j].push_back(new_pair);
       }
       j++;
     }
 
-    int n = sizeof(botMail[botIndex]) / sizeof(botMail[botIndex][0]); // for sorting later
+    //int n = sizeof(botMail[botIndex]) / sizeof(botMail[botIndex][0]); // for sorting later
     int curIndex = 0; // Because we're looping over the array, we have to track the index ourselves
     for (auto &cur : bots)
     {
@@ -142,10 +145,9 @@ void Processor::findNeighbors()
       {
         continue;
       }
-      cur.distance = pow((cur.x - bot.x), 2) + pow((cur.y - bot.y), 2);
+      cur.distance = sqrt(pow((cur.x - bot.x), 2) + pow((cur.y - bot.y), 2));
       bool smallest = true;
-      std::sort(botMail[botIndex], botMail[botIndex] + n,
-                compareTwoBots); // Sorts greatest first
+
       for (int i = 0; i < NEIGHBOR_COUNT; i++)
       {
         if (cur.distance > botMail[botIndex][i].distance)
@@ -158,6 +160,8 @@ void Processor::findNeighbors()
           { // This means cur is neither the furthest nor nearest
             botMail[botIndex][0] = cur;
             smallest = false;
+            std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT,
+                      compareTwoBots); // Sorts greatest first
             break;
           }
         }
@@ -165,25 +169,30 @@ void Processor::findNeighbors()
       if (smallest)
       { // If cur is closer than everything, it's the closest
         botMail[botIndex][0] = cur;
+        std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT,
+                  compareTwoBots); // Sorts greatest first
       }
       curIndex++;
     }
+
     botIndex++;
   }
 }
 
 wvu_swarm_std_msgs::aliceMailArray Processor::createAliceMsg(int i) //Turns information to be sent to Alice into a msg
 {
-
   wvu_swarm_std_msgs::aliceMailArray _aliceMailArray;
   for (int j = 0; j < NEIGHBOR_COUNT; j++) //Transfers fields of the struct to fields of the msg
   {
-    _aliceMailArray.aliceMail[j].botId[0] = (uint8_t) botMail[i][j].id[0];
-    _aliceMailArray.aliceMail[j].botId[1] = (uint8_t) botMail[i][j].id[1];
-    _aliceMailArray.aliceMail[j].x = botMail[i][j].x;
-    _aliceMailArray.aliceMail[j].y = botMail[i][j].y;
+
+    if (botMail[i][j].y-bots[i].y > 0) {
+      _aliceMailArray.aliceMail[j].theta = fmod(atan((botMail[i][j].y-bots[i].y)/(botMail[i][j].x-bots[i].x))-M_PI_2-bots[i].heading,2*M_PI);
+    }
+    else {
+      _aliceMailArray.aliceMail[j].theta = fmod(atan((botMail[i][j].y-bots[i].y)/(botMail[i][j].x-bots[i].x))+M_PI_2-bots[i].heading,2*M_PI);
+    }
     _aliceMailArray.aliceMail[j].distance = botMail[i][j].distance;
-    _aliceMailArray.aliceMail[j].heading = botMail[i][j].heading;
+    _aliceMailArray.aliceMail[j].heading = fmod(botMail[i][j].heading-bots[i].heading,2*M_PI);
   }
   return _aliceMailArray;
 
