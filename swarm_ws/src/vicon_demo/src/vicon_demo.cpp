@@ -117,7 +117,6 @@ int main(int argc, char **argv)
         
         // Convert point to rtheta form
         float radius = sqrt(pow(targetPtTracker.x, 2) + pow(targetPtTracker.y, 2));
-        radius *= 50; //convert to cm
         
         float degrees = 0;
         

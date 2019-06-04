@@ -31,19 +31,33 @@ void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, co
 int main(int argc, char **argv)
 {
     // Initialize a node
-    ros::init(argc, argv, "vicon_demo");
+    ros::init(argc, argv, "tracker");
     
     // Generates nodehandle, publisher, subscribers
     ros::NodeHandle n;
+    ros::NodeHandle n_priv("~"); // private handle
     ros::Publisher pub;
     ros::Subscriber sub;
+    
+    // Import parameters from launchfile
+    //  Where to get the array of bots, what topic to advertise, where to get transform of target
+    std::string viconArrayTopic, advertiseTopic, transfromTopic;
+    //  Value of 'a' in formula in cm, value to iterate degrees, distance to "find" points at
+    int lemniscateConstant, lemniscateInterval, cutoffRadius;
+    
+    if(!n_priv.param<std::string>("vicon_array_topic", viconArrayTopic, "/viconArray")) ROS_ERROR("Can't load array param");
+    if(!n_priv.param<std::string>("advertise_topic", advertiseTopic, "tracker_demo")) ROS_ERROR("Can't load advertise param");
+    if(!n_priv.param<std::string>("transform_topic", transfromTopic, "vicon/swarmbot_AA/swarmbot_AA")) ROS_ERROR("Can't load transform param");
+    if(!n_priv.param<int>("lemniscate_constant", lemniscateConstant, 50)) ROS_ERROR("Can't load 'a' param");
+    if(!n_priv.param<int>("lemniscate_interval", lemniscateInterval, 10)) ROS_ERROR("Can't load interval param");
+    if(!n_priv.param<int>("cutoff_radius", cutoffRadius, 10)) ROS_ERROR("Can't load cutoff param");
     
     // Sets loop rate at 100Hz
     ros::Rate rate(100);
     
     // Subscribe to tracker's vicon topic, publish result vector
-    sub = n.subscribe("/viconArray", 10, &msgCallback);
-    pub = n.advertise<wvu_swarm_std_msgs::rtheta>("tracker_demo", 1000);
+    sub = n.subscribe(viconArrayTopic, 10, &msgCallback);
+    pub = n.advertise<wvu_swarm_std_msgs::rtheta>(advertiseTopic, 1000);
     
     // Set up transform listener
     tf2_ros::Buffer tfBuffer;
@@ -51,7 +65,7 @@ int main(int argc, char **argv)
     
     // Generate a Gerono Lemniscate (figure 8) as discrete points
     std::vector<geometry_msgs::Point> path;
-    genGeronoLemn(path, 1, 10); // a = 1, increment 10 degrees per point
+    genGeronoLemn(path, lemniscateConstant, lemniscateInterval);
     
     // Pick one point out of the path
     geometry_msgs::Point currentPoint = path.at(0);
@@ -63,7 +77,7 @@ int main(int argc, char **argv)
     {
         // Get the information of the vicon array
         wvu_swarm_std_msgs::viconBotArray viconArray =
-                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>("/viconArray"));
+                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>(viconArrayTopic));
         
         // Look for bot named AA
         bool botAAFound = false;
@@ -93,11 +107,11 @@ int main(int argc, char **argv)
         trackerPt.z = 0;
         //ROS_INFO("   Tracker found at %f, %f\n", trackerPt.x, trackerPt.y);
         
-        // Find distance between bot and its target, convert to cm
-        double distance = getDist(trackerPt, currentPoint) * 50;
+        // Find distance between bot and its target
+        double distance = getDist(trackerPt, currentPoint);
         
-        // If less than 5cm, move point
-        if(distance < 5) {
+        // If less than radius, move point
+        if(distance < cutoffRadius) {
             // Rotate through vector if needed
             if(currentIndex + 1 >= path.size())
                 currentIndex = 0;
@@ -107,14 +121,14 @@ int main(int argc, char **argv)
             currentPoint = path.at(currentIndex);
             
             // Recalculate distance
-            distance = getDist(trackerPt, currentPoint) * 50;
+            distance = getDist(trackerPt, currentPoint);
         
             ROS_INFO("Point moved to %f, %f\n", currentPoint.x, currentPoint.y);
         }
         
         // Find transform from tracker to target point
         geometry_msgs::TransformStamped trackerTarget;
-        trackerTarget = tfBuffer.lookupTransform("vicon/swarmbot_AA/swarmbot_AA",
+        trackerTarget = tfBuffer.lookupTransform(transfromTopic,
                 "world", ros::Time(0));
         
         // Transform the point
@@ -158,7 +172,7 @@ void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, co
         // Create a point
         geometry_msgs::Point temp;
         
-        double rads = t * 180 / 3.14156265;
+        double rads = t * 3.14156265 / 180;
         
         // Do math to find its location
         //   This lemniscate is rotated 90 deg
