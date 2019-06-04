@@ -20,6 +20,7 @@ std::pair<float,float> Processor::getSeparation(Bot _bot, std::pair<float,float>
   dx = _obs.first - _bot.x;
   dy = _obs.second - _bot.y;
 
+
   loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
 
   if (loc_r<=_tolerance)
@@ -117,7 +118,11 @@ void Processor::findNeighbors()
   int botIndex = 0;
   int j; //iterator for obs finding loop
   int num_pts = static_cast<int>(obs.size());
+<<<<<<< Upstream, based on master
 
+=======
+  
+>>>>>>> da4f3dc updated obstacles searching. 
   std::pair<float,float> new_pair; //holds the return pair
   float tolerance = 12; //this value is supposed to be our actual tolerance (just made it 12).
   //holds obs near a robot for each robot.
