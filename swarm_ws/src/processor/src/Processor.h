@@ -86,7 +86,7 @@ std::map<char *, int> rid_map = inst(); //a map of the states to integers
 
 static const int BOT_COUNT = 10; // Number of bots in the system
 static const int NEIGHBOR_COUNT = 4; // Number of neighbors desired
-
+//static const float PI = 3.141592;
 //Acts as a parser for the data coming out of the VICON or the simulation, turning the bundle of data into 50 packets
 // of individualized information for each swarm bot, allowing them to enact their agent level rules.
 class Processor
@@ -112,6 +112,8 @@ public:
   void processVicon(wvu_swarm_std_msgs::viconBotArray data); //Fills in bots[]
 
   void printBotMail(); //Prints botMail[] to the console
+
+  void printAliceMail(wvu_swarm_std_msgs::aliceMailArray msg);
 
   void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
 

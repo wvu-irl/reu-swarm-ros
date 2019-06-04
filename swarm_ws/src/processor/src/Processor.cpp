@@ -100,6 +100,20 @@ void Processor::printBotMail() //Prints the id's in botMail[] to the console
   }
 }
 
+void Processor::printAliceMail(wvu_swarm_std_msgs::aliceMailArray _msg)
+{
+  using namespace std;
+
+    std::cout << "[";
+    for (int j = 0; j < NEIGHBOR_COUNT; j++)
+    {
+      cout << " ";
+      cout << _msg.aliceMail[j].theta;
+      cout << " ";
+    }
+    cout << "]\n";
+
+}
 
 /*
      Exactly what it sounds like
@@ -110,7 +124,7 @@ void Processor::findNeighbors()
 {
   int botIndex = 0;
   int j; //iterator for obs finding loop
-  int num_obs = sizeof(obs);
+  int num_obs = obs.size();
 
   float dist_to_obs; //dist b/w closest point of obs and robot (calculated in inner loop).
   float tolerance = 12; //this value is supposed to be our actual tolerance (just made it 12).
@@ -134,7 +148,7 @@ void Processor::findNeighbors()
       j++;
     }
 
-    int n = sizeof(botMail[botIndex]) / sizeof(botMail[botIndex][0]); // for sorting later
+    //int n = sizeof(botMail[botIndex]) / sizeof(botMail[botIndex][0]); // for sorting later
     int curIndex = 0; // Because we're looping over the array, we have to track the index ourselves
     for (auto &cur : bots)
     {
@@ -142,10 +156,9 @@ void Processor::findNeighbors()
       {
         continue;
       }
-      cur.distance = pow((cur.x - bot.x), 2) + pow((cur.y - bot.y), 2);
+      cur.distance = sqrt(pow((cur.x - bot.x), 2) + pow((cur.y - bot.y), 2));
       bool smallest = true;
-      std::sort(botMail[botIndex], botMail[botIndex] + n,
-                compareTwoBots); // Sorts greatest first
+
       for (int i = 0; i < NEIGHBOR_COUNT; i++)
       {
         if (cur.distance > botMail[botIndex][i].distance)
@@ -158,6 +171,8 @@ void Processor::findNeighbors()
           { // This means cur is neither the furthest nor nearest
             botMail[botIndex][0] = cur;
             smallest = false;
+            std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT,
+                      compareTwoBots); // Sorts greatest first
             break;
           }
         }
@@ -165,25 +180,30 @@ void Processor::findNeighbors()
       if (smallest)
       { // If cur is closer than everything, it's the closest
         botMail[botIndex][0] = cur;
+        std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT,
+                  compareTwoBots); // Sorts greatest first
       }
       curIndex++;
     }
+
     botIndex++;
   }
 }
 
 wvu_swarm_std_msgs::aliceMailArray Processor::createAliceMsg(int i) //Turns information to be sent to Alice into a msg
 {
-
   wvu_swarm_std_msgs::aliceMailArray _aliceMailArray;
   for (int j = 0; j < NEIGHBOR_COUNT; j++) //Transfers fields of the struct to fields of the msg
   {
-    _aliceMailArray.aliceMail[j].botId[0] = (uint8_t) botMail[i][j].id[0];
-    _aliceMailArray.aliceMail[j].botId[1] = (uint8_t) botMail[i][j].id[1];
-    _aliceMailArray.aliceMail[j].x = botMail[i][j].x;
-    _aliceMailArray.aliceMail[j].y = botMail[i][j].y;
+
+    if (botMail[i][j].y-bots[i].y > 0) {
+      _aliceMailArray.aliceMail[j].theta = fmod(atan((botMail[i][j].y-bots[i].y)/(botMail[i][j].x-bots[i].x))-M_PI_2-bots[i].heading,2*M_PI);
+    }
+    else {
+      _aliceMailArray.aliceMail[j].theta = fmod(atan((botMail[i][j].y-bots[i].y)/(botMail[i][j].x-bots[i].x))+M_PI_2-bots[i].heading,2*M_PI);
+    }
     _aliceMailArray.aliceMail[j].distance = botMail[i][j].distance;
-    _aliceMailArray.aliceMail[j].heading = botMail[i][j].heading;
+    _aliceMailArray.aliceMail[j].heading = fmod(botMail[i][j].heading-bots[i].heading,2*M_PI);
   }
   return _aliceMailArray;
 
