@@ -117,15 +117,7 @@ void Processor::findNeighbors()
   int botIndex = 0;
   int j; //iterator for obs finding loop
   int num_pts = static_cast<int>(obs.size());
-<<<<<<< HEAD
-<<<<<<< Upstream, based on master
 
-=======
-  
->>>>>>> da4f3dc updated obstacles searching. 
-=======
-  
->>>>>>> refs/remotes/origin/Processor-test
   std::pair<float,float> new_pair; //holds the return pair
   float tolerance = 12; //this value is supposed to be our actual tolerance (just made it 12).
   //holds obs near a robot for each robot.

@@ -47,24 +47,11 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
     wvu_swarm_std_msgs::viconBotArray tempBotArray = *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>
-            ("vicon_array"));
+           ("vicon_array"));
 
-    bigbrain.processVicon(tempBotArray);
-    bigbrain.findNeighbors();
-    // Bot a(0, 0, "ab");
-    //  Bot b(1, 1, "bc");
-    //  Bot c(2, 2, "cd");
-    //  Bot d(3, 3, "de");
-    //  Bot e(4, 4, "ef");
-    //  Bot f(5, 5, "fg");
-    //  Bot g(6, 6, "gh");
-    //  Bot h(7, 7, "hi");
-    //  Bot i(8, 8, "ij");
-    //  Bot j(9, 9, "jk");
-    //  Bot inputList [10] = {a, b, c, d, e, f, g, h, i, j};
-    //  Processor test_pros = Processor(inputList);
-    //  test_pros.findNeighbors();
-     std::cout << "x";
+   bigbrain.processVicon(tempBotArray);
+   bigbrain.findNeighbors();
+std::cout << "test" << std::endl;
     for (int i = 0; i < BOT_COUNT; i++) //Publishes msgs to Alices
     {
       pubVector.at(i).publish(bigbrain.createAliceMsg(i));
