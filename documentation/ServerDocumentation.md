@@ -169,6 +169,22 @@ structs/classes:
     - Threads only allow `void *` inputs so a struct was used
 
 ---
+
+##### `robot_id.h`
+
+This header is here to convert from a numeric id to a `uint8[2]` or `string` id
+
+feilds/globals:
+
+- `rid_indexing` 
+    - Is an array that contains all the state abbreviations in chronological order
+    - this is meant to be used as a way to go from numeric to `string` ids
+
+- `rid_map`
+    - Is a map with `string` key types and `int` values
+    - this is meant to convert from `string` ids to numeric ids
+
+---
 #### Example Code
 
 This code is to be used when the `ros_to_arduino_server` node is also running
