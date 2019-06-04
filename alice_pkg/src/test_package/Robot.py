@@ -7,6 +7,7 @@ import math
 import rospy
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import String
+from wvu_swarm_std_msgs.msg import executeVector
 
 def callback(data):
 	rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
@@ -20,7 +21,7 @@ class Robot:
 	vector_queue = VectorQueue() #create queue
 	MAILBOX = 7 #Sets the number of messeges to hold
 	ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = MAILBOX)
-	execute_pub = rospy.Publisher('execute', String, queue_size = MAILBOX)
+	execute_pub = rospy.Publisher('execute', executeVector, queue_size = MAILBOX)
 	rospy.Subscriber("ideals", Float64MultiArray, callback)
 
 	def __init__(self, name):
@@ -37,16 +38,17 @@ class Robot:
 	
 			#accept sensor input to model
 			self.vector_queue.addVector(model.generateIdeal())
-			compromise = self.vector_queue.createCompromise()
-			print (compromise)
+			compromise_vector = self.vector_queue.createCompromise()
+			print (compromise_vector)
 	
 			ideal = Float64MultiArray(data=model.generateIdeal())
 			self.ideal_pub.publish(ideal)
-			compromise = String(self.name + "," + 
-				str(compromise[1]) + "," + 
-				str(compromise[0]))
-			execute = String(data=compromise)
-			self.execute_pub.publish(execute)
+			compromise = executeVector()
+			compromise.ID = self.name
+			compromise.heading = compromise_vector[0]
+			compromise.magnitude = compromise_vector[1]
+			self.execute_pub.publish(compromise)
+			rospy.spin()
 			self.rate.sleep()
 
 			#pass compromise off
