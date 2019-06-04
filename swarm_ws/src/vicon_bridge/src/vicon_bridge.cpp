@@ -171,6 +171,7 @@ private:
   string host_name_;
   string tf_ref_frame_id_;
   string tracked_frame_suffix_;
+  string swarmbot_prefix_; // What name to look for
   // Publisher
   ros::Publisher marker_pub_;
   ros::Publisher swarm_pub_; // Publisher for all swarmbots
@@ -241,6 +242,7 @@ public:
     nh_priv.param("broadcast_transform", broadcast_tf_, true);
     nh_priv.param("publish_transform", publish_tf_, true);
     nh_priv.param("publish_markers", publish_markers_, true);
+    nh_priv.param<string>("swarmbot_prefix", swarmbot_prefix_, "swarmbot_");
     
     // Initializes vicon
     if (init_vicon() == false){
@@ -532,7 +534,7 @@ private:
       
       // Only continue if this is the right name for us
       // TODO: make this parameter editable by the launchfile
-      if(subject_name.find("swarmbot_") != string::npos)
+      if(subject_name.find(swarmbot_prefix_) != string::npos)
       {
         // Finds number of segments of this subject
         unsigned int n_segments = msvcbridge::GetSegmentCount(subject_name).SegmentCount;
@@ -544,9 +546,9 @@ private:
           
           // Get the id of this segment
           boost::array<std::uint8_t, 2> botId;
-          botId[0] = (std::uint8_t)segment_name.at(segment_name.find("_")+1); // Probably better ways to do this, sorry
-          if(segment_name.length() > segment_name.find("_")+2)
-            botId[1] = (std::uint8_t)segment_name.at(segment_name.find("_")+2);
+          botId[0] = (std::uint8_t)segment_name.at(swarmbot_prefix_.length()); // Probably better ways to do this, sorry
+          if(segment_name.length() > swarmbot_prefix_.length()+1)
+            botId[1] = (std::uint8_t)segment_name.at(swarmbot_prefix_.length()+1);
           else
             botId[1] = (std::uint8_t)' ';
 
