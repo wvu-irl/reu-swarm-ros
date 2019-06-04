@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     //  Bot inputList [10] = {a, b, c, d, e, f, g, h, i, j};
     //  Processor test_pros = Processor(inputList);
     //  test_pros.findNeighbors();
-     std::cout << "x"
+     std::cout << "x";
     for (int i = 0; i < BOT_COUNT; i++) //Publishes msgs to Alices
     {
       pubVector.at(i).publish(bigbrain.createAliceMsg(i));
