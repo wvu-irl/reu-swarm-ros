@@ -42,7 +42,7 @@
 // this is using a struct as it is only a public data storing application
 typedef struct
 {
-  char str[32];
+	char str[32];
 } command;
 
 /**
@@ -53,16 +53,16 @@ typedef struct
 class ConnectionInfo
 {
 private:
-  int connection_descriptor; // the connection connection_descriptor for the socket
-  int rid; // the id of the robot (or other client) connected
+	int connection_descriptor; // the connection connection_descriptor for the socket
+	int rid; // the id of the robot (or other client) connected
 
 public:
-  ConnectionInfo(int connection_descriptor);
+	ConnectionInfo(int connection_descriptor);
 
-  int getRID(); // returns the RID of the client
-  void setRID(int rid); // sets the RID of the client
+	int getRID(); // returns the RID of the client
+	void setRID(int rid); // sets the RID of the client
 
-  int getConnectionDescriptor(); // returns the connection descriptor of the client
+	int getConnectionDescriptor(); // returns the connection descriptor of the client
 };
 
 /**
@@ -82,9 +82,9 @@ void sendCommandToRobots(command cmd);
 
 // function responsible for recieving information from a client
 void runClient(std::function<void(command)> command_callback,
-                std::function<void(const char *, void *)> info_callback,
-                std::function<void(const char *)> error_callback,
-                std::function<bool()> exit_condition_callback, int id);
+		std::function<void(const char *, void *)> info_callback,
+		std::function<void(const char *)> error_callback,
+		std::function<bool()> exit_condition_callback, int id);
 
 /**
  * Begins accepting connections to the server and processes commands from them
@@ -96,8 +96,8 @@ void runClient(std::function<void(command)> command_callback,
  * 													exits when exit_condition_callback() == false
  */
 int beginServer(std::function<void(command)> command_callback,
-                std::function<void(const char *, void *)> info_callback,
-                std::function<void(const char *)> error_callback,
-                std::function<bool()> exit_condition_callback);
+		std::function<void(const char *, void *)> info_callback,
+		std::function<void(const char *)> error_callback,
+		std::function<bool()> exit_condition_callback);
 #include "arduino_server_source.cpp"
 #endif
