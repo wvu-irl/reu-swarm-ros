@@ -136,12 +136,19 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 ## add_executable(${PROJECT_NAME}_node src/swarm_server_node.cpp)
+
 add_library(arduino_server src/arduino_server_source.cpp)
   add_executable(arduino_test src/arduino_test.cpp)
-  target_link_libraries(arduino_test
+  target_link_libraries(arduino_test 
     ${catkin_LIBRARIES}
   )
   add_dependencies(arduino_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+  
+  add_executable(ros_to_arduino_server src/ros_to_arduino_server.cpp)
+  target_link_libraries(ros_to_arduino_server
+    ${catkin_LIBRARIES}
+  )
+  add_dependencies(ros_to_arduino_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})  
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
