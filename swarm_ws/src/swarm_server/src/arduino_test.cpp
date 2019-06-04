@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <wvu_swarm_std_msgs/robotcommand.h>
 #include <wvu_swarm_std_msgs/sensor_data.h>
+#include <wvu_swarm_std_msgs/rtheta.h>
 
 void sensorDatCallback(wvu_swarm_std_msgs::sensor_data msg)
 {
@@ -22,10 +23,13 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{
+		wvu_swarm_std_msgs::rtheta vector =
+		                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::rtheta>("/vicon_demo"));
+
 		wvu_swarm_std_msgs::robotcommand cmd;
-		cmd.rid = {'D', 'E'};
-		cmd.r = 1.0f;
-		cmd.theta = 123.4f;
+		cmd.rid = {'X', 'X'};
+		cmd.r = vector.radius;
+		cmd.theta = vector.degrees;
 
 		exe.publish(cmd);
 
