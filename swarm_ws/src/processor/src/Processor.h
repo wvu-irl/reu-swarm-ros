@@ -95,16 +95,13 @@ class Processor
 private:
   Bot bots[BOT_COUNT]; //Stores the information from the VICON
   Bot botMail[BOT_COUNT][NEIGHBOR_COUNT]; //Stores the information to be sent to Alice
+  std::vector <Obstacle> obs;
 
-  std::vector<std::pair<float,float>> obs; //vector of all obstacle points
-  std::vector<std::pair<float,float>> polar_obs [BOT_COUNT]; //Array of vectors of pairs.
-  //each bot has a vector of obs pairs it can "see". Pairs are form (r,theta).
   ros::Timer timer;
   ros::Publisher pub;
   ros::Subscriber sub;
 
-  std::pair<float,float> getSeparation(Bot _bot, std::pair<float,float> _obs, float _tolerance);
-
+  float getSeparation(Bot _bot, Obstacle _obs); //Helper, finds sep b/w closest point of _obs and given _bot
 public:
   Processor(int a); //Default constructor, dummy parameter is there for compile reasons?
 

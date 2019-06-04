@@ -10,29 +10,37 @@
 #include <math.h>
 
 
-std::pair<float,float> Processor::getSeparation(Bot _bot, std::pair<float,float> _obs, float _tolerance)//helper function for finding obstacle points
-{// takes current
-  float loc_r; //|distance| b/w bot and current obstacle point.
-  float theta; //in radians
-  float dx; //x separation.
-  float dy; //y separation.
+float Processor::getSeparation(Bot _bot, Obstacle _obs)//helper function for finding obstacles
+{
+  //obs positions are vector<float[2]> types.
+  int i = 0;
+  int size = _obs.x.size(); //number of points in cloud (x and y are same size)
+  float r_min;
+  float loc_r;
 
-  dx = _obs.first - _bot.x;
-  dy = _obs.second - _bot.y;
+  float dx;
+  float dy;
 
-  loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
-
-  if (loc_r<=_tolerance)
+  while (i < size) //runs for each point in an obstacles point cloud
   {
-    std::pair<float,float> polar_pt;
-    theta = tan(dx/dy)*(M_PI/180);
-    std::pair<float,float> polar_point (loc_r, theta);
-    return polar_point;
+    dx = _obs.x.at(i) - _bot.x; //x separation.
+    dy = _obs.y.at(i) - _bot.y; //y separation.
+
+    loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
+
+    if (i == 0)
+    {
+      r_min = loc_r;
+    } else
+    {
+      if (loc_r < r_min)
+      {
+        r_min = loc_r;
+      }
+    }
+    i++;
   }
-  else
-  {
-    return *((std::pair<float, float> *) NULL);
-  }
+  return r_min;
 }
 
 Processor::Processor(int a) //Default constructor, dummy parameter is there for compile reasons?
@@ -116,23 +124,26 @@ void Processor::findNeighbors()
 {
   int botIndex = 0;
   int j; //iterator for obs finding loop
-  int num_pts = static_cast<int>(obs.size());
+  int num_obs = obs.size();
 
-  std::pair<float,float> new_pair; //holds the return pair
+  float dist_to_obs; //dist b/w closest point of obs and robot (calculated in inner loop).
   float tolerance = 12; //this value is supposed to be our actual tolerance (just made it 12).
-  //holds obs near a robot for each robot.
+  Obstacle neighbor_obs[50][num_obs]; //holds obs near a robot for each robot.
   //probably not our long term solution for storing the data.
 
   for (auto &bot : bots)
   {
     j = 0;
-    while (j < num_pts) //runs for each point in the obs
+    while (j < num_obs) //runs for each obstacle in obs
     {
-      std::pair<float,float> iter_obs = obs.at(j); //current obs to test
-      new_pair = getSeparation(bot, iter_obs, tolerance);
-      if (&new_pair != NULL)
+      Obstacle iter_obs = obs[j]; //current obs to test
+      if (&iter_obs != NULL)
       {
-        polar_obs[j].push_back(new_pair);
+        dist_to_obs = getSeparation(bot, iter_obs);//returns actual separation distance.
+        if (dist_to_obs <= tolerance)
+        {
+          neighbor_obs[botIndex][j] = iter_obs; //neighbor_obs is currently not initialized.
+        }
       }
       j++;
     }
