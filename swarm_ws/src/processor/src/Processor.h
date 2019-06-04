@@ -95,13 +95,16 @@ class Processor
 private:
   Bot bots[BOT_COUNT]; //Stores the information from the VICON
   Bot botMail[BOT_COUNT][NEIGHBOR_COUNT]; //Stores the information to be sent to Alice
-  std::vector <Obstacle> obs;
 
+  std::vector<std::pair<float,float>> obs; //vector of all obstacle points
+  std::vector<std::pair<float,float>> polar_obs [BOT_COUNT]; //Array of vectors of pairs.
+  //each bot has a vector of obs pairs it can "see". Pairs are form (r,theta).
   ros::Timer timer;
   ros::Publisher pub;
   ros::Subscriber sub;
 
-  float getSeparation(Bot _bot, Obstacle _obs); //Helper, finds sep b/w closest point of _obs and given _bot
+  std::pair<float,float> getSeparation(Bot _bot, std::pair<float,float> _obs, float _tolerance);
+
 public:
   Processor(int a); //Default constructor, dummy parameter is there for compile reasons?
 
@@ -111,11 +114,15 @@ public:
 
   void processVicon(wvu_swarm_std_msgs::viconBotArray data); //Fills in bots[]
 
+  void printBots();
+
   void printBotMail(); //Prints botMail[] to the console
 
   void printAliceMail(wvu_swarm_std_msgs::aliceMailArray msg);
 
   void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
+
+
 
   wvu_swarm_std_msgs::aliceMailArray createAliceMsg(int i); //Turns information to be sent to Alice into a msg
 };

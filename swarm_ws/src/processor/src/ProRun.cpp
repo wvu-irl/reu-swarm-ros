@@ -12,7 +12,7 @@ void botCallback(const wvu_swarm_std_msgs::viconBotArray &msg)
 
 int main(int argc, char **argv)
 {
-  // Test code for neighbor finding
+//  Test code for neighbor finding
   Bot a(0, 0, "ab");
    Bot b(1, 1, "bc");
    Bot c(2, 2, "cd");
@@ -25,8 +25,9 @@ int main(int argc, char **argv)
    Bot j(9, 9, "jk");
    Bot inputList [10] = {a, b, c, d, e, f, g, h, i, j};
    Processor test_pros = Processor(inputList);
+   test_pros.printBots();
    test_pros.findNeighbors();
-   test_pros.printBotMail();
+   test_pros.printBots();
    wvu_swarm_std_msgs::aliceMailArray msg = test_pros.createAliceMsg(9);
    test_pros.printAliceMail(msg);
    std::cout << std::endl;
@@ -46,16 +47,18 @@ int main(int argc, char **argv)
 
   while (ros::ok())
   {
+    std::cout << "yo" << std::endl;
     wvu_swarm_std_msgs::viconBotArray tempBotArray = *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>
-           ("vicon_array"));
+            ("vicon_array"));
 
-   bigbrain.processVicon(tempBotArray);
-   bigbrain.findNeighbors();
-std::cout << "test" << std::endl;
+    bigbrain.processVicon(tempBotArray);
+    bigbrain.printBots();//figure out if stuff is going into printBots();
+    /*
+    bigbrain.findNeighbors();
     for (int i = 0; i < BOT_COUNT; i++) //Publishes msgs to Alices
     {
       pubVector.at(i).publish(bigbrain.createAliceMsg(i));
-    }
+    }*/
     ros::spinOnce();
   }
   return 0;

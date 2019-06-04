@@ -10,38 +10,29 @@
 #include <math.h>
 
 
+std::pair<float,float> Processor::getSeparation(Bot _bot, std::pair<float,float> _obs, float _tolerance)//helper function for finding obstacle points
+{// takes current
+  float loc_r; //|distance| b/w bot and current obstacle point.
+  float theta; //in radians
+  float dx; //x separation.
+  float dy; //y separation.
 
-float Processor::getSeparation(Bot _bot, Obstacle _obs)//helper function for finding obstacles
-{
-  //obs positions are vector<float[2]> types.
-  int i = 0;
-  int size = _obs.x.size(); //number of points in cloud (x and y are same size)
-  float r_min;
-  float loc_r;
+  dx = _obs.first - _bot.x;
+  dy = _obs.second - _bot.y;
 
-  float dx;
-  float dy;
+  loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
 
-  while (i < size) //runs for each point in an obstacles point cloud
+  if (loc_r<=_tolerance)
   {
-    dx = _obs.x.at(i) - _bot.x; //x separation.
-    dy = _obs.y.at(i) - _bot.y; //y separation.
-
-    loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
-
-    if (i == 0)
-    {
-      r_min = loc_r;
-    } else
-    {
-      if (loc_r < r_min)
-      {
-        r_min = loc_r;
-      }
-    }
-    i++;
+    std::pair<float,float> polar_pt;
+    theta = tan(dx/dy)*(M_PI/180);
+    std::pair<float,float> polar_point (loc_r, theta);
+    return polar_point;
   }
-  return r_min;
+  else
+  {
+    return *((std::pair<float, float> *) NULL);
+  }
 }
 
 Processor::Processor(int a) //Default constructor, dummy parameter is there for compile reasons?
@@ -85,6 +76,17 @@ void Processor::processVicon(wvu_swarm_std_msgs::viconBotArray data) //Fills in 
   }
 }
 
+void Processor::printBots() //Prints the
+{
+  using namespace std;
+  for (int i = 0; i < BOT_COUNT; i++)
+  {
+    cout << "[" << bots[i].id[0]<< bots[i].id[1] <<" "<< bots[i].x << " "<< bots[i].y<< " "<< bots[i].heading << " ";
+    cout <<bots[i].distance << "]\n";
+  }
+}
+
+
 void Processor::printBotMail() //Prints the id's in botMail[] to the console
 {
   using namespace std;
@@ -125,26 +127,23 @@ void Processor::findNeighbors()
 {
   int botIndex = 0;
   int j; //iterator for obs finding loop
-  int num_obs = obs.size();
+  int num_pts = static_cast<int>(obs.size());
 
-  float dist_to_obs; //dist b/w closest point of obs and robot (calculated in inner loop).
+  std::pair<float,float> new_pair; //holds the return pair
   float tolerance = 12; //this value is supposed to be our actual tolerance (just made it 12).
-  Obstacle neighbor_obs[50][num_obs]; //holds obs near a robot for each robot.
+  //holds obs near a robot for each robot.
   //probably not our long term solution for storing the data.
 
   for (auto &bot : bots)
   {
     j = 0;
-    while (j < num_obs) //runs for each obstacle in obs
+    while (j < num_pts) //runs for each point in the obs
     {
-      Obstacle iter_obs = obs[j]; //current obs to test
-      if (&iter_obs != NULL)
+      std::pair<float,float> iter_obs = obs.at(j); //current obs to test
+      new_pair = getSeparation(bot, iter_obs, tolerance);
+      if (&new_pair != NULL)
       {
-        dist_to_obs = getSeparation(bot, iter_obs);//returns actual separation distance.
-        if (dist_to_obs <= tolerance)
-        {
-          neighbor_obs[botIndex][j] = iter_obs; //neighbor_obs is currently not initialized.
-        }
+        polar_obs[botIndex].push_back(new_pair);
       }
       j++;
     }
@@ -157,12 +156,13 @@ void Processor::findNeighbors()
       {
         continue;
       }
-      cur.distance = sqrt(pow((cur.x - bot.x), 2) + pow((cur.y - bot.y), 2));
+      Bot temp(cur);
+      temp.distance = sqrt(pow((cur.x - bot.x), 2) + pow((cur.y - bot.y), 2));
       bool smallest = true;
 
       for (int i = 0; i < NEIGHBOR_COUNT; i++)
       {
-        if (cur.distance > botMail[botIndex][i].distance)
+        if (temp.distance > botMail[botIndex][i].distance)
         {
           if (i == 0) // If cur is further than the first in the array, it's further
           {
@@ -170,7 +170,7 @@ void Processor::findNeighbors()
             break;
           } else
           { // This means cur is neither the furthest nor nearest
-            botMail[botIndex][0] = cur;
+            botMail[botIndex][0] = temp;
             smallest = false;
             std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT,
                       compareTwoBots); // Sorts greatest first
@@ -180,7 +180,7 @@ void Processor::findNeighbors()
       }
       if (smallest)
       { // If cur is closer than everything, it's the closest
-        botMail[botIndex][0] = cur;
+        botMail[botIndex][0] = temp;
         std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT,
                   compareTwoBots); // Sorts greatest first
       }
