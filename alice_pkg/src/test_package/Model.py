@@ -46,6 +46,10 @@ class Model:
     def addFood(self, to_add):
         self.food.append(to_add)
 
+	def modelUpdate(self, data):
+		for bot in data:
+			addRobot((bot.heading, bot.theta, bot.distance))
+
     def updateSpeed(self, new_speed):
         self.speed = new_speed
 
