@@ -8,7 +8,7 @@ import rospy
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import String
 from wvu_swarm_std_msgs.msg import robot_command
-from wvu_swarm_std_msgs.msg import aliceMailArray
+from wvu_swarm_std_msgs.msg import alice_mail_array
 #alice_mail/3
 
 def callback(data):
@@ -38,7 +38,7 @@ class Robot:
 		execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
 		rospy.Subscriber("ideals", Float64MultiArray, callback)
 		sub_string = "alice_mail_" + self.name
-		rospy.Subscriber(sub_string, aliceMailArray, self.callToModel)
+		rospy.Subscriber(sub_string, alice_mail_array, self.callToModel)
 		
 		self.rate = rospy.Rate(10)
 		while self.running == True:

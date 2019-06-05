@@ -1,0 +1,2 @@
+wvu_swarm_std_msgs/neighbor_mail[4] neighborMail
+wvu_swarm_std_msgs/obs_point_mail[] obsPointMail

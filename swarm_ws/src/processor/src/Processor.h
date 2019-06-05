@@ -3,8 +3,8 @@
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-#include <wvu_swarm_std_msgs/aliceMail.h>
-#include <wvu_swarm_std_msgs/aliceMailArray.h>
+#include <wvu_swarm_std_msgs/neighbor_mail.h>
+#include <wvu_swarm_std_msgs/alice_mail_array.h>
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
 
 typedef struct Bot //The Bot struct holds the pose of a robot, along with its distance from another.
@@ -91,12 +91,12 @@ public:
 
 	void printBotMail(); //Prints botMail[] to the console
 
-	void printAliceMail(wvu_swarm_std_msgs::aliceMailArray msg);
+	void printAliceMail(wvu_swarm_std_msgs::alice_mail_array msg);
 
 
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
 
-	wvu_swarm_std_msgs::aliceMailArray createAliceMsg(int i); //Turns information to be sent to Alice into a msg
+	wvu_swarm_std_msgs::alice_mail_array createAliceMsg(int i); //Turns information to be sent to Alice into a msg
 };
 
 //#include "Processor.cpp"

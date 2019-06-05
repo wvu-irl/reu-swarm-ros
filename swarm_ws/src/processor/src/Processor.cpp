@@ -97,8 +97,6 @@ void Processor::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills i
 		// the tf::Quaternion has a method to access roll pitch and yaw (yaw is all we need in a 2D plane)
 		double roll, pitch, yaw;
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-		char doot[2] =
-		{ 'a', 'b' };
 		bots[numID] = Bot(tempID, data.poseVect[i].botPose.transform.translation.x,
 				data.poseVect[i].botPose.transform.translation.y, yaw, 10000);
 	}
@@ -141,7 +139,7 @@ void Processor::printBotMail() //Prints the id's in botMail[] to the console
 	std::cout << "------------------------" << "\n";
 }
 
-void Processor::printAliceMail(wvu_swarm_std_msgs::aliceMailArray _msg)
+void Processor::printAliceMail(wvu_swarm_std_msgs::alice_mail_array _msg)
 {
 	using namespace std;
 
@@ -149,7 +147,7 @@ void Processor::printAliceMail(wvu_swarm_std_msgs::aliceMailArray _msg)
 	for (int j = 0; j < NEIGHBOR_COUNT; j++)
 	{
 		cout << " ";
-		cout << _msg.aliceMail[j].theta;
+		cout << _msg.neighborMail[j].theta;
 		cout << " ";
 	}
 	cout << "]\n";
@@ -163,6 +161,7 @@ void Processor::printAliceMail(wvu_swarm_std_msgs::aliceMailArray _msg)
 	}
 	cout << "]\n";
 }
+
 
 /*
  Exactly what it sounds like
@@ -240,41 +239,37 @@ void Processor::findNeighbors()
 	}
 }
 
-wvu_swarm_std_msgs::aliceMailArray Processor::createAliceMsg(int i) //Turns information to be sent to Alice into a msg
+wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns information to be sent to Alice into a msg
 {
 	int num_pts = polar_obs[i].size(); //number of obs pts near this bot.
-	std::cout<<"bot: "<<i<<" has num_pts = "<<num_pts<<"\n";
-	wvu_swarm_std_msgs::aliceMailArray _aliceMailArray;
+
+	wvu_swarm_std_msgs::alice_mail_array _aliceMailArray;
 
 	//std::cout<<"size of obsPointMail = "<<_aliceMailArray.obsPointMail.size()<<"\n";
 
 	for (int j = 0; j < NEIGHBOR_COUNT; j++) //Transfers fields of the struct to fields of the msg
 	{
-		//std::cout<<"iteration: "<<j<<"\n";
 		if ((j < num_pts) && (num_pts >0))
 		{
-			wvu_swarm_std_msgs::obsPointMail current;
+			wvu_swarm_std_msgs::obs_point_mail current;
 			current.radius = polar_obs[i].at(j).first;
 			current.theta =  polar_obs[i].at(j).second;
 			_aliceMailArray.obsPointMail.push_back(current);
-		}else
-		{
-				std::cout<<"no obstacle"<<"\n";
 		}
 
 		if (botMail[i][j].y - bots[i].y > 0)
 		{
-			_aliceMailArray.aliceMail[j].theta = fmod(
+			_aliceMailArray.neighborMail[j].theta = fmod(
 					atan((botMail[i][j].y - bots[i].y) / (botMail[i][j].x - bots[i].x))
 							- M_PI_2 - bots[i].heading, 2 * M_PI);
 		} else
 		{
-			_aliceMailArray.aliceMail[j].theta = fmod(
+			_aliceMailArray.neighborMail[j].theta = fmod(
 					atan((botMail[i][j].y - bots[i].y) / (botMail[i][j].x - bots[i].x))
 							+ M_PI_2 - bots[i].heading, 2 * M_PI);
 		}
-		_aliceMailArray.aliceMail[j].distance = botMail[i][j].distance;
-		_aliceMailArray.aliceMail[j].heading = fmod(
+		_aliceMailArray.neighborMail[j].distance = botMail[i][j].distance;
+		_aliceMailArray.neighborMail[j].heading = fmod(
 				botMail[i][j].heading - bots[i].heading, 2 * M_PI);
 
 		for (int j= 0; j< NEIGHBOR_COUNT; j++){

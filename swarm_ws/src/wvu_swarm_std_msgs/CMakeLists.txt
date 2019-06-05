@@ -22,16 +22,15 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
   add_message_files(
     FILES
-	executeVector.msg
-    aliceMail.msg
-    aliceMailArray.msg
+    neighbor_mail.msg
+    alice_mail_array.msg
     rtheta.msg
     vicon_bot.msg
     vicon_bot_array.msg
     robot_command.msg
     robot_command_array.msg
     sensor_data.msg
-    obsPointMail.msg
+    obs_point_mail.msg
   )
 
 ## Generate added messages and services with any dependencies listed here
