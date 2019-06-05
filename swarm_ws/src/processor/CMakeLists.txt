@@ -4,13 +4,13 @@ project(processor)
 set (CMAKE_CXX_STANDARD 11)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg message_generation wvu_swarm_std_msgs swarm_server)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg message_generation wvu_swarm_std_msgs swarm_server geometry_msgs visualization_msgs)
 
 ## Declare ROS messages and services
 ##add_message_files(FILES )
 
 ## Generate added messages and services
-generate_messages(DEPENDENCIES std_msgs)
+generate_messages(DEPENDENCIES std_msgs wvu_swarm_std_msgs)
 
 ## Declare a catkin package
 catkin_package(
