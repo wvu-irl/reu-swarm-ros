@@ -30,7 +30,7 @@ class Robot:
  		model.modelUpdate(data)
 
 	def __init__(self, name):
-		self.name = rospy.get_param("name")
+		self.name = self.name #rospy.get_param("ID")
 		ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
 		execute_pub = rospy.Publisher('execute', executeVector, queue_size = self.MAILBOX)
 		rospy.Subscriber("ideals", Float64MultiArray, callback)
@@ -41,8 +41,8 @@ class Robot:
 		while self.running == True:
 			model = Model(self.speed)
 			#run loops to update model
-			model.addObstacle((math.pi/2, 15))
-			model.addObstacle((4 * math.pi/7 , 30))
+			#model.addObstacle((math.pi/2, 15))
+			#model.addObstacle((4 * math.pi/7 , 30))
 			model.addRobot((math.pi/2, 10, 0.9, math.pi/2))
 			model.addRobot((3*math.pi/2, 10, 0.7, math.pi/2))
 	

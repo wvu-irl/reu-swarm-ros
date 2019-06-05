@@ -37,7 +37,7 @@ class Model:
             tolerance += 1
         return ideal
 
-    def addRobot(self, to_add): #Should be of the form (direction, distance, speed)
+    def addRobot(self, to_add): #Should be of the form (direction, distance, heading)
         self.robots.append(to_add)
 
     def addObstacle(self, to_add): #Should be of the form (distance, direction)
@@ -48,7 +48,7 @@ class Model:
 
 	def modelUpdate(self, data):
 		for bot in data:
-			addRobot((bot.heading, bot.theta, bot.distance))
+			addRobot((bot.theta, bot.distance, bot.heading))
 
     def updateSpeed(self, new_speed):
         self.speed = new_speed
