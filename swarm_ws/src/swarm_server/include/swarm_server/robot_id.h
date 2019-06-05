@@ -15,7 +15,7 @@ std::string rid_indexing[] =
 std::map<std::string, int> initializeRIDs()
 {
 	std::map<std::string, int> map; // map containing all the conversions
-	for (size_t i = 0; i < 50; i++)
+	for (size_t i = 0; i < sizeof(rid_indexing) / sizeof(rid_indexing[0]); i++)
 	{ // adding all states in order from 0-49
 		map.insert(std::pair<std::string, int>(rid_indexing[i], i));
 	}
