@@ -2,6 +2,6 @@
 
 from test_package.Robot import Robot
 
- 
+
 if __name__ == '__main__':
-	Alice = Robot("Alice")
+	Alice_twin = Robot("Alice_twin")
