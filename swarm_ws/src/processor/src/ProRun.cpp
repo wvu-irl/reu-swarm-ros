@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 	test_pros.findNeighbors();
 
 	test_pros.printBotMail();
-	wvu_swarm_std_msgs::aliceMailArray msg = test_pros.createAliceMsg(9);
+	wvu_swarm_std_msgs::alice_mail_array msg = test_pros.createAliceMsg(9);
 	test_pros.printAliceMail(msg);
 	std::cout << std::endl;
 
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
 	for (int i = 0; i < BOT_COUNT; i++) //Starts publishing to all 50 topics
 	{
-		ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::aliceMailArray
+		ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::alice_mail_array
 				> ("alice_mail_" + std::to_string(i), 1000);
 		pubVector.push_back(pub);
 	}
