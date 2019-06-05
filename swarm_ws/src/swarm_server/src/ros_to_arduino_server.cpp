@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <wvu_swarm_std_msgs/robotcommand.h>
+#include <wvu_swarm_std_msgs/robotcommandarray.h>
 #include <wvu_swarm_std_msgs/sensor_data.h>
 
 #include "arduino_server.h"
@@ -59,26 +60,20 @@ void info(const char *patt, void *dat)
 /**
  *  callback for a subscription to send data to the swarm
  */
-void sendToRobotCallback(wvu_swarm_std_msgs::robotcommand msg)
+void sendToRobotCallback(wvu_swarm_std_msgs::robotcommandarray msga)
 {
-#if DEBUG
-  ROS_INFO("Sending command to robots");
-#endif
-	command cmd =
+	for (wvu_swarm_std_msgs::robotcommand msg : msga.commands)
 	{
-	{ '\0' } }; // creating command
-	sprintf(cmd.str, "%f,%f", msg.r, msg.theta);
-#if DEBUG
-  ROS_INFO("Created vector string \"%s\"", cmd.str);
-#endif
-	char id[3] =
-	{ '\0' };
-	id[0] = msg.rid[0];
-	id[1] = msg.rid[1];
-#if DEBUG
-  ROS_INFO("Got ID: %s", id);
-#endif
-	sendCommandToRobots(cmd, rid_map.at(id)); // sending to robots through TCP server
+		command cmd =
+		{
+		{ '\0' } }; // creating command
+		sprintf(cmd.str, "%f,%f", msg.r, msg.theta);
+		char id[3] =
+		{ '\0' };
+		id[0] = msg.rid[0];
+		id[1] = msg.rid[1];
+		sendCommandToRobots(cmd, rid_map.at(id)); // sending to robots through TCP server
+	}
 }
 
 /**
