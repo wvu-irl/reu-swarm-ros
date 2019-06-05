@@ -1,6 +1,6 @@
 #include <ros/ros.h>
-#include <wvu_swarm_std_msgs/robotcommand.h>
-#include <wvu_swarm_std_msgs/robotcommandarray.h>
+#include <wvu_swarm_std_msgs/robot_command.h>
+#include <wvu_swarm_std_msgs/robot_command_array.h>
 #include <wvu_swarm_std_msgs/sensor_data.h>
 
 #include "arduino_server.h"
@@ -60,9 +60,9 @@ void info(const char *patt, void *dat)
 /**
  *  callback for a subscription to send data to the swarm
  */
-void sendToRobotCallback(wvu_swarm_std_msgs::robotcommandarray msga)
+void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 {
-	for (wvu_swarm_std_msgs::robotcommand msg : msga.commands)
+	for (wvu_swarm_std_msgs::robot_command msg : msga.commands)
 	{
 		command cmd =
 		{

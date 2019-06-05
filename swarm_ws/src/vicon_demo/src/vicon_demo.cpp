@@ -14,10 +14,10 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <wvu_swarm_std_msgs/rtheta.h>
-#include <wvu_swarm_std_msgs/viconBot.h>
-#include <wvu_swarm_std_msgs/viconBotArray.h>
+#include <wvu_swarm_std_msgs/vicon_bot.h>
+#include <wvu_swarm_std_msgs/vicon_bot_array.h>
 
-void msgCallback(const wvu_swarm_std_msgs::viconBotArray &msg) {}
+void msgCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg) {}
 
 int main(int argc, char **argv)
 {
@@ -47,14 +47,14 @@ int main(int argc, char **argv)
     while(ros::ok())
     {
         // Get the information of the vicon array
-        wvu_swarm_std_msgs::viconBotArray viconArray =
-                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>("/viconArray"));
+        wvu_swarm_std_msgs::vicon_bot_array viconArray =
+                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::vicon_bot_array>("/viconArray"));
         
         // Look for two bots named AA and BB
         bool botAAFound = false, botBBFound = false;
-        wvu_swarm_std_msgs::viconBot botAA, botBB;
+        wvu_swarm_std_msgs::vicon_bot botAA, botBB;
         
-        for(wvu_swarm_std_msgs::viconBot iteratorBot : viconArray.poseVect)
+        for(wvu_swarm_std_msgs::vicon_bot iteratorBot : viconArray.poseVect)
         {
             //std::uint8_t varA[2] = {(std::uint8_t)'A', (std::uint8_t)'A'};
             //std::uint8_t varB[2] = {(std::uint8_t)'B', (std::uint8_t)'B'};

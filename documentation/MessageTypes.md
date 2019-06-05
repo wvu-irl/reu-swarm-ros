@@ -11,15 +11,24 @@ TODO
 TODO
 #### executeVector
 TODO
-#### robotcommand
-TODO
-#### robotcommandarray
-TODO
+#### robot_command
+** The message will change depending on swarm objectives
+    
+- ``rid`` is the robot id represented as two ``uint8``'s containing a state abbreviation.
+- ``r`` is the radius/velocity the roobot needs to meet.
+- ``theta`` is the pose/angle the robot needs to meet in degrees. 
+    
+#### robot___command___array
+
+Contains an array of `robot_command`s that `ros_to_arduino_server` will iterate through to send to the connected robots. 
+
+- `commands` is an array of arbitrary size containing all the commands to be sent to the robot. 
+
 #### rtheta
 TODO
 #### sensor_data
 TODO
-#### viconBot
+#### vicon_bot
 TODO
-#### viconBotArray
+#### vicon___bot___array
 TODO

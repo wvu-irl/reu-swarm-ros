@@ -14,13 +14,12 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <wvu_swarm_std_msgs/rtheta.h>
-#include <wvu_swarm_std_msgs/viconBot.h>
-#include <wvu_swarm_std_msgs/viconBotArray.h>
-#include <wvu_swarm_std_msgs/typedPoint.h>
-#include <wvu_swarm_std_msgs/robotcommand.h>
-#include <wvu_swarm_std_msgs/robotcommandarray.h>
+#include <wvu_swarm_std_msgs/vicon_bot.h>
+#include <wvu_swarm_std_msgs/vicon_bot_array.h>
+#include <wvu_swarm_std_msgs/robot_command.h>
+#include <wvu_swarm_std_msgs/robot_command_array.h>
 
-void msgCallback(const wvu_swarm_std_msgs::viconBotArray &msg) {}
+void msgCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg) {}
 
 // Method to find distance between two points
 double getDist(const geometry_msgs::Point first, const geometry_msgs::Point second);
@@ -34,8 +33,8 @@ void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, co
 //   Params: a vector to add the bot's command to, the bot to use, the point to
 //   compare the bot against.
 //   Return: the distance of the bot
-double processBot(wvu_swarm_std_msgs::robotcommandarray &outputMsg, std::string tfPrefix,
-        const wvu_swarm_std_msgs::viconBot bot, const geometry_msgs::Point point, tf2_ros::Buffer &tfBuff);
+double processBot(wvu_swarm_std_msgs::robot_command_array &outputMsg, std::string tfPrefix,
+        const wvu_swarm_std_msgs::vicon_bot bot, const geometry_msgs::Point point, tf2_ros::Buffer &tfBuff);
 
 int main(int argc, char **argv)
 {
@@ -67,7 +66,7 @@ int main(int argc, char **argv)
     
     // Subscribe to tracker's vicon topic, advertise result vector
     sub = n.subscribe(viconArrayTopic, 10, &msgCallback);
-    pub = n.advertise<wvu_swarm_std_msgs::robotcommandarray>(advertiseTopic, 1000);
+    pub = n.advertise<wvu_swarm_std_msgs::robot_command_array>(advertiseTopic, 1000);
     
     // Set up transform buffer
     tf2_ros::Buffer tfBuffer;
@@ -88,16 +87,16 @@ int main(int argc, char **argv)
     while(ros::ok())
     {
         // Get the information of the vicon array
-        wvu_swarm_std_msgs::viconBotArray viconArray =
-                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>(viconArrayTopic));
+        wvu_swarm_std_msgs::vicon_bot_array viconArray =
+                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::vicon_bot_array>(viconArrayTopic));
         
         // Generate a vector of robot commands to publish
-        wvu_swarm_std_msgs::robotcommandarray output;
+        wvu_swarm_std_msgs::robot_command_array output;
         
         double minimumPointDistance = 10000.0; // Trivially large number, in cm
         
         // Iterate through all bots
-        for(wvu_swarm_std_msgs::viconBot iteratorBot : viconArray.poseVect)
+        for(wvu_swarm_std_msgs::vicon_bot iteratorBot : viconArray.poseVect)
         {
             // Process bot's distance from the point and add its command vector to the output
             double thisDist = processBot(output, transformPrefix, iteratorBot, currentPoint, tfBuffer);
@@ -159,8 +158,8 @@ void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, co
     }
 }
 
-double processBot(wvu_swarm_std_msgs::robotcommandarray &outputMsg, std::string tfPrefix,
-        const wvu_swarm_std_msgs::viconBot bot, const geometry_msgs::Point point, tf2_ros::Buffer &tfBuff)
+double processBot(wvu_swarm_std_msgs::robot_command_array &outputMsg, std::string tfPrefix,
+        const wvu_swarm_std_msgs::vicon_bot bot, const geometry_msgs::Point point, tf2_ros::Buffer &tfBuff)
 {
     // Generate a point for this bot's location
     geometry_msgs::Point botPt;
@@ -205,7 +204,7 @@ double processBot(wvu_swarm_std_msgs::robotcommandarray &outputMsg, std::string 
     if(degrees < 0) degrees += 360;
     
     // Build a command for this specific bot
-    wvu_swarm_std_msgs::robotcommand thisCmd;
+    wvu_swarm_std_msgs::robot_command thisCmd;
     thisCmd.rid = bot.botId;
     thisCmd.r = dist;
     thisCmd.theta = degrees;
