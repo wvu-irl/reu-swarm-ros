@@ -47,6 +47,8 @@ class Rules:
         return None
 
     def avoidObstacles(self, obstacles, tolerance):
+        if obstacles == None:
+            return None
         for obstacle in obstacles:
             if ((obstacle[0] < math.pi/12 * tolerance) or (obstacle[0] > 11 * math.pi/12 - math.pi/12 *tolerance)) and (obstacle[1] < ROBOT_SIZE / 2 * tolerance):
                 print("Avoiding obstacles")
