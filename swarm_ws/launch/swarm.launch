@@ -9,16 +9,21 @@
 		<!-- Don't publish individual points or transforms -->
 		<param name="publish_markers" value="false" type="bool" />
 		<param name="publish_transform" value="false" type="bool" />
-
-                <param name="swarmbot_prefix" value="cardbot_" type="str" />
+		<param name="swarmbot_prefix" value="cardbot_" type="str" />
 		
-		</node>
+	</node>
 		
-		<!-- Launching processor node -->
-		<node pkg="processor" name="Processor" type="Processor"/>
+	<!-- Launching processor node -->
+	<node pkg="processor"  type="ProRun" name="Processor"/>
 		
-		<!-- TODO launch ALICE nodes (self contained multi launch) -->
+	<!-- TODO launch ALICE nodes (self contained multi launch) -->
+	<node pkg="_pkg" type="alice" name="alice_0">
+		<param name= "id" value = "0" type = "int"/>
+	</node>
+	<node pkg="test_package" type="Robot" name="alice_1">
+		<param name= "id" value = "1" type = "int"/>  
+	</node>
 		
-		<!-- Launching server node -->
-		<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server"/>
+	<!-- Launching server node -->
+	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server"/>
 </launch>
