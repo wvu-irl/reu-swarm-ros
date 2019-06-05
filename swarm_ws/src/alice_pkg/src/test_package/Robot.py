@@ -30,13 +30,15 @@ class Robot:
  		model.modelUpdate(data)
 
 	def __init__(self, name):
-		self.name = self.name #rospy.get_param("ID")
+		
+		rospy.init_node(name, anonymous=False)	
+		self.name = rospy.get_param('~id')
 		ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
 		execute_pub = rospy.Publisher('execute', executeVector, queue_size = self.MAILBOX)
 		rospy.Subscriber("ideals", Float64MultiArray, callback)
-		sub_string = "alice_mail_" + self.name[-2:]
+		sub_string = "alice_mail_" + self.name
 		rospy.Subscriber(sub_string, aliceMailArray, self.callToModel)
-		rospy.init_node(name, anonymous=True)
+		
 		self.rate = rospy.Rate(10)
 		while self.running == True:
 			model = Model(self.speed)
