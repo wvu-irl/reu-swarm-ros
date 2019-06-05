@@ -25,11 +25,13 @@ find_package(catkin REQUIRED COMPONENTS
 	executeVector.msg
     aliceMail.msg
     aliceMailArray.msg
+   obsPointMail.msg
     rtheta.msg
-    vicon_bot.msg
-    vicon_bot_array.msg
-    robot_command.msg
-    robot_command_array.msg
+    viconBot.msg
+    viconBotArray.msg
+    typedPoint.msg
+    robotcommand.msg
+    robotcommandarray.msg
     sensor_data.msg
   )
 

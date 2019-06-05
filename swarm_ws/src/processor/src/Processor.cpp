@@ -77,7 +77,7 @@ void Processor::init()
 {
 }
 
-void Processor::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills in bots[]
+void Processor::processVicon(wvu_swarm_std_msgs::viconBotArray data) //Fills in bots[]
 {
 
 	for (size_t i = 0; i < data.poseVect.size(); i++)
@@ -120,7 +120,7 @@ void Processor::printBotMail() //Prints the id's in botMail[] to the console
 	using namespace std;
 	for (int i = 0; i < BOT_COUNT; i++)
 	{
-		std::cout << "=========== bots Neighbors ========" << "\n";
+		std::cout << "=========== bots "<<i<<" Neighbors ========" << "\n";
 		std::cout << "[";
 		for (int j = 0; j < NEIGHBOR_COUNT; j++)
 		{
@@ -129,7 +129,7 @@ void Processor::printBotMail() //Prints the id's in botMail[] to the console
 			cout << " ";
 		}
 		cout << "]\n";
-		std::cout << "++++++++++bots obstacles++++++" << "\n";
+		std::cout << "++++++++++bots "<<i<<" obstacles++++++" << "\n";
 		std::cout << "[";
 		for (int k = 0; k < polar_obs[i].size(); k++)
 		{
@@ -154,6 +154,14 @@ void Processor::printAliceMail(wvu_swarm_std_msgs::aliceMailArray _msg)
 	}
 	cout << "]\n";
 
+	std::cout << "[";
+	for (int j = 0; j < _msg.obsPointMail.size(); j++)
+	{
+		cout << "|";
+		cout <<_msg.obsPointMail[j].radius<<","<<_msg.obsPointMail[j].theta;
+		cout << "|";
+	}
+	cout << "]\n";
 }
 
 /*
@@ -234,9 +242,25 @@ void Processor::findNeighbors()
 
 wvu_swarm_std_msgs::aliceMailArray Processor::createAliceMsg(int i) //Turns information to be sent to Alice into a msg
 {
+	int num_pts = polar_obs[i].size(); //number of obs pts near this bot.
+	std::cout<<"bot: "<<i<<" has num_pts = "<<num_pts<<"\n";
 	wvu_swarm_std_msgs::aliceMailArray _aliceMailArray;
+
+	//std::cout<<"size of obsPointMail = "<<_aliceMailArray.obsPointMail.size()<<"\n";
+
 	for (int j = 0; j < NEIGHBOR_COUNT; j++) //Transfers fields of the struct to fields of the msg
 	{
+		//std::cout<<"iteration: "<<j<<"\n";
+		if ((j < num_pts) && (num_pts >0))
+		{
+			wvu_swarm_std_msgs::obsPointMail current;
+			current.radius = polar_obs[i].at(j).first;
+			current.theta =  polar_obs[i].at(j).second;
+			_aliceMailArray.obsPointMail.push_back(current);
+		}else
+		{
+				std::cout<<"no obstacle"<<"\n";
+		}
 
 		if (botMail[i][j].y - bots[i].y > 0)
 		{
@@ -256,8 +280,8 @@ wvu_swarm_std_msgs::aliceMailArray Processor::createAliceMsg(int i) //Turns info
 		for (int j= 0; j< NEIGHBOR_COUNT; j++){
 		         botMail[i][j] = Bot();
 		      }
+
 	}
 	return _aliceMailArray;
 
 }
-

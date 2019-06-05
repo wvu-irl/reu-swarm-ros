@@ -3,7 +3,7 @@
 #include "Processor.cpp"
 #include <sstream>
 
-void botCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg)
+void botCallback(const wvu_swarm_std_msgs::viconBotArray &msg)
 {
 	//For Debug purposes. callback should do nothing by default.
 	//ROS_INFO("I hear: [%i]", msg.id1);
@@ -45,7 +45,6 @@ int main(int argc, char **argv)
 	{ a1, a2, a3, a4 }; //,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14};
 
 	Processor test_pros = Processor(inputList, pair_array);
-	std::cout << "made it to this one" << "\n";
 	test_pros.findNeighbors();
 
 	test_pros.printBotMail();
@@ -68,8 +67,8 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{
-		wvu_swarm_std_msgs::vicon_bot_array tempBotArray =
-				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_bot_array
+		wvu_swarm_std_msgs::viconBotArray tempBotArray =
+				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::viconBotArray
 						> ("vicon_array"));
 
 		bigbrain.processVicon(tempBotArray);
@@ -115,4 +114,3 @@ int main(int argc, char **argv)
 	}
 	return 0;
 }
-
