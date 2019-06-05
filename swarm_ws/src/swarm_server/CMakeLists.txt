@@ -132,12 +132,6 @@ target_link_libraries(robot_id ${catkin_LIBRARIES})
 
 add_library(arduino_server src/arduino_server_source.cpp)
 
-add_executable(arduino_test src/arduino_test.cpp)
-target_link_libraries(arduino_test 
-  ${catkin_LIBRARIES}
-)
-add_dependencies(arduino_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 add_executable(ros_to_arduino_server src/ros_to_arduino_server.cpp)
 target_link_libraries(ros_to_arduino_server
   ${catkin_LIBRARIES}

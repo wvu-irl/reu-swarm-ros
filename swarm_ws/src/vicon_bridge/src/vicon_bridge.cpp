@@ -41,8 +41,8 @@
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <wvu_swarm_std_msgs/viconBot.h>
-#include <wvu_swarm_std_msgs/viconBotArray.h>
+#include <wvu_swarm_std_msgs/vicon_bot.h>
+#include <wvu_swarm_std_msgs/vicon_bot_array.h>
 #include <vicon_bridge/viconGrabPose.h>
 #include <iostream>
 #include <string>
@@ -261,7 +261,7 @@ public:
                                                          this);
 
     // Publisher for swarmbots
-    swarm_pub_ = nh.advertise<wvu_swarm_std_msgs::viconBotArray>("/vicon_array", 10);
+    swarm_pub_ = nh.advertise<wvu_swarm_std_msgs::vicon_bot_array>("/vicon_array", 10);
     
     // Publisher for individual points
     if(publish_markers_)
@@ -521,7 +521,7 @@ private:
     std::vector<tf::StampedTransform, std::allocator<tf::StampedTransform> > transforms;
     geometry_msgs::TransformStampedPtr pose_msg(new geometry_msgs::TransformStamped);
     SegmentMap::iterator pub_it;
-    wvu_swarm_std_msgs::viconBotArray botArray;
+    wvu_swarm_std_msgs::vicon_bot_array botArray;
 
     // Find the number of subjects being tracked
     unsigned int n_subjects = msvcbridge::GetSubjectCount().SubjectCount;
@@ -576,7 +576,7 @@ private:
               tf::transformStampedTFToMsg(stampTf, geoStampedTf);
               
               // Create a swarmbot, add to vector
-              wvu_swarm_std_msgs::viconBot thisBot;
+              wvu_swarm_std_msgs::vicon_bot thisBot;
               thisBot.botId = botId;
               thisBot.botPose = geoStampedTf;
               botArray.poseVect.push_back(thisBot);
