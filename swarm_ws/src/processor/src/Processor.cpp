@@ -54,6 +54,10 @@ Processor::Processor(int a) //Default constructor, dummy parameter is there for 
 		for (int i = 0; i < BOT_COUNT; i++)
 		{
 			bots[i] = Bot();
+			for (int j = 0; j < NEIGHBOR_COUNT; j++)
+			{
+				botMail[i][j] = Bot();
+			}
 		}
 	}
 }
@@ -75,10 +79,15 @@ void Processor::init()
 
 void Processor::processVicon(wvu_swarm_std_msgs::viconBotArray data) //Fills in bots[]
 {
-	for (size_t i = 0; i < sizeof(data.poseVect) / sizeof(data.poseVect[0]); i++)
+
+	for (size_t i = 0; i < data.poseVect.size(); i++)
 	{
-		char tempID[2] =
-		{ data.poseVect[i].botId[0], data.poseVect[i].botId[1] };
+		char bid[3] =
+		{ '\0' };
+		bid[0] = data.poseVect[i].botId[0];
+		bid[1] = data.poseVect[i].botId[1];
+		std::string tempID(bid);
+
 		size_t numID = rid_map[tempID];
 
 		// the incoming geometry_msgs::Quaternion is transformed to a tf::Quaterion
@@ -88,8 +97,21 @@ void Processor::processVicon(wvu_swarm_std_msgs::viconBotArray data) //Fills in 
 		// the tf::Quaternion has a method to access roll pitch and yaw (yaw is all we need in a 2D plane)
 		double roll, pitch, yaw;
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+		char doot[2] =
+		{ 'a', 'b' };
 		bots[numID] = Bot(tempID, data.poseVect[i].botPose.transform.translation.x,
 				data.poseVect[i].botPose.transform.translation.y, yaw, 10000);
+	}
+}
+
+void Processor::printBots() //Prints the
+{
+	using namespace std;
+	for (int i = 0; i < BOT_COUNT; i++)
+	{
+		cout << "[" << bots[i].id[0] << bots[i].id[1] << " " << bots[i].x << " "
+				<< bots[i].y << " " << bots[i].heading << " ";
+		cout << bots[i].distance << "]\n";
 	}
 }
 
@@ -168,7 +190,6 @@ void Processor::findNeighbors()
 			j++;
 		}
 
-		//int n = sizeof(botMail[botIndex]) / sizeof(botMail[botIndex][0]); // for sorting later
 		int curIndex = 0; // Because we're looping over the array, we have to track the index ourselves
 		for (auto &cur : bots)
 		{
@@ -176,12 +197,13 @@ void Processor::findNeighbors()
 			{
 				continue;
 			}
-			cur.distance = sqrt(pow((cur.x - bot.x), 2) + pow((cur.y - bot.y), 2));
+			Bot temp(cur);
+			temp.distance = sqrt(pow((cur.x - bot.x), 2) + pow((cur.y - bot.y), 2));
 			bool smallest = true;
 
 			for (int i = 0; i < NEIGHBOR_COUNT; i++)
 			{
-				if (cur.distance > botMail[botIndex][i].distance)
+				if (temp.distance > botMail[botIndex][i].distance)
 				{
 					if (i == 0) // If cur is further than the first in the array, it's further
 					{
@@ -189,7 +211,7 @@ void Processor::findNeighbors()
 						break;
 					} else
 					{ // This means cur is neither the furthest nor nearest
-						botMail[botIndex][0] = cur;
+						botMail[botIndex][0] = temp;
 						smallest = false;
 						std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT,
 								compareTwoBots); // Sorts greatest first
@@ -199,7 +221,7 @@ void Processor::findNeighbors()
 			}
 			if (smallest)
 			{ // If cur is closer than everything, it's the closest
-				botMail[botIndex][0] = cur;
+				botMail[botIndex][0] = temp;
 				std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT,
 						compareTwoBots); // Sorts greatest first
 			}
@@ -230,6 +252,10 @@ wvu_swarm_std_msgs::aliceMailArray Processor::createAliceMsg(int i) //Turns info
 		_aliceMailArray.aliceMail[j].distance = botMail[i][j].distance;
 		_aliceMailArray.aliceMail[j].heading = fmod(
 				botMail[i][j].heading - bots[i].heading, 2 * M_PI);
+
+		for (int j= 0; j< NEIGHBOR_COUNT; j++){
+		         botMail[i][j] = Bot();
+		      }
 	}
 	return _aliceMailArray;
 
