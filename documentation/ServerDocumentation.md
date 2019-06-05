@@ -17,7 +17,8 @@ All messages from the robots are able to be recieved in the topic ``from_ard``
 ## Connecting
 To connect from an arduino 
 
-- Arduino must connect to *IRL_ROBONET*
+- Arduino must connect to a valid network
+    - A valid network must have a host computer running the TCP server
  
 - Arduino must connect to relevant computer IP address
 
