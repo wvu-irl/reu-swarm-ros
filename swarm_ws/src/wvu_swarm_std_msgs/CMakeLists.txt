@@ -25,24 +25,17 @@ find_package(catkin REQUIRED COMPONENTS
 	executeVector.msg
     aliceMail.msg
     aliceMailArray.msg
-   obsPointMail.msg
     rtheta.msg
-    viconBot.msg
-    viconBotArray.msg
-    typedPoint.msg
-    robotcommand.msg
-    robotcommandarray.msg
+    vicon_bot.msg
+    vicon_bot_array.msg
+    robot_command.msg
+    robot_command_array.msg
     sensor_data.msg
+    obsPointMail.msg
   )
 
 ## Generate added messages and services with any dependencies listed here
-  generate_messages(
-    DEPENDENCIES
-    geometry_msgs
-    std_msgs
-    visualization_msgs
-    wvu_swarm_std_msgs
-  )
+  generate_messages(DEPENDENCIES geometry_msgs std_msgs visualization_msgs wvu_swarm_std_msgs)
 
 catkin_package(
    CATKIN_DEPENDS message_runtime
