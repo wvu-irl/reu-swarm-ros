@@ -21,7 +21,7 @@
 		</node>
 		
 		<!-- Launching processor node -->
-		<node pkg="processor" name="Processor" type="Processor"/>
+		<node pkg="processor" name="Processor" type="ProRun"/>
 				
 		<!-- Launching server node -->
 		<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server"/>

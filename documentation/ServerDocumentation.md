@@ -1,7 +1,7 @@
 # Swarm Server Usage
 [- Running from ROS](#running) 
 
-[- Connecting from an arduino](#connecting)
+[- Connecting from a device](#connecting)
 
 [- Documentation](#documentation) 
 
@@ -15,14 +15,14 @@ The robots are sent all the data from the topic ``execute``
 All messages from the robots are able to be recieved in the topic ``from_ard``
 
 ## Connecting
-To connect from an arduino 
+To connect from a device 
 
-- Arduino must connect to a valid network
+- Device must connect to a valid network
     - A valid network must have a host computer running the TCP server
  
-- Arduino must connect to relevant computer IP address
+- Device must connect to relevant computer IP address
 
-- Arduno must use port ``4321``
+- Device must use port ``4321``
 
 - To have the server communicate with the robot properly, the robot must ``register``
 
@@ -56,7 +56,7 @@ Execution topic (``execute``)
       
 
       
-From arduino (``from_arduino``)
+From device (``from_arduino``)
 
 
 
@@ -150,7 +150,7 @@ functions:
 - `beginServer`
     - Begins the main server loop
     - Accepts callback functions for the printing of various information
-        - `command_callback` is a callback function to process recieved data from the arduinos
+        - `command_callback` is a callback function to process recieved data from the connected devices
         - `info_callback` is a callback to print information about server status
         - `error_callback` is a callback to print server errors 
         - `exit_condition_callback` is a callback that keeps the server running as long as it returns `true`
@@ -176,6 +176,8 @@ structs/classes:
 ##### `robot_id.h`
 
 This header is here to convert from a numeric id to a `uint8[2]` or `string` id
+
+**If you change the one in `src` do not forget the one in the include folder**
 
 feilds/globals:
 
