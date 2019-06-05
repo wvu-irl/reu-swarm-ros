@@ -86,7 +86,7 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robotcommand msg)
  */
 void errorCallBack(const char *msg)
 {
-	ROS_ERROR(msg);
+	ROS_ERROR(msg, NULL);
 }
 
 /**
