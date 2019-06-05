@@ -30,6 +30,7 @@ find_package(catkin REQUIRED COMPONENTS
     viconBotArray.msg
     typedPoint.msg
     robotcommand.msg
+    robotcommandarray.msg
     sensor_data.msg
   )
 
