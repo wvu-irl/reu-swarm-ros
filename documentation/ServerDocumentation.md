@@ -71,7 +71,7 @@ This documentation is also attached to the source as well
 
 ---
 
-##### `ros_to_arduino_server.cpp` 
+##### ros_to_arduino_server.cpp 
 
 **This is a node**
 
@@ -126,8 +126,8 @@ globals:
 
 ---
 
-##### `arduino_server.h` 
-##### & `arduino_server_source.cpp`
+##### arduino_server.h 
+##### & arduino_server_source.cpp
 
 *NOTE: Only inlcude the header file*
 
@@ -174,7 +174,7 @@ structs/classes:
 
 ---
 
-##### `robot_id.h`
+##### robot_id.h
 
 [Source code (in the main file)](https://github.com/wvu-irl/reu-swarm-ros/blob/master/swarm_ws/src/swarm_server/src/robot_id.h)
 
