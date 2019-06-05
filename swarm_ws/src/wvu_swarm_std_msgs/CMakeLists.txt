@@ -27,7 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
     aliceMailArray.msg
    obsPointMail.msg
     rtheta.msg
-    viconBot.msg
+    vicon_bot.msg
     viconBotArray.msg
     typedPoint.msg
     robotcommand.msg
