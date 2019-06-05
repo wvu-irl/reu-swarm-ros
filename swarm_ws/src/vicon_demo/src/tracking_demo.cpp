@@ -18,6 +18,7 @@
 #include <wvu_swarm_std_msgs/viconBotArray.h>
 #include <wvu_swarm_std_msgs/typedPoint.h>
 #include <wvu_swarm_std_msgs/robotcommand.h>
+#include <wvu_swarm_std_msgs/robotcommandarray.h>
 
 void msgCallback(const wvu_swarm_std_msgs::viconBotArray &msg) {}
 
@@ -28,6 +29,13 @@ double getDist(const geometry_msgs::Point first, const geometry_msgs::Point seco
 //   Params: a vector to fill with the points, a value 'a' defining the curve,
 //   and a value for an increment in degrees to iterate through 360 degrees
 void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, const double incr);
+
+// Method to process a bot's ideal vector
+//   Params: a vector to add the bot's command to, the bot to use, the point to
+//   compare the bot against.
+//   Return: the distance of the bot
+double processBot(wvu_swarm_std_msgs::robotcommandarray &outputMsg, std::string tfPrefix,
+        const wvu_swarm_std_msgs::viconBot bot, const geometry_msgs::Point point, tf2_ros::Buffer &tfBuff);
 
 int main(int argc, char **argv)
 {
@@ -41,7 +49,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub;
     
     //  Where to get the array of bots, what topic to advertise, where to get transform of target
-    std::string viconArrayTopic, advertiseTopic, transfromTopic;
+    std::string viconArrayTopic, advertiseTopic, transformPrefix;
     
     //  Value of 'a' in formula in cm, value to iterate degrees, distance to "find" points at
     int lemniscateConstant, lemniscateInterval, cutoffRadius;
@@ -49,7 +57,7 @@ int main(int argc, char **argv)
     // Import parameters from launchfile
     n_priv.param<std::string>("vicon_array_topic", viconArrayTopic, "/viconArray");
     n_priv.param<std::string>("advertise_topic", advertiseTopic, "execute");
-    n_priv.param<std::string>("transform_topic", transfromTopic, "vicon/cardbot_AA/cardbot_AA");
+    n_priv.param<std::string>("transform_prefix", transformPrefix, "cardbot_");
     n_priv.param<int>("lemniscate_constant", lemniscateConstant, 50);
     n_priv.param<int>("lemniscate_interval", lemniscateInterval, 10);
     n_priv.param<int>("cutoff_radius", cutoffRadius, 10);
@@ -59,10 +67,12 @@ int main(int argc, char **argv)
     
     // Subscribe to tracker's vicon topic, advertise result vector
     sub = n.subscribe(viconArrayTopic, 10, &msgCallback);
-    pub = n.advertise<wvu_swarm_std_msgs::robotcommand>(advertiseTopic, 1000);
+    pub = n.advertise<wvu_swarm_std_msgs::robotcommandarray>(advertiseTopic, 1000);
+    
+    // Set up transform buffer
+    tf2_ros::Buffer tfBuffer;
     
     // Set up transform listener
-    tf2_ros::Buffer tfBuffer;
     tf2_ros::TransformListener tfListener(tfBuffer);
     
     // Generate a Gerono Lemniscate (figure 8) as discrete points
@@ -81,39 +91,23 @@ int main(int argc, char **argv)
         wvu_swarm_std_msgs::viconBotArray viconArray =
                 *(ros::topic::waitForMessage<wvu_swarm_std_msgs::viconBotArray>(viconArrayTopic));
         
-        // Look for bot named AA
-        bool botAAFound = false;
-        wvu_swarm_std_msgs::viconBot botAA;
+        // Generate a vector of robot commands to publish
+        wvu_swarm_std_msgs::robotcommandarray output;
         
+        double minimumPointDistance = 10000.0; // Trivially large number, in cm
+        
+        // Iterate through all bots
         for(wvu_swarm_std_msgs::viconBot iteratorBot : viconArray.poseVect)
         {
-            boost::array<std::uint8_t, 2> varA = {(std::uint8_t)'A', (std::uint8_t)'A'};
+            // Process bot's distance from the point and add its command vector to the output
+            double thisDist = processBot(output, transformPrefix, iteratorBot, currentPoint, tfBuffer);
             
-            if(iteratorBot.botId == varA)
-            {
-                botAAFound = true;
-                botAA = iteratorBot;
-            }
+            // Change minimum if necessary
+            if(thisDist < minimumPointDistance) minimumPointDistance = thisDist;
         }
         
-        // Iterate again if not found
-        if(!botAAFound) {
-            usleep(1000);
-            continue;
-        }
-        
-        // Pick out the point from bot relative to static frame
-        geometry_msgs::Point trackerPt;
-        trackerPt.x = botAA.botPose.transform.translation.x;
-        trackerPt.y = botAA.botPose.transform.translation.y;
-        trackerPt.z = 0;
-        //ROS_INFO("   Tracker found at %f, %f\n", trackerPt.x, trackerPt.y);
-        
-        // Find distance between bot and its target
-        double distance = getDist(trackerPt, currentPoint);
-        
-        // If less than radius, move point
-        if(distance < cutoffRadius) {
+        // Move the point if any bot has come too close
+        if(minimumPointDistance < cutoffRadius) {
             // Rotate through vector if needed
             if(currentIndex + 1 >= path.size())
                 currentIndex = 0;
@@ -121,36 +115,11 @@ int main(int argc, char **argv)
                 currentIndex++;
             
             currentPoint = path.at(currentIndex);
-            
-            // Recalculate distance
-            distance = getDist(trackerPt, currentPoint);
         
             ROS_INFO("Point moved to %f, %f\n", currentPoint.x, currentPoint.y);
         }
         
-        // Find transform from tracker to target point
-        geometry_msgs::TransformStamped trackerTarget;
-        trackerTarget = tfBuffer.lookupTransform(transfromTopic,
-                "world", ros::Time(0));
-        
-        // Transform the point
-        geometry_msgs::Point pointTransformed;
-        tf2::doTransform<geometry_msgs::Point>(currentPoint, pointTransformed, botAA.botPose);
-        pointTransformed.z = 0; // why not
-        
-        // Find angle between bot and point
-        double degrees = 0;
-        if(pointTransformed.x < 0)
-            degrees = atan(pointTransformed.y / pointTransformed.x) * 180 / 3.14159265;
-        else
-            degrees = (atan(pointTransformed.y / pointTransformed.x) * 180 / 3.14159265) + 180;
-        if(degrees < 0) degrees += 360;
-        
-        // Put into rtheta form, publish
-        wvu_swarm_std_msgs::robotcommand output;
-        output.rid = {(uint8_t)'A', (uint8_t)'A'};
-        output.r = distance;
-        output.theta = degrees;
+        // Publish vector of robot commands
         pub.publish(output);
         
         ros::spinOnce();
@@ -188,4 +157,61 @@ void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, co
         
         ROS_INFO("Added point at %d degrees, or %f rads, at %f, %f, 0\n", t, rads, temp.x, temp.y);
     }
+}
+
+double processBot(wvu_swarm_std_msgs::robotcommandarray &outputMsg, std::string tfPrefix,
+        const wvu_swarm_std_msgs::viconBot bot, const geometry_msgs::Point point, tf2_ros::Buffer &tfBuff)
+{
+    // Generate a point for this bot's location
+    geometry_msgs::Point botPt;
+    botPt.x = bot.botPose.transform.translation.x;
+    botPt.y = bot.botPose.transform.translation.y;
+    botPt.z = 0;
+    
+    // Find distance between bot and point
+    double dist = getDist(botPt, point);
+    
+    // Convert the bot's pose to a string
+    char rid[3] = {'\0'};
+    rid[0] = bot.botId[0];
+    rid[1] = bot.botId[1];
+    std::string idStr(rid);
+    
+    // Build a string for the robot's transformation
+    std::string transformString = "vicon/";
+    transformString += tfPrefix + idStr + "/" + tfPrefix + idStr;
+    
+    // Find transform from bot to target point
+    geometry_msgs::TransformStamped trackerTarget;
+    try{
+        trackerTarget = tfBuff.lookupTransform(transformString,
+                "world", ros::Time(0));
+    } catch(tf2::LookupException) {
+        ROS_ERROR("Can't find transform %s!", transformString.c_str());
+        return 10000.0; // Arbitrarily large distance, cm
+    }
+
+    // Transform the point
+    geometry_msgs::Point pointTransformed;
+    tf2::doTransform<geometry_msgs::Point>(point, pointTransformed, trackerTarget);
+    pointTransformed.z = 0; // why not
+
+    // Find angle between bot and point
+    double degrees = 0;
+    if(pointTransformed.x < 0)
+        degrees = atan(pointTransformed.y / pointTransformed.x) * 180 / 3.14159265;
+    else
+        degrees = (atan(pointTransformed.y / pointTransformed.x) * 180 / 3.14159265) + 180;
+    if(degrees < 0) degrees += 360;
+    
+    // Build a command for this specific bot
+    wvu_swarm_std_msgs::robotcommand thisCmd;
+    thisCmd.rid = bot.botId;
+    thisCmd.r = dist;
+    thisCmd.theta = degrees;
+    
+    // Add command to the vector
+    outputMsg.commands.push_back(thisCmd);
+    
+    return dist;
 }

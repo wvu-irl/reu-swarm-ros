@@ -562,8 +562,8 @@ private:
             if (!trans.Occluded && !quat.Occluded)
             {
               // Define the transform using the datastream info
-              transform.setOrigin(tf::Vector3(trans.Translation[0] / 1000, trans.Translation[1] / 1000,
-                                                    trans.Translation[2] / 1000));
+              transform.setOrigin(tf::Vector3(trans.Translation[0] / 20, trans.Translation[1] / 20,
+                                                    trans.Translation[2] / 20));
               transform.setRotation(tf::Quaternion(quat.Rotation[0], quat.Rotation[1], quat.Rotation[2],
                                                          quat.Rotation[3]));
 

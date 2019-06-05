@@ -2,7 +2,7 @@
 	<node pkg="vicon_demo" type="tracking_demo" name="tracker" output="screen">
                 <param name="vicon_array_topic" value="/vicon_array" type="str" />
                 <param name="advertise_topic" value="execute" type="str" />
-                <param name="transform_topic" value="vicon/cardbot_AA/cardbot_AA" type="str" />
+                <param name="transform_prefix" value="cardbot_" type="str" />
                 <param name="lemniscate_constant" value="50" type="int" />
                 <param name="lemniscate_interval" value="10" type="int" />
                 <param name="cutoff_radius" value="5" type="int" />
