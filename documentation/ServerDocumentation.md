@@ -39,14 +39,9 @@ To connect from a device
 #### Topics
 Execution topic (``execute``)
 
+- Uses message type [robot_command_array.msg](MessageTypes.md#robot___command___array)
 
-
-- Uses message type ``robotcommand.msg`` to send messages
-    - The message will change depending on swarm objectives
-    - ``rid`` is the robot id represented as two ``uint8``'s containing a state abbreviation
-    - ``r`` is the radius/velocity the roobot needs to meet
-    - ``theta`` is the pose/angle the robot needs to meet in degrees  
-
+- Uses message type [robot_command.msg](MessageTypes.md#robot_command) to send messages
 
 
 - The robot specified in the RID in the message will be the only robot to recieve the message
@@ -60,7 +55,7 @@ From device (``from_arduino``)
 
 
 
-- Uses message type ``sensor_data`` to return sensor data
+- Uses message type [sensor_data](MessageTypes.md#sensor_data) to return sensor data
     - Currently uses a char[32] to return data **this will change** depending on sensors on robots
     
 #### File Specifics
