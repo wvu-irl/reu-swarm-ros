@@ -32,6 +32,7 @@ typedef struct Bot //The Bot struct holds the pose of a robot, along with its di
 	{
 		id[0] = _id.at(0);
 		id[1] = _id.at(1);
+
 		x = _x;
 		y = _y;
 		heading = _heading;
@@ -45,6 +46,7 @@ typedef struct Bot //The Bot struct holds the pose of a robot, along with its di
 	float distance; //is squared
 } Bot;
 
+
 bool compareTwoBots(Bot &a, Bot &b) // Reverses the > operator to sort smallest first instead
 {
 	return (float) a.distance > (float) b.distance;
@@ -52,7 +54,8 @@ bool compareTwoBots(Bot &a, Bot &b) // Reverses the > operator to sort smallest 
 
 static const int BOT_COUNT = 50; // Number of bots in the system
 static const int NEIGHBOR_COUNT = 4; // Number of neighbors desired
-//static const float PI = 3.141592;
+static const int OBS_POINT_COUNT = 4; //random number of obstacles
+
 //Acts as a parser for the data coming out of the VICON or the simulation, turning the bundle of data into 50 packets
 // of individualized information for each swarm bot, allowing them to enact their agent level rules.
 class Processor
@@ -75,17 +78,21 @@ private:
 public:
 	Processor(int a); //Default constructor, dummy parameter is there for compile reasons?
 
-	Processor(Bot _bots[]); //Constructor given a predetermined set of bots
+
+	Processor(Bot _bots[], std::pair<float, float> _obs[]); //Constructor given a predetermined set of bots
+
 
 	void init(); //Does nothing for now
 
 	void processVicon(wvu_swarm_std_msgs::viconBotArray data); //Fills in bots[]
+
 
 	void printBots();
 
 	void printBotMail(); //Prints botMail[] to the console
 
 	void printAliceMail(wvu_swarm_std_msgs::aliceMailArray msg);
+
 
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
 
@@ -94,3 +101,4 @@ public:
 
 //#include "Processor.cpp"
 #endif
+
