@@ -8,7 +8,7 @@
 		<param name="publish_markers" value="false" type="bool" />
 		<param name="publish_transform" value="false" type="bool" />
 
-                <param name="swarmbot_prefix" value="cardbot_" type="str" />
+        <param name="swarmbot_prefix" value="cardbot_" type="str" />
 		
 		</node>
 </launch>
