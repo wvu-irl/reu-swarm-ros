@@ -7,7 +7,7 @@ import math
 import rospy
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import String
-from wvu_swarm_std_msgs.msg import executeVector
+from wvu_swarm_std_msgs.msg import robot_command
 from wvu_swarm_std_msgs.msg import aliceMailArray
 #alice_mail/3
 
@@ -34,7 +34,8 @@ class Robot:
 		rospy.init_node(name, anonymous=False)	
 		self.name = rospy.get_param('~id')
 		ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
-		execute_pub = rospy.Publisher('execute', executeVector, queue_size = self.MAILBOX)
+		ex_string = "execute_" + self.name
+		execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
 		rospy.Subscriber("ideals", Float64MultiArray, callback)
 		sub_string = "alice_mail_" + self.name
 		rospy.Subscriber(sub_string, aliceMailArray, self.callToModel)
@@ -55,10 +56,10 @@ class Robot:
 	
 			ideal = Float64MultiArray(data=model.generateIdeal())
 			ideal_pub.publish(ideal)
-			compromise = executeVector()
-			compromise.ID = self.name
-			compromise.heading = compromise_vector[0]
-			compromise.magnitude = compromise_vector[1]
+			compromise = robot_command()
+			compromise.rid = list(self.name)
+			compromise.theta = float(compromise_vector[0])
+			compromise.r = float(compromise_vector[1])
 			execute_pub.publish(compromise)
 			rospy.spin()
 			self.rate.sleep()
