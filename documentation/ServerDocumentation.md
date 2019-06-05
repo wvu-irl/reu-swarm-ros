@@ -6,7 +6,7 @@
 [- Documentation](#documentation) 
 
 ## Running
-To run the server the node ``ros_to_ardino_server`` must be started 
+To run the server the node `ros_to_ardino_server` must be started 
 
 
 
@@ -80,6 +80,8 @@ This documentation is also attached to the source as well
 
 **This is a node**
 
+[Source code](https://github.com/wvu-irl/reu-swarm-ros/blob/master/swarm_ws/src/swarm_server/src/ros_to_arduino_server.cpp)
+
 functions:
 
 - ``flagger``:
@@ -134,6 +136,10 @@ globals:
 
 *NOTE: Only inlcude the header file*
 
+[Code for header](https://github.com/wvu-irl/reu-swarm-ros/blob/master/swarm_ws/src/swarm_server/src/arduino_server.h)
+
+[Code for source](https://github.com/wvu-irl/reu-swarm-ros/blob/master/swarm_ws/src/swarm_server/src/arduino_server_source.cpp)
+
 functions:
 
 - `sendCommandToRobots`
@@ -175,9 +181,13 @@ structs/classes:
 
 ##### `robot_id.h`
 
+[Source code (in the main file)](https://github.com/wvu-irl/reu-swarm-ros/blob/master/swarm_ws/src/swarm_server/src/robot_id.h)
+
+[Source code (in include)](https://github.com/wvu-irl/reu-swarm-ros/blob/master/swarm_ws/src/swarm_server/include/swarm_server/robot_id.h)
+
 This header is here to convert from a numeric id to a `uint8[2]` or `string` id
 
-**If you change the one in `src` do not forget the one in the include folder**
+**If you change the one in src do not forget the one in the include folder**
 
 feilds/globals:
 
