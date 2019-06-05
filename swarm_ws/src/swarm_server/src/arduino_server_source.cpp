@@ -218,9 +218,9 @@ int beginServer(std::function<void(command)> command_callback,
         puts("SERVER: getting client IP");
 #endif
 			// getting client IP for printing
-			char *client_ip = inet_ntoa(
-					((struct sockaddr_in *) &connection_addr)->sin_addr);
-			info_callback("Connected to %s:4321", client_ip);
+//			char *client_ip = inet_ntoa(
+//					((struct sockaddr_in *) &connection_addr)->sin_addr);
+//			info_callback("Connected to %s:4321", client_ip);
 
 			// collecting arguments for client thread
 			struct client_param clinet_args = (struct client_param
