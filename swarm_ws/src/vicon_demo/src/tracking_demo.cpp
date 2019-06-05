@@ -17,6 +17,7 @@
 #include <wvu_swarm_std_msgs/viconBot.h>
 #include <wvu_swarm_std_msgs/viconBotArray.h>
 #include <wvu_swarm_std_msgs/typedPoint.h>
+#include <wvu_swarm_std_msgs/robotcommand.h>
 
 void msgCallback(const wvu_swarm_std_msgs::viconBotArray &msg) {}
 
@@ -39,25 +40,26 @@ int main(int argc, char **argv)
     ros::Publisher pub;
     ros::Subscriber sub;
     
-    // Import parameters from launchfile
     //  Where to get the array of bots, what topic to advertise, where to get transform of target
     std::string viconArrayTopic, advertiseTopic, transfromTopic;
+    
     //  Value of 'a' in formula in cm, value to iterate degrees, distance to "find" points at
     int lemniscateConstant, lemniscateInterval, cutoffRadius;
     
-    if(!n_priv.param<std::string>("vicon_array_topic", viconArrayTopic, "/viconArray")) ROS_ERROR("Can't load array param");
-    if(!n_priv.param<std::string>("advertise_topic", advertiseTopic, "tracker_demo")) ROS_ERROR("Can't load advertise param");
-    if(!n_priv.param<std::string>("transform_topic", transfromTopic, "vicon/swarmbot_AA/swarmbot_AA")) ROS_ERROR("Can't load transform param");
-    if(!n_priv.param<int>("lemniscate_constant", lemniscateConstant, 50)) ROS_ERROR("Can't load 'a' param");
-    if(!n_priv.param<int>("lemniscate_interval", lemniscateInterval, 10)) ROS_ERROR("Can't load interval param");
-    if(!n_priv.param<int>("cutoff_radius", cutoffRadius, 10)) ROS_ERROR("Can't load cutoff param");
+    // Import parameters from launchfile
+    n_priv.param<std::string>("vicon_array_topic", viconArrayTopic, "/viconArray");
+    n_priv.param<std::string>("advertise_topic", advertiseTopic, "execute");
+    n_priv.param<std::string>("transform_topic", transfromTopic, "vicon/cardbot_AA/cardbot_AA");
+    n_priv.param<int>("lemniscate_constant", lemniscateConstant, 50);
+    n_priv.param<int>("lemniscate_interval", lemniscateInterval, 10);
+    n_priv.param<int>("cutoff_radius", cutoffRadius, 10);
     
     // Sets loop rate at 100Hz
     ros::Rate rate(100);
     
-    // Subscribe to tracker's vicon topic, publish result vector
+    // Subscribe to tracker's vicon topic, advertise result vector
     sub = n.subscribe(viconArrayTopic, 10, &msgCallback);
-    pub = n.advertise<wvu_swarm_std_msgs::rtheta>(advertiseTopic, 1000);
+    pub = n.advertise<wvu_swarm_std_msgs::robotcommand>(advertiseTopic, 1000);
     
     // Set up transform listener
     tf2_ros::Buffer tfBuffer;
@@ -145,9 +147,10 @@ int main(int argc, char **argv)
         if(degrees < 0) degrees += 360;
         
         // Put into rtheta form, publish
-        wvu_swarm_std_msgs::rtheta output;
-        output.radius = distance;
-        output.degrees = degrees;
+        wvu_swarm_std_msgs::robotcommand output;
+        output.rid = {(uint8_t)'A', (uint8_t)'A'};
+        output.r = distance;
+        output.theta = degrees;
         pub.publish(output);
         
         ros::spinOnce();
