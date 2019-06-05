@@ -13,9 +13,8 @@ class VectorQueue:
     def addVector(self, to_add):
         self.vector_queue.append(to_add)
 
-    
     def queueUpdate(self, data):
-        print(data)
+        self.addVector(data)
         
     def returnFirst(self):
         return self.vector_queue.pop()
