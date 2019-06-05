@@ -77,7 +77,7 @@ void Processor::init()
 {
 }
 
-void Processor::processVicon(wvu_swarm_std_msgs::viconBotArray data) //Fills in bots[]
+void Processor::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills in bots[]
 {
 
 	for (size_t i = 0; i < data.poseVect.size(); i++)

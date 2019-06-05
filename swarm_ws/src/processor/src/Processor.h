@@ -5,7 +5,7 @@
 #include "std_msgs/String.h"
 #include <wvu_swarm_std_msgs/aliceMail.h>
 #include <wvu_swarm_std_msgs/aliceMailArray.h>
-#include <wvu_swarm_std_msgs/viconBotArray.h>
+#include <wvu_swarm_std_msgs/vicon_bot_array.h>
 
 typedef struct Bot //The Bot struct holds the pose of a robot, along with its distance from another.
 {
@@ -84,7 +84,7 @@ public:
 
 	void init(); //Does nothing for now
 
-	void processVicon(wvu_swarm_std_msgs::viconBotArray data); //Fills in bots[]
+	void processVicon(wvu_swarm_std_msgs::vicon_bot_array data); //Fills in bots[]
 
 
 	void printBots();
