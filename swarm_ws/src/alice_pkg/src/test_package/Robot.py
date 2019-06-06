@@ -9,6 +9,7 @@ from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import String
 from wvu_swarm_std_msgs.msg import robot_command
 from wvu_swarm_std_msgs.msg import alice_mail_array
+import time
 #alice_mail/3
 
 def callback(data):
@@ -61,8 +62,6 @@ class Robot:
 			compromise.theta = float(compromise_vector[0])
 			compromise.r = float(compromise_vector[1])
 			execute_pub.publish(compromise)
-			rospy.spin()
-			self.rate.sleep()
-
-			self.running = False #breaks loop in tests
+			rospy.spinOnce()
+			time.sleep(0.010)
 
