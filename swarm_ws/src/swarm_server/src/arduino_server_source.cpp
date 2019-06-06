@@ -168,8 +168,8 @@ int beginServer(std::function<void(command)> command_callback,
 		sprintf(err, "Error binding to socket %d", errno); // making an error message that tells what went wrong
 																											 // with binding the socket
 		error_callback(err);
-		exit(1); // crash out
 		throw "Binding failure";
+		exit(1); // crash out
 	}
 #if DEBUG_CPP
     puts("SERVER: Listening to socket");
