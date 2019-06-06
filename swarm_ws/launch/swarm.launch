@@ -171,6 +171,8 @@
 	</node>
 	-->
 	
+	<!-- Funnel to server from alice nodes -->
+	<node pkg="swarm_server" name="funnel" type="funnel"/>
 		
 	<!-- Launching server node -->
 	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server"/>
