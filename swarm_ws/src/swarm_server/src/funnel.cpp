@@ -37,7 +37,10 @@ void *listeningThread(void *arg0)
 	std::string topic; // constructing topic name
 	char temp_topic_string[16] =
 	{ '\0' };
-	sprintf(temp_topic_string, "execute_%d", id);
+	if (id > 9)
+		sprintf(temp_topic_string, "execute_%d", id);
+	else
+		sprintf(temp_topic_string, "execute_0%d", id);
 	topic = std::string(temp_topic_string);
 	ROS_INFO("Subscribing to : %s", topic.c_str()); // checking
 	ros::Subscriber exe = n.subscribe(topic, 1000, compressionCallback); // subscribing to topic
