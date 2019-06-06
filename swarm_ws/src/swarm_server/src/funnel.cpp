@@ -6,11 +6,10 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/io.hpp>
 
 // using a thread safe vector to collect data
-boost::numeric::ublas::vector<wvu_swarm_std_msgs::robot_command> g_commands;
+static bool g_writing = false;
+std::vector<wvu_swarm_std_msgs::robot_command> g_commands;
 
 // struct for passing arguments to the threads
 struct arg_struct
@@ -23,7 +22,23 @@ struct arg_struct
 // callback for subscription
 void compressionCallback(wvu_swarm_std_msgs::robot_command msg)
 {
-	g_commands.insert_element(g_commands.size() - 1, msg); // appending to the vector
+	// spinning lock
+	ros::Rate wait_rate(100);
+	wait: while (g_writing)
+	{
+		wait_rate.sleep();
+	}
+
+	// writing
+	if (!g_writing)
+	{
+		g_writing = true;
+		g_commands.push_back(msg); // appending to the vector
+	}
+	else
+	{
+		goto wait;
+	}
 }
 
 // thread that use being used to collect robot commands
@@ -44,7 +59,7 @@ void *listeningThread(void *arg0)
 	ROS_INFO("Subscribed to  : %s", topic.c_str()); // checking
 
 	ros::Rate t_rate(100);
-	while(ros::ok())
+	while (ros::ok())
 	{
 		args->spinner.spin();
 		t_rate.sleep();
@@ -93,9 +108,8 @@ int main(int argc, char **argv)
 			{
 				cmds.commands.push_back(g_commands[i]);
 			}
-
-			fin_exe.publish(cmds); // sending to server
 			g_commands.clear();
+			fin_exe.publish(cmds); // sending to server
 		}
 
 		run_rate.sleep();
