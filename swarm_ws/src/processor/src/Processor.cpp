@@ -248,7 +248,6 @@ wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns in
 
 	for (int j = 0; j < num_pts; j++)
 	{
-	//if ((j < num_pts) && (num_pts >0))
 		wvu_swarm_std_msgs::obs_point_mail current;
 		current.radius = polar_obs[i].at(j).first;
 		current.theta =  polar_obs[i].at(j).second;
