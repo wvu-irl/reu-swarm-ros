@@ -24,7 +24,7 @@ class Model:
         while ideal == None:
             ideal_tuple = (#self.rules.avoidObstacles(self.obstacles, tolerance),
                            self.rules.avoidRobots(self.robots, tolerance),
-                           self.rules.maintainSpacing(self.robots, tolerance),
+                           #self.rules.maintainSpacing(self.robots, tolerance),
                            self.rules.goToTarget(self.targets, tolerance))
                            #self.rules.matchAngle(self.robots, tolerance),
                            #self.rules.matchSpeed(self.robots, self.speed, tolerance))
