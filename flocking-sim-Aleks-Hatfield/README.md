@@ -1,7 +1,5 @@
 # Flocking Sim Aleks Hatfield
 
-This attempts to simulate flocking behavior, through bodies. the bodies exist on a two-dimensional plane and function through three rules -- alignment, cohesion, and separation.
-
 - Alignment causes bodies to match velocity of nearby bodies.
 - Cohesion causes bodies to seek the center of mass of the nearest clump of bodies.
 - Separation prevents bodies from getting too close to each other.
