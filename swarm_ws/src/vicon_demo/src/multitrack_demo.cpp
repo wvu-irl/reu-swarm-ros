@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     n_priv.param<int>("cutoff_radius", cutoffRadius, 10);
     
     // Sets loop rate at 100Hz
-    ros::Rate rate(100);
+    ros::Rate rate(10);
     
     // Subscribe to tracker's vicon topic, advertise result vector
     sub = n.subscribe(viconArrayTopic, 10, &msgCallback);
