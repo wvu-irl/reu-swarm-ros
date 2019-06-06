@@ -239,24 +239,23 @@ void Processor::findNeighbors()
 	}
 }
 
+
 wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns information to be sent to Alice into a msg
 {
 	int num_pts = polar_obs[i].size(); //number of obs pts near this bot.
 
 	wvu_swarm_std_msgs::alice_mail_array _aliceMailArray;
 
-	//std::cout<<"size of obsPointMail = "<<_aliceMailArray.obsPointMail.size()<<"\n";
+	for (int j = 0; j < num_pts; j++)
+	{
+		wvu_swarm_std_msgs::obs_point_mail current;
+		current.radius = polar_obs[i].at(j).first;
+		current.theta =  polar_obs[i].at(j).second;
+		_aliceMailArray.obsPointMail.push_back(current);
+	}
 
 	for (int j = 0; j < NEIGHBOR_COUNT; j++) //Transfers fields of the struct to fields of the msg
 	{
-		if ((j < num_pts) && (num_pts >0))
-		{
-			wvu_swarm_std_msgs::obs_point_mail current;
-			current.radius = polar_obs[i].at(j).first;
-			current.theta =  polar_obs[i].at(j).second;
-			_aliceMailArray.obsPointMail.push_back(current);
-		}
-
 		if (botMail[i][j].y - bots[i].y > 0)
 		{
 			_aliceMailArray.neighborMail[j].theta = fmod(
