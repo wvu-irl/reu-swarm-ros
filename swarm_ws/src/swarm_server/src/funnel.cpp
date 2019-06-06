@@ -39,6 +39,7 @@ void compressionCallback(wvu_swarm_std_msgs::robot_command msg)
 	{
 		goto wait;
 	}
+	g_writing = false;
 }
 
 // thread that use being used to collect robot commands

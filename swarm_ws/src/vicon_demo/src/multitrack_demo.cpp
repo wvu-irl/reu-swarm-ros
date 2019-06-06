@@ -41,7 +41,7 @@ double processBot(wvu_swarm_std_msgs::robot_command_array &outputMsg, std::strin
 int main(int argc, char **argv)
 {
     // Initialize a node
-    ros::init(argc, argv, "multitrack");
+    ros::init(argc, argv, "alicetrack");
     
     // Generates nodehandle, publisher, subscribers
     ros::NodeHandle n;
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     n_priv.param<int>("cutoff_radius", cutoffRadius, 10);
     
     // Sets loop rate at 100Hz
-    ros::Rate rate(10);
+    ros::Rate rate(25);
     
     // Subscribe to tracker's vicon topic, advertise result vector
     sub = n.subscribe(viconArrayTopic, 10, &msgCallback);
