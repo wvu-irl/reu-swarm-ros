@@ -78,6 +78,7 @@ int main(int argc, char **argv)
 			}
 
 			fin_exe.publish(cmds); // sending to server
+			g_commands.clear();
 		}
 	}
 
