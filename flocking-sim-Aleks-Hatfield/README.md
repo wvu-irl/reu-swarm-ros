@@ -4,7 +4,7 @@
 - Cohesion causes bodies to seek the center of mass of the nearest clump of bodies.
 - Separation prevents bodies from getting too close to each other.
 
-The algorithm was originally formulated by Craig Reynolds. Base code by Jorge Yanar.
+Base code by Yanar.
 
 ## Running the simulation
 
