@@ -32,7 +32,6 @@ class Robot:
 	def __init__(self, name):
 		rospy.init_node(name, anonymous=False)	
 		self.name = '%02d' % int(rospy.get_param('~id'))
-		print(self.name)
 		ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
 		ex_string = "execute_" + self.name
 		execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
@@ -42,25 +41,24 @@ class Robot:
 		
 		self.rate = rospy.Rate(10)
 		while not rospy.is_shutdown():
-			self.model = Model(self.speed)
+                        self.model = Model(self.speed)
 			#run loops to update model
 			#model.addObstacle((math.pi/2, 15))
 			#model.addObstacle((4 * math.pi/7 , 30))
 			self.model.addRobot((math.pi/2, 10, 0.9, math.pi/2))
 			self.model.addRobot((3*math.pi/2, 10, 0.7, math.pi/2))
-			self.model.addTarget((math.pi/2, 5))
 	
 			#accept sensor input to model
 			self.vector_queue.addVector(self.model.generateIdeal())
 			compromise_vector = self.vector_queue.createCompromise()
+			print (compromise_vector)
 	
 			ideal = Float64MultiArray(data=self.model.generateIdeal())
 			ideal_pub.publish(ideal)
 			compromise = robot_command()
-			compromise.rid = list(self.name)
+			compromise.rid = [ord(self.name[0]), ord(self.name[1])]
 			compromise.theta = float(compromise_vector[0])
 			compromise.r = float(compromise_vector[1])
 			execute_pub.publish(compromise)
 			self.rate.sleep()
-			rospy.spin()
 
