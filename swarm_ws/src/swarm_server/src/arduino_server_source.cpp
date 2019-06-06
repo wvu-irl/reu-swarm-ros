@@ -126,7 +126,8 @@ void *runClient(void *args)
 int beginServer(std::function<void(command)> command_callback,
 		std::function<void(const char *, void *)> info_callback,
 		std::function<void(const char *)> error_callback,
-		std::function<bool()> exit_condition_callback)
+		std::function<bool()> exit_condition_callback,
+		std::function<void(const char *)> warn_callback)
 {
 #if DEBUG_CPP
     puts("SERVER: Getting socket");
@@ -168,6 +169,7 @@ int beginServer(std::function<void(command)> command_callback,
 																											 // with binding the socket
 		error_callback(err);
 		exit(1); // crash out
+		throw "Binding failure";
 	}
 #if DEBUG_CPP
     puts("SERVER: Listening to socket");
@@ -209,7 +211,8 @@ int beginServer(std::function<void(command)> command_callback,
 #endif
 		if (connection_descriptor == -1)
 		{
-			error_callback("Error accepting connection.");
+			// TODO change to warn
+			warn_callback("Error accepting connection.");
 			continue;
 		}
 		else

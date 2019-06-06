@@ -98,6 +98,7 @@ void runClient(std::function<void(command)> command_callback,
 int beginServer(std::function<void(command)> command_callback,
 		std::function<void(const char *, void *)> info_callback,
 		std::function<void(const char *)> error_callback,
-		std::function<bool()> exit_condition_callback);
+		std::function<bool()> exit_condition_callback,
+		std::function<void(const char *)> warn_callback);
 #include "arduino_server_source.cpp"
 #endif

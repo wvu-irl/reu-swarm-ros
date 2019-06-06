@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 	{
 		// creating a struct
 		struct arg_struct args =
-		{ n, i, spinner };
+		{ n, (int) i, spinner };
 		// creating a thread to subscribe to the robot topics
 		pthread_attr_t attr;
 		pthread_attr_init(&attr);

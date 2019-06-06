@@ -120,6 +120,11 @@ bool keepAlive()
 	return ros::ok() || !g_flag;
 }
 
+void warnInfo(const char *str)
+{
+	ROS_WARN(str, NULL);
+}
+
 // main
 int main(int argc, char **argv)
 {
@@ -136,7 +141,7 @@ int main(int argc, char **argv)
 	pthread_create(&tid, &attr, controlThread, &n);
 
 	// starting server
-	beginServer(commandCallback, info, errorCallBack, keepAlive);
+	beginServer(commandCallback, info, errorCallBack, keepAlive, warnInfo);
 
 	// waiting for thread to die
 	pthread_join(tid, NULL);
