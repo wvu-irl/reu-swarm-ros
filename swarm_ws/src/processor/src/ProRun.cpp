@@ -70,7 +70,11 @@ int main(int argc, char **argv)
 		wvu_swarm_std_msgs::vicon_bot_array tempBotArray =
 				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_bot_array
 						> ("vicon_array"));
+		wvu_swarm_std_msgs::vicon_points tempTarget =
+						*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
+								> ("vicon_points"));
 
+		bigbrain.processPoints(tempTarget);
 		bigbrain.processVicon(tempBotArray);
 		bigbrain.findNeighbors();
 

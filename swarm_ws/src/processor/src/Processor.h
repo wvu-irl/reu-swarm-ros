@@ -6,6 +6,7 @@
 #include <wvu_swarm_std_msgs/neighbor_mail.h>
 #include <wvu_swarm_std_msgs/alice_mail_array.h>
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
+#include <wvu_swarm_std_msgs/vicon_points.h>
 
 typedef struct Bot //The Bot struct holds the pose of a robot, along with its distance from another.
 {
@@ -65,7 +66,7 @@ private:
 	Bot botMail[BOT_COUNT][NEIGHBOR_COUNT]; //Stores the information to be sent to Alice
 
 	std::vector<std::pair<float, float>> obs; //vector of all obstacle points
-
+	std::vector<std::pair<float, float>> target;
 	//each bot has a vector of obs pairs it can "see". Pairs are form (r,theta).
 	ros::Timer timer;
 	ros::Publisher pub;
@@ -82,6 +83,8 @@ public:
 
 	void processVicon(wvu_swarm_std_msgs::vicon_bot_array data); //Fills in bots[]
 
+	void processPoints(wvu_swarm_std_msgs::vicon_points data);
+
 	void printBots();
 
 	void printBotMail(); //Prints botMail[] to the console
@@ -89,6 +92,8 @@ public:
 	void printAliceMail(wvu_swarm_std_msgs::alice_mail_array msg); //prints alice_mail_array
 
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
+
+	wvu_swarm_std_msgs::obs_point_mail createTargetMail(int i);
 
 	wvu_swarm_std_msgs::neighbor_mail createNeighborMail(int i, int j); //Creates a neighbor_mail msg
 

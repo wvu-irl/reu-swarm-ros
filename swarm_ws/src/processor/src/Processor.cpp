@@ -76,6 +76,16 @@ void Processor::init()
 {
 }
 
+void Processor::processPoints(wvu_swarm_std_msgs::vicon_points data) //Fills in targets
+{
+
+	for (size_t i = 0; i < data.point.size(); i++)
+	{
+		std::pair<float,float> temp(data.point[i].x,data.point[i].y);
+		target.push_back( temp);
+	}
+}
+
 void Processor::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills in bots[]
 {
 
@@ -226,6 +236,17 @@ wvu_swarm_std_msgs::neighbor_mail Processor::createNeighborMail(int i, int j)
 	return _neighborMail;
 }
 
+wvu_swarm_std_msgs::obs_point_mail Processor::createTargetMail(int i)
+{
+	wvu_swarm_std_msgs::obs_point_mail _targetMail;
+	int num_pts = target.size();
+	for (int j =0; j< num_pts; j++)
+	{
+		_targetMail=getSeparation(bots[i],target.at(j),10000);
+	}
+	return _targetMail;
+}
+
 wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns information to be sent to Alice into a msg
 {
 
@@ -246,6 +267,8 @@ wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns in
 		_aliceMailArray.neighborMail[j] = createNeighborMail(i, j);
 	}
 
+	_aliceMailArray.targetMail=createTargetMail(i);
+	target.clear();
 	return _aliceMailArray;
 
 }

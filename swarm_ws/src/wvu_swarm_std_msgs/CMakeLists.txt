@@ -27,6 +27,8 @@ find_package(catkin REQUIRED COMPONENTS
     rtheta.msg
     vicon_bot.msg
     vicon_bot_array.msg
+    vicon_point.msg
+    vicon_points.msg
     robot_command.msg
     robot_command_array.msg
     sensor_data.msg
