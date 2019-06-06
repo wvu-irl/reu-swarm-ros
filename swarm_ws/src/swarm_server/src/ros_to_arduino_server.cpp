@@ -93,7 +93,7 @@ void *controlThread(void *arg0)
 {
 	signal(SIGINT, flagger);
 	ros::NodeHandle *n = (ros::NodeHandle *) arg0; // passed node handle
-	ros::Subscriber to_ard = n->subscribe("execute", 1000, sendToRobotCallback); // subscribing to movment datastream
+	ros::Subscriber to_ard = n->subscribe("final_execute", 1000, sendToRobotCallback); // subscribing to movment datastream
 	g_from_ard = n->advertise < wvu_swarm_std_msgs::sensor_data
 			> ("from_arduino", 1000); // advertising arduino data
 

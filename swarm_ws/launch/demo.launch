@@ -21,7 +21,7 @@
 	<!-- Launches node to interpret vicon bridge and follow a figure 8 -->
 	<node pkg="vicon_demo" type="tracking_demo" name="tracker" output="screen">
         <param name="vicon_array_topic" value="/vicon_array" type="str" />
-        <param name="advertise_topic" value="execute" type="str" />
+        <param name="advertise_topic" value="final_execute" type="str" />
         <param name="transform_prefix" value="cardbot_" type="str" />
         <param name="lemniscate_constant" value="50" type="int" />
         <param name="lemniscate_interval" value="10" type="int" />
@@ -32,5 +32,5 @@
 	<!-- <node pkg="processor" name="ProRun" type="Processor"/> -->
 			
 	<!-- Launching server node -->
-	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server"/>
+	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server" output="screen"/>
 </launch>

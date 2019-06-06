@@ -31,8 +31,7 @@ class Robot:
 
 	def __init__(self, name):
 		rospy.init_node(name, anonymous=False)	
-		self.name = '%02d' % int(rospy.get_param('~id'))
-		print(self.name)
+		self.name = rospy.get_param('~id')
 		ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
 		ex_string = "execute_" + self.name
 		execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
@@ -42,7 +41,7 @@ class Robot:
 		
 		self.rate = rospy.Rate(10)
 		while not rospy.is_shutdown():
-			self.model = Model(self.speed)
+                        self.model = Model(self.speed)
 			#run loops to update model
 			#model.addObstacle((math.pi/2, 15))
 			#model.addObstacle((4 * math.pi/7 , 30))
@@ -52,6 +51,7 @@ class Robot:
 			#accept sensor input to model
 			self.vector_queue.addVector(self.model.generateIdeal())
 			compromise_vector = self.vector_queue.createCompromise()
+			print (compromise_vector)
 	
 			ideal = Float64MultiArray(data=self.model.generateIdeal())
 			ideal_pub.publish(ideal)
