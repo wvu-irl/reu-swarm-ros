@@ -41,7 +41,7 @@ void *listeningThread(void *arg0)
 	topic = std::string(temp_topic_string);
 	ROS_INFO("Subscribing to : %s", topic.c_str()); // checking
 	ros::Subscriber exe = n.subscribe(topic, 1000, compressionCallback); // subscribing to topic
-`	ROS_INFO("Subscribed to  : %s", topic.c_str()); // checking
+	ROS_INFO("Subscribed to  : %s", topic.c_str()); // checking
 
 	ros::Rate t_rate(100);
 	while(ros::ok())
