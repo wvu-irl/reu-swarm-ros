@@ -138,6 +138,12 @@ target_link_libraries(ros_to_arduino_server
 )
 add_dependencies(ros_to_arduino_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})  
 
+add_executable(funnel src/funnel.cpp)
+target_link_libraries(funnel
+  ${catkin_LIBRARIES}
+)
+add_dependencies(funnel ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})  
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
