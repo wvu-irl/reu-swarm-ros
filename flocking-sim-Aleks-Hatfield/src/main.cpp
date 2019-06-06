@@ -1,10 +1,10 @@
 #include <iostream>
-#include "Game.h"
+#include "Sim.h"
 
 int main()
 {
-    Game game;
-    game.Run();
+    Sim sim;
+    sim.Run();
     return 0;
 }
 
