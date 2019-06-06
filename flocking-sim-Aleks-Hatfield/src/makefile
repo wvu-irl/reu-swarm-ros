@@ -1,3 +1,13 @@
+# $ make
+# $ ./flock-sim
+
+CC = g++
+CFLAGS = -c
+DEBUG = -g
+SFML = -lsfml-graphics -lsfml-window -lsfml-system
+
+all: bodies
+
 bodies: Body.o Flock.o Pvector.o main.o Sim.o
 	$(CC) $(DEBUG) Body.o Flock.o Pvector.o Sim.o main.o -o flock-sim $(SFML)
 
