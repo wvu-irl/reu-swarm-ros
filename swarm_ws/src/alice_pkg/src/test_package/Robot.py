@@ -9,7 +9,6 @@ from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import String
 from wvu_swarm_std_msgs.msg import robot_command
 from wvu_swarm_std_msgs.msg import alice_mail_array
-import time
 #alice_mail/3
 
 def callback(data):
@@ -17,7 +16,6 @@ def callback(data):
 	#Alice.queueUpdate(data)
 
 class Robot:
-	running = True
 	speed = 0.8
 	angle = 0
 	name = 'Alice'
@@ -42,7 +40,7 @@ class Robot:
 		rospy.Subscriber(sub_string, alice_mail_array, self.callToModel)
 		
 		self.rate = rospy.Rate(10)
-		while self.running == True:
+		while not rospy.is_shutdown():
                         self.model = Model(self.speed)
 			#run loops to update model
 			#model.addObstacle((math.pi/2, 15))
@@ -62,6 +60,5 @@ class Robot:
 			compromise.theta = float(compromise_vector[0])
 			compromise.r = float(compromise_vector[1])
 			execute_pub.publish(compromise)
-			rospy.spinOnce()
-			time.sleep(0.010)
+			self.rate.sleep()
 
