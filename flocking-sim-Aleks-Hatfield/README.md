@@ -1,4 +1,4 @@
-# Flocking Sim ALeks Hatfield
+# Flocking Sim Aleks Hatfield
 
 This attempts to simulate flocking behavior, through bodies. the bodies exist on a two-dimensional plane and function through three rules -- alignment, cohesion, and separation.
 
