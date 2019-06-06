@@ -1,0 +1,36 @@
+<launch>
+
+	<!--
+		This is just to demo the robots on a set path
+		only vicon and the server need to run for this
+	-->
+
+	<!-- Launching vicon bridge node -->
+	<node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
+		<param name="stream_mode" value="ClientPull" type="str" />
+		<param name="datastream_hostport" value="192.168.10.1:801" type="str" />
+		<param name="tf_ref_frame_id" value="/world" type="str" />
+	
+		<!-- Don't publish individual points or transforms -->
+		<param name="publish_markers" value="false" type="bool" />
+		<param name="publish_transform" value="false" type="bool" />
+
+		<param name="swarmbot_prefix" value="cardbot_" type="str" />
+	</node>
+	
+	<!-- Launches node to interpret vicon bridge and follow a figure 8 -->
+	<node pkg="vicon_demo" type="multitrack_demo" name="multitrack" output="screen">
+        <param name="vicon_array_topic" value="/vicon_array" type="str" />
+        <param name="advertise_topic" value="final_execute" type="str" />
+        <param name="transform_prefix" value="cardbot_" type="str" />
+        <param name="lemniscate_constant" value="50" type="int" />
+        <param name="lemniscate_interval" value="60" type="int" />
+        <param name="cutoff_radius" value="5" type="int" />
+	</node>
+	
+	<!-- Launching processor node -->
+	<!-- <node pkg="processor" name="ProRun" type="Processor"/> -->
+			
+	<!-- Launching server node -->
+	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server" output="screen"/>
+</launch>

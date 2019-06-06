@@ -68,6 +68,13 @@ class Rules:
             print("Matching speed")
             return (0, avg_speed)
         return None
+
+    def goToTarget(self, targets, tolerance):
+        if tolerance >= 2:
+            target = targets[0]
+            print("Onward!")
+            return (target[1], 1 - math.sin(target[1]))
+        return None
 '''
     This seems extraneous
     Helper for matchAngle
