@@ -51,14 +51,31 @@ int ConnectionInfo::getConnectionDescriptor()
 // structure for all the socket descriptors
 std::vector<ConnectionInfo> *sockets;
 
+// map for quick access
+std::map<int, ConnectionInfo> *registry;
+std::vector<ConnectionInfo> *monitors;
+
 void sendCommandToRobots(command cmd, int recip_rid)
 {
-	for (size_t i = 0; i < sockets->size(); i++) // checking every logged connection
+	// sending directly to recipiant
+	send(registry->at(recip_rid).getConnectionDescriptor(), &cmd, COMMAND_SIZE, 0);
+
+	// checking for monitors
+	if (monitors->size() > 0)
 	{
-		if (sockets->at(i).getRID() == -2 || sockets->at(i).getRID() == recip_rid
-				|| recip_rid == -1) // selecting who is to be send the command
-			send(sockets->at(i).getConnectionDescriptor(), &cmd, sizeof(cmd), 0); // sending the command
+		for (ConnectionInfo ci : *monitors)
+		{
+			send(ci.getConnectionDescriptor(), &cmd, COMMAND_SIZE, 0);
+		}
 	}
+
+	/// old
+//	for (size_t i = 0; i < sockets->size(); i++) // checking every logged connection
+//	{
+//		if (sockets->at(i).getRID() == -2 || sockets->at(i).getRID() == recip_rid
+//				|| recip_rid == -1) // selecting who is to be send the command
+//			send(sockets->at(i).getConnectionDescriptor(), &cmd, sizeof(cmd), 0); // sending the command
+//	}
 }
 
 void sendCommandToRobots(command cmd)
@@ -111,6 +128,14 @@ void *runClient(void *args)
 				int rid = rid_map.at(std::string(num));
 
 				sockets->at(id).setRID(rid); // setting the RID of the related object
+				if (rid == -2)
+				{
+					monitors->push_back(sockets->at(id));
+				}
+				else
+				{
+					registry->insert(std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
+				}
 
 				info_callback("Registered %s", (void *) (buffer->str));
 			}
@@ -134,6 +159,8 @@ int beginServer(std::function<void(command)> command_callback,
 #endif
 
 	sockets = new std::vector<ConnectionInfo>();
+	monitors = new std::vector<ConnectionInfo>();
+	registry = new std::map<int, ConnectionInfo>();
 
 	// starting socket
 	int socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);

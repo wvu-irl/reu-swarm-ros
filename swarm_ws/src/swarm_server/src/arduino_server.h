@@ -34,15 +34,17 @@
 
 #include <functional>
 #include <vector>
+#include <map>
 #include <string>
 
 #define SERVER_PORT 4321 // port number
+#define COMMAND_SIZE 32
 
 // datastructure that is used to send/recieve commands
 // this is using a struct as it is only a public data storing application
 typedef struct
 {
-	char str[32];
+	char str[COMMAND_SIZE];
 } command;
 
 /**
