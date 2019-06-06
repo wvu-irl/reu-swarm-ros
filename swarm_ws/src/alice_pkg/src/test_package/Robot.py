@@ -21,16 +21,16 @@ class Robot:
 	angle = 0
 	name = 'Alice'
 	vector_queue = VectorQueue() #create queue
+        model = Model(speed)
 	MAILBOX = 7 #Sets the number of messeges to hold
 
 	def callToVector(self, data):
-		vector_queue.queueUpdate(data)
+		self.vector_queue.queueUpdate(data)
 
 	def callToModel(self, data):
- 		model.modelUpdate(data)
+ 		self.model.modelUpdate(data)
 
 	def __init__(self, name):
-		
 		rospy.init_node(name, anonymous=False)	
 		self.name = rospy.get_param('~id')
 		ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
@@ -42,19 +42,19 @@ class Robot:
 		
 		self.rate = rospy.Rate(10)
 		while self.running == True:
-			model = Model(self.speed)
+                        self.model = Model(self.speed)
 			#run loops to update model
 			#model.addObstacle((math.pi/2, 15))
 			#model.addObstacle((4 * math.pi/7 , 30))
-			model.addRobot((math.pi/2, 10, 0.9, math.pi/2))
-			model.addRobot((3*math.pi/2, 10, 0.7, math.pi/2))
+			self.model.addRobot((math.pi/2, 10, 0.9, math.pi/2))
+			self.model.addRobot((3*math.pi/2, 10, 0.7, math.pi/2))
 	
 			#accept sensor input to model
-			self.vector_queue.addVector(model.generateIdeal())
+			self.vector_queue.addVector(self.model.generateIdeal())
 			compromise_vector = self.vector_queue.createCompromise()
 			print (compromise_vector)
 	
-			ideal = Float64MultiArray(data=model.generateIdeal())
+			ideal = Float64MultiArray(data=self.model.generateIdeal())
 			ideal_pub.publish(ideal)
 			compromise = robot_command()
 			compromise.rid = list(self.name)

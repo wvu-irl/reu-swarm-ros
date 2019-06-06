@@ -14,7 +14,7 @@
 	</node>
 		
 	<!-- Launching processor node -->
-	<node pkg="processor"  type="ProRun" name="Processor"/>
+	<node pkg="processor"  type="ProRun" name="Processor" output="screen"/>
 		
 	<!-- TODO launch ALICE nodes -->
  	<node pkg="alice_pkg" type="alice" name="alice_0">							
@@ -32,6 +32,8 @@
 	<node pkg="alice_pkg" type="alice" name="alice_4">
 		<param name= "id" value = "4" type = "str"/>  
 	</node>
+	
+	<!--
 	<node pkg="alice_pkg" type="alice" name="alice_5">
 		<param name= "id" value = "5" type = "str"/>  
 	</node>
@@ -50,8 +52,6 @@
 	<node pkg="alice_pkg" type="alice" name="alice_10">
 		<param name= "id" value = "10" type = "str"/>  
 	</node>
-	
-	<!--
 	<node pkg="alice_pkg" type="alice" name="alice_11">
 		<param name= "id" value = "11" type = "str"/>  
 	</node>
@@ -172,8 +172,8 @@
 	-->
 	
 	<!-- Funnel to server from alice nodes -->
-	<node pkg="swarm_server" name="funnel" type="funnel"/>
+	<node pkg="swarm_server" name="funnel" type="funnel" output="screen"/>
 		
 	<!-- Launching server node -->
-	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server"/>
+	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server" output="screen"/>
 </launch>

@@ -33,12 +33,14 @@ void *listeningThread(void *arg0)
 	int id = args->id;
 	ros::NodeHandle n = args->node;
 
-	std::string topic = "execute_" + id; // constructing topic name
+	std::string topic; // constructing topic name
+        char goodgod[16] = {'\0'};
+        sprintf(goodgod, "execute_%d", id);
+        topic = std::string(goodgod);
+        ROS_INFO("Subscribing to : %s", topic.c_str()); // checking
 	ros::Subscriber exe = n.subscribe(topic, 1000, compressionCallback); // subscribing to topic
 
-	ROS_INFO("Subscribing to : %s", topic.c_str()); // checking
-
-	ros::spin(); // allowing callbacks to run
+	//ros::spin(); // allowing callbacks to run
 }
 
 // main
@@ -51,8 +53,10 @@ int main(int argc, char **argv)
 	// creating topic that will have the arrays published to it
 	ros::Publisher fin_exe = n.advertise< wvu_swarm_std_msgs::robot_command_array >("final_execute", 1000);
 
+        ros::MultiThreadedSpinner spinner(50); // Makes a spinner that can handle each thread
+        
 	// creating all the threads that will subscribe to the execution nodes
-	for (size_t i = 0; i < g_commands.size(); i++)
+	for (size_t i = 0; i < 50; i++)
 	{
 		// creating a struct
 		struct arg_struct args;
@@ -81,6 +85,8 @@ int main(int argc, char **argv)
 			g_commands.clear();
 		}
 	}
+        
+        spinner.spin();
 
 	return 0;
 }
