@@ -56,6 +56,7 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "Processor");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("vicon_array", 1000, botCallback); //Subscribes to the Vicon
+	ros::Subscriber sub2 = n.subscribe("target", 1000, botCallback);
 	std::vector < ros::Publisher > pubVector;
 
 	for (int i = 0; i < BOT_COUNT; i++) //Starts publishing to all 50 topics
@@ -72,7 +73,7 @@ int main(int argc, char **argv)
 						> ("vicon_array"));
 		wvu_swarm_std_msgs::vicon_points tempTarget =
 						*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
-								> ("vicon_points"));
+								> ("target"));
 
 		bigbrain.processPoints(tempTarget);
 		bigbrain.processVicon(tempBotArray);
