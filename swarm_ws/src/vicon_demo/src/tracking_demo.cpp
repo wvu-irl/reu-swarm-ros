@@ -29,6 +29,8 @@ double getDist(const geometry_msgs::Point first, const geometry_msgs::Point seco
 //   and a value for an increment in degrees to iterate through 360 degrees
 void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, const double incr);
 
+void butterflyLemn(std::vector<geometry_msgs::POint> &target, const double a, const double incr);
+
 // Method to process a bot's ideal vector
 //   Params: a vector to add the bot's command to, the bot to use, the point to
 //   compare the bot against.
@@ -76,7 +78,7 @@ int main(int argc, char **argv)
     
     // Generate a Gerono Lemniscate (figure 8) as discrete points
     std::vector<geometry_msgs::Point> path;
-    genGeronoLemn(path, lemniscateConstant, lemniscateInterval);
+    butterflyLemn(path, lemniscateConstant, lemniscateInterval);
     
     // Pick one point out of the path
     geometry_msgs::Point currentPoint = path.at(0);
@@ -149,6 +151,29 @@ void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, co
         //   This lemniscate is rotated 90 deg
         temp.x = a * cos(rads) * sin(rads);
         temp.y = a * sin(rads);
+        temp.z = 0; //flatworld
+        
+        // Add to vector
+        target.push_back(temp);
+        
+        ROS_INFO("Added point at %d degrees, or %f rads, at %f, %f, 0\n", t, rads, temp.x, temp.y);
+    }
+}
+
+void butterflyLemn(std::vector<geometry_msgs::POint> &target, const double a, const double incr)
+{
+    // Iterate across 360 degrees
+    for(int t = 0; t < 360; t += incr)
+    {
+        // Create a point
+        geometry_msgs::Point temp;
+        
+        double rads = t * 3.14156265 / 180;
+        
+        // Do math to find its location
+        //   This lemniscate is rotated 90 deg
+        temp.x = a/3.0 * sin(rads) * (exp(cos(rads))-2*cos(4*rads)-(pow(sin(rads/12),5)));
+        temp.y = a/3.0 * cos(rads) * (exp(cos(rads))-2*cos(4*rads)-(pow(sin(5/12),5)));
         temp.z = 0; //flatworld
         
         // Add to vector
