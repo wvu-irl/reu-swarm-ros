@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 
-#define DEBUG 1
+#define DEBUG 0
 
 // using a thread safe vector to collect data
 static bool g_writing = false;
@@ -18,7 +18,6 @@ struct arg_struct
 {
 	ros::NodeHandle node;
 	const int id;
-	ros::MultiThreadedSpinner spinner;
 };
 
 // callback for subscription
@@ -70,7 +69,6 @@ void *listeningThread(void *arg0)
 	ros::Rate t_rate(100);
 	while (ros::ok())
 	{
-		//args->spinner.spin();
 		ros::spinOnce();
 		t_rate.sleep();
 	}
@@ -88,16 +86,17 @@ int main(int argc, char **argv)
 	ros::Publisher fin_exe = n.advertise < wvu_swarm_std_msgs::robot_command_array
 			> ("final_execute", 1000);
 
-	ros::MultiThreadedSpinner spinner(50); // Makes a spinner that can handle each thread
-
 	ros::Rate sub_rate(100);
-	ros::Rate run_rate(100);
+	ros::Rate run_rate(10);
+
+	int thread_count = 0;
 
 	// creating all the threads that will subscribe to the execution nodes
 	for (size_t i = 0; i < 50; i++)
 	{
+		thread_count++;
 		// creating a struct
-		struct arg_struct args = { n, (int) i, spinner };
+		struct arg_struct args = { n, (int) i };
 		// creating a thread to subscribe to the robot topics
 		pthread_attr_t attr;
 		pthread_attr_init(&attr);
@@ -110,7 +109,7 @@ int main(int argc, char **argv)
 	// collecting commands and packaging them for the
 	while (ros::ok())
 	{
-		if (g_commands.size() > 10) // collecting data when there are at least 10 stored commands
+		if (g_commands.size() > thread_count) // collecting data when there are at least 10 stored commands
 		{
 #if DEBUG
 			ROS_INFO("\033[30;42mCollecting stuff\033[0m");
