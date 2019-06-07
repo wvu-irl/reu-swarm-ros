@@ -195,6 +195,7 @@ void Processor::findNeighbors()
 						break;
 					} else
 					{ // This means cur is neither the furthest nor nearest
+
 						botMail[botIndex][0] = temp;
 						smallest = false;
 						std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT, compareTwoBots); // Sorts greatest first
@@ -215,8 +216,9 @@ void Processor::findNeighbors()
 
 wvu_swarm_std_msgs::neighbor_mail Processor::createNeighborMail(int i, int j)
 {
-	wvu_swarm_std_msgs::neighbor_mail _neighborMail;
 
+	wvu_swarm_std_msgs::neighbor_mail _neighborMail;
+	_neighborMail.id = i;
 	if (botMail[i][j].y - bots[i].y > 0)
 	{
 		_neighborMail.theta = fmod(
