@@ -63,11 +63,13 @@ class Processor
 
 private:
 	Bot bots[BOT_COUNT]; //Stores the information from the VICON
+	bool activeBots[BOT_COUNT]; //Keeps track of which bots have been sent around;
 	Bot botMail[BOT_COUNT][NEIGHBOR_COUNT]; //Stores the information to be sent to Alice
 
 	std::vector<std::pair<float, float>> obs; //vector of all obstacle points
 	std::vector<std::pair<float, float>> target;
 	//each bot has a vector of obs pairs it can "see". Pairs are form (r,theta).
+
 	ros::Timer timer;
 	ros::Publisher pub;
 	ros::Subscriber sub;
@@ -98,6 +100,8 @@ public:
 	wvu_swarm_std_msgs::neighbor_mail createNeighborMail(int i, int j); //Creates a neighbor_mail msg
 
 	wvu_swarm_std_msgs::alice_mail_array createAliceMsg(int i); //Compiles all info into a single msg
+
+	bool isActive(int i); //Checks if bot is active
 };
 
 //#include "Processor.cpp"

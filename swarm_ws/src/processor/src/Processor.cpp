@@ -53,12 +53,14 @@ Processor::Processor(int a) //Default constructor, dummy parameter is there for 
 		for (int i = 0; i < BOT_COUNT; i++)
 		{
 			bots[i] = Bot();
+			activeBots[i]=false;
 			for (int j = 0; j < NEIGHBOR_COUNT; j++)
 			{
 				botMail[i][j] = Bot();
 			}
 		}
 	}
+
 }
 
 Processor::Processor(Bot _bots[], std::pair<float, float> _obs[]) //Constructor given a predetermined set of bots
@@ -97,7 +99,7 @@ void Processor::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills i
 		std::string tempID(bid);
 
 		size_t numID = rid_map[tempID];
-
+		activeBots[numID]=true;
 		// the incoming geometry_msgs::Quaternion is transformed to a tf::Quaterion
 		tf::Quaternion quat;
 		tf::quaternionMsgToTF(data.poseVect[i].botPose.transform.rotation, quat);
@@ -177,7 +179,7 @@ void Processor::findNeighbors()
 		int curIndex = 0; // Because we're looping over the array, we have to track the index ourselves
 		for (auto &cur : bots)
 		{
-			if (cur.id[0] == bot.id[0] && cur.id[1] == bot.id[1]) // Check for duplicates
+			if (cur.id[0] == bot.id[0] && cur.id[1] == bot.id[1] && activeBots[botIndex]==true && activeBots[curIndex]==true) // Check for duplicates and nonactive bots
 			{
 				continue;
 			}
@@ -273,4 +275,9 @@ wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns in
 	target.clear();
 	return _aliceMailArray;
 
+}
+
+bool Processor::isActive(int i) //Checks if bot is active
+{
+	return activeBots[i];
 }
