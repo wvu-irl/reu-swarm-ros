@@ -1,7 +1,7 @@
 #ifndef ARDINO_SERVER_SOURCE
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
-#define DEBUG_CPP 1
+#define DEBUG_CPP 0
 
 #include "arduino_server.h"
 
@@ -22,7 +22,7 @@ ConnectionInfo::ConnectionInfo(int connection_descriptor)
 {
 #if DEBUG_CPP
 	puts("SERVER (OBJ): Started connecting info");
-	printf("SERVER (OBJ): descriptor exists: // crash out %d\n",
+	printf("SERVER (OBJ): descriptor exists: %d\n",
 			&connection_descriptor != NULL);
 #endif
 	this->connection_descriptor = connection_descriptor;
@@ -62,7 +62,7 @@ void sendCommandToRobots(command cmd, int recip_rid)
 	puts("SERVER: Got message");
 	printf("key exists: %s\n", registry->find(recip_rid)->first == recip_rid && registry->size() > 0? "true" : "false");
 	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
-		printf("SERVER: sending message: %s\t%d\n", cmd.str,
+		printf("\033[1;32mSERVER: sending message: %s\t%d\033[0m\n", cmd.str,
 				registry->at(recip_rid).getConnectionDescriptor());
 #endif
 
@@ -75,7 +75,7 @@ void sendCommandToRobots(command cmd, int recip_rid)
 	if (monitors->size() > 0)
 	{
 #if DEBUG_CPP
-		printf("SERVER: sending message to monitor: %s\n", cmd.str);
+		printf("SERVER: sending message to monitor: %s\n\n", cmd.str);
 #endif
 		for (ConnectionInfo ci : *monitors)
 		{

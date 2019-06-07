@@ -13,7 +13,7 @@
 #include <functional>
 #include <signal.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
 
@@ -72,14 +72,7 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 		char id[3] = { '\0' };
 		id[0] = msg.rid[0];
 		id[1] = msg.rid[1];
-#if DEBUG
-		ROS_INFO("Got numeric id: %d", rid_map.at(id));
-		ROS_INFO("Constructed message: %s", cmd.str);
-#endif
 		sendCommandToRobots(cmd, rid_map.at(id)); // sending to robots through TCP server
-#if DEBUG
-		ROS_INFO("Sent message");
-#endif
 	}
 }
 

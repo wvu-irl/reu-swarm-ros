@@ -25,8 +25,8 @@ int main(int argc, char **argv)
 
 	// creating recurrent message
 	wvu_swarm_std_msgs::robot_command_array ary;
-	ary.commands.push_back(genCmd("WV", 0.3f, 123.10f));
-	ary.commands.push_back(genCmd("DE", 0.2f, 456.11f));
+	ary.commands.push_back(genCmd("NJ", 0.3f, 123.10f));
+	ary.commands.push_back(genCmd("MA", 0.2f, 456.11f));
 	ary.commands.push_back(genCmd("NH", 0.1f, 789.12f));
 
 	sleep(5);
