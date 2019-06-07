@@ -5,6 +5,9 @@
 #include <SFML/Graphics.hpp>
 #include <swarm_simulation/Body.h>
 
+#include <wvu_swarm_std_msgs/robot_command.h>
+#include <wvu_swarm_std_msgs/robot_command_array.h>
+
 // Global Variables for borders()
 // desktopTemp gets screen resolution of PC running the program
 sf::VideoMode desktopTemp = sf::VideoMode::getDesktopMode();

@@ -3,6 +3,10 @@
 #include <swarm_simulation/Body.h>
 #include <swarm_simulation/Pvector.h>
 #include <swarm_simulation/Sim.h>
+
+#include <wvu_swarm_std_msgs/robot_command.h>
+#include <wvu_swarm_std_msgs/robot_command_array.h>
+
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 //#include "ros/ros.h"
