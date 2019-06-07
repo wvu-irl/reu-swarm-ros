@@ -24,9 +24,10 @@ class Robot:
 	MAILBOX = 7 #Sets the number of messeges to hold
 
 	def callToVector(self, data):
-		for bot in model.robots:
-			if robot[4] == data.data[4]:
-				self.vector_queue.queueUpdate((data.data[0], data.data[1], robot[1], data.data[3], data.data[4]))
+		if len(model.robots) != 0;
+			for bot in model.robots:
+				if robot[4] == data.data[4]:
+					self.vector_queue.queueUpdate((data.data[0], data.data[1], robot[1], data.data[3], data.data[4]))
 
 	def callToModel(self, data):
  		self.model.modelUpdate(data)
