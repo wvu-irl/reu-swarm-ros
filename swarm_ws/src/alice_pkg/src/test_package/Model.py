@@ -41,7 +41,7 @@ class Model:
         print(ideal)
         return ideal
 
-    def addRobot(self, to_add): #Should be of the form (direction, distance, heading)
+    def addRobot(self, to_add): #Should be of the form (direction, distance, heading, ID)
         self.robots.append(to_add)
 
     def addObstacle(self, to_add): #Should be of the form (direction, distance)
@@ -52,7 +52,7 @@ class Model:
 
     def modelUpdate(self, data):
         for bot in data.neighborMail:
-            self.addRobot((bot.theta, bot.distance, bot.heading))
+            self.addRobot((bot.theta, bot.distance, bot.heading, bot.ID))
         for obs in data.obsPointMail:
             self.addObstacle((obs.theta, obs.radius))
         self.addTarget((data.targetMail.radius, data.targetMail.theta))
