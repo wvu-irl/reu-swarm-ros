@@ -80,7 +80,7 @@ class Rules:
             return None
         if tolerance >= 2:
             target = targets[0]
-            print("Onward!")
+            #print("Onward!")
             return (target[0], 1 - math.sin(target[0]/2))
         return None
 '''

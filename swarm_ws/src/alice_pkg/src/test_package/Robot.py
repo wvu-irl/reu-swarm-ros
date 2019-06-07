@@ -20,14 +20,14 @@ class Robot:
 	angle = 0
 	name = 'Alice'
 	vector_queue = VectorQueue() #create queue
-	model = Model(speed, name)
+	model = Model(speed)
 	MAILBOX = 7 #Sets the number of messeges to hold
 
 	def callToVector(self, data):
-		if len(model.robots) != 0;
-			for bot in model.robots:
-				if robot[4] == data.data[4]:
-					self.vector_queue.queueUpdate((data.data[0], data.data[1], robot[1], data.data[3], data.data[4]))
+		if len(self.model.robots) != 0:
+			for bot in self.model.robots:
+				if bot[3] == data.data[4]:
+					self.vector_queue.queueUpdate((data.data[0], data.data[1],  bot[1], data.data[3], data.data[4]))
 
 	def callToModel(self, data):
  		self.model.modelUpdate(data)
@@ -35,6 +35,7 @@ class Robot:
 	def __init__(self, name):
 		rospy.init_node(name, anonymous=False)	
 		self.name = '%02d' % int(rospy.get_param('~id'))
+                self.model.setName(self.name)
 		ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
 		ex_string = "execute_" + self.name
 		execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
@@ -44,13 +45,12 @@ class Robot:
 		
 		self.rate = rospy.Rate(10)
 		while not rospy.is_shutdown():
-			self.model = Model(self.speed, self.name)
 			#run loops to update model
 			#model.addObstacle((math.pi/2, 15))
 			#model.addObstacle((4 * math.pi/7 , 30))
-			self.model.addRobot((math.pi/2, 10, 0.9, math.pi/2))
-			self.model.addRobot((3*math.pi/2, 10, 0.7, math.pi/2))
-			self.model.addTarget((math.pi/2, 5))
+			#self.model.addRobot((math.pi/2, 10, 0.9, math.pi/2))
+			#self.model.addRobot((3*math.pi/2, 10, 0.7, math.pi/2))
+			#self.model.addTarget((math.pi/2, 5))
 	
 			#accept sensor input to model
 			self.vector_queue.addVector(self.model.generateIdeal())
@@ -63,6 +63,8 @@ class Robot:
 			compromise.theta = float(compromise_vector[0])
 			compromise.r = float(compromise_vector[1])
 			execute_pub.publish(compromise)
+                        self.model.clear()
+                        self.vector_queue.clear()
 			self.rate.sleep()
-			rospy.spin()
+			#rospy.spin()
 

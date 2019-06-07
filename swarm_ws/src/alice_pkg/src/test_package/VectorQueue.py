@@ -10,6 +10,10 @@ class VectorQueue:
     def __init__(self, to_add): #for testing only
         self.vector_queue += to_add
     '''
+
+    def clear(self):
+        self.vector_queue = []
+
     def addVector(self, to_add):
         self.vector_queue.append(to_add)
 

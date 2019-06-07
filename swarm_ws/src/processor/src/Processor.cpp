@@ -17,8 +17,7 @@ wvu_swarm_std_msgs::obs_point_mail Processor::getSeparation(Bot _bot, std::pair<
 	float dx; //x separation.
 	float dy; //y separation.
 	wvu_swarm_std_msgs::obs_point_mail polar_point;
-        _obs.first=2;
-        _obs.second=3;
+
 	dx = _obs.first - _bot.x;
 	dy = _obs.second - _bot.y;
 	loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
@@ -184,7 +183,7 @@ void Processor::findNeighbors()
 		int curIndex = 0; // Because we're looping over the array, we have to track the index ourselves
 		for (auto &cur : bots)
 		{
-			if (cur.id[0] == bot.id[0] && cur.id[1] == bot.id[1] && activeBots[botIndex]==true && activeBots[curIndex]==true) // Check for duplicates and nonactive bots
+			if ((cur.id[0] == bot.id[0] && cur.id[1] == bot.id[1])||(activeBots[botIndex]==false && activeBots[curIndex]==false)) // Check for duplicates and nonactive bots
 			{
 				continue;
 			}
