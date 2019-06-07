@@ -44,4 +44,8 @@ add_dependencies(ros_to_arduino_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${cat
 
 add_executable(funnel src/funnel.cpp)
 target_link_libraries(funnel ${catkin_LIBRARIES})
-add_dependencies(funnel ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})  
+add_dependencies(funnel ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}) 
+
+add_executable(testing src/testing.cpp)
+target_link_libraries(testing ${catkin_LIBRARIES})
+add_dependencies(testing ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})   

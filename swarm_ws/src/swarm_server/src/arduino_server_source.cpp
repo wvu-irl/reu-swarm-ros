@@ -1,7 +1,7 @@
 #ifndef ARDINO_SERVER_SOURCE
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
-#define DEBUG_CPP 0
+#define DEBUG_CPP 1
 
 #include "arduino_server.h"
 
@@ -57,25 +57,24 @@ std::vector<ConnectionInfo> *monitors;
 
 void sendCommandToRobots(command cmd, int recip_rid)
 {
+#if DEBUG_CPP
+	printf("SERVER: sending message: %s\t%d\n", cmd.str, registry->at(recip_rid).getConnectionDescriptor());
+#endif
+
 	// sending directly to recipiant
 	send(registry->at(recip_rid).getConnectionDescriptor(), &cmd, COMMAND_SIZE, 0);
 
 	// checking for monitors
 	if (monitors->size() > 0)
 	{
+#if DEBUG_CPP
+		printf("SERVER: sending message to monitor: %s\n", cmd.str);
+#endif
 		for (ConnectionInfo ci : *monitors)
 		{
 			send(ci.getConnectionDescriptor(), &cmd, COMMAND_SIZE, 0);
 		}
 	}
-
-	/// old
-//	for (size_t i = 0; i < sockets->size(); i++) // checking every logged connection
-//	{
-//		if (sockets->at(i).getRID() == -2 || sockets->at(i).getRID() == recip_rid
-//				|| recip_rid == -1) // selecting who is to be send the command
-//			send(sockets->at(i).getConnectionDescriptor(), &cmd, sizeof(cmd), 0); // sending the command
-//	}
 }
 
 void sendCommandToRobots(command cmd)
