@@ -20,11 +20,13 @@ class Robot:
 	angle = 0
 	name = 'Alice'
 	vector_queue = VectorQueue() #create queue
-        model = Model(speed)
+	model = Model(speed, name)
 	MAILBOX = 7 #Sets the number of messeges to hold
 
 	def callToVector(self, data):
-		self.vector_queue.queueUpdate(data)
+		for bot in model.robots:
+			if robot[4] == data.data[4]:
+				self.vector_queue.queueUpdate((data.data[0], data.data[1], robot[1], data.data[3], data.data[4]))
 
 	def callToModel(self, data):
  		self.model.modelUpdate(data)
@@ -32,17 +34,16 @@ class Robot:
 	def __init__(self, name):
 		rospy.init_node(name, anonymous=False)	
 		self.name = '%02d' % int(rospy.get_param('~id'))
-		print(self.name)
 		ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
 		ex_string = "execute_" + self.name
 		execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
-		rospy.Subscriber("ideals", Float64MultiArray, callback)
+		rospy.Subscriber("ideals", Float64MultiArray, self.callToVector)
 		sub_string = "alice_mail_" + self.name
 		rospy.Subscriber(sub_string, alice_mail_array, self.callToModel)
 		
 		self.rate = rospy.Rate(10)
 		while not rospy.is_shutdown():
-			self.model = Model(self.speed)
+			self.model = Model(self.speed, self.name)
 			#run loops to update model
 			#model.addObstacle((math.pi/2, 15))
 			#model.addObstacle((4 * math.pi/7 , 30))
@@ -57,7 +58,7 @@ class Robot:
 			ideal = Float64MultiArray(data=self.model.generateIdeal())
 			ideal_pub.publish(ideal)
 			compromise = robot_command()
-			compromise.rid = list(self.name)
+			compromise.rid = [ord(self.name[0]), ord(self.name[1])]
 			compromise.theta = float(compromise_vector[0])
 			compromise.r = float(compromise_vector[1])
 			execute_pub.publish(compromise)
