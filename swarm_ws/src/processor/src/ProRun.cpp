@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 //     std::cout << "x";
 		for (int i = 0; i < BOT_COUNT; i++) //Publishes msgs to Alices
 		{
-			if (bigbrain.isActive(i));
+			//if (bigbrain.isActive(i))
 			pubVector.at(i).publish(bigbrain.createAliceMsg(i));
 		}
 		ros::spinOnce();

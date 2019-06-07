@@ -17,6 +17,8 @@ wvu_swarm_std_msgs::obs_point_mail Processor::getSeparation(Bot _bot, std::pair<
 	float dx; //x separation.
 	float dy; //y separation.
 	wvu_swarm_std_msgs::obs_point_mail polar_point;
+        _obs.first=2;
+        _obs.second=3;
 	dx = _obs.first - _bot.x;
 	dy = _obs.second - _bot.y;
 	loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
@@ -38,7 +40,9 @@ wvu_swarm_std_msgs::obs_point_mail Processor::getSeparation(Bot _bot, std::pair<
 
 		polar_point.radius = loc_r;
 		polar_point.theta = theta;
-		return polar_point;
+//		polar_point.radius = 2;
+//		polar_point.theta = 2;
+                return polar_point;
 	} else
 	{
 		polar_point.radius = -1;
@@ -84,7 +88,8 @@ void Processor::processPoints(wvu_swarm_std_msgs::vicon_points data) //Fills in 
 	for (size_t i = 0; i < data.point.size(); i++)
 	{
 		std::pair<float,float> temp(data.point[i].x,data.point[i].y);
-		target.push_back( temp);
+		//ROS_INFO("%f, %f", temp.first, temp.second);
+                target.push_back(temp);
 	}
 }
 
@@ -244,10 +249,8 @@ wvu_swarm_std_msgs::obs_point_mail Processor::createTargetMail(int i)
 {
 	wvu_swarm_std_msgs::obs_point_mail _targetMail;
 	int num_pts = target.size();
-	for (int j =0; j< num_pts; j++)
-	{
-		_targetMail=getSeparation(bots[i],target.at(j),10000);
-	}
+        for (std::pair<float, float> thisPair : target){
+            _targetMail = getSeparation(bots[i], thisPair, 10000);}
 	return _targetMail;
 }
 
@@ -272,9 +275,13 @@ wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns in
 	}
 
 	_aliceMailArray.targetMail=createTargetMail(i);
-	target.clear();
+	
 	return _aliceMailArray;
 
+}
+
+void Processor::clearProcessor(){
+    target.clear();
 }
 
 bool Processor::isActive(int i) //Checks if bot is active

@@ -102,6 +102,8 @@ public:
 	wvu_swarm_std_msgs::alice_mail_array createAliceMsg(int i); //Compiles all info into a single msg
 
 	bool isActive(int i); //Checks if bot is active
+
+        void clearProcessor(); //clears target vector
 };
 
 //#include "Processor.cpp"
