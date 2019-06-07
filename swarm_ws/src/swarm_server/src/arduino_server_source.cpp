@@ -77,7 +77,7 @@ void sendCommandToRobots(command cmd, int recip_rid)
 #if DEBUG_CPP
 		printf("SERVER: sending message to monitor: %s\n\n", cmd.str);
 #endif
-		sprintf(cmd.str, "%s(%02d):\t%s", rid_indexing[recip_rid], recip_rid, cmd.str);
+		sprintf(cmd.str, "%s(%02d):\t%s", rid_indexing[recip_rid].c_str(), recip_rid, cmd.str);
 		for (ConnectionInfo ci : *monitors)
 		{
 			send(ci.getConnectionDescriptor(), &cmd, COMMAND_SIZE, 0);
