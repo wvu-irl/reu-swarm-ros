@@ -5,8 +5,13 @@
 #include <SFML/Graphics.hpp>
 #include <swarm_simulation/Body.h>
 
-#include <wvu_swarm_std_msgs/robot_command.h>
-#include <wvu_swarm_std_msgs/robot_command_array.h>
+//msg creation and formating includes
+#include "geometry_msgs/TransformStamped.h"
+#include "geometry_msgs/Vector3.h"
+#include "geometry_msgs/Quaternion.h"
+#include "tf/transform_datatypes.h"
+#include "tf/LinearMath/Matrix3x3.h"
+#include <tf2/LinearMath/Quaternion.h>
 
 // Global Variables for borders()
 // desktopTemp gets screen resolution of PC running the program
@@ -26,6 +31,8 @@ Body::Body(float x, float y)
     acceleration = Pvector(0, 0);
     velocity = Pvector(rand()%3 - 2, rand()%3 - 2);
     location = Pvector(x, y);
+    ID[0] = 'I';
+    ID[1] = 'D';
     maxSpeed = 1.5;
     maxForce = 0.5;
 }
@@ -237,3 +244,50 @@ float Body::angle(Pvector v)
     float angle = (float)(atan2(v.x, -v.y) * 180 / PI);
     return angle;
 }
+//char[2] Body::getID()
+//{
+//	return ID;
+//}
+
+wvu_swarm_std_msgs::vicon_bot_array Body::createMessages(std::vector<Body> _flock)//vector<Body> _flock) //flock is a global.
+{
+	wvu_swarm_std_msgs::vicon_bot_array vb_array;
+	for (int i = 0; i < _flock.size();i++)
+	{
+		wvu_swarm_std_msgs::vicon_bot this_bot;
+		geometry_msgs::TransformStamped this_bot_msg;
+		tf2::Quaternion q;
+		Body cur = _flock.at(i); //current body being looked at.
+
+		float mag = cur.velocity.magnitude();
+		q.setRPY( 0, 0, cur.angle(cur.velocity) - M_PI_2);  // Create this quaternion from roll=0/pitch=0/yaw (in radians)
+		q.normalize();
+
+		//translational information
+		this_bot_msg.transform.translation.x = cur.location.x;
+		this_bot_msg.transform.translation.y = cur.location.y;
+		this_bot_msg.transform.translation.z = 0;
+
+		//rotational information
+		this_bot_msg.transform.rotation.x = q.x();
+		this_bot_msg.transform.rotation.y = q.y();
+		this_bot_msg.transform.rotation.z = q.z();
+		this_bot_msg.transform.rotation.w = q.w();
+
+		//header information
+		this_bot_msg.header.seq = 0;
+		this_bot_msg.header.frame_id = "0";
+		//set child frame dummy val.
+		this_bot_msg.child_frame_id = "0";
+
+		//create the vicon_bot.
+		this_bot.botPose = this_bot_msg;
+		this_bot.botId[0] = cur.ID[0];
+		this_bot.botId[1] = cur.ID[1];
+
+		//add to the vector list
+		vb_array.poseVect.push_back(this_bot);
+	}
+	return vb_array;
+}
+

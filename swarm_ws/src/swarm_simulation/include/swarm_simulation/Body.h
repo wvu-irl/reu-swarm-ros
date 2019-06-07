@@ -2,6 +2,11 @@
 #include <vector>
 #include <stdlib.h>
 #include <iostream>
+#include <wvu_swarm_std_msgs/neighbor_mail.h>
+#include <wvu_swarm_std_msgs/alice_mail_array.h>
+#include <wvu_swarm_std_msgs/vicon_bot_array.h>
+#include <wvu_swarm_std_msgs/vicon_bot.h>
+#include <wvu_swarm_std_msgs/vicon_points.h>
 
 #ifndef BODY_H_
 #define BODY_H_
@@ -29,7 +34,13 @@
 //      current body to seek the center of mass of nearby bodies.
 
 class Body {
+
+private:
+
+	  wvu_swarm_std_msgs::vicon_bot_array createMessages(std::vector<Body> _flock);//vector<Body> _flock); //operates on flock
+		//char[2] getID();
 public:
+		char ID [2];
     bool predator;
     Pvector location;
     Pvector velocity;
