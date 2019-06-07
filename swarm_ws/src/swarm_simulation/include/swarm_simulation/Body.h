@@ -20,7 +20,7 @@
 //  applyForce(Pvector force): Adds the given vector to acceleration
 //
 //  Pvector Separation(vector<Body> Bodies): If any other bodies are within a
-//      given distance, Separation computes a vector that distances the
+//      given distance, Separation computes a a vector that distances the
 //      current body from the bodies that are too close.
 //  Pvector Alignment(vector<Body> Bodies): Computes a vector that causes the
 //      velocity of the current body to match that of bodies that are nearby.
@@ -40,12 +40,10 @@ public:
     Body(float x, float y);
     Body(float x, float y, bool predCheck);
     void applyForce(Pvector force);
-
     // Three Laws that bodies follow
     Pvector Separation(vector<Body> Bodies);
     Pvector Alignment(vector<Body> Bodies);
     Pvector Cohesion(vector<Body> Bodies);
-
     //Functions involving SFML and visualisation linking
     Pvector seek(Pvector v);
     void run(vector <Body> v);
