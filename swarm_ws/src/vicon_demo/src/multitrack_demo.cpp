@@ -41,7 +41,7 @@ double processBot(wvu_swarm_std_msgs::robot_command_array &outputMsg, std::strin
 int main(int argc, char **argv)
 {
     // Initialize a node
-    ros::init(argc, argv, "alicetrack");
+    ros::init(argc, argv, "multitrack");
     
     // Generates nodehandle, publisher, subscribers
     ros::NodeHandle n;

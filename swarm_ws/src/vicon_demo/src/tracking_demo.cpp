@@ -29,7 +29,7 @@ double getDist(const geometry_msgs::Point first, const geometry_msgs::Point seco
 //   and a value for an increment in degrees to iterate through 360 degrees
 void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, const double incr);
 
-void butterflyLemn(std::vector<geometry_msgs::POint> &target, const double a, const double incr);
+void butterflyLemn(std::vector<geometry_msgs::Point> &target, const double a, const double incr);
 
 // Method to process a bot's ideal vector
 //   Params: a vector to add the bot's command to, the bot to use, the point to
@@ -160,7 +160,7 @@ void genGeronoLemn(std::vector<geometry_msgs::Point> &target, const double a, co
     }
 }
 
-void butterflyLemn(std::vector<geometry_msgs::POint> &target, const double a, const double incr)
+void butterflyLemn(std::vector<geometry_msgs::Point> &target, const double a, const double incr)
 {
     // Iterate across 360 degrees
     for(int t = 0; t < 360; t += incr)
