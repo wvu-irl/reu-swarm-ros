@@ -144,7 +144,7 @@ void *runClient(void *args)
 							std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
 				}
 
-				info_callback("Registered %s", (void *) (buffer->str));
+				info_callback("\033[34mRegistered %s\033[0m", (void *) (buffer->str));
 			}
 			else
 				command_callback(*buffer); // sending message to callback

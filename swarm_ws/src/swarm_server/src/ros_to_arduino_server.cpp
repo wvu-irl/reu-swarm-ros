@@ -51,7 +51,7 @@ void commandCallback(command cmd)
 void info(const char *patt, void *dat)
 {
 	std::ostringstream os;
-	os << "SERVER INFO: " << patt;
+	os << "\033[34mSERVER INFO: \033[0m" << patt;
 	std::string full_pattern = os.str();
 	const char *ch_pathh = full_pattern.c_str();
 	ROS_INFO(ch_pathh, dat);
