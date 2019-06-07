@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="swarm_server" name="ros_to_arduino_server" type="ros_to_arduino_server" output="screen"/>
+	<node pkg="swarm_server" name="testing" type="testing" output="screen"/>
+</launch>

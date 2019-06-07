@@ -13,7 +13,7 @@
 #include <functional>
 #include <signal.h>
 
-#define DEBUG 0
+#define DEBUG 1
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
 
@@ -64,15 +64,22 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 {
 	for (wvu_swarm_std_msgs::robot_command msg : msga.commands)
 	{
-		command cmd =
-		{
-		{ '\0' } }; // creating command
+#if DEBUG
+		ROS_INFO("Sending message: %c%c, %f, %f", msg.rid[0], msg.rid[1], msg.r, msg.theta);
+#endif
+		command cmd = { { '\0' } }; // creating command
 		sprintf(cmd.str, "%f,%f", msg.r, msg.theta);
-		char id[3] =
-		{ '\0' };
+		char id[3] = { '\0' };
 		id[0] = msg.rid[0];
 		id[1] = msg.rid[1];
+#if DEBUG
+		ROS_INFO("Got numeric id: %d", rid_map.at(id));
+		ROS_INFO("Constructed message: %s", cmd.str);
+#endif
 		sendCommandToRobots(cmd, rid_map.at(id)); // sending to robots through TCP server
+#if DEBUG
+		ROS_INFO("Sent message");
+#endif
 	}
 }
 
@@ -93,7 +100,8 @@ void *controlThread(void *arg0)
 {
 	signal(SIGINT, flagger);
 	ros::NodeHandle *n = (ros::NodeHandle *) arg0; // passed node handle
-	ros::Subscriber to_ard = n->subscribe("final_execute", 1000, sendToRobotCallback); // subscribing to movment datastream
+	ros::Subscriber to_ard = n->subscribe("final_execute", 1000,
+			sendToRobotCallback); // subscribing to movment datastream
 	g_from_ard = n->advertise < wvu_swarm_std_msgs::sensor_data
 			> ("from_arduino", 1000); // advertising arduino data
 

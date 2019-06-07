@@ -21,14 +21,15 @@ struct client_param
 ConnectionInfo::ConnectionInfo(int connection_descriptor)
 {
 #if DEBUG_CPP
-  puts("SERVER (OBJ): Started connecting info");
-  printf("SERVER (OBJ): descriptor exists: // crash out %d\n", &connection_descriptor != NULL);
+	puts("SERVER (OBJ): Started connecting info");
+	printf("SERVER (OBJ): descriptor exists: // crash out %d\n",
+			&connection_descriptor != NULL);
 #endif
 	this->connection_descriptor = connection_descriptor;
 	this->rid = -1;
 
 #if DEBUG_CPP
-  puts("SERVER (OBJ): Constructed");
+	puts("SERVER (OBJ): Constructed");
 #endif
 }
 
@@ -58,11 +59,17 @@ std::vector<ConnectionInfo> *monitors;
 void sendCommandToRobots(command cmd, int recip_rid)
 {
 #if DEBUG_CPP
-	printf("SERVER: sending message: %s\t%d\n", cmd.str, registry->at(recip_rid).getConnectionDescriptor());
+	puts("SERVER: Got message");
+	printf("key exists: %s\n", registry->find(recip_rid)->first == recip_rid && registry->size() > 0? "true" : "false");
+	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
+		printf("SERVER: sending message: %s\t%d\n", cmd.str,
+				registry->at(recip_rid).getConnectionDescriptor());
 #endif
 
 	// sending directly to recipiant
-	send(registry->at(recip_rid).getConnectionDescriptor(), &cmd, COMMAND_SIZE, 0);
+	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
+		send(registry->at(recip_rid).getConnectionDescriptor(), &cmd, COMMAND_SIZE,
+				0);
 
 	// checking for monitors
 	if (monitors->size() > 0)
@@ -85,7 +92,7 @@ void sendCommandToRobots(command cmd)
 void *runClient(void *args)
 {
 #if DEBUG_CPP
-  puts("Starting client thread");
+	puts("Starting client thread");
 #endif
 
 	// getting parameters
@@ -133,7 +140,8 @@ void *runClient(void *args)
 				}
 				else
 				{
-					registry->insert(std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
+					registry->insert(
+							std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
 				}
 
 				info_callback("Registered %s", (void *) (buffer->str));
@@ -154,7 +162,7 @@ int beginServer(std::function<void(command)> command_callback,
 		std::function<void(const char *)> warn_callback)
 {
 #if DEBUG_CPP
-    puts("SERVER: Getting socket");
+	puts("SERVER: Getting socket");
 #endif
 
 	sockets = new std::vector<ConnectionInfo>();
@@ -183,7 +191,7 @@ int beginServer(std::function<void(command)> command_callback,
 	socket_address.sin_port = htons(SERVER_PORT);
 
 #if DEBUG_CPP
-    puts("SERVER: Binding socket");
+	puts("SERVER: Binding socket");
 #endif
 
 	// Bind to the socket
@@ -198,7 +206,7 @@ int beginServer(std::function<void(command)> command_callback,
 		exit(1); // crash out
 	}
 #if DEBUG_CPP
-    puts("SERVER: Listening to socket");
+	puts("SERVER: Listening to socket");
 #endif
 	// Set socket to listen for connections
 	if (listen(socket_descriptor, 3) == -1)
@@ -213,7 +221,7 @@ int beginServer(std::function<void(command)> command_callback,
 	std::vector < pthread_t > threads; // vector to keep track of thread ids
 
 #if DEBUG_CPP
-    puts("SERVER: Starting socket loop");
+	puts("SERVER: Starting socket loop");
 #endif
 	// Loop to handle connections on the socket
 	while (exit_condition_callback())
@@ -222,38 +230,29 @@ int beginServer(std::function<void(command)> command_callback,
 		socklen_t connection_addr_size = sizeof(struct sockaddr);
 
 #if DEBUG_CPP
-      puts("SERVER: looking for accept");
+		puts("SERVER: looking for accept");
 #endif
 
 		// Accept connection
 		connection_descriptor = accept(socket_descriptor, &connection_addr,
 				&connection_addr_size);
 #if DEBUG_CPP
-      puts("SERVER: accepted");
+		puts("SERVER: accepted");
 #endif
 		sockets->push_back(ConnectionInfo(connection_descriptor));
 #if DEBUG_CPP
-      puts("SERVER: Made connection info object");
+		puts("SERVER: Made connection info object");
 #endif
 		if (connection_descriptor == -1)
 		{
-			// TODO change to warn
 			warn_callback("Error accepting connection.");
 			continue;
 		}
 		else
 		{
-#if DEBUG_CPP
-        puts("SERVER: getting client IP");
-#endif
-			// getting client IP for printing
-//			char *client_ip = inet_ntoa(
-//					((struct sockaddr_in *) &connection_addr)->sin_addr);
-//			info_callback("Connected to %s:4321", client_ip);
 
 			// collecting arguments for client thread
-			struct client_param clinet_args = (struct client_param
-					)
+			struct client_param clinet_args = (struct client_param )
 					{ command_callback, info_callback, error_callback,
 							exit_condition_callback, (int) sockets->size() - 1 };
 
@@ -262,7 +261,7 @@ int beginServer(std::function<void(command)> command_callback,
 			pthread_t tid;
 
 #if DEBUG_CPP
-        puts("Starting thread");
+			puts("Starting thread");
 #endif
 
 			// starting client thread

@@ -29,6 +29,9 @@ int main(int argc, char **argv)
 	ary.commands.push_back(genCmd("DE", 0.2f, 456.11f));
 	ary.commands.push_back(genCmd("NH", 0.1f, 789.12f));
 
+	sleep(5);
+	ROS_WARN("Sending messages");
+
 	ros::Rate rate(3);
 	while (ros::ok())
 	{
