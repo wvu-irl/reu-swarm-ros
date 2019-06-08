@@ -13,7 +13,8 @@
 #include <functional>
 #include <signal.h>
 
-#define DEBUG 0
+#define DEBUG 1
+#define PRINT_HEADER "[\033[1;33mros_to_arduino_server\033[0m]"
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
 
@@ -66,14 +67,16 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 	for (wvu_swarm_std_msgs::robot_command msg : msga.commands)
 	{
 #if DEBUG
-		ROS_INFO("Sending message: %c%c, %f, %f", msg.rid[0], msg.rid[1], msg.r, msg.theta);
+		ROS_INFO(PRINT_HEADER"Sending message: %c%c, %f, %f", msg.rid[0],
+				msg.rid[1], msg.r, msg.theta);
 #endif
 		command cmd = { { '\0' } }; // creating command
 		sprintf(cmd.str, "%f,%f", msg.r, msg.theta);
-		char id[3] = { '\0' };
-		id[0] = msg.rid[0];
-		id[1] = msg.rid[1];
-		sendCommandToRobots(cmd, rid_map.at(id)); // sending to robots through TCP server
+		int id = (int) strtol(((char *) (&(msg.rid[0]))), NULL, 10);
+#if DEBUG
+		ROS_INFO(PRINT_HEADER"Constructed command: %02d,\t%s", id, cmd.str);
+#endif
+		sendCommandToRobots(cmd, id); // sending to robots through TCP server
 		send_rate.sleep();
 	}
 }

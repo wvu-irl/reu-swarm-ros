@@ -8,8 +8,8 @@
 #include <sys/types.h>
 #include <pthread.h>
 
-#define SERVER_TEST 0
-#define FUNNEL_TEST 1
+#define SERVER_TEST 1
+#define FUNNEL_TEST 0
 
 #if FUNNEL_TEST && !SERVER_TEST
 
@@ -103,9 +103,13 @@ int main(int argc, char **argv)
 
 	// creating recurrent message
 	wvu_swarm_std_msgs::robot_command_array ary;
-	ary.commands.push_back(genCmd("NJ", 0.3f, 123.10f));
-	ary.commands.push_back(genCmd("MA", 0.2f, 456.11f));
-	ary.commands.push_back(genCmd("NH", 0.1f, 789.12f));
+	ary.commands.push_back(genCmd("01", 0.3f, 123.10f));
+	ary.commands.push_back(genCmd("02", 0.2f, 456.11f));
+	ary.commands.push_back(genCmd("15", 0.1f, 789.12f));
+	ary.commands.push_back(genCmd("25", 0.1f, 789.12f));
+	ary.commands.push_back(genCmd("20", 0.1f, 789.12f));
+	ary.commands.push_back(genCmd("10", 0.1f, 789.12f));
+	ary.commands.push_back(genCmd("04", 0.1f, 789.12f));
 
 	sleep(5);
 	ROS_WARN("Sending messages");

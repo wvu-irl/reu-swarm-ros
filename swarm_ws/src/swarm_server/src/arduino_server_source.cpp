@@ -2,6 +2,7 @@
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
 #define DEBUG_CPP 0
+#define DEBUG 1
 
 #include "arduino_server.h"
 
@@ -58,11 +59,10 @@ std::vector<ConnectionInfo> *monitors;
 
 void sendCommandToRobots(command cmd, int recip_rid)
 {
-#if DEBUG_CPP
-	puts("SERVER: Got message");
-	printf("key exists: %s\n", registry->find(recip_rid)->first == recip_rid && registry->size() > 0? "true" : "false");
+#if DEBUG_CPP || DEBUG
+	printf("[\033[1;33mros_to_arduino_server\033[0m] Command executing");
 	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
-		printf("\033[1;32mSERVER: sending message: %s\t%d\033[0m\n", cmd.str,
+		printf("\033[30;42mSERVER: sending message: %s\t%d\033[0m\n", cmd.str,
 				registry->at(recip_rid).getConnectionDescriptor());
 #endif
 
@@ -70,14 +70,23 @@ void sendCommandToRobots(command cmd, int recip_rid)
 	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
 		send(registry->at(recip_rid).getConnectionDescriptor(), &cmd, COMMAND_SIZE,
 				0);
+#if DEBUG_CPP || DEBUG
+	else
+		printf(
+				"\033[30;41mCould not locate ConnectionInfo for %02d <-> %s\033[0m\n",
+				recip_rid, rid_indexing[recip_rid].c_str());
+#endif
 
 	// checking for monitors
 	if (monitors->size() > 0)
 	{
-#if DEBUG_CPP
-		printf("SERVER: sending message to monitor: %s\n\n", cmd.str);
+#if DEBUG_CPP || DEBUG
+		printf("\033[34mSERVER: sending message to monitor: %s\033[0m\n\n",
+				cmd.str);
 #endif
-		sprintf(cmd.str, "%s(%02d):\t%s", rid_indexing[recip_rid].c_str(), recip_rid, cmd.str);
+		char mon_str[64];
+		sprintf(mon_str, "[%02d / %s]:\t%s", recip_rid, rid_indexing[recip_rid].c_str(), cmd.str);
+		strncpy(cmd.str, mon_str, sizeof(cmd.str));
 		for (ConnectionInfo ci : *monitors)
 		{
 			send(ci.getConnectionDescriptor(), &cmd, COMMAND_SIZE, 0);
@@ -143,6 +152,10 @@ void *runClient(void *args)
 				{
 					registry->insert(
 							std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
+#if DEBUG_CPP
+					printf("SERVER: Registry size: \033[31m%d\033[0m\n",
+							registry->size());
+#endif
 				}
 
 				info_callback("\033[34mRegistered %s\033[0m", (void *) (buffer->str));
