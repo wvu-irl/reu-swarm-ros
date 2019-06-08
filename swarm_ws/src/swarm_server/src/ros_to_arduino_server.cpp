@@ -13,7 +13,7 @@
 #include <functional>
 #include <signal.h>
 
-#define DEBUG 1
+#define DEBUG 0
 #define PRINT_HEADER "[\033[1;33mros_to_arduino_server\033[0m]"
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos

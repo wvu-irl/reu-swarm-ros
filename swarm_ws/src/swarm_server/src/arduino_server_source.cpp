@@ -2,7 +2,7 @@
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
 #define DEBUG_CPP 0
-#define DEBUG 1
+#define DEBUG 0
 
 #include "arduino_server.h"
 
