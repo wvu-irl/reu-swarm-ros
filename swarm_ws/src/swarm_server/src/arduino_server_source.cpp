@@ -2,7 +2,9 @@
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
 #define DEBUG_CPP 0
-#define DEBUG_ROS 0
+
+// setting this to 1 shows what messages failed and succeeded
+#define DEBUG_ROS 1
 
 #include "arduino_server.h"
 
@@ -161,6 +163,31 @@ void *runClient(void *args)
 				}
 
 				info_callback("\033[34mRegistered %s\033[0m", (void *) (buffer->str));
+			}
+			else if(sockets->size() > 0 && strstr(buffer->str, "exit") == buffer->str)
+			{
+				ConnectionInfo leaving = sockets->at(id);
+				sockets->erase(sockets->begin() + id);
+
+				if (registry->find(leaving.getRID())->first == leaving.getRID() && registry->size() > 0)
+					registry->erase(leaving.getRID());
+
+				if (leaving.getRID() == -2)
+				{
+					int erase_id = 0;
+					for (int i = 0;i < monitors->size();i++)
+					{
+						if (monitors->size() > 0 && monitors->at(i).getConnectionDescriptor() == connection_descriptor)
+						{
+							monitors->erase(monitors->begin() + i);
+							break;
+						}
+					}
+				}
+			}
+			else if (strstr(buffer->str, "ping") == buffer->str)
+			{
+				write(connection_descriptor, "pong", 4);
 			}
 			else
 				command_callback(*buffer); // sending message to callback
