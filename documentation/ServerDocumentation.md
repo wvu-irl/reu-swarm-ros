@@ -26,15 +26,15 @@ To connect from a device
 
 - To have the server communicate with the robot properly, the robot must ``register``
 
-    - To register a robot the robot must send the command ``register <<RID>>`` where the RID is a numerical value from 0-49 
+    - To register a robot the robot must send the command ``register <<RID>>`` where the RID is a 2 character state abbreviation
+
+- To safely disconnect, the connected device should send `exit` to the server to appropriately disconnect and de-register.
 
 ## Documentation
 
 [Topics](#topics)
 
 [File Specifics](#file-specifics)
-
-[Example Code](#example-code)
 
 #### Topics
 Execution topic (``execute``)
@@ -195,71 +195,25 @@ feilds/globals:
     - this is meant to convert from `string` ids to numeric ids
 
 ---
-#### Example Code
+##### funnel.cpp
 
-This code is to be used when the `ros_to_arduino_server` node is also running
+[Source code](https://github.com/wvu-irl/reu-swarm-ros/blob/master/swarm_ws/src/swarm_server/src/funnel.cpp)
 
-```
-#include <ros/ros.h>
+The purpose of this funnel is to create a collection of data that results from subscribing to a large number of topics.
 
-// messages usd by server 
-#include <wvu_swarm_std_msgs/robotcommand.h>
-#include <wvu_swarm_std_msgs/sensor_data.h>
+functions:
 
-// messages used by datastream
-#include <wvu_swarm_std_msgs/rtheta.h>
+- `comressionCallback`
+    - A callback for the topic that was subscribed to in a thread
+    - contains rules for a lock to keep away from write conflicts
+        - The funnel uses a `std::vector` to collect data, which by nature is not thread safe.
 
-/**
- * Callback for getting data from the sensor topic
- */
-void sensorDatCallback(wvu_swarm_std_msgs::sensor_data msg)
-{
-	ROS_INFO("SENSOR DATA: %s", (char *) (&(msg.data[0])));
-}
-
-// main
-int main(int argc, char **argv)
-{
-	// initializing the node
-	ros::init(argc, argv, "server_test");
-	ros::NodeHandle n;
-
-	// advertizing the topic that the server subscribes to
-	ros::Publisher exe = n.advertise < wvu_swarm_std_msgs::robotcommand
-			> ("execute", 1000);
-			
-	// subscribing to the topic that the server produces
-	ros::Subscriber sense = n.subscribe("from_arduino", 1000, sensorDatCallback);
-
-	ros::Rate loop_rate(100); // setting a loop rate for sanity
-
-	while (ros::ok())
-	{
-		/**
-		 * This is just an example datastream
-		 * Communication could work in a variety of other ways
-		 */
-		wvu_swarm_std_msgs::rtheta vector = *(ros::topic::waitForMessage
-				< wvu_swarm_std_msgs::rtheta > ("/vicon_demo")); // getting ViCon data
-
-
-		wvu_swarm_std_msgs::robotcommand cmd; // reparsing the message
-		
-		/**
-		 *  if you wanted to change the input,
-		 *  below is the place to do that
-		 */
-		
-		cmd.rid =
-		{ 'X', 'X'}; // setting the RID to send to all robots
-		cmd.r = vector.radius; // getting vector information from datastream
-		cmd.theta = vector.degrees;
-
-		exe.publish(cmd); // sending the message to the robots
-
-		ros::spinOnce(); // allowing callbacks to run
-		loop_rate.sleep(); // sleeping for the proper loop rate
-	}
-}
-
-```
+- `listeningThread`
+    - A thread started to subscribe to an individual topic.
+    - This was done to allow a higher topic output rate.
+    
+- `main`
+    - Creates the funnel node
+    - starts threads so that they connect to the correct topics.
+    - Looks for number of elements in the collected vector, and publishes them.
+        - The topic published to is a collective of what is being subscribed to.
