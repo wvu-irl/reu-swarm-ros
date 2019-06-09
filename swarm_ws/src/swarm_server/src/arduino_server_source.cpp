@@ -176,7 +176,6 @@ void *runClient(void *args)
 					&& strstr(buffer->str, "exit") == buffer->str)
 			{
 				ConnectionInfo leaving = sockets->at(id);
-				sockets->erase(sockets->begin() + id);
 
 				if (registry->find(leaving.getRID())->first == leaving.getRID()
 						&& registry->size() > 0)
