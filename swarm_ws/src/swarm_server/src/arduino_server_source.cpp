@@ -2,6 +2,8 @@
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
 #define DEBUG_CPP 0
+
+// setting this to 1 shows what messages failed and succeeded
 #define DEBUG_ROS 0
 
 #include "arduino_server.h"
@@ -143,7 +145,14 @@ void *runClient(void *args)
 				char num[2];
 
 				sscanf(buffer->str, "register %s", num); // obtaining the ID
-				int rid = rid_map.at(std::string(num));
+#if DEBUG_CPP
+				printf("\033[34mAttempting to register: \033[37;%dm%s\033[0m\n", rid_map.find(std::string(num))->first == num ? 42 : 41,num);
+#endif
+				int rid =
+						rid_map.find(std::string(num))->first == num ?
+								rid_map.at(std::string(num)) : -1;
+
+				sockets->at(id).setRID(rid); // setting the RID of the related object
 
 				sockets->at(id).setRID(rid); // setting the RID of the related object
 				if (rid == -2)
@@ -156,11 +165,40 @@ void *runClient(void *args)
 							std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
 #if DEBUG_CPP
 					printf("SERVER: Registry size: \033[31m%d\033[0m\n",
-							registry->size());
+							(int)registry->size());
 #endif
 				}
 
 				info_callback("\033[34mRegistered %s\033[0m", (void *) (buffer->str));
+			}
+			else if (sockets->size() > 0
+					&& strstr(buffer->str, "exit") == buffer->str)
+			{
+				ConnectionInfo leaving = sockets->at(id);
+				sockets->erase(sockets->begin() + id);
+
+				if (registry->find(leaving.getRID())->first == leaving.getRID()
+						&& registry->size() > 0)
+					registry->erase(leaving.getRID());
+
+				if (leaving.getRID() == -2)
+				{
+					int erase_id = 0;
+					for (int i = 0; i < monitors->size(); i++)
+					{
+						if (monitors->size() > 0
+								&& monitors->at(i).getConnectionDescriptor()
+										== connection_descriptor)
+						{
+							monitors->erase(monitors->begin() + i);
+							break;
+						}
+					}
+				}
+			}
+			else if (strstr(buffer->str, "ping") == buffer->str)
+			{
+				write(connection_descriptor, "pong", 4);
 			}
 			else
 				command_callback(*buffer); // sending message to callback
