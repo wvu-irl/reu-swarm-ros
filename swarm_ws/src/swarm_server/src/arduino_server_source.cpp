@@ -1,10 +1,10 @@
 #ifndef ARDINO_SERVER_SOURCE
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
-#define DEBUG_CPP 1
+#define DEBUG_CPP 0
 
 // setting this to 1 shows what messages failed and succeeded
-#define DEBUG_ROS 1
+#define DEBUG_ROS 0
 
 #include "arduino_server.h"
 
@@ -62,9 +62,9 @@ std::vector<ConnectionInfo> *monitors;
 void sendCommandToRobots(command cmd, int recip_rid)
 {
 #if DEBUG_CPP || DEBUG_ROS
-	printf("[\033[1;33marduino_server_source\033[0m] Command executing\033[0m\n");
+	//printf("[\033[1;33marduino_server_source\033[0m] Command executing\033[0m\n");
 	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
-		printf("\033[37;42mSERVER: sending message [%02d <-> %s]: %s\t%d\033[0m\n",
+		printf("\033[30;42mSERVER: sending message [%02d <-> %s]: %s\t%d\033[0m\n",
 				recip_rid, rid_indexing[recip_rid].c_str(), cmd.str,
 				registry->at(recip_rid).getConnectionDescriptor());
 #endif
@@ -255,7 +255,7 @@ int beginServer(std::function<void(command)> command_callback,
 	{
 		char err[64];
 		sprintf(err, "Error binding to socket (%d) retrying", errno); // making an error message that tells what went wrong
-																											 // with binding the socket
+		// with binding the socket
 		error_callback(err);
 		throw "Binding failure";
 		exit(1); // crash out

@@ -35,27 +35,22 @@ struct command
 
 int main()
 {
-	printf("\033[2J\033[1;1H\033[42;30mRecieved Messages\033[0m\n");
-
 	size_t i;
 	pid_t curr_pid = getpid();
 	for (i = 0; i < 35 && curr_pid != 0; i++)
 	{
 		curr_pid = fork();
 		usleep(100000);
-		if (curr_pid == 0)
-			break;
 	}
-	if (curr_pid != 0)
+	if (curr_pid == 0)
 		i++;
 
 	int socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_descriptor == -1)
 	{
-		printf("\033[%d;1H\033[31mError getting socket: %d\033[0m\n", (int) i + 1,
-				errno);
+		printf("Error getting socket: %d\n", errno);
 		if (curr_pid != 0)
-			wait (NULL);
+			wait(NULL);
 		exit(1);
 	}
 
@@ -67,13 +62,12 @@ int main()
 	inet_aton(IP, &(socket_address.sin_addr));
 
 	// Connect to the socket
-	if (connect(socket_descriptor, (struct sockaddr *) &socket_address,
-			sizeof(socket_address)) == -1)
+	if (connect(socket_descriptor, (struct sockaddr *)&socket_address,
+				sizeof(socket_address)) == -1)
 	{
-		printf("\033[%d;1H\033[1;31mError connecting to socket: %d\033[0m\n",
-				(int) i + 1, errno);
+		printf("\033[1;31mError connecting to socket: %d\033[0m\n", errno);
 		if (curr_pid != 0)
-			wait (NULL);
+			wait(NULL);
 		exit(1);
 	}
 
@@ -88,12 +82,12 @@ int main()
 	{
 		puts("Failed registration");
 		if (curr_pid != 0)
-			wait (NULL);
+			wait(NULL);
 		return 1;
 	}
-
-	std::cout << "\033[" << i + 1 << ";1H\033[1;32mRegistered with: " << reg.str
-			<< "\033[0m" << std::endl;
+	puts("");
+	std::cout << "\033[1;32mRegistered as " << reg.str << "\033[0m"
+			  << std::endl;
 
 	while (true)
 	{
@@ -105,21 +99,19 @@ int main()
 		//reading the message
 		while ((message_size = read(socket_descriptor, str, sizeof(str))) > 0)
 		{
-			printf("\033[%d;1H%s : %s                     \n", (int) i + 1,
-					rid_indexing[i].c_str(), str);
+			printf("CLIENT %s GOT: %s\n", rid_indexing[i].c_str(), str);
 		}
 
 		// Display if there was an error
 		if (message_size == -1)
 		{
-			std::cout << "\033[" << i + 1 << ";1H\033[1;33mError recieving message: "
-					<< errno << "\033[0m" << std::endl;
+			std::cout << "\033[1;33mError recieving message: " << errno << "\033[0m" << std::endl;
 			if (curr_pid != 0)
-				wait (NULL);
+				wait(NULL);
 			return 1;
 		}
 	}
 	if (curr_pid != 0)
-		wait (NULL);
+		wait(NULL);
 	return 0;
 }
