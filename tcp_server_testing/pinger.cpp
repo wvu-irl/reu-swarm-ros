@@ -77,13 +77,14 @@ int main()
 		return 1;
 	}
 	puts("\033[1;34mRegistration successful\033[0m");
+	usleep(1000);
 
 	while (true)
 	{
 		int message_size = 0;
 		char str[32];
 
-		usleep(1000);
+
 		write(socket_descriptor, "ping", 4);
 						start_time = high_resolution_clock::now();
 

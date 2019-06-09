@@ -99,24 +99,28 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "testing");
 	ros::NodeHandle n;
 
-	ros::Publisher exe = n.advertise< wvu_swarm_std_msgs::robot_command_array >("final_execute", 1000);
+	srand(20473598);
+
+	ros::Publisher exe = n.advertise < wvu_swarm_std_msgs::robot_command_array
+			> ("final_execute", 1000);
 
 	// creating recurrent message
-	wvu_swarm_std_msgs::robot_command_array ary;
-	ary.commands.push_back(genCmd("01", 0.3f, 123.10f));
-	ary.commands.push_back(genCmd("02", 0.2f, 456.11f));
-	ary.commands.push_back(genCmd("15", 0.1f, 789.12f));
-	ary.commands.push_back(genCmd("25", 0.1f, 789.12f));
-	ary.commands.push_back(genCmd("20", 0.1f, 789.12f));
-	ary.commands.push_back(genCmd("10", 0.1f, 789.12f));
-	ary.commands.push_back(genCmd("04", 0.1f, 789.12f));
-
-	sleep(5);
+	sleep(6);
 	ROS_WARN("Sending messages");
 
 	ros::Rate rate(3);
 	while (ros::ok())
 	{
+		wvu_swarm_std_msgs::robot_command_array ary;
+		for (int i = 0; i < 10; i++)
+		{
+			char nm[3] = { '\0' };
+			sprintf(nm, "%02d", rand() % 50);
+			ary.commands.push_back(
+					genCmd(nm, (float) (rand() % 100) / 100.0f,
+							(float) (rand() % 3600) / 10.0f));
+		}
+
 		exe.publish(ary);
 		rate.sleep();
 	}
