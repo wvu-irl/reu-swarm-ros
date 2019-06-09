@@ -1,10 +1,10 @@
 #ifndef ARDINO_SERVER_SOURCE
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
-#define DEBUG_CPP 0
+#define DEBUG_CPP 1
 
 // setting this to 1 shows what messages failed and succeeded
-#define DEBUG_ROS 0
+#define DEBUG_ROS 1
 
 #include "arduino_server.h"
 
@@ -62,7 +62,7 @@ std::vector<ConnectionInfo> *monitors;
 void sendCommandToRobots(command cmd, int recip_rid)
 {
 #if DEBUG_CPP || DEBUG_ROS
-	//printf("[\033[1;33mros_to_arduino_server\033[0m] Command executing");
+	printf("[\033[1;33marduino_server_source\033[0m] Command executing\033[0m\n");
 	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
 		printf("\033[37;42mSERVER: sending message [%02d <-> %s]: %s\t%d\033[0m\n",
 				recip_rid, rid_indexing[recip_rid].c_str(), cmd.str,
@@ -146,7 +146,8 @@ void *runClient(void *args)
 
 				sscanf(buffer->str, "register %s", num); // obtaining the ID
 #if DEBUG_CPP
-				printf("\033[34mAttempting to register: \033[37;%dm%s\033[0m\n", rid_map.find(std::string(num))->first == num ? 42 : 41,num);
+				printf("\033[34mAttempting to register: \033[37;%dm%s\033[0m\n",
+						rid_map.find(std::string(num))->first == num ? 42 : 41, num);
 #endif
 				int rid =
 						rid_map.find(std::string(num))->first == num ?
@@ -165,7 +166,7 @@ void *runClient(void *args)
 							std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
 #if DEBUG_CPP
 					printf("SERVER: Registry size: \033[31m%d\033[0m\n",
-							(int)registry->size());
+							(int) registry->size());
 #endif
 				}
 
@@ -249,11 +250,11 @@ int beginServer(std::function<void(command)> command_callback,
 #endif
 
 	// Bind to the socket
-	if (bind(socket_descriptor, (struct sockaddr *) &socket_address,
+	while (bind(socket_descriptor, (struct sockaddr *) &socket_address,
 			sizeof(socket_address)) == -1)
 	{
-		char err[32];
-		sprintf(err, "Error binding to socket %d", errno); // making an error message that tells what went wrong
+		char err[64];
+		sprintf(err, "Error binding to socket (%d) retrying", errno); // making an error message that tells what went wrong
 																											 // with binding the socket
 		error_callback(err);
 		throw "Binding failure";
