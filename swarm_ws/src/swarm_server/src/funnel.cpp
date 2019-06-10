@@ -17,7 +17,7 @@ std::vector<wvu_swarm_std_msgs::robot_command> g_commands;
 struct arg_struct
 {
 	ros::NodeHandle node;
-	const int id;
+	int id;
 };
 
 // callback for subscription
@@ -83,16 +83,18 @@ int main(int argc, char **argv)
 	ros::Rate sub_rate(100);
 	ros::Rate run_rate(100);
 
+	struct arg_struct args[50];
+
 	// creating all the threads that will subscribe to the execution nodes
-	for (size_t i = 0; i < 50; i++)
+	for (size_t i = 0; i < sizeof(args) / sizeof(struct arg_struct); i++)
 	{
 		// creating a struct
-		struct arg_struct args = { n, (int) i };
+		args[i] = { n, (int) i };
 		// creating a thread to subscribe to the robot topics
 		pthread_attr_t attr;
 		pthread_attr_init(&attr);
 		pthread_t tid;
-		pthread_create(&tid, &attr, listeningThread, &args);
+		pthread_create(&tid, &attr, listeningThread, args + i);
 
 		sub_rate.sleep();
 	}

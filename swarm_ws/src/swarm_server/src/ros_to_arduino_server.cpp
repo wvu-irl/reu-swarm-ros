@@ -13,6 +13,9 @@
 #include <functional>
 #include <signal.h>
 
+#include <iostream>
+#include <fstream>
+
 #define DEBUG 0
 #define PRINT_HEADER "[\033[1;33mros_to_arduino_server\033[0m]"
 
@@ -33,7 +36,7 @@ void flagger(int sig)
  *
  *  All recieved data will get published as soon as it comes
  */
-void commandCallback(command cmd)
+void commandCallback(command cmd, int rid)
 {
 	ROS_INFO("\033[34mCommand: \033[30;44m%s\033[0m", cmd.str); // displaying recieved data
 	wvu_swarm_std_msgs::sensor_data inf; // conversion container
@@ -41,7 +44,13 @@ void commandCallback(command cmd)
 	{
 		inf.data[i] = cmd.str[i];
 	}
-	g_from_ard.publish(inf); // publishing
+	if (&g_from_ard != NULL)
+		g_from_ard.publish(inf); // publishing
+
+	std::ofstream file;
+	file.open("sensor_log.csv", std::ios::out | std::ios::app);
+	file << rid_indexing[rid] << "," << cmd.str << std::endl;
+	file.close();
 }
 
 /**

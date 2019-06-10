@@ -83,7 +83,7 @@ void sendCommandToRobots(command cmd, int recip_rid);
 void sendCommandToRobots(command cmd);
 
 // function responsible for recieving information from a client
-void runClient(std::function<void(command)> command_callback,
+void runClient(std::function<void(command, int)> command_callback,
 		std::function<void(const char *, void *)> info_callback,
 		std::function<void(const char *)> error_callback,
 		std::function<bool()> exit_condition_callback, int id);
@@ -97,7 +97,7 @@ void runClient(std::function<void(command)> command_callback,
  * exit_condition_callback is the registered function that dictates a successful exit condition
  * 													exits when exit_condition_callback() == false
  */
-int beginServer(std::function<void(command)> command_callback,
+int beginServer(std::function<void(command, int)> command_callback,
 		std::function<void(const char *, void *)> info_callback,
 		std::function<void(const char *)> error_callback,
 		std::function<bool()> exit_condition_callback,
