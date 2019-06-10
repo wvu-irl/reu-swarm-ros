@@ -13,7 +13,7 @@
 // and the client processing thread
 struct client_param
 {
-	std::function<void(command)> command_callback;
+	std::function<void(command, int)> command_callback;
 	std::function<void(const char *, void *)> info_callback;
 	std::function<void(const char *)> error_callback;
 	std::function<bool()> exit_condition_callback;
@@ -114,7 +114,7 @@ void *runClient(void *args)
 	struct client_param *vals = (struct client_param *) args; // separating out parameter type
 
 	// putting parameters into easily useabel variables
-	std::function<void(command)> command_callback = vals->command_callback;
+	std::function<void(command, int)> command_callback = vals->command_callback;
 	std::function<void(const char *, void *)> info_callback = vals->info_callback;
 	std::function<void(const char *)> error_callback = vals->error_callback;
 	std::function < bool() > exit_condition_callback =
@@ -206,7 +206,7 @@ void *runClient(void *args)
 				write(connection_descriptor, "pong", 4); // returns pong to sender
 			}
 			else
-				command_callback(*buffer); // sending message to callback
+				command_callback(*buffer, sockets->at(id).getRID()); // sending message to callback
 		}
 
 		free(buffer); // freeing buffer
@@ -214,7 +214,7 @@ void *runClient(void *args)
 	pthread_exit(0); // exiting the client thread
 }
 
-int beginServer(std::function<void(command)> command_callback,
+int beginServer(std::function<void(command, int)> command_callback,
 		std::function<void(const char *, void *)> info_callback,
 		std::function<void(const char *)> error_callback,
 		std::function<bool()> exit_condition_callback,
