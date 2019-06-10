@@ -123,6 +123,10 @@ int main(int argc, char **argv)
         outputPt.x = currentPoint.x;
         outputPt.y = currentPoint.y;
         output.point.push_back(outputPt);
+        wvu_swarm_std_msgs::vicon_point dummyPt;
+        dummyPt.x = 30.0;
+        dummyPt.y = 30.0;
+        output.point.push_back(dummyPt);
         pub.publish(output);
         
         ros::spinOnce();
