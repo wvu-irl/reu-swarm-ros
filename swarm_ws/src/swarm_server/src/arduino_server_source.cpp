@@ -4,7 +4,7 @@
 #define DEBUG_CPP 0
 
 // setting this to 1 shows what messages failed and succeeded
-#define DEBUG_ROS 0
+#define DEBUG_MESSAGE 0
 
 #include "arduino_server.h"
 
@@ -61,7 +61,7 @@ std::vector<ConnectionInfo> *monitors;
 
 void sendCommandToRobots(command cmd, int recip_rid)
 {
-#if DEBUG_CPP || DEBUG_ROS
+#if DEBUG_CPP || DEBUG_MESSAGE
 	//printf("[\033[1;33marduino_server_source\033[0m] Command executing\033[0m\n");
 	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
 		printf("\033[30;42mSERVER: sending message [%02d <-> %s]: %s\t%d\033[0m\n",
@@ -70,10 +70,10 @@ void sendCommandToRobots(command cmd, int recip_rid)
 #endif
 
 	// sending directly to recipiant
-	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
+	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0) // check to see that the location in the map exists
 		send(registry->at(recip_rid).getConnectionDescriptor(), &cmd, COMMAND_SIZE,
-				0);
-#if DEBUG_CPP || DEBUG_ROS
+				0); // sending message
+#if DEBUG_CPP || DEBUG_MESSAGE
 	else
 		printf(
 				"\033[37;41mCould not locate ConnectionInfo for %02d <-> %s\033[0m\n",
@@ -84,14 +84,15 @@ void sendCommandToRobots(command cmd, int recip_rid)
 	if (monitors->size() > 0)
 	{
 		char mon_str[64];
+		// creating monitor message
 		sprintf(mon_str, "[%02d / %s]:\t%s", recip_rid,
 				rid_indexing[recip_rid].c_str(), cmd.str);
-		strncpy(cmd.str, mon_str, sizeof(cmd.str));
-#if DEBUG_CPP || DEBUG_ROS
+		strncpy(cmd.str, mon_str, sizeof(cmd.str)); // safe copy
+#if DEBUG_CPP || DEBUG_MESSAGE
 		printf("\033[37;44mSERVER: sending message to monitor: %s\033[0m\n",
 				cmd.str);
 #endif
-		for (ConnectionInfo ci : *monitors)
+		for (ConnectionInfo ci : *monitors) // sending message to all open monitors
 		{
 			send(ci.getConnectionDescriptor(), &cmd, COMMAND_SIZE, 0);
 		}
@@ -172,15 +173,18 @@ void *runClient(void *args)
 
 				info_callback("\033[34mRegistered %s\033[0m", (void *) (buffer->str));
 			}
+			// cheking to see if the exit command was sent
 			else if (sockets->size() > 0
 					&& strstr(buffer->str, "exit") == buffer->str)
 			{
-				ConnectionInfo leaving = sockets->at(id);
+				ConnectionInfo leaving = sockets->at(id); // getting ConnectionInfo for the connection
 
+				// removing if registered as a robot
 				if (registry->find(leaving.getRID())->first == leaving.getRID()
 						&& registry->size() > 0)
 					registry->erase(leaving.getRID());
 
+				// removing of registered as a monitor
 				if (leaving.getRID() == -2)
 				{
 					int erase_id = 0;
@@ -188,7 +192,7 @@ void *runClient(void *args)
 					{
 						if (monitors->size() > 0
 								&& monitors->at(i).getConnectionDescriptor()
-										== connection_descriptor)
+										== connection_descriptor) // matching connection descriptor
 						{
 							monitors->erase(monitors->begin() + i);
 							break;
@@ -196,9 +200,10 @@ void *runClient(void *args)
 					}
 				}
 			}
+			// checking if the connection is doing a latency test
 			else if (strstr(buffer->str, "ping") == buffer->str)
 			{
-				write(connection_descriptor, "pong", 4);
+				write(connection_descriptor, "pong", 4); // returns pong to sender
 			}
 			else
 				command_callback(*buffer); // sending message to callback

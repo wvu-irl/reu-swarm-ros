@@ -1,3 +1,16 @@
+/**
+ *
+ * Pinger is a program that can measure the latency between server and client
+ *
+ * The time is measured in ms and measures the round trip of the packet.
+ * Program pings server at 2Hz roughly.
+ *
+ *
+ * author: Henry Vos
+ * email: hlv0002@mix.wvu.edu
+ *
+ */
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -19,31 +32,38 @@
 #include <chrono>
 
 #define PORT 4321
+
+// ip that the program is connecting to
 #define IP "10.0.1.37"
 
+// using this namespace because there are many time measurments
 using namespace std::chrono;
 
+// flag for SIGINT
 bool die = false;
+
+// time measurement
 auto start_time = high_resolution_clock::now();
+
+// variables for doing some basic visual heuristics
 double max_late = 0, prev = 0;
 
-struct command
-{
-	char str[32];
-};
-
+// callback for SIGINT
 void sigCallback(int sig)
 {
 	puts("\033[32mKilling process\033[0m");
 	die = true;
 }
 
+// main
 int main()
 {
 	puts("\033[37;42mStarting\033[0m");
 
+	// overriding interrupt signal
 	signal(SIGINT, sigCallback);
 
+	// setting up socket from the client side
 	int socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_descriptor == -1)
 	{
@@ -70,43 +90,40 @@ int main()
 	}
 	puts("\033[37;42mConnected to socket\033[0m");
 
-	int bytes = write(socket_descriptor, "register YY", 11);
-	if (bytes < 0)
-	{
-		puts("Failed registration");
-		return 1;
-	}
-	puts("\033[1;34mRegistration successful\033[0m");
-	usleep(1000);
-
+	// main loop
 	while (true)
 	{
 		int message_size = 0;
 		char str[32];
 
-
 		write(socket_descriptor, "ping", 4);
-						start_time = high_resolution_clock::now();
+		start_time = high_resolution_clock::now();
 
 		//reading the message
 		while ((message_size = read(socket_descriptor, str, sizeof(str))) > 0)
 		{
+			// looking for pong return
 			if (strstr(str, "pong") == str)
 			{
-				double late = duration_cast<microseconds>(
-						high_resolution_clock::now() - start_time).count() / 2000.0;
-				bool new_max = false;
+				// calculating latency
+				double late = duration_cast < microseconds
+						> (high_resolution_clock::now() - start_time).count() / 1000.0;
+				bool new_max = false; // determining if the max recorded latency has increased
 				if (max_late < late)
 				{
 					max_late = late;
 					new_max = true;
 				}
-				printf("Latency: %s%4.3lf\033[0m\tmax:%s%4.3lf ms\033[0m\n", prev >= late ? "\033[32m" : "\033[31m" ,late, new_max ? "\033[30;41m" : "\033[0m", max_late);
+				// displaying latency results
+				printf("Latency: %s%4.3lf\033[0m\tmax:%s%4.3lf ms\033[0m\n",
+						prev >= late ? "\033[32m" : "\033[31m", late,
+						new_max ? "\033[30;41m" : "\033[0m", max_late);
 				prev = late;
+				// sleeping
 				usleep(500000);
-				write(socket_descriptor, "ping", 4);
-				start_time = high_resolution_clock::now();
-				
+				write(socket_descriptor, "ping", 4); // sending a ping
+				start_time = high_resolution_clock::now(); // resetting start time
+
 			}
 			// Display if there was an error
 			if (message_size == -1)
@@ -115,6 +132,7 @@ int main()
 				return 1;
 			}
 
+			// runs if there was an interrupt
 			if (die)
 			{
 				puts("Sending exit command");
@@ -122,15 +140,20 @@ int main()
 				exit(0);
 			}
 		}
+
+		// this runs when there are no messages coming through
+		// runs on interrupt
 		if (die)
 		{
 			puts("Sending exit command");
 			write(socket_descriptor, "exit", 4);
 			exit(0);
 		}
+
+		// writes another ping if missed
 		write(socket_descriptor, "ping", 4);
 		start_time = high_resolution_clock::now();
-		usleep(500000);
+		usleep(500000); // sleeping 0.5s
 	}
 	puts("\033[37;44mEnding\033[0m");
 	return 0;

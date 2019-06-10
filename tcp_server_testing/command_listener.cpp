@@ -1,3 +1,11 @@
+/*
+ * this program registers with the server as a monitor
+ * so, this means that all the commands that are being sent
+ * are also sent to the monitor.
+ *
+ * This is a debugging tool for the TCP server
+ */
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
