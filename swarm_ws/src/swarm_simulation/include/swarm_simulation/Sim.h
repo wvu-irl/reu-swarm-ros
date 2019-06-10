@@ -5,6 +5,7 @@
 #include "SFML/Window.hpp"
 #include "SFML/Graphics.hpp"
 #include <ros/ros.h>
+#include <wvu_swarm_std_msgs/robot_command_array.h>
 //#include <swarm_server/robot_id.h>
 
 #ifndef SIM_H
@@ -19,7 +20,7 @@ private:
     sf::RenderWindow window;
     int window_width;
     int window_height;
-
+    void vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg);
     Flock flock;
     float bodiesSize;
     vector<sf::CircleShape> shapes;
