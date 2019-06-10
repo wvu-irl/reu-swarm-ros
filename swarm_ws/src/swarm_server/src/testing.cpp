@@ -3,8 +3,6 @@
 #include <wvu_swarm_std_msgs/robot_command_array.h>
 
 #include <stdlib.h>
-<<<<<<< HEAD
-=======
 #include <sys/types.h>
 #include <pthread.h>
 
@@ -81,7 +79,6 @@ int main(int argc, char **argv)
 #endif
 
 #if SERVER_TEST && !FUNNEL_TEST
->>>>>>> refs/remotes/origin/master
 
 wvu_swarm_std_msgs::robot_command genCmd(const char id[3], float r, float theta)
 {

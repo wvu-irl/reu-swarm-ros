@@ -92,11 +92,7 @@ void sendCommandToRobots(command cmd, int recip_rid)
 		printf("\033[37;44mSERVER: sending message to monitor: %s\033[0m\n",
 				cmd.str);
 #endif
-<<<<<<< HEAD
-		for (ConnectionInfo ci : *monitors)
-=======
 		for (ConnectionInfo ci : *monitors) // sending message to all open monitors
->>>>>>> refs/remotes/origin/master
 		{
 			send(ci.getConnectionDescriptor(), &cmd, COMMAND_SIZE, 0);
 		}
