@@ -1,0 +1,187 @@
+<launch>
+
+	<!-- Launching vicon bridge node -->
+	<node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
+		<param name="stream_mode" value="ClientPull" type="str" />
+		<param name="datastream_hostport" value="192.168.10.1:801" type="str" />
+		<param name="tf_ref_frame_id" value="/world" type="str" />
+		
+		<!-- Don't publish individual postrs or transforms -->
+		<param name="publish_markers" value="false" type="bool" />
+		<param name="publish_transform" value="false" type="bool" />
+		<param name="swarmbot_prefix" value="cardbot_" type="str" />
+	</node>
+
+        <!-- Launching target node -->
+        <node pkg="vicon_demo" type="alicetrack_demo" name="alicetrack_demo" output="screen">
+            <param name="vicon_array_topic" value="/vicon_array" type="str" />
+            <param name="advertise_topic" value="target" type="str" />
+            <param name="transform_prefix" value="cardbot_" type="str" />
+            <param name="lemniscate_constant" value="50" type="int" />
+            <param name="lemniscate_interval" value="360" type="int" />
+            <param name="cutoff_radius" value="5" type="int" />
+	</node>
+		
+	<!-- Launching processor node -->
+	<node pkg="processor"  type="ProRun" name="Processor" output="screen"/>
+		
+	<!--  launch ALICE nodes -->
+ 	<node pkg="alice_pkg" type="alice" name="alice_0">							
+		<param name= "id" value = "0" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_1">
+		<param name= "id" value = "1" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_2">
+		<param name= "id" value = "2" type = "str"/>  
+	</node>	
+	<node pkg="alice_pkg" type="alice" name="alice_3">
+		<param name= "id" value = "3" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_4">
+		<param name= "id" value = "4" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_5">
+		<param name= "id" value = "5" type = "str"/>  
+	</node>
+        <!--
+	<node pkg="alice_pkg" type="alice" name="alice_6">
+		<param name= "id" value = "6" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_7">
+		<param name= "id" value = "7" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_8">
+		<param name= "id" value = "8" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_9">
+		<param name= "id" value = "9" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_10">
+		<param name= "id" value = "10" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_11">
+		<param name= "id" value = "11" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_12">
+		<param name= "id" value = "12" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_13">
+		<param name= "id" value = "13" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_14">
+		<param name= "id" value = "14" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_15">
+		<param name= "id" value = "15" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_16">
+		<param name= "id" value = "16" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_17">
+		<param name= "id" value = "17" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_18">
+		<param name= "id" value = "18" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_19">
+		<param name= "id" value = "19" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_20">
+		<param name= "id" value = "20" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_21">
+		<param name= "id" value = "21" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_22">
+		<param name= "id" value = "22" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_23">
+		<param name= "id" value = "23" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_24">
+		<param name= "id" value = "24" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_25">
+		<param name= "id" value = "25" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_26">
+		<param name= "id" value = "26" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_27">
+		<param name= "id" value = "27" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_28">
+		<param name= "id" value = "28" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_29">
+		<param name= "id" value = "29" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_30">
+		<param name= "id" value = "30" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_31">
+		<param name= "id" value = "31" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_32">
+		<param name= "id" value = "32" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_33">
+		<param name= "id" value = "33" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_34">
+		<param name= "id" value = "34" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_35">
+		<param name= "id" value = "35" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_36">
+		<param name= "id" value = "36" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_37">
+		<param name= "id" value = "37" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_38">
+		<param name= "id" value = "38" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_39">
+		<param name= "id" value = "39" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_40">
+		<param name= "id" value = "40" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_41">
+		<param name= "id" value = "41" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_42">
+		<param name= "id" value = "42" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_43">
+		<param name= "id" value = "43" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_44">
+		<param name= "id" value = "44" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_45">
+		<param name= "id" value = "45" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_46">
+		<param name= "id" value = "46" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_47">
+		<param name= "id" value = "47" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_48">
+		<param name= "id" value = "48" type = "str"/>  
+	</node>
+	<node pkg="alice_pkg" type="alice" name="alice_49">
+		<param name= "id" value = "49" type = "str"/>  
+	</node>
+	-->
+	
+	<!-- Funnel to server from alice nodes -->
+	<node pkg="swarm_server" name="funnel" type="funnel"/>
+		
+	<!-- Launching server node -->
+	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server" />
+</launch>
