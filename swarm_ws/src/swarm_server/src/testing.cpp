@@ -2,8 +2,6 @@
 #include <wvu_swarm_std_msgs/robot_command.h>
 #include <wvu_swarm_std_msgs/robot_command_array.h>
 
-#include <string.h>
-
 #include <stdlib.h>
 #include <sys/types.h>
 #include <pthread.h>

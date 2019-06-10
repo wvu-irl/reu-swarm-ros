@@ -171,7 +171,7 @@ void *runClient(void *args)
 #endif
 				}
 
-				info_callback("\033[34mRegistered %s\033[0m", (void *) (buffer->str));
+				info_callback("Registered %s", (void *) (buffer->str));
 			}
 			// cheking to see if the exit command was sent
 			else if (sockets->size() > 0

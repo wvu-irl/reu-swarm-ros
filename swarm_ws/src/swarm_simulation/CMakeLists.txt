@@ -20,7 +20,8 @@ catkin_package(
 
 # Detect and add SFML
 
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs )
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs wvu_swarm_std_msgs geometry_msgs)
+
 include_directories(include ${catkin_INCLUDE_DIRS})
 add_library(Body src/Body.cpp)
 add_library(Flock src/Flock.cpp)
