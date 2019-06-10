@@ -85,7 +85,7 @@ public:
 	void processPoints(wvu_swarm_std_msgs::vicon_points data);
 
 	void printBots();
-
+        
 	void printBotMail(); //Prints botMail[] to the console
 
 	void printAliceMail(wvu_swarm_std_msgs::alice_mail_array msg); //prints alice_mail_array

@@ -102,7 +102,6 @@ void Processor::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills i
 		bid[1] = data.poseVect[i].botId[1];
 		std::string tempID(bid);
 		size_t numID = rid_map[tempID];
-
 		activeBots[numID] = true;
 		// the incoming geometry_msgs::Quaternion is transformed to a tf::Quaterion
 		tf::Quaternion quat;
@@ -121,10 +120,15 @@ void Processor::printBots() //Prints the
 	using namespace std;
 	for (int i = 0; i < BOT_COUNT; i++)
 	{
+            if (activeBots[i]==true)
+            {
 		cout << "[" << bots[i].id << " " << bots[i].x << " " << bots[i].y << " " << bots[i].heading << " ";
 		cout << bots[i].distance << "]\n";
-	}
+            }
+        }  
 }
+
+
 
 void Processor::printBotMail() //Prints the id's in botMail[] to the console
 {
@@ -174,18 +178,20 @@ void Processor::printAliceMail(wvu_swarm_std_msgs::alice_mail_array _msg)
  */
 void Processor::findNeighbors()
 {
-	int botIndex = 0;
-	for (auto &bot : bots)
+	
+	for (int botIndex=0; botIndex<BOT_COUNT; botIndex++)
 	{
-		int curIndex = 0; // Because we're looping over the array, we have to track the index ourselves
-		for (auto &cur : bots)
+		for (int curIndex=0; curIndex<BOT_COUNT; curIndex++)
 		{
-			if (cur.id == bot.id )//|| activeBots[botIndex] == false || activeBots[curIndex] == false) // Check for duplicates and nonactive bots
+                    
+			if (botIndex==curIndex || activeBots[botIndex] == false || (activeBots[curIndex] == false)) // Check for duplicates and nonactive bots
 			{
 				continue;
 			}
-			Bot temp(cur);
-			temp.distance = sqrt(pow((cur.x - bot.x), 2) + pow((cur.y - bot.y), 2));
+
+			Bot temp(bots[curIndex]);
+                     
+			temp.distance = sqrt(pow((bots[curIndex].x - bots[botIndex].x), 2) + pow((bots[curIndex].y - bots[botIndex].y), 2));
 			bool smallest = true;
 
 			for (int i = 0; i < NEIGHBOR_COUNT; i++)
@@ -211,9 +217,7 @@ void Processor::findNeighbors()
 				botMail[botIndex][0] = temp;
 				std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT, compareTwoBots); // Sorts greatest first
 			}
-			curIndex++;
 		}
-		botIndex++;
 	}
 }
 
@@ -222,7 +226,7 @@ void Processor::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail_array &_al
 	for (int j = 0; j < NEIGHBOR_COUNT; j++) //Transfers fields of the struct to fields of the msg
 	{
 		wvu_swarm_std_msgs::neighbor_mail _neighborMail;
-		_neighborMail.id = i;
+		_neighborMail.id = botMail[i][j].id;
 		if (botMail[i][j].y - bots[i].y > 0)
 		{
 			_neighborMail.theta = fmod(
@@ -283,7 +287,14 @@ wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns in
 void Processor::clearProcessor()
 {
 	target.clear();
-
+        for(int i= 0; i<BOT_COUNT; i++)
+        {
+            for(int j=0; j<NEIGHBOR_COUNT; j++) 
+            {
+                botMail[i][j].id=-1;
+                botMail[i][j].distance=10000;
+            }
+        }
 }
 
 bool Processor::isActive(int i) //Checks if bot is active
