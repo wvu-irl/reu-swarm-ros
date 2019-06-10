@@ -7,6 +7,11 @@
 #include <vector>
 #include <string>
 
+<<<<<<< HEAD
+=======
+#define DEBUG 0
+
+>>>>>>> refs/remotes/origin/master
 // using a thread safe vector to collect data
 static bool g_writing = false;
 std::vector<wvu_swarm_std_msgs::robot_command> g_commands;
@@ -16,7 +21,6 @@ struct arg_struct
 {
 	ros::NodeHandle node;
 	const int id;
-	ros::MultiThreadedSpinner spinner;
 };
 
 // callback for subscription
@@ -62,7 +66,11 @@ void *listeningThread(void *arg0)
 	ros::Rate t_rate(100);
 	while (ros::ok())
 	{
+<<<<<<< HEAD
 		args->spinner.spin();
+=======
+		ros::spinOnce();
+>>>>>>> refs/remotes/origin/master
 		t_rate.sleep();
 	}
 
@@ -79,8 +87,6 @@ int main(int argc, char **argv)
 	ros::Publisher fin_exe = n.advertise < wvu_swarm_std_msgs::robot_command_array
 			> ("final_execute", 1000);
 
-	ros::MultiThreadedSpinner spinner(50); // Makes a spinner that can handle each thread
-
 	ros::Rate sub_rate(100);
 	ros::Rate run_rate(100);
 
@@ -88,8 +94,12 @@ int main(int argc, char **argv)
 	for (size_t i = 0; i < 50; i++)
 	{
 		// creating a struct
+<<<<<<< HEAD
 		struct arg_struct args =
 		{ n, (int) i, spinner };
+=======
+		struct arg_struct args = { n, (int) i };
+>>>>>>> refs/remotes/origin/master
 		// creating a thread to subscribe to the robot topics
 		pthread_attr_t attr;
 		pthread_attr_init(&attr);

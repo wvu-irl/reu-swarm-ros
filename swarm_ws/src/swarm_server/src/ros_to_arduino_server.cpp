@@ -14,6 +14,7 @@
 #include <signal.h>
 
 #define DEBUG 0
+#define PRINT_HEADER "[\033[1;33mros_to_arduino_server\033[0m]"
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
 
@@ -34,7 +35,7 @@ void flagger(int sig)
  */
 void commandCallback(command cmd)
 {
-	ROS_INFO("Command: %s", cmd.str); // displaying recieved data
+	ROS_INFO("\033[34mCommand: \033[30;44m%s\033[0m", cmd.str); // displaying recieved data
 	wvu_swarm_std_msgs::sensor_data inf; // conversion container
 	for (size_t i = 0; i < 32; i++)
 	{
@@ -62,17 +63,21 @@ void info(const char *patt, void *dat)
  */
 void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 {
+	ros::Rate send_rate(10);
 	for (wvu_swarm_std_msgs::robot_command msg : msga.commands)
 	{
 #if DEBUG
-		ROS_INFO("Sending message: %c%c, %f, %f", msg.rid[0], msg.rid[1], msg.r, msg.theta);
+		ROS_INFO(PRINT_HEADER"Sending message: %c%c, %f, %f", msg.rid[0],
+				msg.rid[1], msg.r, msg.theta);
 #endif
 		command cmd = { { '\0' } }; // creating command
 		sprintf(cmd.str, "%f,%f", msg.r, msg.theta);
-		char id[3] = { '\0' };
-		id[0] = msg.rid[0];
-		id[1] = msg.rid[1];
-		sendCommandToRobots(cmd, rid_map.at(id)); // sending to robots through TCP server
+		int id = (int) strtol(((char *) (&(msg.rid[0]))), NULL, 10);
+#if DEBUG
+		ROS_INFO(PRINT_HEADER"Constructed command: %02d,\t%s", id, cmd.str);
+#endif
+		sendCommandToRobots(cmd, id); // sending to robots through TCP server
+		send_rate.sleep();
 	}
 }
 

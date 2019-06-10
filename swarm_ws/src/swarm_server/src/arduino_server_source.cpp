@@ -3,6 +3,9 @@
 // definition of a "verbose" option
 #define DEBUG_CPP 0
 
+// setting this to 1 shows what messages failed and succeeded
+#define DEBUG_MESSAGE 0
+
 #include "arduino_server.h"
 
 // struct not really useful to anything outside this file
@@ -58,26 +61,42 @@ std::vector<ConnectionInfo> *monitors;
 
 void sendCommandToRobots(command cmd, int recip_rid)
 {
-#if DEBUG_CPP
-	puts("SERVER: Got message");
-	printf("key exists: %s\n", registry->find(recip_rid)->first == recip_rid && registry->size() > 0? "true" : "false");
+#if DEBUG_CPP || DEBUG_MESSAGE
+	//printf("[\033[1;33marduino_server_source\033[0m] Command executing\033[0m\n");
 	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
-		printf("\033[1;32mSERVER: sending message: %s\t%d\033[0m\n", cmd.str,
+		printf("\033[30;42mSERVER: sending message [%02d <-> %s]: %s\t%d\033[0m\n",
+				recip_rid, rid_indexing[recip_rid].c_str(), cmd.str,
 				registry->at(recip_rid).getConnectionDescriptor());
 #endif
 
 	// sending directly to recipiant
-	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
+	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0) // check to see that the location in the map exists
 		send(registry->at(recip_rid).getConnectionDescriptor(), &cmd, COMMAND_SIZE,
-				0);
+				0); // sending message
+#if DEBUG_CPP || DEBUG_MESSAGE
+	else
+		printf(
+				"\033[37;41mCould not locate ConnectionInfo for %02d <-> %s\033[0m\n",
+				recip_rid, rid_indexing[recip_rid].c_str());
+#endif
 
 	// checking for monitors
 	if (monitors->size() > 0)
 	{
-#if DEBUG_CPP
-		printf("SERVER: sending message to monitor: %s\n\n", cmd.str);
+		char mon_str[64];
+		// creating monitor message
+		sprintf(mon_str, "[%02d / %s]:\t%s", recip_rid,
+				rid_indexing[recip_rid].c_str(), cmd.str);
+		strncpy(cmd.str, mon_str, sizeof(cmd.str)); // safe copy
+#if DEBUG_CPP || DEBUG_MESSAGE
+		printf("\033[37;44mSERVER: sending message to monitor: %s\033[0m\n",
+				cmd.str);
 #endif
+<<<<<<< HEAD
 		for (ConnectionInfo ci : *monitors)
+=======
+		for (ConnectionInfo ci : *monitors) // sending message to all open monitors
+>>>>>>> refs/remotes/origin/master
 		{
 			send(ci.getConnectionDescriptor(), &cmd, COMMAND_SIZE, 0);
 		}
@@ -131,7 +150,15 @@ void *runClient(void *args)
 				char num[2];
 
 				sscanf(buffer->str, "register %s", num); // obtaining the ID
-				int rid = rid_map.at(std::string(num));
+#if DEBUG_CPP
+				printf("\033[34mAttempting to register: \033[37;%dm%s\033[0m\n",
+						rid_map.find(std::string(num))->first == num ? 42 : 41, num);
+#endif
+				int rid =
+						rid_map.find(std::string(num))->first == num ?
+								rid_map.at(std::string(num)) : -1;
+
+				sockets->at(id).setRID(rid); // setting the RID of the related object
 
 				sockets->at(id).setRID(rid); // setting the RID of the related object
 				if (rid == -2)
@@ -142,9 +169,45 @@ void *runClient(void *args)
 				{
 					registry->insert(
 							std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
+#if DEBUG_CPP
+					printf("SERVER: Registry size: \033[31m%d\033[0m\n",
+							(int) registry->size());
+#endif
 				}
 
 				info_callback("Registered %s", (void *) (buffer->str));
+			}
+			// cheking to see if the exit command was sent
+			else if (sockets->size() > 0
+					&& strstr(buffer->str, "exit") == buffer->str)
+			{
+				ConnectionInfo leaving = sockets->at(id); // getting ConnectionInfo for the connection
+
+				// removing if registered as a robot
+				if (registry->find(leaving.getRID())->first == leaving.getRID()
+						&& registry->size() > 0)
+					registry->erase(leaving.getRID());
+
+				// removing of registered as a monitor
+				if (leaving.getRID() == -2)
+				{
+					int erase_id = 0;
+					for (int i = 0; i < monitors->size(); i++)
+					{
+						if (monitors->size() > 0
+								&& monitors->at(i).getConnectionDescriptor()
+										== connection_descriptor) // matching connection descriptor
+						{
+							monitors->erase(monitors->begin() + i);
+							break;
+						}
+					}
+				}
+			}
+			// checking if the connection is doing a latency test
+			else if (strstr(buffer->str, "ping") == buffer->str)
+			{
+				write(connection_descriptor, "pong", 4); // returns pong to sender
 			}
 			else
 				command_callback(*buffer); // sending message to callback
@@ -195,12 +258,12 @@ int beginServer(std::function<void(command)> command_callback,
 #endif
 
 	// Bind to the socket
-	if (bind(socket_descriptor, (struct sockaddr *) &socket_address,
+	while (bind(socket_descriptor, (struct sockaddr *) &socket_address,
 			sizeof(socket_address)) == -1)
 	{
-		char err[32];
-		sprintf(err, "Error binding to socket %d", errno); // making an error message that tells what went wrong
-																											 // with binding the socket
+		char err[64];
+		sprintf(err, "Error binding to socket (%d) retrying", errno); // making an error message that tells what went wrong
+		// with binding the socket
 		error_callback(err);
 		throw "Binding failure";
 		exit(1); // crash out
