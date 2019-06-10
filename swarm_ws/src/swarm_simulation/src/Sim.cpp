@@ -53,7 +53,7 @@ void Sim::Run(ros::NodeHandle _n)
         shapes.push_back(shape);
     }
 
-    ros::Publisher pub = _n.advertise<wvu_swarm_std_msgs::vicon_bot_array>("sim_vicon_array", 1000); //Publishes like Vicon
+    ros::Publisher pub = _n.advertise<wvu_swarm_std_msgs::vicon_bot_array>("vicon_array", 1000); //Publishes like Vicon
     ros::Rate loop_rate(10);
 
     while (window.isOpen()) {
