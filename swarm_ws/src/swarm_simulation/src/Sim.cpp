@@ -15,6 +15,11 @@ Sim::Sim()
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     this->window_height = desktop.height;
     this->window_width  = desktop.width;
+
+    //window_height = 1000;
+		//window_width = 800;
+
+    //std::cout<<"Window h;w = "<<window_height << "; "<<window_width<<"\n";
     this->window.create(sf::VideoMode(window_width, window_height, desktop.bitsPerPixel), "Flocking Simulation Aleks Hatfield", sf::Style::None);
 }
 
@@ -41,6 +46,8 @@ void Sim::Run()
     while (window.isOpen()) {
         HandleInput();
         Render();
+        wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
+        flock.printMessage(vb_array);
         //create and send messages();
     }
 }
