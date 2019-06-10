@@ -25,7 +25,7 @@ Sim::Sim()
 
 // Run the simulation. Run creates the bodies that we'll display, checks for user
 // input, and updates the view
-void Sim::Run()
+void Sim::Run(ros::NodeHandle _n)
 {
     for (int i = 0; i < 49; i++) {
         Body b(window_width / 2 , window_height / 2 ); // Starts all bodies in the center of the screen
@@ -43,12 +43,19 @@ void Sim::Run()
         flock.addBody(b);
         shapes.push_back(shape);
     }
+
+    ros::Publisher pub = _n.advertise<wvu_swarm_std_msgs::vicon_bot_array>("sim_vicon_array", 1000); //Publishes like Vicon
+    ros::Rate loop_rate(10);
+
     while (window.isOpen()) {
         HandleInput();
         Render();
         wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
+
+        //publishing vicon_bot_array
         flock.printMessage(vb_array);
-        //create and send messages();
+        pub.publish(vb_array);
+        ros::spinOnce();
     }
 }
 

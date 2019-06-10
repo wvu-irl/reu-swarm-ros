@@ -4,6 +4,7 @@
 #include "Pvector.h"
 #include "SFML/Window.hpp"
 #include "SFML/Graphics.hpp"
+#include <ros/ros.h>
 
 #ifndef SIM_H
 #define SIM_H
@@ -27,7 +28,7 @@ private:
 
 public:
     Sim();
-    void Run();
+    void Run(ros::NodeHandle _n);
 };
 
 #endif
