@@ -39,8 +39,6 @@ wvu_swarm_std_msgs::obs_point_mail Processor::getSeparation(Bot _bot, std::pair<
 
 		polar_point.radius = loc_r;
 		polar_point.theta = theta;
-//		polar_point.radius = 2;
-//		polar_point.theta = 2;
                 return polar_point;
 	} else
 	{
@@ -237,10 +235,7 @@ wvu_swarm_std_msgs::neighbor_mail Processor::createNeighborMail(int i, int j)
 	_neighborMail.distance = botMail[i][j].distance;
 	_neighborMail.heading = fmod(botMail[i][j].heading - bots[i].heading, 2 * M_PI);
 
-	for (int j = 0; j < NEIGHBOR_COUNT; j++)
-	{
-		botMail[i][j] = Bot();
-	}
+
 	return _neighborMail;
 }
 
@@ -272,15 +267,14 @@ wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns in
 	{
 		_aliceMailArray.neighborMail[j] = createNeighborMail(i, j);
 	}
-
 	_aliceMailArray.targetMail=createTargetMail(i);
-	
 	return _aliceMailArray;
 
 }
 
 void Processor::clearProcessor(){
     target.clear();
+
 }
 
 bool Processor::isActive(int i) //Checks if bot is active
