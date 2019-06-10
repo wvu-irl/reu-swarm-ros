@@ -41,6 +41,7 @@ void Sim::Run()
     while (window.isOpen()) {
         HandleInput();
         Render();
+        //create and send messages();
     }
 }
 
@@ -120,8 +121,8 @@ void Sim::Render()
 
     // Applies the three rules to each body in the flock and changes them accordingly.
     flock.flocking();
-
     window.display();
+
 }
 
 

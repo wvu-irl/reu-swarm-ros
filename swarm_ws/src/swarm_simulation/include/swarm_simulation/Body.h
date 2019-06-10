@@ -62,6 +62,7 @@ public:
     void flock(vector <Body> v);
     void borders();
     float angle(Pvector v);
+    void printMessage(int i,wvu_swarm_std_msgs::vicon_bot_array _vb_array);
 };
 
 #endif

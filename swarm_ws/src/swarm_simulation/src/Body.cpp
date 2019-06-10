@@ -261,6 +261,7 @@ wvu_swarm_std_msgs::vicon_bot_array Body::createMessages(std::vector<Body> _floc
 
 		float mag = cur.velocity.magnitude();
 		q.setRPY( 0, 0, cur.angle(cur.velocity) - M_PI_2);  // Create this quaternion from roll=0/pitch=0/yaw (in radians)
+		//^will have to be changed for a holonomic (apparently direction and heading are different).
 		q.normalize();
 
 		//translational information
@@ -289,5 +290,11 @@ wvu_swarm_std_msgs::vicon_bot_array Body::createMessages(std::vector<Body> _floc
 		vb_array.poseVect.push_back(this_bot);
 	}
 	return vb_array;
+}
+
+void Body::printMessage(int i,wvu_swarm_std_msgs::vicon_bot_array _vb_array)
+{
+	std::cout<<"id: "<<_vb_array.poseVect.at(i).botPose.header.frame_id<<std::endl;
+	std::cout<<"x: "<<_vb_array.poseVect.at(i).botPose.transform.translation.x<<"\n";
 }
 
