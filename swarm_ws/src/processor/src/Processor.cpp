@@ -24,19 +24,7 @@ wvu_swarm_std_msgs::obs_point_mail Processor::getSeparation(Bot _bot, std::pair<
 	//std::cout<<"test_tolerance: loc_r = "<<loc_r<<"\n";
 	if (loc_r <= _tolerance)
 	{
-		//std::cout<<"returned polar_point"<<"\n";
-		if (dy > 0)
-		{
-			theta = fmod(atan(dy / dx) - M_PI_2 - _bot.heading, 2 * M_PI);
-		} else
-		{
-			theta = fmod(atan(dy / dx) + M_PI_2 - _bot.heading, 2 * M_PI);
-		}
-		if (theta < 0)
-		{
-			theta = 2 * M_PI + theta;
-		}
-
+                theta = fmod(atan2(dy, dx)-_bot.heading+4*M_PI,2*M_PI);
 		polar_point.radius = loc_r;
 		polar_point.theta = theta;
 //		polar_point.radius = 2;
@@ -227,17 +215,9 @@ void Processor::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail_array &_al
 	{
 		wvu_swarm_std_msgs::neighbor_mail _neighborMail;
 		_neighborMail.id = botMail[i][j].id;
-		if (botMail[i][j].y - bots[i].y > 0)
-		{
-			_neighborMail.theta = fmod(
-					atan((botMail[i][j].y - bots[i].y) / (botMail[i][j].x - bots[i].x)) - M_PI_2 - bots[i].heading, 2 * M_PI);
-		} else
-		{
-			_neighborMail.theta = fmod(
-					atan((botMail[i][j].y - bots[i].y) / (botMail[i][j].x - bots[i].x)) + M_PI_2 - bots[i].heading, 2 * M_PI);
-		}
+                _neighborMail.theta = fmod(atan2(botMail[i][j].y - bots[i].y, botMail[i][j].x - bots[i].x)-bots[i].heading+4*M_PI,2*M_PI);
 		_neighborMail.distance = botMail[i][j].distance;
-		_neighborMail.heading = fmod(botMail[i][j].heading - bots[i].heading, 2 * M_PI);
+		_neighborMail.heading = fmod(botMail[i][j].heading - bots[i].heading+2*M_PI, 2 * M_PI);
 
 
 		_aliceMailArray.neighborMail[j] = _neighborMail;
@@ -251,10 +231,10 @@ void Processor::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail_array &_alic
 	int num_pts = target.size();
 	for (int j = 0; j < num_pts; j++)
 	{
-		wvu_swarm_std_msgs::obs_point_mail _obsPointMail = getSeparation(bots[i], obs.at(j), 10000);
+		wvu_swarm_std_msgs::obs_point_mail _obsPointMail = getSeparation(bots[i], target.at(j), 10000);
 		if (_obsPointMail.radius > -1)
 		{
-			_aliceMailArray.obsPointMail.push_back(_obsPointMail);
+			_aliceMailArray.targetMail.push_back(_obsPointMail);
 		}
 	}
 }
