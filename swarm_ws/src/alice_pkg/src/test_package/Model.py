@@ -1,6 +1,7 @@
 
 from Rules import Rules
 import math
+import rospy
 
 '''
 This class holds the robot's model of the world
@@ -21,7 +22,7 @@ class Model:
     def generateIdeal(self):
         ideal = None #Will eventually be of the form 
         tolerance = 1
-        while ideal == None:
+        while ideal == None and not rospy.is_shutdown():
             ideal_tuple = (self.rules.avoidObstacles(self.obstacles, tolerance),
                            self.rules.avoidRobots(self.robots, tolerance),
                            self.rules.maintainSpacing(self.robots, tolerance),
