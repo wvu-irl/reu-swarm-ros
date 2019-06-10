@@ -5,6 +5,7 @@
 #include "SFML/Window.hpp"
 #include "SFML/Graphics.hpp"
 #include <ros/ros.h>
+//#include <swarm_server/robot_id.h>
 
 #ifndef SIM_H
 #define SIM_H

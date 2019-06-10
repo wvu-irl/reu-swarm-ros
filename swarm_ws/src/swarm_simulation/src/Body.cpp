@@ -19,21 +19,19 @@ const int window_width = desktopTemp.width;
 // Body Functions from Body.h
 // ----------------------------
 
-Body::Body(float x, float y)
+Body::Body(float x, float y, char _id[2])
 {
     acceleration = Pvector(0, 0);
     velocity = Pvector(rand()%3 - 2, rand()%3 - 2);
     location = Pvector(x, y);
-    ID[0] = 'I';
-    ID[1] = 'D';
     maxSpeed = 1.5;
     maxForce = 0.5;
+    id[0] = _id[0];
+    id[1] = _id[1];
 }
 
 Body::Body(float x, float y, bool predCheck)
 {
-	  ID[0] = 'I';
-	  ID[1] = 'D';
     predator = predCheck;
     if (predCheck == true) {
         maxSpeed = 2.0;

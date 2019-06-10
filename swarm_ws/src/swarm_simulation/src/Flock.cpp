@@ -52,8 +52,8 @@ wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages() //generates an array
 
 		//create the vicon_bot.
 		this_bot.botPose = this_bot_msg;
-		this_bot.botId[0] = cur.ID[0];
-		this_bot.botId[1] = cur.ID[1];
+		this_bot.botId[0] = cur.id[0];
+		this_bot.botId[1] = cur.id[1];
 
 		//add to the vector list
 		vb_array.poseVect.push_back(this_bot);

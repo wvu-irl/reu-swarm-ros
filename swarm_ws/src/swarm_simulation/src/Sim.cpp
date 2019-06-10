@@ -27,8 +27,17 @@ Sim::Sim()
 // input, and updates the view
 void Sim::Run(ros::NodeHandle _n)
 {
+		std::pair<char,char> body_id [50];
+		char letters [100]= {'D','E', 'P','A', 'N','J','G','A','C','T','M','A','M','D','S','C','N','H','V','A','N','Y','N','C',
+				'R','I', 'V','T', 'K','Y', 'T','N', 'O','H', 'L','A', 'I','N', 'M','S', 'I','L', 'A','L', 'M','E', 'M','O',
+				'A','R', 'M','I', 'F','L', 'T','X', 'I','A', 'W','I', 'C','A', 'M','N', 'O','R', 'K','A', 'W','V', 'N','V',
+				'N','E', 'C','O', 'N','D', 'S','D', 'M','T', 'W','A', 'I','D', 'W','Y', 'U','T', 'O','K', 'N','M', 'A','Z',
+				'A','K', 'H','I'};
+
+
     for (int i = 0; i < 49; i++) {
-        Body b(window_width / 2 , window_height / 2 ); // Starts all bodies in the center of the screen
+    		char temp[2]={letters[2*i],letters[2*i+1]};
+        Body b(window_width / 2 , window_height / 2, temp); // Starts all bodies in the center of the screen
         sf::CircleShape shape(4);
 
         // Changing the Visual Properties of the shape
