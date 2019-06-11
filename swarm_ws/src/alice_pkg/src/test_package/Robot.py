@@ -35,7 +35,7 @@ class Robot:
 		ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
 		ex_string = "execute_" + self.name
 		execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
-		rospy.Subscriber("ideals", Float64MultiArray, callback)
+		rospy.Subscriber("ideals", Float64MultiArray, self.callToVector)
 		sub_string = "alice_mail_" + self.name
 		rospy.Subscriber(sub_string, alice_mail_array, self.callToModel)
 		
@@ -51,7 +51,7 @@ class Robot:
 			#accept sensor input to model
 			self.vector_queue.addVector(self.model.generateIdeal())
 			compromise_vector = self.vector_queue.createCompromise()
-			print (compromise_vector)
+			#print (compromise_vector)
 	
 			ideal = Float64MultiArray(data=self.model.generateIdeal())
 			ideal_pub.publish(ideal)

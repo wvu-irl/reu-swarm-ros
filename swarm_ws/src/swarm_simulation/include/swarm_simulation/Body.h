@@ -37,18 +37,20 @@ class Body {
 
 private:
 
-	  wvu_swarm_std_msgs::vicon_bot_array createMessages(std::vector<Body> _flock);//vector<Body> _flock); //operates on flock
+	  //wvu_swarm_std_msgs::vicon_bot_array createMessages(std::vector<Body> _flock);//vector<Body> _flock); //operates on flock
 		//char[2] getID();
 public:
-		char ID [2];
+		char id [2];
     bool predator;
     Pvector location;
     Pvector velocity;
     Pvector acceleration;
     float maxSpeed;
     float maxForce;
+
+
     Body() {}
-    Body(float x, float y);
+    Body(float x, float y, char _id[2]);
     Body(float x, float y, bool predCheck);
     void applyForce(Pvector force);
     // Three Laws that bodies follow

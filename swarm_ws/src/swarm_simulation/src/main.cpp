@@ -7,7 +7,7 @@ int main(int argc, char **argv)
     Sim sim;
   	ros::init(argc, argv, "simulation");
   	ros::NodeHandle n;
-    sim.Run();
+  	sim.Run(n);
     return 0;
 }
 
