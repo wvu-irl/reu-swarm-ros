@@ -20,7 +20,7 @@ class Robot:
 	angle = 0
 	name = 'Alice'
 	vector_queue = VectorQueue() #create queue
-        model = Model(speed)
+    model = Model(speed)
 	MAILBOX = 7 #Sets the number of messeges to hold
 
 	def callToVector(self, data):
@@ -29,36 +29,45 @@ class Robot:
 	def callToModel(self, data):
  		self.model.modelUpdate(data)
 
-	def __init__(self, name):
-		rospy.init_node(name, anonymous=False)	
-		self.name = '%02d' % int(rospy.get_param('~id'))
-		ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
+	def setUpNode(self):
+		rospy.init_node(self.name, anonymous=False)	
+		self.name = int(rospy.get_param('~id')
+		self.ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
 		ex_string = "execute_" + self.name
-		execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
-		rospy.Subscriber("ideals", Float64MultiArray, self.callToVector)
+		self.execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
+		rospy.Subscriber("ideals", Float64MultiArray, callback)
 		sub_string = "alice_mail_" + self.name
 		rospy.Subscriber(sub_string, alice_mail_array, self.callToModel)
-		
 		self.rate = rospy.Rate(10)
+
+	def tester(self):
+		self.model.addObstacle((math.pi/2, 15))
+		self.model.addObstacle((4 * math.pi/7 , 30))
+		self.model.addRobot((math.pi/2, 10, 0.9, math.pi/2))
+		self.model.addRobot((3*math.pi/2, 10, 0.7, math.pi/2))
+
+	def publishData(self):
+		ideal = Float64MultiArray(data=self.model.generateIdeal())
+		self.ideal_pub.publish(ideal)
+		compromise = robot_command()
+		compromise.rid = self.name
+		compromise.theta = float(self.compromise_vector[0])
+		compromise.r = float(self.compromise_vector[1])
+		self.execute_pub.publish(compromise)
+		
+
+	def __init__(self, name):
+		
+		self.setUpNode()
 		while not rospy.is_shutdown():
-                        self.model = Model(self.speed)
-			#run loops to update model
-			#model.addObstacle((math.pi/2, 15))
-			#model.addObstacle((4 * math.pi/7 , 30))
-			self.model.addRobot((math.pi/2, 10, 0.9, math.pi/2))
-			self.model.addRobot((3*math.pi/2, 10, 0.7, math.pi/2))
+			self.model = Model(self.speed)
 	
-			#accept sensor input to model
+			self.tester() #Uncomment to include test inputs
+			
 			self.vector_queue.addVector(self.model.generateIdeal())
-			compromise_vector = self.vector_queue.createCompromise()
-			#print (compromise_vector)
+			self.compromise_vector = self.vector_queue.createCompromise()
 	
-			ideal = Float64MultiArray(data=self.model.generateIdeal())
-			ideal_pub.publish(ideal)
-			compromise = robot_command()
-			compromise.rid = [ord(self.name[0]), ord(self.name[1])]
-			compromise.theta = float(compromise_vector[0])
-			compromise.r = float(compromise_vector[1])
-			execute_pub.publish(compromise)
+			self.publishData()
+
 			self.rate.sleep()
 
