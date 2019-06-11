@@ -6,8 +6,8 @@
 	<node pkg="processor"  type="ProRun" name="Processor" output="screen"/>
 		
 	<!-- TODO launch ALICE nodes -->
- 	<node pkg="alice_pkg" type="alice" name="alice_0">							
-		<param name= "id" value = "0" type = "str"/>  
+ 	<node pkg="alice_pkg" type="alice" name="alice_0" output="screen">							
+		<param name= "id" value = "0" type = "str" />  
 	</node>
 	<node pkg="alice_pkg" type="alice" name="alice_1">
 		<param name= "id" value = "1" type = "str"/>  
