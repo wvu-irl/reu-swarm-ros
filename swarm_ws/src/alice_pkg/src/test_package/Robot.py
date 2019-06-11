@@ -21,6 +21,7 @@ class Robot:
 	name = 'Alice'
 	vector_queue = VectorQueue() #create queue
 	model = Model(speed)
+	self_portrait = SelfPortrait()
 	MAILBOX = 7 #Sets the number of messeges to hold
 
 	def callToVector(self, data):
@@ -33,10 +34,10 @@ class Robot:
 		rospy.init_node(self.name, anonymous=False)	
 		self.name = int(rospy.get_param('~id'))
 		self.ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
-		ex_string = "execute_" + str(self.name)
+		ex_string = "execute_" + self.name
 		self.execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
-		rospy.Subscriber("ideals", Float64MultiArray, self.callToVector)
-		sub_string = "alice_mail_" + str(self.name)
+		rospy.Subscriber("ideals", Float64MultiArray, callback)
+		sub_string = "alice_mail_" + self.name
 		rospy.Subscriber(sub_string, alice_mail_array, self.callToModel)
 		self.rate = rospy.Rate(10)
 
@@ -55,6 +56,10 @@ class Robot:
 		compromise.r = float(self.compromise_vector[1])
 		self.execute_pub.publish(compromise)
 		
+	@staticmethod
+	def update(self):
+		print("updated")
+		
 
 	def __init__(self, name):
 		
@@ -62,7 +67,7 @@ class Robot:
 		while not rospy.is_shutdown():
 			self.model = Model(self.speed)
 	
-			#self.tester() #Uncomment to include test inputs
+			self.tester() #Uncomment to include test inputs
 			
 			self.vector_queue.addVector(self.model.generateIdeal())
 			self.compromise_vector = self.vector_queue.createCompromise()

@@ -14,7 +14,7 @@ class VectorQueue:
         self.vector_queue.append(to_add)
 
     def queueUpdate(self, data):
-        self.addVector(data.data)
+        self.addVector(data)
         
     def returnFirst(self):
         return self.vector_queue.pop()
@@ -24,7 +24,7 @@ class VectorQueue:
         compromise_speed = 0 #speed to pass on
         priority = 0 #keeps track of sum, so that new vectors affect it the correct amount
         
-        while len(self.vector_queue) != 0:
+        while len(self.vector_queue) != 0:s
             current = self.returnFirst()
             current_priority = (current[3] / (current[2] + 1)) ** 2 #factoring in distance
             compromise_angle = (compromise_angle * priority + current[0] * current_priority)/(priority + current_priority)
