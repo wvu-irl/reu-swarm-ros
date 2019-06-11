@@ -1,7 +1,7 @@
 # Robot ID in two-char form ("WV", "NC", "PA", etc)
 # Robot ID of "XX" sends to all the robots
 # Robot ID of "YY" sends to only logging computers
-uint8[2] rid
+int rid
 
 # Radius or velocity magnitude
 float64 r

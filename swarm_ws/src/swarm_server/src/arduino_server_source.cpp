@@ -261,8 +261,7 @@ int beginServer(std::function<void(command, int)> command_callback,
 		sprintf(err, "Error binding to socket (%d) retrying", errno); // making an error message that tells what went wrong
 		// with binding the socket
 		error_callback(err);
-		throw "Binding failure";
-		exit(1); // crash out
+		usleep(100000);
 	}
 #if DEBUG_CPP
 	puts("SERVER: Listening to socket");
