@@ -18,9 +18,9 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 			if (msg.commands.at(i).rid == j)
 			{
 				flock.flock.at(j).velocity.set(
-						0.1*msg.commands.at(i).r
+						0.1 * msg.commands.at(i).r
 								* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity) + M_PI / 180.0 * msg.commands.at(i).theta),
-						0.1*msg.commands.at(i).r * -1
+						0.1 * msg.commands.at(i).r
 								* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity) + M_PI / 180.0 * msg.commands.at(i).theta));
 			}
 		}
@@ -53,11 +53,12 @@ void Sim::Run(ros::NodeHandle _n)
 	for (int i = 0; i < 50; i++)
 	{
 		char temp[2] = { letters[2 * i], letters[2 * i + 1] };
-		Body b(1 * i, window_height / 2, temp); // Starts all bodies in the center of the screen
-		sf::CircleShape shape(4);
+		Body b(25*(int)(i *0.1), 50*(i % 10), temp); // Starts all bodies in the center of the screen
+		sf::CircleShape shape(8, 3);
 
 		// Changing the Visual Properties of the shape
 		shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
+		shape.setOrigin(12,12);
 		//shape.setPosition(window_width, window_height); // Testing purposes, starts all shapes in the center of screen.
 		shape.setFillColor(sf::Color::Yellow);
 		shape.setOutlineColor(sf::Color::White);
@@ -67,8 +68,10 @@ void Sim::Run(ros::NodeHandle _n)
 		// Adding the body to the flock and adding the shapes to the vector<sf::CircleShape>
 		flock.addBody(b);
 		shapes.push_back(shape);
+		window.draw(shape);
 	}
-
+	window.display();
+	sleep(1);
 	ros::Publisher pub = _n.advertise < wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array", 1000); //Publishes like Vicon
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
 	ros::Rate loop_rate(10);
@@ -77,10 +80,9 @@ void Sim::Run(ros::NodeHandle _n)
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
 	pub.publish(vb_array);
 	ros::spinOnce();
-	std::cout << "yo" << std::endl;
-	while (window.isOpen())
+	while (window.isOpen() && ros::ok())
 	{
-		HandleInput();
+		//HandleInput();
 		Render();
 		wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
 
@@ -88,6 +90,7 @@ void Sim::Run(ros::NodeHandle _n)
 		//flock.printMessage(vb_array);
 		pub.publish(vb_array);
 		ros::spinOnce();
+
 	}
 }
 
@@ -106,28 +109,7 @@ void Sim::HandleInput()
 			window.close();
 		}
 	}
-	// Check for mouse click, draws and adds bodies to flock if so.
-//    if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-//        // Gets mouse coordinates, sets that as the location of the body and the shape
-//        sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
-//        Body b(mouseCoords.x, mouseCoords.y, false);
-//        sf::CircleShape shape(4);
-//
-//        // Changing visual properties of newly created body
-//        shape.setPosition(mouseCoords.x, mouseCoords.y);
-//        shape.setOutlineColor(sf::Color::White);
-//        shape.setFillColor(sf::Color::White);
-//        shape.setOutlineColor(sf::Color::White);
-//        shape.setOutlineThickness(1);
-//        shape.setRadius(bodiesSize);
-//
-//        // Adds newly created body and shape to their respective data structure
-//        flock.addBody(b);
-//        shapes.push_back(shape);
-//
-//        // New Shape is drawn
-//        window.draw(shapes[shapes.size()-1]);
-//    }
+
 }
 
 void Sim::Render()
@@ -137,11 +119,6 @@ void Sim::Render()
 	// Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)
 	{
-		window.draw(shapes[i]);
-
-		//cout << "Body "<< i <<" Coordinates: (" << shapes[i].getPosition().x << ", " << shapes[i].getPosition().y << ")" << endl;
-		//cout << "Body Code " << i << " Location: (" << flock.getBody(i).location.x << ", " << flock.getBody(i).location.y << ")" << endl;
-
 		// Matches up the location of the shape to the body
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
@@ -162,10 +139,11 @@ void Sim::Render()
 		// If body exits top boundary
 		if (shapes[i].getPosition().y < 0)
 			shapes[i].setPosition(shapes[i].getPosition().x, shapes[i].getPosition().y + window_height);
+		window.draw(shapes[i]);
 	}
-
-	// Applies the three rules to each body in the flock and changes them accordingly.
 	flock.flocking();
+	// Applies the three rules to each body in the flock and changes them accordingly.
+
 	window.display();
 
 }

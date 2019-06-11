@@ -51,12 +51,12 @@ public:
 
     Body() {}
     Body(float x, float y, char _id[2]);
-    Body(float x, float y, bool predCheck);
+    //Body(float x, float y, bool predCheck);
     void applyForce(Pvector force);
     // Three Laws that bodies follow
-    Pvector Separation(vector<Body> Bodies);
-    Pvector Alignment(vector<Body> Bodies);
-    Pvector Cohesion(vector<Body> Bodies);
+//    Pvector Separation(vector<Body> Bodies);
+//    Pvector Alignment(vector<Body> Bodies);
+//    Pvector Cohesion(vector<Body> Bodies);
     //Functions involving SFML and visualisation linking
     Pvector seek(Pvector v);
     void run(vector <Body> v);
