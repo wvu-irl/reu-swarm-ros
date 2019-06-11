@@ -27,7 +27,10 @@ class Rules:
             x += robot[1] * math.cos(robot[0])
             y += robot[1] * math.sin(robot[0])
         distance = (x**2 + y**2) ** 0.5
-        direction = math.atan(y/x)
+        if x != 0:
+        	direction = math.atan(y/x)
+        else:
+        	direction = 0
         return direction, distance
     
 
@@ -63,6 +66,8 @@ class Rules:
         return sum(speed_list)/len(speed_list)
         
     def matchSpeed(self, robots, speed, tolerance):
+    	if len(robots) == 0:
+    		return None
         avg_speed = self.findSpeedMean(robots)
         if abs(speed - avg_speed) * tolerance > 0.5:
             print("Matching speed")

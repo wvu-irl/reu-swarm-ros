@@ -224,10 +224,10 @@ void Body::flock(vector<Body> v)
 // the other side.
 void Body::borders()
 {
-    if (location.x < 0) location.x += w_width;
-    if (location.y < 0) location.y += w_height;
-    if (location.x > 1000) location.x -= w_width;
-    if (location.y > 1000) location.y -= w_height;
+    if (location.x < 0) location.x += 300;
+    if (location.y < 0) location.y += 600;
+    if (location.x > 300) location.x -= 300;
+    if (location.y > 600) location.y -= 600;
 }
 
 // Calculates the angle for the velocity of a body which allows the visual

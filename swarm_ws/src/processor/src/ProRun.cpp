@@ -53,11 +53,9 @@ int main(int argc, char **argv)
 
 	for (int i = 0; i < BOT_COUNT; i++) //Starts publishing to all 50 topics
 	{
-                char twoDigit[2];
-                sprintf(twoDigit, "%02d", i);
-                std::string empty = "";
+
 		ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::alice_mail_array
-				> (empty + "alice_mail_" + twoDigit, 1000);
+				> ("alice_mail_" + std::to_string(i), 1000);
 		pubVector.push_back(pub);
 	}
 
