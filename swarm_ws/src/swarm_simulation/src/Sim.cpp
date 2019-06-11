@@ -5,8 +5,22 @@
 #include <swarm_simulation/Sim.h>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-
+#include <math.h>
+#include <wvu_swarm_std_msgs/robot_command_array.h>
 //#include "ros/ros.h"
+
+void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg){
+	for (int i=0; i<msg.commands.size();i++)
+	{
+		for (int j=0; j< flock.flock.size(); j++)
+		{
+				if (msg.commands.at(i).rid[0]==flock.flock.at(j).id[0]&&msg.commands.at(i).rid[1]==flock.flock.at(j).id[1])
+				{
+					flock.flock.at(j).velocity.set(msg.commands.at(i).r*cos(180.0/M_PI*msg.commands.at(i).theta),msg.commands.at(i).r*sin(180.0/M_PI*msg.commands.at(i).theta));
+				}
+		}
+	}
+}
 
 // Construct window using SFML
 Sim::Sim()
@@ -27,7 +41,6 @@ Sim::Sim()
 // input, and updates the view
 void Sim::Run(ros::NodeHandle _n)
 {
-		std::pair<char,char> body_id [50];
 		char letters [100]= {'D','E', 'P','A', 'N','J','G','A','C','T','M','A','M','D','S','C','N','H','V','A','N','Y','N','C',
 				'R','I', 'V','T', 'K','Y', 'T','N', 'O','H', 'L','A', 'I','N', 'M','S', 'I','L', 'A','L', 'M','E', 'M','O',
 				'A','R', 'M','I', 'F','L', 'T','X', 'I','A', 'W','I', 'C','A', 'M','N', 'O','R', 'K','A', 'W','V', 'N','V',
@@ -54,7 +67,13 @@ void Sim::Run(ros::NodeHandle _n)
     }
 
     ros::Publisher pub = _n.advertise<wvu_swarm_std_msgs::vicon_bot_array>("vicon_array", 1000); //Publishes like Vicon
+    ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this);//subscribes to funnel
     ros::Rate loop_rate(10);
+
+    //publishes initial information for each bot
+    wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
+    pub.publish(vb_array);
+    ros::spinOnce();
 
     while (window.isOpen()) {
         HandleInput();

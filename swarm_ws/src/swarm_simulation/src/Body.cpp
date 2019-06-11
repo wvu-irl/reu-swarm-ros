@@ -22,9 +22,9 @@ const int window_width = desktopTemp.width;
 Body::Body(float x, float y, char _id[2])
 {
     acceleration = Pvector(0, 0);
-    velocity = Pvector(rand()%3 - 2, rand()%3 - 2);
+    velocity = Pvector(0,0);
     location = Pvector(x, y);
-    maxSpeed = 1.5;
+    maxSpeed = 1;
     maxForce = 0.5;
     id[0] = _id[0];
     id[1] = _id[1];
