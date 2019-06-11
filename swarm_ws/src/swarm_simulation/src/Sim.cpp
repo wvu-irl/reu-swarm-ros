@@ -15,10 +15,13 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 	{
 		for (int j = 0; j < flock.flock.size(); j++)
 		{
-			if (10 * (msg.commands.at(i).rid[0] - 48) + msg.commands.at(i).rid[1] - 48 == j)
+			if (msg.commands.at(i).rid == j)
 			{
-				flock.flock.at(j).velocity.set(msg.commands.at(i).r * cos(180.0 / M_PI * msg.commands.at(i).theta),
-						msg.commands.at(i).r * sin(180.0 / M_PI * msg.commands.at(i).theta));
+				flock.flock.at(j).velocity.set(
+						0.1*msg.commands.at(i).r
+								* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity) + M_PI / 180.0 * msg.commands.at(i).theta),
+						0.1*msg.commands.at(i).r * -1
+								* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity) + M_PI / 180.0 * msg.commands.at(i).theta));
 			}
 		}
 	}
@@ -27,13 +30,10 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 // Construct window using SFML
 Sim::Sim()
 {
-	this->bodiesSize = 11.0;
+	this->bodiesSize = 12.0;
 	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-	this->window_height = desktop.height;
-	this->window_width = desktop.width;
-
-	//window_height = 1000;
-	//window_width = 800;
+	this->window_height = 600;
+	this->window_width = 300;
 
 	//std::cout<<"Window h;w = "<<window_height << "; "<<window_width<<"\n";
 	this->window.create(sf::VideoMode(window_width, window_height, desktop.bitsPerPixel),
@@ -57,8 +57,8 @@ void Sim::Run(ros::NodeHandle _n)
 		sf::CircleShape shape(4);
 
 		// Changing the Visual Properties of the shape
-		// shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
-		shape.setPosition(window_width, window_height); // Testing purposes, starts all shapes in the center of screen.
+		shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
+		//shape.setPosition(window_width, window_height); // Testing purposes, starts all shapes in the center of screen.
 		shape.setFillColor(sf::Color::Yellow);
 		shape.setOutlineColor(sf::Color::White);
 		shape.setOutlineThickness(1);
