@@ -17,8 +17,11 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 		{
 			if (msg.commands.at(i).rid == j)
 			{
-				flock.flock.at(j).velocity.set(msg.commands.at(i).r * cos(M_PI/180.0 * msg.commands.at(i).theta),
-						msg.commands.at(i).r * sin(-180.0/M_PI * msg.commands.at(i).theta));
+				flock.flock.at(j).velocity.set(
+						0.1*msg.commands.at(i).r
+								* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity) + M_PI / 180.0 * msg.commands.at(i).theta),
+						0.1*msg.commands.at(i).r * -1
+								* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity) + M_PI / 180.0 * msg.commands.at(i).theta));
 			}
 		}
 	}
@@ -54,7 +57,7 @@ void Sim::Run(ros::NodeHandle _n)
 		sf::CircleShape shape(4);
 
 		// Changing the Visual Properties of the shape
-		 shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
+		shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
 		//shape.setPosition(window_width, window_height); // Testing purposes, starts all shapes in the center of screen.
 		shape.setFillColor(sf::Color::Yellow);
 		shape.setOutlineColor(sf::Color::White);

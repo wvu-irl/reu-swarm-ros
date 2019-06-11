@@ -238,7 +238,4 @@ float Body::angle(Pvector v)
     float angle = (float)(atan2(v.x, -v.y) * 180 / PI);
     return angle;
 }
-//char[2] Body::getID()
-//{
-//	return ID;
-//}
+
