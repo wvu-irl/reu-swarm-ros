@@ -53,10 +53,10 @@ void Sim::Run(ros::NodeHandle _n)
 	for (int i = 0; i < 50; i++)
 	{
 		char temp[2] = { letters[2 * i], letters[2 * i + 1] };
-		Body b(25*(int)(i *0.1), 50*(i % 10), temp); // Starts all bodies in the center of the screen
+		Body b(25*(int)(i /10), 50*(i % 10), temp); // Starts all bodies in the center of the screen
 		sf::CircleShape shape(8, 3);
 
-		// Changing the Visual Properties of the shape
+		// Changing the Visual Properties of the shape.
 		shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
 		shape.setOrigin(12,12);
 		//shape.setPosition(window_width, window_height); // Testing purposes, starts all shapes in the center of screen.
