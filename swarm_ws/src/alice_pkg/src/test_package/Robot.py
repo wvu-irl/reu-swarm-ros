@@ -3,8 +3,10 @@
 
 from VectorQueue import VectorQueue
 from Model import Model
+from SelfPortrait import SelfPortrait
 import math
 import rospy
+import Tkinter
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import String
 from wvu_swarm_std_msgs.msg import robot_command
@@ -21,6 +23,7 @@ class Robot:
 	name = 'Alice'
 	vector_queue = VectorQueue() #create queue
 	model = Model(speed)
+	compromise_vector = None
 	MAILBOX = 7 #Sets the number of messeges to hold
 
 	def callToVector(self, data):
@@ -59,10 +62,18 @@ class Robot:
 	def __init__(self, name):
 		
 		self.setUpNode()
+		self_portrait = SelfPortrait(self)
+		should_update = True
 		while not rospy.is_shutdown():
+			if should_update:
+				try:
+					self_portrait.root.update()
+				except Tkinter.TclError:
+					should_update = False
+			
 			self.model = Model(self.speed)
 	
-			#self.tester() #Uncomment to include test inputs
+			self.tester() #Uncomment to include test inputs
 			
 			self.vector_queue.addVector(self.model.generateIdeal())
 			self.compromise_vector = self.vector_queue.createCompromise()

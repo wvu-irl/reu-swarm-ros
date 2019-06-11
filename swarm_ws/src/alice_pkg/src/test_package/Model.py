@@ -1,6 +1,6 @@
 
 from Rules import Rules
-#from SelfPortrait import SelfPortrait
+from SelfPortrait import SelfPortrait
 import math
 import rospy
 
@@ -15,9 +15,8 @@ class Model:
     obstacles = [] #Saved in form (Direction, distance)
     robots = [] #Saved in form (Direction, distance, speed, angle)
     food = [] #Not implemented, but will probably be stored as (Direction, distance)
-    tolerance = 0
     rules = Rules()
-#	self_portrait = SelfPortrait()
+    tolerance = 0
 
     def __init__(self, speed):
         self.speed = speed

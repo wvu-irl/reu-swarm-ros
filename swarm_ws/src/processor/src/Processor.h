@@ -84,6 +84,8 @@ public:
 
 	void processPoints(wvu_swarm_std_msgs::vicon_points data);
 
+	void processObstacles(wvu_swarm_std_msgs::vicon_points data);
+
 	void printBots();
         
 	void printBotMail(); //Prints botMail[] to the console

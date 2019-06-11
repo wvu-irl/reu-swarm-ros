@@ -33,8 +33,8 @@ wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages() //generates an array
 
 
 		//translational information
-		this_bot_msg.transform.translation.x = cur.location.x / 3 - 50; //scales info for table
-		this_bot_msg.transform.translation.y = -1 * cur.location.y / 3 + 100; //scales info for table
+		this_bot_msg.transform.translation.x = cur.location.x * 0.07320644216; //scales info for table
+		this_bot_msg.transform.translation.y = cur.location.y * 0.26041666666; //scales info for table
 		this_bot_msg.transform.translation.z = 0;
 
 		//rotational information

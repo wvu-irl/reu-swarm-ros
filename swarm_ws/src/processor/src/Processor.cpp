@@ -80,6 +80,15 @@ void Processor::processPoints(wvu_swarm_std_msgs::vicon_points data) //Fills in 
 	}
 }
 
+void Processor::processObstacles(wvu_swarm_std_msgs::vicon_points data) //Fills in targets
+{
+	for (size_t i = 0; i < data.point.size(); i++)
+	{
+		std::pair<float, float> temp(data.point[i].x, data.point[i].y);
+		obs.push_back(temp);
+	}
+}
+
 void Processor::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills in bots[]
 {
 

@@ -8,7 +8,7 @@ void botCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg)
 	//For Debug purposes. callback should do nothing by default.
 	//ROS_INFO("I hear: [%i]", msg.id1);
 }
-
+void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg){}
 void pointCallback(const wvu_swarm_std_msgs::vicon_points &msg){}
 
 int main(int argc, char **argv)
@@ -49,6 +49,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("vicon_array", 1000, botCallback); //Subscribes to the Vicon
 	ros::Subscriber sub2 = n.subscribe("target", 1000, pointCallback);
+	ros::Subscriber sub3 = n.subscribe("virutal_obstacles",1000,obsCallback);
 	std::vector < ros::Publisher > pubVector;
 
 	for (int i = 0; i < BOT_COUNT; i++) //Starts publishing to all 50 topics
@@ -69,9 +70,14 @@ int main(int argc, char **argv)
         wvu_swarm_std_msgs::vicon_bot_array tempBotArray =
 				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_bot_array
 						> ("vicon_array"));
+
+        wvu_swarm_std_msgs::vicon_points temp_obs_array =
+        				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
+        						> ("virtual_obstacle"));
 //
 //		bigbrain.processPoints(tempTarget);
 		bigbrain.processVicon(tempBotArray);
+		bigbrain.processObstacles(temp_obs_array);
 		bigbrain.findNeighbors();
                 for (int i = 0; i < BOT_COUNT; i++) //Publishes msgs to Alices
 		{
