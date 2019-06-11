@@ -20,7 +20,7 @@ class Robot:
 	angle = 0
 	name = 'Alice'
 	vector_queue = VectorQueue() #create queue
-    model = Model(speed)
+	model = Model(speed)
 	MAILBOX = 7 #Sets the number of messeges to hold
 
 	def callToVector(self, data):
