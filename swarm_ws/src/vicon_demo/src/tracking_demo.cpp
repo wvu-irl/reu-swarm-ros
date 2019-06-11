@@ -197,9 +197,13 @@ double processBot(wvu_swarm_std_msgs::robot_command_array &outputMsg, std::strin
     
     // Convert the bot's pose to a string
     char rid[3] = {'\0'};
+    char rid2[3] = {'\0'};
     rid[0] = bot.botId[0];
     rid[1] = bot.botId[1];
+    rid2[0] = bot.botId[0];
+    rid2[1] = bot.botId[1];
     std::string idStr(rid);
+    int idNum = rid_map[rid2];
     
     // Build a string for the robot's transformation
     std::string transformString = "vicon/";
@@ -230,7 +234,7 @@ double processBot(wvu_swarm_std_msgs::robot_command_array &outputMsg, std::strin
     
     // Build a command for this specific bot
     wvu_swarm_std_msgs::robot_command thisCmd;
-    thisCmd.rid = bot.botId;
+    thisCmd.rid = idNum;
     thisCmd.r = dist;
     thisCmd.theta = degrees;
     
