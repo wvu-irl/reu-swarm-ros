@@ -34,7 +34,7 @@ class Rules:
     def maintainSpacing(self, robots, tolerance):
         direction, distance = self.findCenter(robots)
         if (4 * ROBOT_SIZE / tolerance < distance): #This is mostly arbitrary and will need to be adjusted in simulation
-            print("Maintaining spacing")
+            #print("Maintaining spacing")
             return  (direction, 1 - math.sin(direction))
         else:
             return None
@@ -42,7 +42,7 @@ class Rules:
     def avoidRobots(self, robots, tolerance):
         for robot in robots:
             if ((robot[0] < math.pi/12 * tolerance) or (robot[0] > 11 * math.pi/12 - math.pi/12 *tolerance)) and (robot[1] < ROBOT_SIZE / 2 * tolerance): #This is mostly arbitrary and will need to be adjusted in simulation
-                print("Avoiding robots")
+                #print("Avoiding robots")
                 return ((robot[0] + math.pi/2)%math.pi, 1)
         return None
 
@@ -51,7 +51,7 @@ class Rules:
             return None
         for obstacle in obstacles:
             if ((obstacle[0] < math.pi/12 * tolerance) or (obstacle[0] > 11 * math.pi/12 - math.pi/12 *tolerance)) and (obstacle[1] < ROBOT_SIZE / 2 * tolerance):
-                print("Avoiding obstacles")
+                #print("Avoiding obstacles")
                 return ((obstacle[0] + math.pi/2)%math.pi, 1/(1 + tolerance))
         return None
     
@@ -65,7 +65,7 @@ class Rules:
     def matchSpeed(self, robots, speed, tolerance):
         avg_speed = self.findSpeedMean(robots)
         if abs(speed - avg_speed) * tolerance > 0.5:
-            print("Matching speed")
+            #print("Matching speed")
             return (0, avg_speed)
         return None
 '''
