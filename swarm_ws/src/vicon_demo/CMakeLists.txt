@@ -17,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   message_generation
   visualization_msgs
-#  swarm_server
+  swarm_server
 )
 
 ## System dependencies are found with CMake's conventions
@@ -74,10 +74,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 # Generate added messages and services with any dependencies listed here
-  generate_messages(
-    DEPENDENCIES
-    std_msgs
-  )
+#  generate_messages(
+#    DEPENDENCIES
+#    std_msgs
+#  )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##

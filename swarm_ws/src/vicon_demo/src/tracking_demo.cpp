@@ -18,6 +18,7 @@
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
 #include <wvu_swarm_std_msgs/robot_command.h>
 #include <wvu_swarm_std_msgs/robot_command_array.h>
+#include "robot_id.h"
 
 void msgCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg) {}
 
@@ -203,7 +204,7 @@ double processBot(wvu_swarm_std_msgs::robot_command_array &outputMsg, std::strin
     rid2[0] = bot.botId[0];
     rid2[1] = bot.botId[1];
     std::string idStr(rid);
-    int idNum = rid_map[rid2];
+    int idNum = rid_map[idStr];
     
     // Build a string for the robot's transformation
     std::string transformString = "vicon/";
