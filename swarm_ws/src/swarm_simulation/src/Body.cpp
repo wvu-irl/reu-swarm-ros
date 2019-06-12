@@ -109,7 +109,10 @@ void Body::borders()
 float Body::angle(Pvector v)
 {
     // From the definition of the dot product
-    float angle = (float)(atan2(v.x, -v.y) );
+	  float angle = -1*(float)(atan2(v.y,v.x) );
+
+    //float angle = (float)(atan2(v.x, -v.y) );
+	  //^ the way this was written before. Saved it just in case.
     return angle;
 }
 //char[2] Body::getID()

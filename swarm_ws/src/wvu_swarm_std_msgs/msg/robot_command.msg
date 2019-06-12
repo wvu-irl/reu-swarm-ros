@@ -7,4 +7,5 @@ int32 rid
 float64 r
 
 # Angle/Pose to be determined by robot
-float64 theta
+float64 theta 
+#theta is negative in the counterclockwise direction.

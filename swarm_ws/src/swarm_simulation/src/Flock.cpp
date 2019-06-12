@@ -26,15 +26,18 @@ wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages() //generates an array
 		Body cur = flock.at(i); //current body being looked at.
 
 		float mag = cur.velocity.magnitude(); // r, the mag of the velocity
-		q.setRPY( 0, 0, -cur.angle(cur.velocity));  // Create this quaternion from roll=0/pitch=0/ yaw (in radians)
+
+		//add negative sign to cur.angle ############################
+
+		q.setRPY( 0, 0, cur.angle(cur.velocity));  // Create this quaternion from roll=0/pitch=0/ yaw (in radians)
 		//^will have to be changed for a holonomic (apparently direction and heading are different).
 		q.normalize(); // normalizes the quaternion.
 
 
 
 		//translational information
-		this_bot_msg.transform.translation.x = cur.location.x * 0.07320644216; //scales info for table
-		this_bot_msg.transform.translation.y = cur.location.y * 0.26041666666; //scales info for table
+		this_bot_msg.transform.translation.x = cur.location.x * 0.3333 - 50;  //scales info for table
+		this_bot_msg.transform.translation.y = -cur.location.y * 0.3333 + 100; //scales info for table
 		this_bot_msg.transform.translation.z = 0;
 
 		//rotational information

@@ -17,17 +17,39 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 		{
 			if (msg.commands.at(i).rid == j && flock.flock.at(j).updated==false)
 			{
-				std::cout << flock.flock.at(j).angle(flock.flock.at(j).velocity) << std::endl;
+				//std::cout << flock.flock.at(j).angle(flock.flock.at(j).velocity) << std::endl;
+
+//				std::cout<<"--------- Bot ID "<<j<<"--------\n";
+//				float o = flock.flock.at(j).angle(flock.flock.at(j).velocity);
+//				float n = msg.commands.at(i).theta;
+//				std::cout<<"v_old (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
+//				std::cout<<"heading: "<<o<<"| theta: "<<n<<"\n";
+//				^ will print out fun facts if desired.
+
+//				flock.flock.at(j).velocity.set(
+//						msg.commands.at(i).r
+//								* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity) - M_PI_2 +  msg.commands.at(i).theta),
+//						 msg.commands.at(i).r
+//								* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity) - M_PI_2 + msg.commands.at(i).theta));
+//       ^the way this code was before, just in case.
+
 				flock.flock.at(j).velocity.set(
-						 msg.commands.at(i).r
-								* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity)-M_PI_2+  msg.commands.at(i).theta),
-						 msg.commands.at(i).r
-								* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity)-M_PI_2 + msg.commands.at(i).theta));
+										 0.1*msg.commands.at(i).r
+												* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity) +  msg.commands.at(i).theta),
+										 -0.1*msg.commands.at(i).r
+												* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity) + msg.commands.at(i).theta));
 				flock.flock.at(j).updated=true;
+
+//				std::cout<<"new (sum) angle"<< o +  n<<"\n";
+//				std::cout<<"v_new (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
+//				std::cout<<"-----------------------------\n";
+//				^more fun facts, if ya want um.
 			}
 		}
 	}
+	std::cout<<"iteration Ran"<<"\n";
 }
+
 
 // Construct window using SFML
 Sim::Sim()
@@ -55,8 +77,8 @@ void Sim::Run(ros::NodeHandle _n)
 	for (int i = 0; i < 50; i++)
 	{
 		char temp[2] = { letters[2 * i], letters[2 * i + 1] };
-		Body b(25*(int)(i /10), 50*(i % 10), temp); // Starts all bodies in the center of the screen
-		sf::CircleShape shape(8, 3);
+		Body b(30*(int)(i /10), 60*(i % 10), temp); // Starts all bodies in the center of the screen
+		sf::CircleShape shape(8, 5);
 
 		// Changing the Visual Properties of the shape.
 		shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
@@ -148,9 +170,7 @@ void Sim::Render()
 		flock.flock.at(i).updated=false;
 	}
 
-	// Applies the three rules to each body in the flock and changes them accordingly.
-
-	window.display();
+	window.display(); //updates display
 
 }
 
