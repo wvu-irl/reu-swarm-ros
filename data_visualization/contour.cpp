@@ -2,9 +2,10 @@
 #include <sstream>
 #include <math.h>
 #include <thread>
+#include <future>
 #include "contour.h"
 
-#define DEBUG_CONT_SRC 1
+#define DEBUG_CONT_SRC 0
 
 Vector3D::Vector3D(double x, double y, double z) : x(x), y(y), z(z)
 {
@@ -37,7 +38,13 @@ ContourMap::ContourMap(sf::Rect<int> _bounds)
     cols = (sf::Uint8 *)malloc(bounds.width * bounds.height * 4);
     img.create(bounds.width, bounds.height, cols);
 
-    sprite.scale(sf::Vector2f(2.5, 2.5));
+    //sprite.scale(sf::Vector2f(2.5, 2.5));
+    sprite.setPosition(bounds.left, bounds.top);
+}
+
+void ContourMap::scale(float sx, float sy)
+{
+    this->sprite.scale(sf::Vector2f(sx, sy));
 }
 
 ContourMap::~ContourMap()
@@ -59,6 +66,25 @@ void ContourMap::resemble(std::function<double(double, double)> z)
     this->zfunc = z;
 }
 
+Vector3D *drawPix(Vector3D points[5], double level)
+{
+    std::function<bool(double, double, double)> isBtw([](double l, double r, double mid) -> bool {
+        return (l < r ? l : r) <= mid && mid <= (l < r ? r : l);
+    });
+
+    Vector3D *draw = NULL;
+
+    for (size_t i = 1; i < 5; i++)
+    {
+        if (isBtw(points[0].z, points[i].z, level))
+        {
+            draw = points;
+            break;
+        }
+    }
+    return draw;
+}
+
 void ContourMap::render(sf::RenderWindow *window)
 {
     if (levels.size() > 0)
@@ -70,16 +96,16 @@ void ContourMap::render(sf::RenderWindow *window)
                 for (double k = 0; k < levels.size(); k++)
                 {
                     Vector3D zc = Vector3D(j, i, zfunc(j, i));
-                    Vector3D zu = Vector3D(j, i - 1.5, zfunc(j, i - 1.5));
-                    Vector3D zd = Vector3D(j, i - 1.5, zfunc(j, i - 1.5));
-                    Vector3D zl = Vector3D(j - 1.5, i, zfunc(j - 1.5, i));
-                    Vector3D zr = Vector3D(j + 1.5, i, zfunc(j + 1.5, i));
+                    Vector3D zu = Vector3D(j, i - LINE_CHECK_DIST, zfunc(j, i - LINE_CHECK_DIST));
+                    Vector3D zd = Vector3D(j, i - LINE_CHECK_DIST, zfunc(j, i - LINE_CHECK_DIST));
+                    Vector3D zl = Vector3D(j - LINE_CHECK_DIST, i, zfunc(j - LINE_CHECK_DIST, i));
+                    Vector3D zr = Vector3D(j + LINE_CHECK_DIST, i, zfunc(j + LINE_CHECK_DIST, i));
                     img.setPixel(j, i, sf::Color::Transparent);
-                    if (levels.at(k) < zc.z && (levels.at(k) > zu.z || levels.at(k) > zl.z ||
-                                                levels.at(k) > zd.z || levels.at(k) > zr.z) ||
-                        abs(levels.at(k) - zc.z) < 0.001)
+                    Vector3D vects[] = {zc, zu, zd, zl, zr};
+                    Vector3D *draw = drawPix(vects, levels.at(k));
+                    if (draw != NULL)
                     {
-                        img.setPixel(j, i, sf::Color::White);
+                        img.setPixel((int)draw->x, (int)draw->y, levels.at(k) < 0 ? sf::Color::Red : sf::Color::White);
                         break;
                     }
                 }

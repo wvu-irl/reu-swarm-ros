@@ -4,7 +4,6 @@
  *      g++ main.cpp -oContour.o -lsfml-graphics -lsfml-window -lsfml-system
  */
 
-#include "GameClock.hpp"
 #include "contour.h"
 
 #include <math.h>
@@ -14,50 +13,35 @@
 
 ContourMap *cont;
 
-static int tick = 0;
+static int g_tick = 0;
 
 double function(double x, double y)
 {
-    x -= 100;
-    y -= 100;
-    x /= 10;
-    y /= 10;
-    return x * x - y * y;
+    x -= 250;
+    y -= 250;
+    x /= 50;
+    y /= 50;
+    return (x * x - y * y) * sin(M_PI / 50 * g_tick);
 }
 
-void incrTick()
+void tick()
 {
-    tick++;
-    tick %= 100;
+    std::cout << "Tick" << std::endl;
+
+    g_tick++;
+    g_tick %= 100;
 }
 
-void gameclock::tick()
-{
-    incrTick();
-}
-
-void gameclock::render(sf::RenderWindow *window)
+void render(sf::RenderWindow *window)
 {
     cont->render(window);
 }
 
-void gameclock::buttonAction(int id)
-{
-}
-
-void gameclock::keyPress(sf::Keyboard::Key key)
-{
-}
-
-void gameclock::keyRelease(sf::Keyboard::Key key)
-{
-}
-
 int main(int argc, char **argv)
 {
-    cont = new ContourMap(sf::Rect<int>(10, 10, 200, 200));
+    cont = new ContourMap(sf::Rect<int>(10, 10, 500, 500));
 
-    for (double i = -10.0; i <= 10.0; i += 20.0 / 5.0)
+    for (double i = -20.0; i <= 20.0; i += 40.0 / 16.0)
     {
         cont->levels.push_back(i);
         std::cout << "Added level: " << i << std::endl;
@@ -66,5 +50,27 @@ int main(int argc, char **argv)
 
     sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Contour Plotting", sf::Style::Default);
 
-    gameclock::init(&window, WIDTH, HEIGHT, 100.0f, 60.0f);
+    // gameclock::init(&window, WIDTH, HEIGHT, 100.0f, 30.0f);
+    while (window.isOpen())
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            switch (event.type)
+            {
+            case sf::Event::Closed:
+                window.close();
+                break;
+            }
+        }
+
+        tick();
+
+        if (window.isOpen())
+        {
+            window.clear();
+            render(&window);
+            window.display();
+        }
+    }
 }

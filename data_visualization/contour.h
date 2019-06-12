@@ -5,6 +5,8 @@
 #include <vector>
 #include <functional>
 
+#define LINE_CHECK_DIST 1
+
 class Vector3D
 {
 public:
@@ -48,6 +50,8 @@ public:
     void render(sf::RenderWindow *window);
 
     void resemble(std::function<double(double, double)> z);
+
+    void scale(float sx, float sy);
 
     ~ContourMap();
 };
