@@ -47,6 +47,7 @@ public:
 
     ContourMap(sf::Rect<int> bounds);
 
+    void tick();
     void render(sf::RenderWindow *window);
 
     void resemble(std::function<double(double, double)> z);

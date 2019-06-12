@@ -26,7 +26,8 @@ double function(double x, double y)
 
 void tick()
 {
-    std::cout << "Tick" << std::endl;
+    // std::cout << "Tick" << std::endl;
+    cont->tick();
 
     g_tick++;
     g_tick %= 100;
@@ -41,7 +42,7 @@ int main(int argc, char **argv)
 {
     cont = new ContourMap(sf::Rect<int>(10, 10, 500, 500));
 
-    for (double i = -20.0; i <= 20.0; i += 40.0 / 16.0)
+    for (double i = -10.0; i <= 10.0; i += 20.0 / 9.0)
     {
         cont->levels.push_back(i);
         std::cout << "Added level: " << i << std::endl;

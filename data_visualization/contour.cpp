@@ -52,12 +52,6 @@ ContourMap::~ContourMap()
     free(cols);
 }
 
-sf::Vector2f intersectPoint(Vector3D _ray_vector, Vector3D _start_point, double level)
-{
-    Vector3D vect = _start_point - _ray_vector * (((_ray_vector - Vector3D(0.0, 0.0, level)).dot(Vector3D(0.0, 0.0, 1.0))) / (_ray_vector.dot(Vector3D(0.0, 0.0, 1.0))));
-    return sf::Vector2f(vect.x, vect.y);
-}
-
 void ContourMap::resemble(std::function<double(double, double)> z)
 {
 #if DEBUG_CONT_SRC
@@ -85,7 +79,7 @@ Vector3D *drawPix(Vector3D points[5], double level)
     return draw;
 }
 
-void ContourMap::render(sf::RenderWindow *window)
+void ContourMap::tick()
 {
     if (levels.size() > 0)
     {
@@ -93,15 +87,16 @@ void ContourMap::render(sf::RenderWindow *window)
         {
             for (double j = 0; j < bounds.width; j++)
             {
+                img.setPixel(j, i, sf::Color::Transparent);
+                Vector3D zc = Vector3D(j, i, zfunc(j, i));
+                Vector3D zu = Vector3D(j, i - LINE_CHECK_DIST, zfunc(j, i - LINE_CHECK_DIST));
+                Vector3D zd = Vector3D(j, i - LINE_CHECK_DIST, zfunc(j, i - LINE_CHECK_DIST));
+                Vector3D zl = Vector3D(j - LINE_CHECK_DIST, i, zfunc(j - LINE_CHECK_DIST, i));
+                Vector3D zr = Vector3D(j + LINE_CHECK_DIST, i, zfunc(j + LINE_CHECK_DIST, i));
+
+                Vector3D vects[] = {zc, zu, zd, zl, zr};
                 for (double k = 0; k < levels.size(); k++)
                 {
-                    Vector3D zc = Vector3D(j, i, zfunc(j, i));
-                    Vector3D zu = Vector3D(j, i - LINE_CHECK_DIST, zfunc(j, i - LINE_CHECK_DIST));
-                    Vector3D zd = Vector3D(j, i - LINE_CHECK_DIST, zfunc(j, i - LINE_CHECK_DIST));
-                    Vector3D zl = Vector3D(j - LINE_CHECK_DIST, i, zfunc(j - LINE_CHECK_DIST, i));
-                    Vector3D zr = Vector3D(j + LINE_CHECK_DIST, i, zfunc(j + LINE_CHECK_DIST, i));
-                    img.setPixel(j, i, sf::Color::Transparent);
-                    Vector3D vects[] = {zc, zu, zd, zl, zr};
                     Vector3D *draw = drawPix(vects, levels.at(k));
                     if (draw != NULL)
                     {
@@ -111,7 +106,13 @@ void ContourMap::render(sf::RenderWindow *window)
                 }
             }
         }
+    }
+}
 
+void ContourMap::render(sf::RenderWindow *window)
+{
+    if (levels.size() > 0)
+    {
         tex.loadFromImage(img);
         sprite.setTexture(tex, true);
         window->draw(sprite);
