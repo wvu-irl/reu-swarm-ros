@@ -22,20 +22,32 @@ class Robot:
 	angle = 0
 	name = 'Alice'
 	vector_queue = VectorQueue() #create queue
-	model = Model(speed)
 	compromise_vector = None
 	ideal_vector = None
+	neighbors = []
 	MAILBOX = 7 #Sets the number of messeges to hold
 
+	def is_neighbor(self, to_check):
+		to_return = 0
+		for neighbor in self.neighbors:
+			if neighbor[0] == to_check:
+				to_return = neighbor[1]
+		return to_return
+
 	def callToVector(self, data):
-		self.vector_queue.queueUpdate(data)
+		if self.is_neighbor(data.data[4]) != 0 and len(self.vector_queue.vector_queue) < 8:
+			self.vector_queue.queueUpdate((data.data[0], data.data[1], self.is_neighbor(data.data[4]), data.data[3], data.data[4]))
 
 	def callToModel(self, data):
- 		self.model.modelUpdate(data)
+		for neighbor in data.neighborMail:
+			if self.is_neighbor(neighbor.id) == 0:
+ 				self.model.addRobot(neighbor)
+ 				self.neighbors.append((neighbor.id, neighbor.distance))
 
 	def setUpNode(self):
 		rospy.init_node(self.name, anonymous=False)	
 		self.name = int(rospy.get_param('~id'))
+		self.model = Model(self.name)
 		self.ideal_pub = rospy.Publisher('ideals', Float64MultiArray, queue_size = self.MAILBOX)
 		ex_string = "execute_" + str(self.name)
 		self.execute_pub = rospy.Publisher(ex_string, robot_command, queue_size = self.MAILBOX)
@@ -73,12 +85,15 @@ class Robot:
 				except Tkinter.TclError:
 					should_update = False
 			
-			self.model = Model(self.speed)
+			self.neighbors = []
+			self.model.clear()
 	
 			#self.tester() #Uncomment to include test inputs
 			self.ideal_vector = self.model.generateIdeal()
 			self.vector_queue.addVector(self.ideal_vector)
 			self.compromise_vector = self.vector_queue.createCompromise()
+			
+			self.vector_queue.vector_queue = []
 	
 			self.publishData()
 
