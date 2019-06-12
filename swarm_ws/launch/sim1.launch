@@ -2,6 +2,9 @@
 		
 	<node pkg="swarm_simulation" type="main" name="Simulation" output="screen"/>
 		
+	<!-- Launching virtual obstacle node -->
+	<node pkg="swarm_simulation"  type="virtual_obstacle" name="swarm_simulation" output="screen"/>
+		
 	<!-- Launching processor node -->
 	<node pkg="processor"  type="ProRun" name="Processor" output="screen"/>
 	
