@@ -2,7 +2,8 @@
 #include "std_msgs/String.h"
 #include "stdlib.h"
 #include <sstream>
-
+#include <iostream>
+#include <wvu_swarm_std_msgs/vicon_point.h>
 #include <wvu_swarm_std_msgs/vicon_points.h>
 
 void makeAndPublish(ros::Publisher _pub)
@@ -21,7 +22,9 @@ void makeAndPublish(ros::Publisher _pub)
     cur.y = pair_array[i].second;
     vp_vector.point.push_back(cur);
   }
+  std::cout<<"It created an array"<<"\n";
   _pub.publish(vp_vector);
+  std::cout<<"It published"<<"\n";
 
 }
 int main(int argc, char **argv)
@@ -29,10 +32,6 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "virtual_obstacle");
   ros::NodeHandle n;
   ros::Publisher pub = n.advertise<wvu_swarm_std_msgs::vicon_points>("virtual_obstacles",1000);
-
-  while (ros::ok())
-  {
-		makeAndPublish(pub);
-		ros::spinOnce();
-  }
+  makeAndPublish(pub);
+  ros::spinOnce();
 }
