@@ -160,11 +160,11 @@
 	<node pkg="alice_pkg" type="alice" name="alice_48">
 		<param name= "id" value = "48" type = "str"/>  
 	</node>
-	-->
+	
 	<node pkg="alice_pkg" type="alice" name="alice_49">
 		<param name= "id" value = "49" type = "str"/>  
 	</node>
-	
+	-->
 	
 	<!-- Funnel to server from alice nodes -->
 	<node pkg="swarm_server" name="funnel" type="funnel" output="screen"/>
