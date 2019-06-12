@@ -76,14 +76,13 @@ class Robot:
 			self.model = Model(self.speed)
 	
 			#self.tester() #Uncomment to include test inputs
+			self.compromise_vector = None
+			self.ideal_vector = None
 			self.ideal_vector = self.model.generateIdeal()
 			self.vector_queue.addVector(self.ideal_vector)
 			self.compromise_vector = self.vector_queue.createCompromise()
 	
 			self.publishData()
-
-			self.compromise_vector = None
-			self.ideal_vector = None
 
 			self.rate.sleep()
 
