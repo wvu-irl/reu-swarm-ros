@@ -4,6 +4,9 @@
 		
 	<!-- Launching processor node -->
 	<node pkg="processor"  type="ProRun" name="Processor" output="screen"/>
+	
+	<!-- Launching virtual obstacle node -->
+	<node pkg="swarm_simulation"  type="virtual_obstacle" name="swarm_simulation" output="screen"/>
 		
 	<!-- TODO launch ALICE nodes -->
  	<node pkg="alice_pkg" type="alice" name="alice_0" output="screen">							
