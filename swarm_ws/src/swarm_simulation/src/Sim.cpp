@@ -19,9 +19,9 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 			{
 				flock.flock.at(j).velocity.set(
 						0.1 * msg.commands.at(i).r
-								* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity) + M_PI / 180.0 * msg.commands.at(i).theta),
+								* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity)-M_PI_2+ M_PI / 180.0 * msg.commands.at(i).theta),
 						0.1 * msg.commands.at(i).r
-								* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity) + M_PI / 180.0 * msg.commands.at(i).theta));
+								* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity)-M_PI_2 + M_PI / 180.0 * msg.commands.at(i).theta));
 			}
 		}
 	}
@@ -115,7 +115,7 @@ void Sim::HandleInput()
 void Sim::Render()
 {
 	window.clear();
-
+	flock.flocking();
 	// Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)
 	{
@@ -141,7 +141,7 @@ void Sim::Render()
 			shapes[i].setPosition(shapes[i].getPosition().x, shapes[i].getPosition().y + window_height);
 		window.draw(shapes[i]);
 	}
-	flock.flocking();
+
 	// Applies the three rules to each body in the flock and changes them accordingly.
 
 	window.display();

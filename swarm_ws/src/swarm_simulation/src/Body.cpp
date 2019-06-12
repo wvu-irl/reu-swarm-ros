@@ -12,8 +12,8 @@ sf::VideoMode desktopTemp = sf::VideoMode::getDesktopMode();
 const int window_height = desktopTemp.height;
 const int window_width = desktopTemp.width;
 
-#define w_height window_height
-#define w_width window_width
+#define w_height 600
+#define w_width 300
 #define PI 3.141592635
 
 // Body Functions from Body.h
@@ -99,8 +99,8 @@ void Body::borders()
 {
     if (location.x < 0) location.x += w_width;
     if (location.y < 0) location.y += w_height;
-    if (location.x > 1000) location.x -= w_width;
-    if (location.y > 1000) location.y -= w_height;
+    if (location.x > 300) location.x -= w_width;
+    if (location.y > 600) location.y -= w_height;
 }
 
 // Calculates the angle for the velocity of a body which allows the visual
@@ -108,7 +108,7 @@ void Body::borders()
 float Body::angle(Pvector v)
 {
     // From the definition of the dot product
-    float angle = (float)(atan2(v.x, -v.y) * 180 / PI);
+    float angle = (float)(atan2(v.x, -v.y) );
     return angle;
 }
 //char[2] Body::getID()
