@@ -4,7 +4,9 @@
 		
 	<!-- Launching processor node -->
 	<node pkg="processor"  type="ProRun" name="Processor" output="screen"/>
-		
+	
+	
+	
 	<!-- TODO launch ALICE nodes -->
  	<node pkg="alice_pkg" type="alice" name="alice_0" output="screen">							
 		<param name= "id" value = "0" type = "str" />  
@@ -155,10 +157,11 @@
 	<node pkg="alice_pkg" type="alice" name="alice_48">
 		<param name= "id" value = "48" type = "str"/>  
 	</node>
+	-->
 	<node pkg="alice_pkg" type="alice" name="alice_49">
 		<param name= "id" value = "49" type = "str"/>  
 	</node>
-	-->
+	
 	
 	<!-- Funnel to server from alice nodes -->
 	<node pkg="swarm_server" name="funnel" type="funnel" output="screen"/>

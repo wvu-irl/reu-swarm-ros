@@ -47,6 +47,7 @@ public:
     Pvector acceleration;
     float maxSpeed;
     float maxForce;
+    bool updated;
 
 
     Body() {}

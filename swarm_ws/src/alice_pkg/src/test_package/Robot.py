@@ -62,14 +62,14 @@ class Robot:
 	def __init__(self, name):
 		
 		self.setUpNode()
-		self_portrait = SelfPortrait(self)
+		##self_portrait = SelfPortrait(self)
 		should_update = True
 		while not rospy.is_shutdown():
-			if should_update:
-				try:
-					self_portrait.root.update()
-				except Tkinter.TclError:
-					should_update = False
+			##if should_update:
+				##try:
+					##self_portrait.root.update()
+				##except Tkinter.TclError:
+					##should_update = False
 			
 			self.model = Model(self.speed)
 	

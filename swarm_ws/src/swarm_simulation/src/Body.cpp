@@ -28,6 +28,7 @@ Body::Body(float x, float y, char _id[2])
     maxForce = 0.5;
     id[0] = _id[0];
     id[1] = _id[1];
+    updated = false;
 }
 
 //Body::Body(float x, float y, bool predCheck)

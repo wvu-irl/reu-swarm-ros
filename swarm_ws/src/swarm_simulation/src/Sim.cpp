@@ -15,13 +15,15 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 	{
 		for (int j = 0; j < flock.flock.size(); j++)
 		{
-			if (msg.commands.at(i).rid == j)
+			if (msg.commands.at(i).rid == j && flock.flock.at(j).updated==false)
 			{
+				std::cout << flock.flock.at(j).angle(flock.flock.at(j).velocity) << std::endl;
 				flock.flock.at(j).velocity.set(
 						0.1 * msg.commands.at(i).r
-								* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity)-M_PI_2+ M_PI / 180.0 * msg.commands.at(i).theta),
+								* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity)-M_PI_2+  msg.commands.at(i).theta),
 						0.1 * msg.commands.at(i).r
-								* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity)-M_PI_2 + M_PI / 180.0 * msg.commands.at(i).theta));
+								* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity)-M_PI_2 + msg.commands.at(i).theta));
+				flock.flock.at(j).updated=true;
 			}
 		}
 	}
@@ -112,6 +114,8 @@ void Sim::HandleInput()
 
 }
 
+
+
 void Sim::Render()
 {
 	window.clear();
@@ -119,11 +123,12 @@ void Sim::Render()
 	// Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)
 	{
+
 		// Matches up the location of the shape to the body
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
 		// Calculates the angle where the velocity is pointing so that the triangle turns towards it.
-		float theta = flock.getBody(i).angle(flock.getBody(i).velocity);
+		float theta = 180/M_PI*flock.getBody(i).angle(flock.getBody(i).velocity);
 		shapes[i].setRotation(theta);
 
 		// Prevent bodies from moving off the screen through wrapping
@@ -140,6 +145,7 @@ void Sim::Render()
 		if (shapes[i].getPosition().y < 0)
 			shapes[i].setPosition(shapes[i].getPosition().x, shapes[i].getPosition().y + window_height);
 		window.draw(shapes[i]);
+		flock.flock.at(i).updated=false;
 	}
 
 	// Applies the three rules to each body in the flock and changes them accordingly.

@@ -71,13 +71,13 @@ int main(int argc, char **argv)
 				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_bot_array
 						> ("vicon_array"));
 
-        wvu_swarm_std_msgs::vicon_points temp_obs_array =
-        				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
-        						> ("virtual_obstacle"));
+//        wvu_swarm_std_msgs::vicon_points temp_obs_array =
+//        				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
+//        						> ("virtual_obstacle"));
 //
 //		bigbrain.processPoints(tempTarget);
 		bigbrain.processVicon(tempBotArray);
-		bigbrain.processObstacles(temp_obs_array);
+		//bigbrain.processObstacles(temp_obs_array);
 		bigbrain.findNeighbors();
                 for (int i = 0; i < BOT_COUNT; i++) //Publishes msgs to Alices
 		{
