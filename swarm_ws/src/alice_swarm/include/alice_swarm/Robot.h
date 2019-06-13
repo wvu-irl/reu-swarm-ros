@@ -9,6 +9,9 @@
 #define ROBOT_H_
 
 class Robot {
+private:
+
+
 public:
 	Robot();
 	virtual ~Robot();
