@@ -105,7 +105,7 @@ void Hub::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills in bots
 		tf::quaternionMsgToTF(data.poseVect[i].botPose.transform.rotation, quat);
 
 		// the tf::Quaternion has a method to access roll pitch and yaw (yaw is all we need in a 2D plane)
-		double roll, pitch, yaw;
+		double roll, pitch, yaw;std::list <neighbor> bots, float tolerance
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 		bots[numID] = Bot(numID, data.poseVect[i].botPose.transform.translation.x,
 				data.poseVect[i].botPose.transform.translation.y, yaw, 10000);
