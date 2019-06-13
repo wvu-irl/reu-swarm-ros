@@ -105,7 +105,7 @@ void Body::borders()
     if (location.x > 300) location.x -= w_width;
     if (location.y > 600) location.y -= w_height;*/
 
-		//boundary condition. Nulls velocity component on orthogonal to boundary.
+		//boundary condition. Nulls velocity component orthogonal to boundary.
     if ((location.x <=10) ||(location.x >=290))
     {
     	velocity.x = 0;
@@ -124,7 +124,7 @@ void Body::borders()
 // image to rotate in the direction that it is going in.
 float Body::angle(Pvector v)
 {
-    // From the definition of the dot product
+    // From the definition of the dot product. negated to transform to first quadrant from 4th.
 	  float angle = -1*(float)(atan2(v.y,v.x) );
 
     //float angle = (float)(atan2(v.x, -v.y) );
