@@ -7,6 +7,8 @@
 class Rules
 {
 public:
+	Rules();
+
 	vel maintainSpacing(std::list <neighbor> bots, float tolerance);
 
 	vel avoidRobots(std::list <neighbor> bots, float tolerance);

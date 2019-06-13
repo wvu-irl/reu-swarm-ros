@@ -12,11 +12,6 @@ void VectorQueue::oneToQueue(ideal toAdd)
 	vector_queue.insert(toAdd);
 }
 
-void VectorQueue::manyToQueue(std::list <ideal> toAdd)
-{
-	vector_queue.splice(vector_queue.end(), toAdd);
-}
-
 vel VectorQueue::createCompromise()
 {
 	float compromise_angle = 0;

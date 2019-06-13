@@ -12,8 +12,6 @@ class VectorQueue
 
 		VectorQueue();
 
-		void manyToQueue(std::list <ideal> toAdd);
-
 		void addToQueue(ideal toAdd);
 
 		vel createCompromise();

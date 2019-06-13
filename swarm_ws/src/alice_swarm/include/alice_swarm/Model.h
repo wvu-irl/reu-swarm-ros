@@ -11,6 +11,8 @@ public:
 	std::list <neighbor> robots;
 	std::list <tar> targets;
 
+	Model();
+
 	ideal generateIdeal();
 
 	void addToModel(mail toAdd);
