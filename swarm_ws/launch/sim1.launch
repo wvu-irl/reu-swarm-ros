@@ -32,7 +32,7 @@
 		<param name= "portrait" value="false" type = "bool"/>
 	</node>
 	
-	
+	<!--
 	<node pkg="alice_pkg" type="alice" name="alice_5">
 		<param name= "id" value = "5" type = "str"/>  
 	</node>
