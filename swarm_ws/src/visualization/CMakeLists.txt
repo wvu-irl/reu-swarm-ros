@@ -7,7 +7,6 @@ add_compile_options(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lsfml-graphics -lsfml-window -lsfml-system")
 #find_package(sfml COMPONENTS graphics window system REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -19,18 +18,17 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 ## catkin specific configuration ##
 ###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if your package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES visualization
-#  CATKIN_DEPENDS roscpp rospy
-#  DEPENDS libsfml-dev
 )
+
+add_library(color_map src/color_map.cpp)
+target_link_libraries(color_map ${catkin_LIBRARIES})
+
+add_library(contour src/contour.cpp)
+target_link_libraries(contour ${catkin_LIBRARIES} color_map)
+
+add_executable(table_vis src/table_vis.cpp)
+target_link_libraries(table_vis ${catkin_LIBRARIES} color_map contour)
 
 ###########
 ## Build ##
@@ -42,12 +40,15 @@ include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
 )
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
+#Find any version 2.X of SFML
+#See the FindSFML.cmake file for additional details and instructions
+find_package(SFML 2 REQUIRED  graphics window system)
+find_package(SFML 2 COMPONENTS graphics window system)
+if(SFML_FOUND)
+  include_directories(${SFML_INCLUDE_DIR})
+  target_link_libraries(table_vis ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
+endif()
 
-#target_link_libraries(SFML sfml-graphics sfml-window sfml-system)
-
-add_library(color_map src/color_map.cpp)
-target_link_libraries(color_map ${catkin_LIBRARIES})
-
-add_library(contour src/contour.cpp)
-target_link_libraries(contour ${catkin_LIBRARIES})
+add_dependencies(table_vis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
