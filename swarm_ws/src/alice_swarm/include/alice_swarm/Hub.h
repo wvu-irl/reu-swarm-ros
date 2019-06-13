@@ -60,7 +60,7 @@ private:
 //	ros::Subscriber sub;
 	std::vector<Bot> bots;
 	std::vector<std::vector <Bot>> neighbors;
-	wvu_swarm_std_msgs::obs_point_mail getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
+	aliceStructs::tar getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
 
 public:
 	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?

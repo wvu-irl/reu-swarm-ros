@@ -1,6 +1,6 @@
 #include <string>
 
-class aliceStructs {
+class AliceStructs {
 
 	typedef struct {
 		float dir;
@@ -17,9 +17,8 @@ class aliceStructs {
 	typedef struct {
 		float dir;
 		float dis;
-		float spd;
 		float ang;
-		std::string name;
+		int name;
 	} neighbor;
 
 	typedef struct {
@@ -31,4 +30,11 @@ class aliceStructs {
 		float dir;
 		float dis;
 	}  tar;
+
+	typedef struct {
+		std::vector<neighbor> neighbors;
+		std::vector<obj> objs;
+		std::vector<tar> tars;
+		int name;
+	} mail;
 };

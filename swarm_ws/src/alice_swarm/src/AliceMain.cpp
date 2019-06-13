@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 
 		Hub.update(tempBotArray,tempTarget,temp_obs_array); //puts in absolute data from subscribers
 		for (int i=0; i<tempBotArray.poseVect.size();i++){
-			aliceMap[i]=Hub.getAliceMail(i); //gives each robot the relative data it needs
+			aliceMap[i].receiveMail(Hub.getAliceMail(i); //gives each robot the relative data it needs
 		}
 		for (std::map<int, Robot::Robot>::iterator it=aliceMap.begin(); it!=aliceMap.end(); ++it) //eventually run this part asynchronously
 		{

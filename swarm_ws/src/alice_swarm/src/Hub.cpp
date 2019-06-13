@@ -10,13 +10,13 @@
 #include <math.h>
 #include <swarm_server/robot_id.h>
 
-wvu_swarm_std_msgs::obs_point_mail Hub::getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance) //helper function for finding obstacle points.
+aliceStructs::tar Hub::getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance) //helper function for finding obstacle points.
 { // takes current bot and looks at distance to each obs point. If it "sees" it, converts that obs to polar and pushes to its vector stored in polar_obs.
 	float loc_r; //|distance| b/w bot and current obstacle point.
 	float theta; //in radians
 	float dx; //x separation.
 	float dy; //y separation.
-	wvu_swarm_std_msgs::obs_point_mail polar_point;
+	aliceStructs::tar polar_point;
 
 	dx = _obs.first - _bot.x;
 	dy = _obs.second - _bot.y;
@@ -25,15 +25,15 @@ wvu_swarm_std_msgs::obs_point_mail Hub::getSeparation(Bot _bot, std::pair<float,
 	if (loc_r <= _tolerance)
 	{
                 theta = fmod(atan2(dy, dx)-_bot.heading+4*M_PI,2*M_PI);
-		polar_point.radius = loc_r;
-		polar_point.theta = theta;
+		polar_point.dis = loc_r;
+		polar_point.dir = theta;
 //		polar_point.radius = 2;
 //		polar_point.theta = 2;
 		return polar_point;
 	} else
 	{
-		polar_point.radius = -1;
-		polar_point.theta = 0;
+		polar_point.dis = -1;
+		polar_point.dir = 0;
 		return polar_point;
 	}
 }
@@ -103,37 +103,46 @@ void Hub::findNeighbors()
 	}
 }
 
-void Hub::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray)
+void Hub::addNeighborMail(int i, aliceStructs::mail &_mail)
 {
-	for (int j = 0; j < ; j++) //Transfers fields of the struct to fields of the msg
+	std::vector<aliceStructs::neighbor> n;
+	for (std::vector<Bot>::iterator it=neighbors.at(i).begin(); it!=neighbors.at(i).end(); ++it)
 	{
-		wvu_swarm_std_msgs::neighbor_mail _neighborMail;
-		_neighborMail.id = botMail[i][j].id;
-                _neighborMail.theta = fmod(atan2(botMail[i][j].y - bots[i].y, botMail[i][j].x - bots[i].x)-bots[i].heading+4*M_PI,2*M_PI);
-		_neighborMail.distance = botMail[i][j].distance;
-		_neighborMail.heading = fmod(botMail[i][j].heading - bots[i].heading+2*M_PI, 2 * M_PI);
-
-
-		_aliceMailArray.neighborMail[j] = _neighborMail;
+		aliceStructs::neighbor temp;
+		temp.name = it->id;
+    temp.dir = fmod(atan2(it->y - bots[i].y, it->x - bots[i].x)-bots[i].heading+4*M_PI,2*M_PI);
+		temp.dis = it->distance;
+		temp.ang = fmod(it->heading - bots[i].heading+2*M_PI, 2 * M_PI);
+		n.push_back(temp);
 	}
-
+	mail.neighbors=n;
 }
 
-void Hub::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray)
+void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 {
-
-	int num_pts = target.size();
+	std::vector<aliceStructs::tar> t;
+//		for (std::vector<Bot>::iterator it=neighbors.at(i).begin(); it!=neighbors.at(i).end(); ++it)
+//		{
+//			aliceStructs::neighbor temp;
+//			temp.name = it->id;
+//	    temp.dir = fmod(atan2(it->y - bots[i].y, it->x - bots[i].x)-bots[i].heading+4*M_PI,2*M_PI);
+//			temp.dis = it->distance;
+//			temp.ang = fmod(it->heading - bots[i].heading+2*M_PI, 2 * M_PI);
+//			n.push_back(temp);
+//		}
+//		mail.neighbors=n;
+	int num_pts = targets.size();
 	for (int j = 0; j < num_pts; j++)
 	{
-		wvu_swarm_std_msgs::obs_point_mail _obsPointMail = getSeparation(bots[i], target.at(j), 10000);
+		aliceStructs::tar temp = getSeparation(bots[i], target.at(j), 10000);
 		if (_obsPointMail.radius > -1)
 		{
-			_aliceMailArray.targetMail.push_back(_obsPointMail);
+			t.push_back(temp);
 		}
 	}
 }
 
-void Hub::addObsPointMail(int i,)
+void Hub::addObsPointMail(int i, AliceStructs::mail &_mail)
 {
 	int num_pts = obs.size(); //number of obs pts
 	for (int j = 0; j < num_pts; j++)
@@ -146,13 +155,13 @@ void Hub::addObsPointMail(int i,)
 	}
 }
 
-Robot::Robot Hub::getAliceMail(int i) //Turns information to be sent to Alice into a msg
+AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Alice into a msg
 {
-	Robot temp;
+	AliceStructs::mail temp;
 	addObsPointMail(i, temp);
 	addNeighborMail(i, temp);
 	addTargetMail(i, temp);
-
+	name = i;
 	return temp;
 
 }
