@@ -7,3 +7,13 @@
 
 #include "VectorQueue.h"
 
+struct ideal {
+	float dir;
+	float spd;
+	float dis;
+	float pri;
+};
+
+class VectorQueue {
+
+};
