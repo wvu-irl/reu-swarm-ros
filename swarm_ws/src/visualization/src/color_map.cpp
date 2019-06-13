@@ -1,3 +1,5 @@
+#ifndef COLOR_MAP_CPP
+#define COLOR_MAP_CPP
 #include "color_map.h"
 #include <sstream>
 #include <iostream>
@@ -78,3 +80,4 @@ sf::Color ColorMap::calculateColor(double val)
 		}
 	}
 }
+#endif

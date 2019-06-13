@@ -17,5 +17,5 @@ public:
 	sf::Color calculateColor(double val);
 };
 
-#include "color_map.cpp"
+//#include "color_map.cpp"
 #endif

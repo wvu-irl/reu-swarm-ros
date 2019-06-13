@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  vicon_demo
   wvu_swarm_std_msgs
 )
 
@@ -37,6 +36,7 @@ add_library(robot_id src/robot_id.cpp)
 target_link_libraries(robot_id ${catkin_LIBRARIES})
 
 add_library(arduino_server src/arduino_server_source.cpp)
+target_link_libraries(arduino_server ${catkin_LIBRARIES})
 
 add_executable(ros_to_arduino_server src/ros_to_arduino_server.cpp)
 target_link_libraries(ros_to_arduino_server ${catkin_LIBRARIES})

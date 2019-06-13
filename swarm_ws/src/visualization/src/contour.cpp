@@ -1,3 +1,5 @@
+#ifndef CONTOUR_CPP
+#define CONTOUR_CPP
 #include <iostream>
 #include <sstream>
 #include <math.h>
@@ -142,3 +144,4 @@ ColorMap *ContourMap::getColorMap()
 {
 	return &color_mapping;
 }
+#endif

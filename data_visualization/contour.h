@@ -62,5 +62,5 @@ public:
 
 	~ContourMap();
 };
-#include "contour.cpp"
+//#include "contour.cpp"
 #endif
