@@ -48,11 +48,20 @@ int main(int argc, char **argv)
 		{
 			all_ideals.push_back(it->generateIdeal());
 		}
+		wvu_swarm_std_msgs::robot_command_array execute;
 		for (std::map<int, Robot::Robot>::iterator it=aliceMap.begin(); it!=aliceMap.end(); ++it) //eventually run this part asynchronously
 		{
-			it->generateComp(add_ideals);
+
+			wvu_swarm_std_msgs::robot_command temp;
+			aliceStructs::vel tempVel= it->generateComp(add_ideals);
+			temp.rid=it->name;
+			temp.r=tempVel.mag;
+			temp.theta=tempVel.dir;
+
+			execute.push_back(temp);
 		}
-		pub.publish(/*execute vector*/);
+
+		pub.publish(execute);
 		ros::spinOnce();
 		loopRate.sleep();
 	}

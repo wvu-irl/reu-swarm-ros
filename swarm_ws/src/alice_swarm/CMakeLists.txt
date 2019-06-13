@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(processor)
+project(alice_swarm)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -18,9 +18,17 @@ catkin_package(
 
 ## Build talker and listener
 include_directories(include ${catkin_INCLUDE_DIRS})
+add_library(Hub src/Hub.cpp)
+add_library(VectorQueue src/VectorQueue.cpp)
+add_library(Rules src/Rules.cpp)
+add_library(Robot src/Robot.cpp)
+add_library(Model src/Model.cpp)
 
-add_library(Processor src/Processor.cpp)
-add_executable(ProRun src/ProRun.cpp)
-target_link_libraries(Processor ${catkin_LIBRARIES})
-target_link_libraries(ProRun ${catkin_LIBRARIES})
-  add_dependencies(ProRun ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(AliceMain src/AliceMain.cpp)
+target_link_libraries(Hub ${catkin_LIBRARIES})
+target_link_libraries(VectorQueue ${catkin_LIBRARIES})
+target_link_libraries(Rules ${catkin_LIBRARIES})
+target_link_libraries(Robot ${catkin_LIBRARIES})
+target_link_libraries(Model ${catkin_LIBRARIES})
+target_link_libraries(AliceMain ${catkin_LIBRARIES})
+  add_dependencies(AliceMain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
