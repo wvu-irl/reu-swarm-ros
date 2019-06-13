@@ -7,13 +7,14 @@
 class ColorMap
 {
 private:
-    std::vector<std::tuple<double, sf::Color>> colors;
+	std::vector<std::tuple<double, sf::Color>> colors;
 
 public:
-    ColorMap(std::tuple<double, sf::Color> min, std::tuple<double, sf::Color> max);
+	ColorMap(std::tuple<double, sf::Color> min,
+			std::tuple<double, sf::Color> max);
 
-    void addColor(std::tuple<double, sf::Color>);
-    sf::Color calculateColor(double val);
+	void addColor(std::tuple<double, sf::Color>);
+	sf::Color calculateColor(double val);
 };
 
 #include "ColorMap.cpp"

@@ -11,56 +11,56 @@
 class Vector3D
 {
 public:
-    double x, y, z;
+	double x, y, z;
 
-    Vector3D(double x, double y, double z);
+	Vector3D(double x, double y, double z);
 
-    double magnitude() const;
+	double magnitude() const;
 
-    double dot(const Vector3D &rhs) const;
+	double dot(const Vector3D &rhs) const;
 
-    Vector3D operator-(const Vector3D &rhs) const
-    {
-        return Vector3D(x - rhs.x, y - rhs.y, z - rhs.z);
-    }
+	Vector3D operator-(const Vector3D &rhs) const
+	{
+		return Vector3D(x - rhs.x, y - rhs.y, z - rhs.z);
+	}
 
-    Vector3D operator*(double rhs) const
-    {
-        return Vector3D(rhs * x, rhs * y, rhs * z);
-    }
+	Vector3D operator*(double rhs) const
+	{
+		return Vector3D(rhs * x, rhs * y, rhs * z);
+	}
 
-    friend std::ostream &operator<<(std::ostream &, const Vector3D &);
+	friend std::ostream &operator<<(std::ostream &, const Vector3D &);
 };
 
 class ContourMap
 {
 private:
-    sf::Uint8 *cols;
-    sf::Image img;
-    sf::Texture tex;
-    sf::Sprite sprite;
+	sf::Uint8 *cols;
+	sf::Image img;
+	sf::Texture tex;
+	sf::Sprite sprite;
 
-    std::function<double(double, double)> zfunc;
+	std::function<double(double, double)> zfunc;
 
-    ColorMap color_mapping;
+	ColorMap color_mapping;
 
 public:
-    sf::Rect<int> bounds;
-    std::vector<double> levels;
+	sf::Rect<int> bounds;
+	std::vector<double> levels;
 
-    ContourMap(sf::Rect<int> bounds, ColorMap);
+	ContourMap(sf::Rect<int> bounds, ColorMap);
 
-    void tick();
-    void render(sf::RenderWindow *window);
+	void tick();
+	void render(sf::RenderWindow *window);
 
-    void resemble(std::function<double(double, double)> z);
+	void resemble(std::function<double(double, double)> z);
 
-    void scale(float sx, float sy);
+	void scale(float sx, float sy);
 
-    void setColorMap(ColorMap);
-    ColorMap *getColorMap();
+	void setColorMap(ColorMap);
+	ColorMap *getColorMap();
 
-    ~ContourMap();
+	~ContourMap();
 };
 #include "contour.cpp"
 #endif
