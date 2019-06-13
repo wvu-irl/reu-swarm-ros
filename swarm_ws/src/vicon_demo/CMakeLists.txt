@@ -17,7 +17,6 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   message_generation
   visualization_msgs
-  swarm_server
 )
 
 ## System dependencies are found with CMake's conventions

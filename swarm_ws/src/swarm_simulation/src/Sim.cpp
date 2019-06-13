@@ -11,13 +11,15 @@
 
 void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 {
-	for (int i = 0; i < msg.commands.size(); i++)
+	for (int i = 0; i < flock.flock.size(); i++)
 	{
-		for (int j = 0; j < flock.flock.size(); j++)
+		if (flock.flock.at(i).updatedCommand == false)
 		{
-			if (msg.commands.at(i).rid == j && flock.flock.at(j).updated==false)
+			for (int j = 0; j < msg.commands.size(); j++)
 			{
-				//std::cout << flock.flock.at(j).angle(flock.flock.at(j).velocity) << std::endl;
+				if (msg.commands.at(j).rid == i)
+				{
+					//std::cout << flock.flock.at(j).angle(flock.flock.at(j).velocity) << std::endl;
 
 //				std::cout<<"--------- Bot ID "<<j<<"--------\n";
 //				float o = flock.flock.at(j).angle(flock.flock.at(j).velocity);
@@ -33,23 +35,38 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 //								* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity) - M_PI_2 + msg.commands.at(i).theta));
 //       ^the way this code was before, just in case.
 
-				flock.flock.at(j).velocity.set(
-										 0.1*msg.commands.at(i).r
-												* cos(flock.flock.at(j).angle(flock.flock.at(j).velocity) +  msg.commands.at(i).theta),
-										 -0.1*msg.commands.at(i).r
-												* sin(flock.flock.at(j).angle(flock.flock.at(j).velocity) + msg.commands.at(i).theta));
-				flock.flock.at(j).updated=true;
+//Prevents sudden turns
+//				if (msg.commands.at(j).theta > M_PI / 6)
+//				{
+//					flock.flock.at(i).velocity.set(
+//							0.000001 * cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) + M_PI / 18),
+//							0.000001 * sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) + M_PI / 18));
+//
+//				} else if (msg.commands.at(j).theta < -M_PI / 6)
+//				{
+//					flock.flock.at(i).velocity.set(
+//							0.000001 * cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) - M_PI / 18),
+//							0.000001 * sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) - M_PI / 18));
+//
+//				} else
+//				{
+					flock.flock.at(i).velocity.set(
+							1 * msg.commands.at(j).r
+									* cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) + msg.commands.at(j).theta),
+							1 * msg.commands.at(i).r
+									* sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) + msg.commands.at(j).theta));
+					//		}
+					flock.flock.at(i).updatedCommand = true;
 
 //				std::cout<<"new (sum) angle"<< o +  n<<"\n";
 //				std::cout<<"v_new (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
 //				std::cout<<"-----------------------------\n";
 //				^more fun facts, if ya want um.
+				}
 			}
 		}
 	}
-	std::cout<<"iteration Ran"<<"\n";
 }
-
 
 // Construct window using SFML
 Sim::Sim()
@@ -68,21 +85,23 @@ Sim::Sim()
 // input, and updates the view
 void Sim::Run(ros::NodeHandle _n)
 {
-	char letters[100] = { 'D', 'E', 'P', 'A', 'N', 'J', 'G', 'A', 'C', 'T', 'M', 'A', 'M', 'D', 'S', 'C', 'N', 'H', 'V',
-			'A', 'N', 'Y', 'N', 'C', 'R', 'I', 'V', 'T', 'K', 'Y', 'T', 'N', 'O', 'H', 'L', 'A', 'I', 'N', 'M', 'S', 'I', 'L',
-			'A', 'L', 'M', 'E', 'M', 'O', 'A', 'R', 'M', 'I', 'F', 'L', 'T', 'X', 'I', 'A', 'W', 'I', 'C', 'A', 'M', 'N', 'O',
-			'R', 'K', 'A', 'W', 'V', 'N', 'V', 'N', 'E', 'C', 'O', 'N', 'D', 'S', 'D', 'M', 'T', 'W', 'A', 'I', 'D', 'W', 'Y',
-			'U', 'T', 'O', 'K', 'N', 'M', 'A', 'Z', 'A', 'K', 'H', 'I' };
+	char letters[100] =
+	{ 'D', 'E', 'P', 'A', 'N', 'J', 'G', 'A', 'C', 'T', 'M', 'A', 'M', 'D', 'S', 'C', 'N', 'H', 'V', 'A', 'N', 'Y', 'N',
+			'C', 'R', 'I', 'V', 'T', 'K', 'Y', 'T', 'N', 'O', 'H', 'L', 'A', 'I', 'N', 'M', 'S', 'I', 'L', 'A', 'L', 'M', 'E',
+			'M', 'O', 'A', 'R', 'M', 'I', 'F', 'L', 'T', 'X', 'I', 'A', 'W', 'I', 'C', 'A', 'M', 'N', 'O', 'R', 'K', 'A', 'W',
+			'V', 'N', 'V', 'N', 'E', 'C', 'O', 'N', 'D', 'S', 'D', 'M', 'T', 'W', 'A', 'I', 'D', 'W', 'Y', 'U', 'T', 'O', 'K',
+			'N', 'M', 'A', 'Z', 'A', 'K', 'H', 'I' };
 
 	for (int i = 0; i < 50; i++)
 	{
-		char temp[2] = { letters[2 * i], letters[2 * i + 1] };
-		Body b(30*(int)(i /10), 60*(i % 10), temp); // Starts all bodies in the center of the screen
-		sf::CircleShape shape(8, 5);
+		char temp[2] =
+		{ letters[2 * i], letters[2 * i + 1] };
+		Body b(30 * (int) (i / 10), 60 * (i % 10), temp); // Starts all bodies in the center of the screen
+		sf::CircleShape shape(8, 3);
 
 		// Changing the Visual Properties of the shape.
 		shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
-		shape.setOrigin(12,12);
+		shape.setOrigin(12, 12);
 		//shape.setPosition(window_width, window_height); // Testing purposes, starts all shapes in the center of screen.
 		shape.setFillColor(sf::Color::Yellow);
 		shape.setOutlineColor(sf::Color::White);
@@ -98,15 +117,14 @@ void Sim::Run(ros::NodeHandle _n)
 	sleep(1);
 	ros::Publisher pub = _n.advertise < wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array", 1000); //Publishes like Vicon
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
-	ros::Rate loop_rate(10);
-
+	ros::Rate loopRate(10);
 	//publishes initial information for each bot
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
 	pub.publish(vb_array);
 	ros::spinOnce();
 	while (window.isOpen() && ros::ok())
 	{
-		//HandleInput();
+		HandleInput();
 		Render();
 		wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
 
@@ -114,8 +132,9 @@ void Sim::Run(ros::NodeHandle _n)
 		//flock.printMessage(vb_array);
 		pub.publish(vb_array);
 		ros::spinOnce();
-
+		loopRate.sleep();
 	}
+
 }
 
 void Sim::HandleInput()
@@ -136,13 +155,11 @@ void Sim::HandleInput()
 
 }
 
-
-
 void Sim::Render()
 {
 	window.clear();
 	flock.flocking();
-	// Draws all of the bodies out, and applies functions that are needed to update.
+// Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)
 	{
 
@@ -150,7 +167,7 @@ void Sim::Render()
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
 		// Calculates the angle where the velocity is pointing so that the triangle turns towards it.
-		float theta = 180/M_PI*flock.getBody(i).angle(flock.getBody(i).velocity);
+		float theta = 180 / M_PI * flock.getBody(i).angle(flock.getBody(i).velocity);
 		shapes[i].setRotation(theta);
 
 		// Prevent bodies from moving off the screen through wrapping
@@ -167,7 +184,8 @@ void Sim::Render()
 		if (shapes[i].getPosition().y < 0)
 			shapes[i].setPosition(shapes[i].getPosition().x, shapes[i].getPosition().y + window_height);
 		window.draw(shapes[i]);
-		flock.flock.at(i).updated=false;
+		flock.flock.at(i).updatedCommand = false;
+		flock.flock.at(i).updatedPosition = false;
 	}
 
 	window.display(); //updates display
