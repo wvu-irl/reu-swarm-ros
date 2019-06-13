@@ -3,7 +3,6 @@
 #include <boost/array.hpp>
 #include <ros/ros.h>
 #include <ros/time.h>
-#include <vicon_demo/rtheta.h>
 #include <vicon_bridge/Markers.h>
 #include <vicon_bridge/Marker.h>
 #include <geometry_msgs/TransformStamped.h>
