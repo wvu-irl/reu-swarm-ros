@@ -5,8 +5,8 @@
  *      Author: smart6
  */
 
-#include "Robot.h" {
-	float speed;
-	float angle;
-	String name = "Alice"
+#include "Robot.h"
+
+class Robot {
+
 }

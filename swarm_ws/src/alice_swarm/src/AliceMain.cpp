@@ -43,9 +43,14 @@ int main(int argc, char **argv)
 		for (int i=0; i<tempBotArray.poseVect.size();i++){
 			aliceMap[i].receiveMsg(aliceBrain.getAliceMail(i)); //gives each robot the relative data it needs
 		}
+		std::vector <ideal> all_ideals;
 		for (std::map<int, Robot::Robot>::iterator it=aliceMap.begin(); it!=aliceMap.end(); ++it) //eventually run this part asynchronously
 		{
-			//stuff
+			all_ideals.push_back(it->generateIdeal());
+		}
+		for (std::map<int, Robot::Robot>::iterator it=aliceMap.begin(); it!=aliceMap.end(); ++it) //eventually run this part asynchronously
+		{
+			it->generateComp(add_ideals);
 		}
 		pub.publish(/*execute vector*/);
 		ros::spinOnce();

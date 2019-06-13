@@ -11,10 +11,8 @@
 class Robot {
 private:
 
-
 public:
 	Robot();
-	virtual ~Robot();
 };
 
 #endif /* ROBOT_H_ */

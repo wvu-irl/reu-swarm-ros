@@ -22,4 +22,34 @@ ideal Model::generateIdeal()
 				to_return.dir = ideal_list.get(i).dir;
 				to_return.spd = ideal_list.get(i).mag;
 				to_return.dis = 0;
-				
+				to_return.pri = (ideal_list.size() - i + 1)/(tolerance + 1);
+				return to_return;
+			}
+		}
+		tolerance += 1;
+	}
+}
+
+void addToModel(mail toAdd)
+{
+	for (auto& item : toAdd.obstacles)
+	{
+		obstacles.insert(item)
+	}
+	for (auto& item : toAdd.neighbors)
+	{
+		neighbors.insert(item)
+	}
+	for (auto& item : toAdd.targets)
+	{
+		targets.insert(item)
+	}
+}
+
+void clear()
+{
+	obstacles.clear()
+	robots.clear()
+	targets.clear()
+}
+		

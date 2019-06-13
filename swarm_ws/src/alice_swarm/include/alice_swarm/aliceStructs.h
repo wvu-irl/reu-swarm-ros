@@ -29,7 +29,7 @@ class AliceStructs {
 
 	typedef struct {
 		std::vector<neighbor> neighbors;
-		std::vector<obj> obstacless;
+		std::vector<obj> obstacles;
 		std::vector<obj> targets;
 		int name;
 	} mail;
