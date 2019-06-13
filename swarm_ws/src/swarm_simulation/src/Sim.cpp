@@ -160,7 +160,7 @@ void Sim::HandleInput()
 			window.close();
 		}
 
-		//allows for pause
+		//allows for pause. Press the Pause button.
 		bool pauseSim = false;
 		if((event.type == sf::Event::KeyPressed )&&( event.key.code == sf::Keyboard::Pause)){
 			pauseSim = true;
@@ -181,6 +181,7 @@ void Sim::HandleInput()
 				}
 		  }
 		}
+		//allow for moving the bots.
 	}
 
 }
