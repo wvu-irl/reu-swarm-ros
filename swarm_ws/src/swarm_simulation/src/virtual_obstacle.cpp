@@ -29,10 +29,11 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "virtual_obstacle");
   ros::NodeHandle n;
   ros::Publisher pub = n.advertise<wvu_swarm_std_msgs::vicon_points>("virtual_obstacles",1000);
-
+  ros::Rate loopRate(10);
   while (ros::ok())
   {
 		makeAndPublish(pub);
 		ros::spinOnce();
+		loopRate.sleep();
   }
 }

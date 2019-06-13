@@ -24,11 +24,12 @@ Body::Body(float x, float y, char _id[2])
     acceleration = Pvector(0, 0);
     velocity = Pvector(0,0);
     location = Pvector(x, y);
-    maxSpeed = 1;
+    maxSpeed = 3;
     maxForce = 0.5;
     id[0] = _id[0];
     id[1] = _id[1];
-    updated = false;
+    updatedCommand = false;
+    updatedPosition = false;
 }
 
 //Body::Body(float x, float y, bool predCheck)
@@ -62,10 +63,11 @@ void Body::update()
     // Update velocity
     //velocity.addVector(acceleration);
     // Limit speed
-    velocity.limit(maxSpeed);
+    velocity.limit(1);
+    velocity.mulScalar(maxSpeed);
     location.addVector(velocity);
     // Reset accelertion to 0 each cycle
-
+    updatedPosition=true;
 }
 
 // Run flock() on the flock of bodies.
@@ -73,8 +75,7 @@ void Body::update()
 // and corrects bodies which are sitting outside of the SFML window
 void Body::run(vector <Body> v)
 {
-    flock(v);
-    update();
+    if (updatedPosition==false)update();
     borders();
 }
 
