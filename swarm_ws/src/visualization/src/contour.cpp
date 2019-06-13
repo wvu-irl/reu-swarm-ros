@@ -5,7 +5,7 @@
 #include <math.h>
 #include <thread>
 #include <future>
-#include "contour.h"
+#include <visualization/contour.h>
 
 #define DEBUG_CONT_SRC 0
 
