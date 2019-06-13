@@ -13,21 +13,26 @@
 	<!-- TODO launch ALICE nodes -->
  	<node pkg="alice_pkg" type="alice" name="alice_0" output="screen">							
 		<param name= "id" value = "0" type = "str" />  
+		<param name= "portrait" value="false" type = "bool"/>
 	</node>
 	<node pkg="alice_pkg" type="alice" name="alice_1">
-		<param name= "id" value = "1" type = "str"/>  
+		<param name= "id" value = "1" type = "str"/> 
+		<param name= "portrait" value="false" type = "bool"/> 
 	</node>
 	<node pkg="alice_pkg" type="alice" name="alice_2">
 		<param name= "id" value = "2" type = "str"/>  
+		<param name= "portrait" value="false" type = "bool"/>
 	</node>	
 	<node pkg="alice_pkg" type="alice" name="alice_3">
 		<param name= "id" value = "3" type = "str"/>  
+		<param name= "portrait" value="false" type = "bool"/>
 	</node>
 	<node pkg="alice_pkg" type="alice" name="alice_4">
 		<param name= "id" value = "4" type = "str"/>  
+		<param name= "portrait" value="false" type = "bool"/>
 	</node>
 	
-	<!--
+	
 	<node pkg="alice_pkg" type="alice" name="alice_5">
 		<param name= "id" value = "5" type = "str"/>  
 	</node>
