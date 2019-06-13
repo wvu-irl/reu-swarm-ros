@@ -4,7 +4,7 @@
 #include <wvu_swarm_std_msgs/sensor_data.h>
 
 #include "arduino_server.h"
-#include "robot_id.h"
+#include <swarm_server/robot_id.h>
 #include <stdlib.h>
 #include <string.h>
 #include <map>
@@ -48,7 +48,7 @@ void commandCallback(command cmd, int rid)
 		g_from_ard.publish(inf); // publishing
 
 	std::ofstream file;
-	file.open("sensor_log.csv", std::ios::out | std::ios::app);
+	file.open("/home/air/sensor_log.csv", std::ios::out | std::ios::app);
 	file << rid_indexing[rid] << "," << cmd.str << std::endl;
 	file.close();
 }

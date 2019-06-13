@@ -92,11 +92,17 @@ void Sim::Run(ros::NodeHandle _n)
 			'V', 'N', 'V', 'N', 'E', 'C', 'O', 'N', 'D', 'S', 'D', 'M', 'T', 'W', 'A', 'I', 'D', 'W', 'Y', 'U', 'T', 'O', 'K',
 			'N', 'M', 'A', 'Z', 'A', 'K', 'H', 'I' };
 
+	int x = 50; //x inital positions for the bots.
+
 	for (int i = 0; i < 50; i++)
 	{
-		char temp[2] =
-		{ letters[2 * i], letters[2 * i + 1] };
-		Body b(30 * (int) (i / 10), 60 * (i % 10), temp); // Starts all bodies in the center of the screen
+		char temp[2] = {letters[2 * i], letters[2 * i + 1]};
+		int y = 50 * (i%10)+ 50; // y pos of bots
+
+//		std::cout<<"----Bot ID: "<<temp[0]<<temp[1]<<"-------\n";
+//		std::cout<<"x,y: "<<x<<","<<y<<"\n";
+
+		Body b(x,y, temp); // Starts all bodies in the center of the screen
 		sf::CircleShape shape(8, 3);
 
 		// Changing the Visual Properties of the shape.
@@ -112,12 +118,19 @@ void Sim::Run(ros::NodeHandle _n)
 		flock.addBody(b);
 		shapes.push_back(shape);
 		window.draw(shape);
+
+		if(y == 500) //increments the  x pos so bots are drawn in a grid.
+		{
+			x+=50;
+		}
+
 	}
 	window.display();
 	sleep(1);
 	ros::Publisher pub = _n.advertise < wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array", 1000); //Publishes like Vicon
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
 	ros::Rate loopRate(10);
+
 	//publishes initial information for each bot
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
 	pub.publish(vb_array);
@@ -134,7 +147,6 @@ void Sim::Run(ros::NodeHandle _n)
 		ros::spinOnce();
 		loopRate.sleep();
 	}
-
 }
 
 void Sim::HandleInput()
@@ -142,15 +154,34 @@ void Sim::HandleInput()
 	sf::Event event;
 	while (window.pollEvent(event))
 	{
-		// "close requested" event: we close the window
-		// Implemented alternate ways to close the window. (Pressing the escape, X, and BackSpace key also close the program.)
-		if ((event.type == sf::Event::Closed)
-				|| (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
-				|| (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::BackSpace)
-				|| (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::X))
+		// Pressing the escape key will close the program
+		if ((event.type == sf::Event::Closed)|| (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
 		{
 			window.close();
 		}
+
+		//allows for pause. Press the Pause button.
+		bool pauseSim = false;
+		if((event.type == sf::Event::KeyPressed )&&( event.key.code == sf::Keyboard::Pause)){
+			pauseSim = true;
+			std::cout<<"paused"<<std::endl;
+		}
+		while(pauseSim == true) //runs while pause in effect.
+		{
+			if(window.pollEvent(event))
+			{
+				if ((event.type == sf::Event::KeyPressed )&&( event.key.code == sf::Keyboard::Pause))
+				{//allows for unpause.
+					pauseSim = false;
+					std::cout<<"unpaused"<<std::endl;
+				}
+				if ((event.type == sf::Event::Closed) || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
+				{
+					window.close();
+				}
+		  }
+		}
+		//allow for moving the bots.
 	}
 
 }
@@ -187,6 +218,8 @@ void Sim::Render()
 		flock.flock.at(i).updatedCommand = false;
 		flock.flock.at(i).updatedPosition = false;
 	}
+
+
 
 	window.display(); //updates display
 

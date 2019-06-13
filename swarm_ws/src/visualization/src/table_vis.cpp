@@ -1,6 +1,8 @@
+#include <ros/ros.h>
+
 /*
  *  Compile using
- * 
+ *
  *      g++ main.cpp -oContour.o -lsfml-graphics -lsfml-window -lsfml-system
  */
 
@@ -39,6 +41,9 @@ void render(sf::RenderWindow *window)
 
 int main(int argc, char **argv)
 {
+	ros::init(argc, argv, "table_vis");
+	ros::NodeHandle n;
+
 	ColorMap cmap(std::pair<double, sf::Color>(-10, sf::Color::Red),
 			std::pair<double, sf::Color>(10, sf::Color::Magenta));
 

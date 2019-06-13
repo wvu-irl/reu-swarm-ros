@@ -99,17 +99,32 @@ void Body::flock(vector<Body> v)
 // the other side.
 void Body::borders()
 {
-    if (location.x < 0) location.x += w_width;
+		//wrapping code
+    /*if (location.x < 0) location.x += w_width;
     if (location.y < 0) location.y += w_height;
     if (location.x > 300) location.x -= w_width;
-    if (location.y > 600) location.y -= w_height;
+    if (location.y > 600) location.y -= w_height;*/
+
+		//boundary condition. Nulls velocity component orthogonal to boundary.
+    if ((location.x <=10) ||(location.x >=290))
+    {
+    	velocity.x = 0;
+    	if(location.x <= 10){location.x = 10;}
+    	if(location.x >= 290){location.x = 290;}
+    }
+    if ((location.y <=10) ||(location.y >=600))
+		{
+			velocity.y = 0;
+			if(location.y <=10){location.y = 10;}
+			if(location.y >=590){location.y = 590;}
+		}
 }
 
 // Calculates the angle for the velocity of a body which allows the visual
 // image to rotate in the direction that it is going in.
 float Body::angle(Pvector v)
 {
-    // From the definition of the dot product
+    // From the definition of the dot product. negated to transform to first quadrant from 4th.
 	  float angle = -1*(float)(atan2(v.y,v.x) );
 
     //float angle = (float)(atan2(v.x, -v.y) );
