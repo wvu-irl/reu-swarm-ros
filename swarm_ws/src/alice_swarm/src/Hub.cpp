@@ -10,13 +10,13 @@
 #include <math.h>
 #include <swarm_server/robot_id.h>
 
-aliceStructs::tar Hub::getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance) //helper function for finding obstacle points.
+aliceStructs::obj Hub::getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance) //helper function for finding obstacle points.
 { // takes current bot and looks at distance to each obs point. If it "sees" it, converts that obs to polar and pushes to its vector stored in polar_obs.
 	float loc_r; //|distance| b/w bot and current obstacle point.
 	float theta; //in radians
 	float dx; //x separation.
 	float dy; //y separation.
-	aliceStructs::tar polar_point;
+	aliceStructs::obj polar_point;
 
 	dx = _obs.first - _bot.x;
 	dy = _obs.second - _bot.y;
@@ -44,6 +44,7 @@ Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reas
 
 Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b,wvu_swarm_std_msgs::vicon_points &_t,wvu_swarm_std_msgs::vicon_points &_o)
 {
+	clearHub();
 	viconBotArray =_b;
 	targets= _t;
 	obstacles = _o;
@@ -120,39 +121,34 @@ void Hub::addNeighborMail(int i, aliceStructs::mail &_mail)
 
 void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 {
-	std::vector<aliceStructs::tar> t;
-//		for (std::vector<Bot>::iterator it=neighbors.at(i).begin(); it!=neighbors.at(i).end(); ++it)
-//		{
-//			aliceStructs::neighbor temp;
-//			temp.name = it->id;
-//	    temp.dir = fmod(atan2(it->y - bots[i].y, it->x - bots[i].x)-bots[i].heading+4*M_PI,2*M_PI);
-//			temp.dis = it->distance;
-//			temp.ang = fmod(it->heading - bots[i].heading+2*M_PI, 2 * M_PI);
-//			n.push_back(temp);
-//		}
-//		mail.neighbors=n;
+	std::vector<aliceStructs::obj> t;
 	int num_pts = targets.size();
 	for (int j = 0; j < num_pts; j++)
 	{
-		aliceStructs::tar temp = getSeparation(bots[i], target.at(j), 10000);
+		std::pair<float, float> temp = {targets.at(j).x,targets.at(j).y};
+		aliceStructs::obj temp = getSeparation(bots[i], temp, 10000);
 		if (_obsPointMail.radius > -1)
 		{
 			t.push_back(temp);
 		}
 	}
+	mail.targets=t;
 }
 
 void Hub::addObsPointMail(int i, AliceStructs::mail &_mail)
 {
-	int num_pts = obs.size(); //number of obs pts
-	for (int j = 0; j < num_pts; j++)
-	{
-		wvu_swarm_std_msgs::obs_point_mail _obsPointMail = getSeparation(bots[i], obs.at(j), TOLERANCE);
-		if (_obsPointMail.radius > -1)
+	std::vector<aliceStructs::obj> o;
+		int num_pts = obstacles.size();
+		for (int j = 0; j < num_pts; j++)
 		{
-			_aliceMailArray.obsPointMail.push_back(_obsPointMail);
+			std::pair<float, float> temp = {obstacles.at(j).x,obstacles.at(j).y};
+			aliceStructs::tar temp = getSeparation(bots[i], temp, TOLERANCE);
+			if (_obsPointMail.radius > -1)
+			{
+				o.push_back(temp);
+			}
 		}
-	}
+		mail.obstacles=o;
 }
 
 AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Alice into a msg
@@ -168,17 +164,6 @@ AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Al
 
 void Hub::clearHub()
 {
-        for(int i= 0; i<BOT_COUNT; i++)
-        {
-            for(int j=0; j<NEIGHBOR_COUNT; j++) 
-            {
-                botMail[i][j].id=-1;
-                botMail[i][j].distance=10000;
-            }
-        }
-}
-
-bool Hub::isActive(int i) //Checks if bot is active
-{
-return activeBots[i];
+	bots.clear();
+	neighbors.clear()
 }

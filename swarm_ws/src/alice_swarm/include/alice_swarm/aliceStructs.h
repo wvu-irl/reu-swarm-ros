@@ -26,15 +26,11 @@ class AliceStructs {
 		float dis;
 	}  obj;
 
-	typedef struct {
-		float dir;
-		float dis;
-	}  tar;
 
 	typedef struct {
 		std::vector<neighbor> neighbors;
-		std::vector<obj> objs;
-		std::vector<tar> tars;
+		std::vector<obj> obstacless;
+		std::vector<obj> targets;
 		int name;
 	} mail;
 };

@@ -60,33 +60,24 @@ private:
 //	ros::Subscriber sub;
 	std::vector<Bot> bots;
 	std::vector<std::vector <Bot>> neighbors;
-	aliceStructs::tar getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
-
+	aliceStructs::obj getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
+	void processVicon(); //Fills in bots[]
 public:
 	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?
 
-	void update(wvu_swarm_std_msgs::vicon_bot_array _b,wvu_swarm_std_msgs::vicon_points _t,wvu_swarm_std_msgs::vicon_points _o)
-
-	void processVicon(wvu_swarm_std_msgs::vicon_bot_array &data); //Fills in bots[]
-
-
-	void printBots();
-        
-	void printBotMail(); //Prints botMail[] to the console
-
-	void printAliceMail(wvu_swarm_std_msgs::alice_mail_array msg); //prints alice_mail_array
+	void update(wvu_swarm_std_msgs::vicon_bot_array &_b,wvu_swarm_std_msgs::vicon_points &_t,wvu_swarm_std_msgs::vicon_points &_o)
 
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
 
-	void addObsPointMail(int i,wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray);
 
-	void addTargetMail(int i,wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray);
 
-	void addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray);//Creates a neighbor_mail msg
+	void addObsPointMail(int i, aliceStructs::mail &_mail);
 
-	wvu_swarm_std_msgs::alice_mail_array createAliceMsg(int i); //Compiles all info into a single msg
+	void addTargetMail(int i, aliceStructs::mail &_mail);
 
-	bool isActive(int i);
+	void addNeighborMail(int i, aliceStructs::mail &_mail);//Creates a neighbor_mail msg
+
+	AliceStructs::mail getAliceMail(int i); //Compiles all info into a single msg
 
 	void clearHub();
 };

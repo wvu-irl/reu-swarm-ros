@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 	ros::Subscriber sub3 = n.subscribe("virtual_obstacles", 1000, obsCallback);
 	ros::Rate loopRate(10);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array > ("final_execute", 1000);
-	Hub(0); // Creates a hub for the conversion of absolute to relative info
+	Hub aliceBrain(0); // Creates a hub for the conversion of absolute to relative info
 
 	while (ros::ok())
 	{
@@ -39,9 +39,9 @@ int main(int argc, char **argv)
 //        				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
 //        						> ("virtual_obstacle"));
 
-		Hub.update(tempBotArray,tempTarget,temp_obs_array); //puts in absolute data from subscribers
+		aliceBrain.update(tempBotArray,tempTarget,temp_obs_array); //puts in absolute data from subscribers
 		for (int i=0; i<tempBotArray.poseVect.size();i++){
-			aliceMap[i].receiveMail(Hub.getAliceMail(i); //gives each robot the relative data it needs
+			aliceMap[i].receiveMsg(aliceBrain.getAliceMail(i)); //gives each robot the relative data it needs
 		}
 		for (std::map<int, Robot::Robot>::iterator it=aliceMap.begin(); it!=aliceMap.end(); ++it) //eventually run this part asynchronously
 		{
