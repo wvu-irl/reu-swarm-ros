@@ -1,5 +1,5 @@
-#ifndef PROCESSOR_H
-#define PROCESSOR_H
+#ifndef HUB_H
+#define HUB_H
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
@@ -57,7 +57,7 @@ static const int OBS_POINT_COUNT = 4; //random number of obstacles
 static const int TOLERANCE = 12;
 //Acts as a parser for the data coming out of the VICON or the simulation, turning the bundle of data into 50 packets
 // of individualized information for each swarm bot, allowing them to enact their agent level rules.
-class Processor
+class Hub
 {
 
 private:
@@ -74,9 +74,9 @@ private:
 	wvu_swarm_std_msgs::obs_point_mail getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
 
 public:
-	Processor(int a); //Default constructor, dummy parameter is there for compile reasons?
+	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?
 
-	Processor(Bot _bots[], std::pair<float, float> _obs[]); //Constructor given a predetermined set of bots
+	Hub(Bot _bots[], std::pair<float, float> _obs[]); //Constructor given a predetermined set of bots
 
 	void init(); //Does nothing for now
 
@@ -104,8 +104,8 @@ public:
 
 	bool isActive(int i);
 
-	void clearProcessor();
+	void clearHub();
 };
 
-//#include "Processor.cpp"
+//#include "Hub.cpp"
 #endif

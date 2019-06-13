@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-#include "Processor.h"
+#include "Hub.h"
 #include <stdlib.h>
 #include <map>
 #include "geometry_msgs/Vector3.h"
@@ -10,7 +10,7 @@
 #include <math.h>
 #include <swarm_server/robot_id.h>
 
-wvu_swarm_std_msgs::obs_point_mail Processor::getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance) //helper function for finding obstacle points.
+wvu_swarm_std_msgs::obs_point_mail Hub::getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance) //helper function for finding obstacle points.
 { // takes current bot and looks at distance to each obs point. If it "sees" it, converts that obs to polar and pushes to its vector stored in polar_obs.
 	float loc_r; //|distance| b/w bot and current obstacle point.
 	float theta; //in radians
@@ -38,7 +38,7 @@ wvu_swarm_std_msgs::obs_point_mail Processor::getSeparation(Bot _bot, std::pair<
 	}
 }
 
-Processor::Processor(int a) //Default constructor, dummy parameter is there for compile reasons?
+Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reasons?
 {
 	{
 		for (int i = 0; i < BOT_COUNT; i++)
@@ -54,7 +54,7 @@ Processor::Processor(int a) //Default constructor, dummy parameter is there for 
 
 }
 
-Processor::Processor(Bot _bots[], std::pair<float, float> _obs[]) //Constructor given a predetermined set of bots
+Hub::Hub(Bot _bots[], std::pair<float, float> _obs[]) //Constructor given a predetermined set of bots
 {
 	for (int i = 0; i < BOT_COUNT; i++)
 	{
@@ -65,11 +65,11 @@ Processor::Processor(Bot _bots[], std::pair<float, float> _obs[]) //Constructor 
 		obs.push_back(_obs[h]);
 	}
 }
-void Processor::init()
+void Hub::init()
 {
 }
 
-void Processor::processPoints(wvu_swarm_std_msgs::vicon_points data) //Fills in targets
+void Hub::processPoints(wvu_swarm_std_msgs::vicon_points data) //Fills in targets
 {
 
 	for (size_t i = 0; i < data.point.size(); i++)
@@ -80,7 +80,7 @@ void Processor::processPoints(wvu_swarm_std_msgs::vicon_points data) //Fills in 
 	}
 }
 
-void Processor::processObstacles(wvu_swarm_std_msgs::vicon_points data) //Fills in targets
+void Hub::processObstacles(wvu_swarm_std_msgs::vicon_points data) //Fills in targets
 {
 	for (size_t i = 0; i < data.point.size(); i++)
 	{
@@ -89,7 +89,7 @@ void Processor::processObstacles(wvu_swarm_std_msgs::vicon_points data) //Fills 
 	}
 }
 
-void Processor::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills in bots[]
+void Hub::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills in bots[]
 {
 
 	for (size_t i = 0; i < data.poseVect.size(); i++)
@@ -112,7 +112,7 @@ void Processor::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills i
 	}
 }
 
-void Processor::printBots() //Prints the
+void Hub::printBots() //Prints the
 {
 	using namespace std;
 	for (int i = 0; i < BOT_COUNT; i++)
@@ -127,7 +127,7 @@ void Processor::printBots() //Prints the
 
 
 
-void Processor::printBotMail() //Prints the id's in botMail[] to the console
+void Hub::printBotMail() //Prints the id's in botMail[] to the console
 {
 	using namespace std;
 	for (int i = 0; i < BOT_COUNT; i++)
@@ -145,7 +145,7 @@ void Processor::printBotMail() //Prints the id's in botMail[] to the console
 	std::cout << "------------------------" << "\n";
 }
 
-void Processor::printAliceMail(wvu_swarm_std_msgs::alice_mail_array _msg)
+void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail_array _msg)
 {
 	using namespace std;
 
@@ -173,7 +173,7 @@ void Processor::printAliceMail(wvu_swarm_std_msgs::alice_mail_array _msg)
  This function finds the nearest few neighbors
  The number of neighbors can be set by NEIGHBOR_COUNT
  */
-void Processor::findNeighbors()
+void Hub::findNeighbors()
 {
 	
 	for (int botIndex=0; botIndex<BOT_COUNT; botIndex++)
@@ -218,7 +218,7 @@ void Processor::findNeighbors()
 	}
 }
 
-void Processor::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray)
+void Hub::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray)
 {
 	for (int j = 0; j < NEIGHBOR_COUNT; j++) //Transfers fields of the struct to fields of the msg
 	{
@@ -234,7 +234,7 @@ void Processor::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail_array &_al
 
 }
 
-void Processor::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray)
+void Hub::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray)
 {
 
 	int num_pts = target.size();
@@ -248,7 +248,7 @@ void Processor::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail_array &_alic
 	}
 }
 
-void Processor::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray)
+void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray)
 {
 	int num_pts = obs.size(); //number of obs pts
 	for (int j = 0; j < num_pts; j++)
@@ -261,7 +261,7 @@ void Processor::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail_array &_al
 	}
 }
 
-wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns information to be sent to Alice into a msg
+wvu_swarm_std_msgs::alice_mail_array Hub::createAliceMsg(int i) //Turns information to be sent to Alice into a msg
 {
 
 	wvu_swarm_std_msgs::alice_mail_array _aliceMailArray;
@@ -273,7 +273,7 @@ wvu_swarm_std_msgs::alice_mail_array Processor::createAliceMsg(int i) //Turns in
 
 }
 
-void Processor::clearProcessor()
+void Hub::clearHub()
 {
 	target.clear();
         for(int i= 0; i<BOT_COUNT; i++)
@@ -286,7 +286,7 @@ void Processor::clearProcessor()
         }
 }
 
-bool Processor::isActive(int i) //Checks if bot is active
+bool Hub::isActive(int i) //Checks if bot is active
 {
 return activeBots[i];
 }
