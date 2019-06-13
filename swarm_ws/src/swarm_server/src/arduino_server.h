@@ -14,7 +14,7 @@
  */
 
 // Includes
-#include "robot_id.h"
+#include <swarm_server/robot_id.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/types.h>

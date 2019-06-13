@@ -4,7 +4,7 @@
 #include <wvu_swarm_std_msgs/sensor_data.h>
 
 #include "arduino_server.h"
-#include "robot_id.h"
+#include <swarm_server/robot_id.h>
 #include <stdlib.h>
 #include <string.h>
 #include <map>
