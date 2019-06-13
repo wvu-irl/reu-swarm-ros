@@ -48,7 +48,7 @@ void commandCallback(command cmd, int rid)
 		g_from_ard.publish(inf); // publishing
 
 	std::ofstream file;
-	file.open("sensor_log.csv", std::ios::out | std::ios::app);
+	file.open("~/sensor_log.csv", std::ios::out | std::ios::app);
 	file << rid_indexing[rid] << "," << cmd.str << std::endl;
 	file.close();
 }
