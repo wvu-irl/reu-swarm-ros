@@ -40,9 +40,20 @@ void render(sf::RenderWindow *window)
 
 int main(int argc, char **argv)
 {
-    cont = new ContourMap(sf::Rect<int>(10, 10, 500, 500));
+    ColorMap cmap(std::pair<double, sf::Color>(-10, sf::Color::Red), std::pair<double, sf::Color>(10, sf::Color::Magenta));
 
-    for (double i = -10.0; i <= 10.0; i += 20.0 / 9.0)
+    //cmap.addColor(std::tuple<double, sf::Color>(0, sf::Color::White));
+
+    cmap.addColor(std::tuple<double, sf::Color>(-6.66667, sf::Color::Yellow));
+    cmap.addColor(std::tuple<double, sf::Color>(-3.33333, sf::Color::Green));
+    cmap.addColor(std::tuple<double, sf::Color>(3.33333, sf::Color::Cyan));
+    cmap.addColor(std::tuple<double, sf::Color>(6.66667, sf::Color::Blue));
+
+    cont = new ContourMap(sf::Rect<int>(10, 10, 500, 500), cmap);
+
+    int j = 0;
+    const double num_levels = 9.0;
+    for (double i = -10.0; i <= 10.0; i += 20.0 / num_levels)
     {
         cont->levels.push_back(i);
         std::cout << "Added level: " << i << std::endl;
@@ -51,7 +62,6 @@ int main(int argc, char **argv)
 
     sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Contour Plotting", sf::Style::Default);
 
-    // gameclock::init(&window, WIDTH, HEIGHT, 100.0f, 30.0f);
     while (window.isOpen())
     {
         sf::Event event;

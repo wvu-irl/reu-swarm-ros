@@ -7,6 +7,8 @@
 
 #define DEBUG_CONT_SRC 0
 
+#define SHOW_HEAT_MAP 0
+
 Vector3D::Vector3D(double x, double y, double z) : x(x), y(y), z(z)
 {
 }
@@ -30,15 +32,11 @@ std::ostream &operator<<(std::ostream &os, const Vector3D &f)
 
 // Contour map definiton
 
-ContourMap::ContourMap(sf::Rect<int> _bounds)
+ContourMap::ContourMap(sf::Rect<int> _bounds, ColorMap cm) : color_mapping(cm)
 {
     bounds = sf::Rect<int>(_bounds);
-    //this->data = new Raster2D<double>(bounds.height, bounds.width, 0.0);
-
     cols = (sf::Uint8 *)malloc(bounds.width * bounds.height * 4);
     img.create(bounds.width, bounds.height, cols);
-
-    //sprite.scale(sf::Vector2f(2.5, 2.5));
     sprite.setPosition(bounds.left, bounds.top);
 }
 
@@ -60,12 +58,13 @@ void ContourMap::resemble(std::function<double(double, double)> z)
     this->zfunc = z;
 }
 
+bool isBtw(double l, double r, double mid)
+{
+    return (l < r ? l : r) <= mid && mid <= (l < r ? r : l);
+}
+
 Vector3D *drawPix(Vector3D points[5], double level)
 {
-    std::function<bool(double, double, double)> isBtw([](double l, double r, double mid) -> bool {
-        return (l < r ? l : r) <= mid && mid <= (l < r ? r : l);
-    });
-
     Vector3D *draw = NULL;
 
     for (size_t i = 1; i < 5; i++)
@@ -87,8 +86,12 @@ void ContourMap::tick()
         {
             for (double j = 0; j < bounds.width; j++)
             {
-                img.setPixel(j, i, sf::Color::Transparent);
                 Vector3D zc = Vector3D(j, i, zfunc(j, i));
+#if SHOW_HEAT_MAP
+                img.setPixel(j, i, color_mapping.calculateColor(zc.z));
+#else
+                img.setPixel(j, i, sf::Color::Transparent);
+#endif
                 Vector3D zu = Vector3D(j, i - LINE_CHECK_DIST, zfunc(j, i - LINE_CHECK_DIST));
                 Vector3D zd = Vector3D(j, i - LINE_CHECK_DIST, zfunc(j, i - LINE_CHECK_DIST));
                 Vector3D zl = Vector3D(j - LINE_CHECK_DIST, i, zfunc(j - LINE_CHECK_DIST, i));
@@ -100,7 +103,11 @@ void ContourMap::tick()
                     Vector3D *draw = drawPix(vects, levels.at(k));
                     if (draw != NULL)
                     {
-                        img.setPixel((int)draw->x, (int)draw->y, levels.at(k) < 0 ? sf::Color::Red : sf::Color::White);
+#if SHOW_HEAT_MAP
+                        img.setPixel((int)draw->x, (int)draw->y, sf::Color::Transparent);
+#else
+                        img.setPixel((int)draw->x, (int)draw->y, color_mapping.calculateColor(zc.z));
+#endif
                         break;
                     }
                 }
@@ -117,4 +124,14 @@ void ContourMap::render(sf::RenderWindow *window)
         sprite.setTexture(tex, true);
         window->draw(sprite);
     }
+}
+
+void ContourMap::setColorMap(ColorMap cm)
+{
+    color_mapping = cm;
+}
+
+ColorMap *ContourMap::getColorMap()
+{
+    return &color_mapping;
 }

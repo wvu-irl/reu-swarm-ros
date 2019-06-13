@@ -3,23 +3,17 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <map>
 
 class ColorMap
 {
 private:
-    std::vector<std::pair<double, sf::Color>> colors;
-
-    bool gradiant_;
+    std::vector<std::tuple<double, sf::Color>> colors;
 
 public:
-    ColorMap(std::pair<double, sf::Color> min, std::pair<double, sf::Color> max);
+    ColorMap(std::tuple<double, sf::Color> min, std::tuple<double, sf::Color> max);
 
-    void addColor(std::pair<double, sf::Color>);
+    void addColor(std::tuple<double, sf::Color>);
     sf::Color calculateColor(double val);
-
-    void isGradiant(bool);
-    bool isGradiant() const;
 };
 
 #include "ColorMap.cpp"

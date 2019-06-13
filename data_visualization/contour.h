@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include "sub_types/ColorMap.h"
 #include <functional>
 
 #define LINE_CHECK_DIST 1
@@ -41,11 +42,13 @@ private:
 
     std::function<double(double, double)> zfunc;
 
+    ColorMap color_mapping;
+
 public:
     sf::Rect<int> bounds;
     std::vector<double> levels;
 
-    ContourMap(sf::Rect<int> bounds);
+    ContourMap(sf::Rect<int> bounds, ColorMap);
 
     void tick();
     void render(sf::RenderWindow *window);
@@ -53,6 +56,9 @@ public:
     void resemble(std::function<double(double, double)> z);
 
     void scale(float sx, float sy);
+
+    void setColorMap(ColorMap);
+    ColorMap *getColorMap();
 
     ~ContourMap();
 };
