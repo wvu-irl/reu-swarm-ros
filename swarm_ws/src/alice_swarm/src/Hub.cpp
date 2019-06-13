@@ -66,7 +66,7 @@ void Hub::processVicon() //Fills in bots[]
 		tf::quaternionMsgToTF(viconBotArray.poseVect[i].botPose.transform.rotation, quat);
 
 		// the tf::Quaternion has a method to access roll pitch and yaw (yaw is all we need in a 2D plane)
-		double roll, pitch, yaw;
+		double roll, pitch, yaw;std::list <neighbor> bots, float tolerance
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 		bots.insert(Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
 				viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000));
