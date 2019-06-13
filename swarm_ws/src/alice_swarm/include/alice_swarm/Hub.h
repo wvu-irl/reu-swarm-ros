@@ -8,7 +8,33 @@
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
 #include <wvu_swarm_std_msgs/vicon_points.h>
 
+typedef struct Bot //The Bot struct holds the pose of a robot, along with its distance from another.
+{
+	Bot() //Default Constructor
+	{
+		id = -1;
+		x = 0;
+		y = 0;
+		heading = 0;
+		distance = 10000;
+	}
 
+	Bot(int _id, float _x, float _y, float _heading, float _distance) //Alternate Constructor
+	{
+		id=_id;
+
+		x = _x;
+		y = _y;
+		heading = _heading;
+		distance = _distance;
+	}
+
+	int id; //the id's are the 50 states, from 0 to 49
+	float x; //position
+	float y; //position
+	float heading; //in radians
+	float distance;
+} Bot;
 
 bool compareTwoBots(Bot &a, Bot &b) // Reverses the > operator to sort smallest first instead
 {
@@ -25,33 +51,24 @@ class Hub
 {
 
 private:
-	wvu_swarm_std_msgs::vicon_bot_array ViconBotArray;
-	wvu_swarm_std_msgs::vicon
-	Bot botMail[BOT_COUNT][NEIGHBOR_COUNT]; //Stores the information to be sent to Alice
-	bool activeBots[BOT_COUNT];
-	std::vector<std::pair<float, float>> obs; //vector of all obstacle points
-	std::vector<std::pair<float, float>> target;
+	wvu_swarm_std_msgs::vicon_bot_array viconBotArray;
+	wvu_swarm_std_msgs::vicon_points targets;
+	wvu_swarm_std_msgs::vicon_points obstacles;
 	//each bot has a vector of obs pairs it can "see". Pairs are form (r,theta).
 //	ros::Timer timer;
 //	ros::Publisher pub;
 //	ros::Subscriber sub;
-
+	std::vector<Bot> bots;
+	std::vector<std::vector <Bot>> neighbors;
 	wvu_swarm_std_msgs::obs_point_mail getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
 
 public:
 	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?
 
-	Hub(Bot _bots[], std::pair<float, float> _obs[]); //Constructor given a predetermined set of bots
+	void update(wvu_swarm_std_msgs::vicon_bot_array _b,wvu_swarm_std_msgs::vicon_points _t,wvu_swarm_std_msgs::vicon_points _o)
 
-	Hub()
+	void processVicon(wvu_swarm_std_msgs::vicon_bot_array &data); //Fills in bots[]
 
-	void init(); //Does nothing for now
-
-	void processVicon(wvu_swarm_std_msgs::vicon_bot_array data); //Fills in bots[]
-
-	void processPoints(wvu_swarm_std_msgs::vicon_points data);
-
-	void processObstacles(wvu_swarm_std_msgs::vicon_points data);
 
 	void printBots();
         

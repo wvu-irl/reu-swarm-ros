@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 //        				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
 //        						> ("virtual_obstacle"));
 
-		Hub.update(); //puts in absolute data from subscribers
+		Hub.update(tempBotArray,tempTarget,temp_obs_array); //puts in absolute data from subscribers
 		for (int i=0; i<tempBotArray.poseVect.size();i++){
 			aliceMap[i]=Hub.getAliceMail(i); //gives each robot the relative data it needs
 		}

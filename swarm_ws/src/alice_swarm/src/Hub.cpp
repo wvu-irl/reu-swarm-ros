@@ -40,132 +40,37 @@ wvu_swarm_std_msgs::obs_point_mail Hub::getSeparation(Bot _bot, std::pair<float,
 
 Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reasons?
 {
-	{
-		for (int i = 0; i < BOT_COUNT; i++)
-		{
-			bots[i] = Bot();
-			activeBots[i] = false;
-			for (int j = 0; j < NEIGHBOR_COUNT; j++)
-			{
-				botMail[i][j] = Bot();
-			}
-		}
-	}
-
 }
 
-Hub::Hub(Bot _bots[], std::pair<float, float> _obs[]) //Constructor given a predetermined set of bots
+Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b,wvu_swarm_std_msgs::vicon_points &_t,wvu_swarm_std_msgs::vicon_points &_o)
 {
-	for (int i = 0; i < BOT_COUNT; i++)
-	{
-		bots[i] = _bots[i];
-	}
-	for (int h = 0; h < OBS_POINT_COUNT; h++)
-	{
-		obs.push_back(_obs[h]);
-	}
-}
-void Hub::init()
-{
+	viconBotArray =_b;
+	targets= _t;
+	obstacles = _o;
+	processVicon(); //needed cause this data needs to be converted first
 }
 
-void Hub::processPoints(wvu_swarm_std_msgs::vicon_points data) //Fills in targets
+
+void Hub::processVicon() //Fills in bots[]
 {
 
-	for (size_t i = 0; i < data.point.size(); i++)
-	{
-		std::pair<float, float> temp(data.point[i].x, data.point[i].y);
-		//ROS_INFO("%f, %f", temp.first, temp.second);
-		target.push_back(temp);
-	}
-}
-
-void Hub::processObstacles(wvu_swarm_std_msgs::vicon_points data) //Fills in targets
-{
-	for (size_t i = 0; i < data.point.size(); i++)
-	{
-		std::pair<float, float> temp(data.point[i].x, data.point[i].y);
-		obs.push_back(temp);
-	}
-}
-
-void Hub::processVicon(wvu_swarm_std_msgs::vicon_bot_array data) //Fills in bots[]
-{
-
-	for (size_t i = 0; i < data.poseVect.size(); i++)
+	for (size_t i = 0; i < viconBotArray.poseVect.size(); i++)
 	{
 		char bid[3] = { '\0' };
-		bid[0] = data.poseVect[i].botId[0];
-		bid[1] = data.poseVect[i].botId[1];
+		bid[0] = viconBotArray.poseVect[i].botId[0];
+		bid[1] = viconBotArray.poseVect[i].botId[1];
 		std::string tempID(bid);
 		size_t numID = rid_map[tempID];
-		activeBots[numID] = true;
 		// the incoming geometry_msgs::Quaternion is transformed to a tf::Quaterion
 		tf::Quaternion quat;
-		tf::quaternionMsgToTF(data.poseVect[i].botPose.transform.rotation, quat);
+		tf::quaternionMsgToTF(viconBotArray.poseVect[i].botPose.transform.rotation, quat);
 
 		// the tf::Quaternion has a method to access roll pitch and yaw (yaw is all we need in a 2D plane)
 		double roll, pitch, yaw;
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-		bots[numID] = Bot(numID, data.poseVect[i].botPose.transform.translation.x,
-				data.poseVect[i].botPose.transform.translation.y, yaw, 10000);
+		bots.insert(Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
+				viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000));
 	}
-}
-
-void Hub::printBots() //Prints the
-{
-	using namespace std;
-	for (int i = 0; i < BOT_COUNT; i++)
-	{
-            if (activeBots[i]==true)
-            {
-		cout << "[" << bots[i].id << " " << bots[i].x << " " << bots[i].y << " " << bots[i].heading << " ";
-		cout << bots[i].distance << "]\n";
-            }
-        }  
-}
-
-
-
-void Hub::printBotMail() //Prints the id's in botMail[] to the console
-{
-	using namespace std;
-	for (int i = 0; i < BOT_COUNT; i++)
-	{
-		std::cout << "=========== bots " << i << " Neighbors ========" << "\n";
-		std::cout << "[";
-		for (int j = 0; j < NEIGHBOR_COUNT; j++)
-		{
-			cout << " ";
-			cout << botMail[i][j].id;
-			cout << " ";
-		}
-		cout << "]\n";
-	}
-	std::cout << "------------------------" << "\n";
-}
-
-void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail_array _msg)
-{
-	using namespace std;
-
-	std::cout << "[";
-	for (int j = 0; j < NEIGHBOR_COUNT; j++)
-	{
-		cout << " ";
-		cout << _msg.neighborMail[j].theta;
-		cout << " ";
-	}
-	cout << "]\n";
-
-	std::cout << "[";
-	for (int j = 0; j < _msg.obsPointMail.size(); j++)
-	{
-		cout << "|";
-		cout << _msg.obsPointMail[j].radius << "," << _msg.obsPointMail[j].theta;
-		cout << "|";
-	}
-	cout << "]\n";
 }
 
 /*
@@ -175,52 +80,32 @@ void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail_array _msg)
  */
 void Hub::findNeighbors()
 {
-	
-	for (int botIndex=0; botIndex<BOT_COUNT; botIndex++)
+	for (int botIndex=0; botIndex<viconBotArray.poseVect.size(); botIndex++)
 	{
-		for (int curIndex=0; curIndex<BOT_COUNT; curIndex++)
+		for (int curIndex=0; curIndex<viconBotArray.poseVect.size(); curIndex++)
 		{
-                    
-			if (botIndex==curIndex || activeBots[botIndex] == false || (activeBots[curIndex] == false)) // Check for duplicates and nonactive bots
+			if (botIndex==curIndex) // Check for duplicates and nonactive bots
 			{
 				continue;
 			}
-
-			Bot temp(bots[curIndex]);
-                     
-			temp.distance = sqrt(pow((bots[curIndex].x - bots[botIndex].x), 2) + pow((bots[curIndex].y - bots[botIndex].y), 2));
-			bool smallest = true;
-
-			for (int i = 0; i < NEIGHBOR_COUNT; i++)
+			Bot temp(bots.at(curIndex));
+			temp.distance = sqrt(pow((bots.at(curIndex).x - bots.at(botIndex).x), 2) + pow((bots.at(curIndex).y - bots.at(botIndex).y), 2));
+			bool done = false;
+			for (std::vector<Bot>::iterator it=neighbors.at(botIndex).begin(); it!=neighbors.at(botIndex).end(); ++it)
 			{
-				if (temp.distance > botMail[botIndex][i].distance)
-				{
-					if (i == 0) // If cur is further than the first in the array, it's further
-					{
-						smallest = false;
-						break;
-					} else
-					{ // This means cur is neither the furthest nor nearest
-
-						botMail[botIndex][0] = temp;
-						smallest = false;
-						std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT, compareTwoBots); // Sorts greatest first
-						break;
-					}
-				}
+				if (temp.distance < it->distance) neightbors.at(botIndex).insert(it,temp);
+				done=true;
+				continue;
 			}
-			if (smallest)
-			{ // If cur is closer than everything, it's the closest
-				botMail[botIndex][0] = temp;
-				std::sort(botMail[botIndex], botMail[botIndex] + NEIGHBOR_COUNT, compareTwoBots); // Sorts greatest first
-			}
+			if (neighbors.at(botIndex).size() > NEIGHBOR_COUNT) neighbors.at(botIndex).pop_back();
+			else if (!done && neighbors.at(botIndex).size()< NEIGHBOR_COUNT) neighbors.at(botIndex).push_back(temp);
 		}
 	}
 }
 
 void Hub::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray)
 {
-	for (int j = 0; j < NEIGHBOR_COUNT; j++) //Transfers fields of the struct to fields of the msg
+	for (int j = 0; j < ; j++) //Transfers fields of the struct to fields of the msg
 	{
 		wvu_swarm_std_msgs::neighbor_mail _neighborMail;
 		_neighborMail.id = botMail[i][j].id;
@@ -248,7 +133,7 @@ void Hub::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailA
 	}
 }
 
-void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMailArray)
+void Hub::addObsPointMail(int i,)
 {
 	int num_pts = obs.size(); //number of obs pts
 	for (int j = 0; j < num_pts; j++)
@@ -261,21 +146,19 @@ void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail_array &_aliceMai
 	}
 }
 
-wvu_swarm_std_msgs::alice_mail_array Hub::createAliceMsg(int i) //Turns information to be sent to Alice into a msg
+Robot::Robot Hub::getAliceMail(int i) //Turns information to be sent to Alice into a msg
 {
+	Robot temp;
+	addObsPointMail(i, temp);
+	addNeighborMail(i, temp);
+	addTargetMail(i, temp);
 
-	wvu_swarm_std_msgs::alice_mail_array _aliceMailArray;
-	addObsPointMail(i, _aliceMailArray);
-	addNeighborMail(i, _aliceMailArray);
-	addTargetMail(i, _aliceMailArray);
-
-	return _aliceMailArray;
+	return temp;
 
 }
 
 void Hub::clearHub()
 {
-	target.clear();
         for(int i= 0; i<BOT_COUNT; i++)
         {
             for(int j=0; j<NEIGHBOR_COUNT; j++) 
