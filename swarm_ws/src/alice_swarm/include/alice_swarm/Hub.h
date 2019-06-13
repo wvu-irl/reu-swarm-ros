@@ -67,9 +67,9 @@ private:
 	std::vector<std::pair<float, float>> obs; //vector of all obstacle points
 	std::vector<std::pair<float, float>> target;
 	//each bot has a vector of obs pairs it can "see". Pairs are form (r,theta).
-	ros::Timer timer;
-	ros::Publisher pub;
-	ros::Subscriber sub;
+//	ros::Timer timer;
+//	ros::Publisher pub;
+//	ros::Subscriber sub;
 
 	wvu_swarm_std_msgs::obs_point_mail getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
 
