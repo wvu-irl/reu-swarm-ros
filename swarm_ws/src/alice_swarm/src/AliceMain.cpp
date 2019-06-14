@@ -61,14 +61,13 @@ int main(int argc, char **argv)
 		{
 			wvu_swarm_std_msgs::robot_command temp;
 			AliceStructs::vel tempVel = it->second.generateComp(all_ideals);
-			std::cout << "we made it here" << std::endl;
 			temp.rid = it->second.name;
 			temp.r = tempVel.mag;
 			temp.theta = tempVel.dir;
 
 			execute.commands.push_back(temp);
 		}
-
+		std::cout << "yo" << std::endl;
 		pub.publish(execute);
 		ros::spinOnce();
 		loopRate.sleep();

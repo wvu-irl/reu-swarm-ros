@@ -166,6 +166,14 @@ void Hub::addObsPointMail(int i, AliceStructs::mail &_mail)
 		_mail.obstacles=o;
 }
 
+void Hub::printAliceMail(AliceStructs::mail _mail)
+{
+	std::cout <<"---Mail for Alice " << _mail.name << "---" << std::endl;
+	for (std::vector<AliceStructs::neighbor>::iterator it = _mail.neighbors.begin(); it != _mail.neighbors.end(); ++it){
+		std::cout << it->dir <<" "<< it->dis << " " << it->ang <<" " << it->name << std::endl;
+	}
+}
+
 AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Alice into a msg
 {
 	AliceStructs::mail temp;
@@ -174,6 +182,7 @@ AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Al
 
 	addTargetMail(i, temp);
 	temp.name = i;
+	printAliceMail(temp);
 	return temp;
 
 }

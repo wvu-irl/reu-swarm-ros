@@ -38,9 +38,10 @@ AliceStructs::ideal Robot::generateIdeal()
 
 AliceStructs::vel Robot::generateComp(std::vector<AliceStructs::ideal> ideals)
 {
+
 	for (int i = 0; i < ideals.size(); i++)
 	{
-		for (int j = 0; j < ideals.size(); j++)
+		for (int j = 0; j < neighbors.size(); j++)
 		{
 			if (ideals.at(i).name = neighbors.at(j).name)
 			{

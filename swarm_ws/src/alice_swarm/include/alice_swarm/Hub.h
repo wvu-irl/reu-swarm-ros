@@ -71,6 +71,7 @@ public:
 
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
 
+	void printAliceMail(AliceStructs::mail _mail);
 
 
 	void addObsPointMail(int i, AliceStructs::mail &_mail);
