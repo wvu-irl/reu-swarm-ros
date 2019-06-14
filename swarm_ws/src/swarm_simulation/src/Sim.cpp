@@ -232,8 +232,6 @@ void Sim::Render() //draws changes in simulation states to the window.
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
-		//still doesnt fucking work.
-
 		// Calculates the angle where the velocity is pointing so that the triangle turns towards it.
 		float theta = 180.0 / M_PI * (flock.flock.at(i).angle(flock.flock.at(i).velocity));
 		shapes[i].setRotation(90-theta); //alignes body with direction of motion

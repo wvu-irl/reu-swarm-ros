@@ -24,6 +24,7 @@ Body::Body(float x, float y, char _id[2])
     acceleration = Pvector(0, 0);
     velocity = Pvector(0,0);
     location = Pvector(x, y);
+    prev_location = Pvector(x,y);
     maxSpeed = 3;
     maxForce = 0.5;
     id[0] = _id[0];
@@ -65,7 +66,9 @@ void Body::update()
     // Limit speed
     velocity.limit(1);
     velocity.mulScalar(maxSpeed);
+    prev_location.set(location.x,location.y);
     location.addVector(velocity);
+
     // Reset accelertion to 0 each cycle
     updatedPosition=true;
 }
@@ -77,6 +80,7 @@ void Body::run(vector <Body> v)
 {
     if (updatedPosition==false)update();
     borders();
+    seperation(v);
 }
 
 // Applies the three laws to the flock of bodies
@@ -118,6 +122,70 @@ void Body::borders()
 			if(location.y <=10){location.y = 10;}
 			if(location.y >=590){location.y = 590;}
 		}
+}
+
+void  Body::seperation(vector<Body> _bodies)
+{
+		// Distance of field of vision for separation between bodies
+    float desiredseparation = 20;
+    Pvector steer(0, 0);
+    int count = 0; //iterator
+
+    for (int i = 0; i < _bodies.size(); i++) // For every body in the system, check if it's too close
+    {
+        // Calculate distance from current body to body we're looking at
+    	 float d = location.distance(_bodies.at(i).location);
+        // If this is a fellow body and it's too close, move away from it
+        if ((d > 0) && (d < desiredseparation) && (id[0] !=_bodies.at(i).id[0]) && (id[1] !=_bodies.at(i).id[1]))
+        {
+        	std::cout<<"BOTS ARE TOO CLOSE!"<<std::endl;
+        	std::cout<<"bot: "<<id[0]<<id[1]<<" and bot: "<<_bodies.at(i).id[0]<<_bodies.at(i).id[1]<<std::endl;
+        	std::cout<<"seperation is: "<<d<<std::endl;
+        	std::cout<<"-----------------\n";
+
+        	_bodies.at(i).location.x = _bodies.at(i).prev_location.x;
+        	location.x = prev_location.x;
+
+        	_bodies.at(i).location.y = _bodies.at(i).prev_location.y;
+        	location.y = prev_location.y;
+
+//        	float dx = _bodies.at(i).location.x - location.x;
+//        	float dy = _bodies.at(i).location.y - location.y;
+//        	if(dx>=0)
+//        	{
+//        		_bodies.at(i).location.x += 30;
+//        		location.x -= 30;
+//        	}
+//        	else
+//        	{
+//        		_bodies.at(i).location.x -= 30;
+//        		location.x += 30;
+//        	}
+//        	if(dy>=0)
+//        	{
+//        		_bodies.at(i).location.y += 30;
+//        		location.y -= 30;
+//        	}
+//        	else
+//        	{
+//        		_bodies.at(i).location.y -= 30;
+//        		location.y += 30;
+//        	}
+
+        	velocity.x = 0;
+          velocity.y = 0;
+          _bodies.at(i).velocity.x = 0;
+					_bodies.at(i).velocity.y =0;
+
+
+//            Pvector diff(0,0);
+//            diff = diff.subTwoVector(location, _bodies.at(i).location);
+//            diff.normalize();
+//            diff.divScalar(d);      // Weight by distance
+//            steer.addVector(diff);
+            count++;
+        }
+    }
 }
 
 // Calculates the angle for the velocity of a body which allows the visual

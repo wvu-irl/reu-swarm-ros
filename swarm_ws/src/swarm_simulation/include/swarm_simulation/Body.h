@@ -43,6 +43,7 @@ public:
 		char id [2];
     bool predator;
     Pvector location;
+    Pvector prev_location;
     Pvector velocity;
     Pvector acceleration;
     float maxSpeed;
@@ -65,6 +66,7 @@ public:
     void update();
     void flock(vector <Body> v);
     void borders();
+    void seperation(vector<Body> _bodies);
     float angle(Pvector v);
     void printMessage(int i,wvu_swarm_std_msgs::vicon_bot_array _vb_array);
 };
