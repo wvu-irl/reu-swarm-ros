@@ -2,6 +2,10 @@
 #include "alice_swarm/aliceStructs.h"
 #include <math.h>
 
+VectorQueue::VectorQueue(){
+
+}
+
 void VectorQueue::oneToQueue(AliceStructs::ideal toAdd)
 {
 	vectorQueue.push_back(toAdd);

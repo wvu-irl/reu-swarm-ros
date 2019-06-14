@@ -13,18 +13,26 @@
 #include "alice_swarm/VectorQueue.h"
 
 class Robot {
-private:
-	Model model;
-	VectorQueue vector_queue;
-	std::vector <AliceStructs::neighbor> neighbors;
+
 public:
 	int name;
+
+	VectorQueue vectorQueue;
+
+	Robot();
 
 	Robot(AliceStructs::mail data);
 
 	AliceStructs::ideal generateIdeal();
 
 	AliceStructs::vel generateComp(std::vector <AliceStructs::ideal> ideals);
+
+	void receiveMsg(AliceStructs::mail data);
+
+private:
+	Model model;
+
+	std::vector <AliceStructs::neighbor> neighbors;
 
 };
 

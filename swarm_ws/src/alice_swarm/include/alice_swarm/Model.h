@@ -11,9 +11,9 @@ public:
 	std::list <AliceStructs::neighbor> robots;
 	std::list <AliceStructs::obj> targets;
 
+	Model();//dummy
+
 	Model(int _name);
-
-
 
 	AliceStructs::ideal generateIdeal();
 

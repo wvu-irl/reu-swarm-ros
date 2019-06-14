@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 #include <list>
-class AliceStructs {
-public:
+namespace AliceStructs {
+
 	typedef struct {
 		float dir;
 		float spd;

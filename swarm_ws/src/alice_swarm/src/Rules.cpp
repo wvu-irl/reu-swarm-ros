@@ -35,7 +35,7 @@ AliceStructs::vel Rules::maintainSpacing(std::list <AliceStructs::neighbor> bots
 	}
 }
 
-AliceStructs::vel avoidRobots(std::list <AliceStructs::neighbor> bots, float tolerance)
+AliceStructs::vel Rules::avoidRobots(std::list <AliceStructs::neighbor> bots, float tolerance)
 {
 	AliceStructs::vel to_return;
 	if (bots.size() == 0)
@@ -56,7 +56,7 @@ AliceStructs::vel avoidRobots(std::list <AliceStructs::neighbor> bots, float tol
 	return to_return;
 }
 
-AliceStructs::vel avoidObstacles(std::list <AliceStructs::obj> obstacles, float tolerance)
+AliceStructs::vel Rules::avoidObstacles(std::list <AliceStructs::obj> obstacles, float tolerance)
 {
 	AliceStructs::vel to_return;
 	if (obstacles.size() == 0)

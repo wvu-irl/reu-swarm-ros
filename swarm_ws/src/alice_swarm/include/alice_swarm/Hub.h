@@ -7,6 +7,7 @@
 #include <wvu_swarm_std_msgs/alice_mail_array.h>
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
 #include <wvu_swarm_std_msgs/vicon_points.h>
+#include "alice_swarm/aliceStructs.h"
 
 typedef struct Bot //The Bot struct holds the pose of a robot, along with its distance from another.
 {
@@ -58,24 +59,25 @@ private:
 //	ros::Timer timer;
 //	ros::Publisher pub;
 //	ros::Subscriber sub;
+
 	std::vector<Bot> bots;
 	std::vector<std::vector <Bot>> neighbors;
-	aliceStructs::obj getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
+	AliceStructs::obj getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
 	void processVicon(); //Fills in bots[]
 public:
 	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?
 
-	void update(wvu_swarm_std_msgs::vicon_bot_array &_b,wvu_swarm_std_msgs::vicon_points &_t,wvu_swarm_std_msgs::vicon_points &_o)
+	void update(wvu_swarm_std_msgs::vicon_bot_array &_b,wvu_swarm_std_msgs::vicon_points &_t,wvu_swarm_std_msgs::vicon_points &_o);
 
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
 
 
 
-	void addObsPointMail(int i, aliceStructs::mail &_mail);
+	void addObsPointMail(int i, AliceStructs::mail &_mail);
 
-	void addTargetMail(int i, aliceStructs::mail &_mail);
+	void addTargetMail(int i, AliceStructs::mail &_mail);
 
-	void addNeighborMail(int i, aliceStructs::mail &_mail);//Creates a neighbor_mail msg
+	void addNeighborMail(int i, AliceStructs::mail &_mail);//Creates a neighbor_mail msg
 
 	AliceStructs::mail getAliceMail(int i); //Compiles all info into a single msg
 
