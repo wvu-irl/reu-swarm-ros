@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-#include "Hub.h"
+#include "alice_swarm/Hub.h"
 #include <stdlib.h>
 #include <map>
 #include "geometry_msgs/Vector3.h"

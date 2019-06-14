@@ -1,28 +1,29 @@
 #ifndef MODEL_H_
 #define MODEL_H_
 
-#include "aliceStructs.h"
-#include "Rules.h"
+#include "alice_swarm/aliceStructs.h"
+#include "alice_swarm/Rules.h"
 
 class Model
 {
 public:
-	std::list <obj> obstacles;
-	std::list <neighbor> robots;
-	std::list <tar> targets;
+	std::list <AliceStructs::obj> obstacles;
+	std::list <AliceStructs::neighbor> robots;
+	std::list <AliceStructs::obj> targets;
 
-	Model();
+	Model(int _name);
 
-	ideal generateIdeal();
 
-	void addToModel(mail toAdd);
+
+	AliceStructs::ideal generateIdeal();
+
+	void addToModel(AliceStructs::mail toAdd);
 
 	void clear();
 
 private:
-	rules Rules;
-
-
+	Rules rules;
+	int name;
 };
 
 #endif /* MODEL_H_ */

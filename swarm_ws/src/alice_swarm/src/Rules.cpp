@@ -1,17 +1,21 @@
-#include "Rules.h"
-#include "aliceStructs.h"
-#include "math"
+#include "alice_swarm/Rules.h"
+#include "alice_swarm/aliceStructs.h"
+#include <math.h>
 
-vel Rules::maintainSpacing(std::list <neighbor> bots, float tolerance)
+Rules::Rules(){
+	//nothing
+}
+
+AliceStructs::vel Rules::maintainSpacing(std::list <AliceStructs::neighbor> bots, float tolerance)
 {
-	vel to_return;
+	AliceStructs::vel to_return;
 	if (bots.size() == 0)
 	{
 		to_return.mag = -1;
 		return to_return;
 	}
 	float direction = 0;
-	float distance = 0;to_return.dis = -1;
+	float distance = 0;to_return.dir = -1;
 	for (auto &bot : bots) {
 		direction += bot.dir;
 		distance += bot.dis;
@@ -31,48 +35,47 @@ vel Rules::maintainSpacing(std::list <neighbor> bots, float tolerance)
 	}
 }
 
-vel avoidRobots(std::list <neighbor> bots, float tolerance)
+AliceStructs::vel avoidRobots(std::list <AliceStructs::neighbor> bots, float tolerance)
 {
-	vel to_return;
+	AliceStructs::vel to_return;
 	if (bots.size() == 0)
 	{
-		to_return.dis = -1;
+		to_return.mag = -1;
 		return to_return;
 	}
 	for (auto &bot : bots)
 	{
-		if ((bot.dir < M_PI/12 * tolerance) or (bot.dir > 11 * M_PI/12 0 - M_PI/12 * tolerance)
-				and (bot.dis < ROBOT_SIZE / 2 * tolerance))
+		if ((bot.dir < M_PI/12 * tolerance) || (bot.dir > 2*M_PI - M_PI/12 * tolerance)&& (bot.dis < ROBOT_SIZE / 2 * tolerance))
 		{
-			to_return.dir = (robot.dir + M_PI/2)%(2 * M_PI);
+			to_return.dir = fmod((bot.dir + M_PI/2),(2 * M_PI));
 			to_return.mag = 1 - sin(to_return.dir);
-			return to_return
+			return to_return;
 		}
 	}
-	to_return.dis = -1;
-	return to_return
+	to_return.mag = -1;
+	return to_return;
 }
 
-vel avoidObstacles(std::list <obj> obstacles, float tolerance)
+AliceStructs::vel avoidObstacles(std::list <AliceStructs::obj> obstacles, float tolerance)
 {
-	vel to_return;
-	if (bots.size() == 0)
+	AliceStructs::vel to_return;
+	if (obstacles.size() == 0)
 	{
-		to_return.dis = -1;
+		to_return.mag = -1;
 		return to_return;
 	}
 	for (auto &obj : obstacles)
 	{
-		if ((obj.dir < M_PI/12 * tolerance) or (obj.dir > 11 * M_PI/12 0 - M_PI/12 * tolerance)
+		if ((obj.dir < M_PI/12 * tolerance) or (obj.dir > 2 * M_PI - M_PI/12 * tolerance)
 				and (obj.dis < ROBOT_SIZE / 2 * tolerance))
 		{
-			to_return.dir = (obj.dir + M_PI/2)%(2 * M_PI);
+			to_return.dir = fmod((obj.dir + M_PI/2),(2 * M_PI));
 			to_return.mag = 1 - sin(to_return.dir);
-			return to_return
+			return to_return;
 		}
 	}
-	to_return.dis = -1;
-	return to_return
+	to_return.mag = -1;
+	return to_return;
 };
 
 /*

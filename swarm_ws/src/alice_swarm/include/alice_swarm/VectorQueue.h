@@ -1,4 +1,3 @@
-
 #ifndef VECTORQUEUE_H_
 #define VECTORQUEUE_H_
 
@@ -6,15 +5,15 @@
 
 class VectorQueue
 {
-	public:
+public:
 
-		std::list <ideal> vector_queue;
+	std::vector<AliceStructs::ideal> vectorQueue;
 
-		VectorQueue();
+	VectorQueue();
 
-		void addToQueue(ideal toAdd);
+	void oneToQueue(AliceStructs::ideal toAdd);
 
-		vel createCompromise();
-	};
+	AliceStructs::vel createCompromise();
+};
 
 #endif /* VECTORQUEUE_H_ */

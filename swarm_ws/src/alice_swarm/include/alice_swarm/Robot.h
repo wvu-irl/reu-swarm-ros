@@ -8,23 +8,23 @@
 #ifndef ROBOT_H_
 #define ROBOT_H_
 
-#include "aliceStructs.h"
-#include "Model.h"
-#include "VectorQueue.h"
+#include "alice_swarm/aliceStructs.h"
+#include "alice_swarm/Model.h"
+#include "alice_swarm/VectorQueue.h"
 
 class Robot {
 private:
 	Model model;
 	VectorQueue vector_queue;
-	std::vector <neighbor> neighbors;
+	std::vector <AliceStructs::neighbor> neighbors;
 public:
 	int name;
 
-	Robot(mail data);
+	Robot(AliceStructs::mail data);
 
-	ideal generateIdeal();
+	AliceStructs::ideal generateIdeal();
 
-	vel generateComp(std::vector <ideal> ideals);
+	AliceStructs::vel generateComp(std::vector <AliceStructs::ideal> ideals);
 
 };
 

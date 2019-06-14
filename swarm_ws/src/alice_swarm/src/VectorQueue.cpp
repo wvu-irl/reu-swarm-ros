@@ -1,31 +1,28 @@
+#include "alice_swarm/VectorQueue.h"
+#include "alice_swarm/aliceStructs.h"
+#include <math.h>
 
-
-#include "VectorQueue.h"
-#include "aliceStructs.h"
-#include "math.h"
-
-class VectorQueue
+void VectorQueue::oneToQueue(AliceStructs::ideal toAdd)
 {
-
-void VectorQueue::oneToQueue(ideal toAdd)
-{
-	vector_queue.insert(toAdd);
+	vectorQueue.push_back(toAdd);
 }
 
-vel VectorQueue::createCompromise()
+AliceStructs::vel VectorQueue::createCompromise()
 {
 	float compromise_angle = 0;
 	float compromise_speed = 0;
 	float priority = 0;
-	while (vector_queue.size() != 0);
-		ideal current = vector_queue.pop_front();
-		current_priority = pow((current.pri / (current.dis + 1)) , 2);
+	while (!vectorQueue.empty())
+	{
+		AliceStructs::ideal current = vectorQueue.back();
+		vectorQueue.pop_back();
+		float current_priority = pow((current.pri / (current.dis + 1)), 2);
 		compromise_angle = (compromise_angle * priority + current.dir * current_priority) / (priority + current_priority);
 		compromise_speed = (compromise_speed * priority + current.spd * current_priority) / (priority + current_priority);
 		priority += current_priority;
-	vel to_return;
+	}
+	AliceStructs::vel to_return;
 	to_return.dir = compromise_angle;
 	to_return.mag = compromise_speed;
 	return to_return;
-	}
 };

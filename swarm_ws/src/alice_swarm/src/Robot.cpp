@@ -5,39 +5,37 @@
  *      Author: smart6
  */
 
-#include "Robot.h"
+#include "alice_swarm/Robot.h"
 
-class Robot
+Robot::Robot(AliceStructs::mail data)
 {
+	model.addToModel(data);
+	name = data.name;
+	neighbors = data.neighbors;
+}
 
-	Robot(mail data)
-	{
-		model.addToModel(data);
-		name = data.name;
-		neighbors = data.neighbors;
-	}
+AliceStructs::ideal Robot::generateIdeal()
+{
+	AliceStructs::ideal to_return = model.generateIdeal();
+	model.clear();
+	vector_queue.oneToQueue(to_return/*originally had "ideal", had no idea what was intended*/);
+	return to_return;
+}
 
-	ideal Robot::generateIdeal()
+AliceStructs::vel Robot::generateComp(std::vector<AliceStructs::ideal> ideals)
+{
+	for (int i = 0; i < ideals.size(); i++)
 	{
-		ideal to_return = model.generateIdeal();
-		model.clear();
-		vector_queue.oneToQueue(ideal);
-		return to_return;
-	}
-
-	vel Robot::generateComp(std::vector <ideal> ideals)
-	{
-		for (int i = 0; i < ideals.size(); i++)
+		for (int j = 0; j < ideals.size(); j++)
 		{
-			for (int j = 0; j < ideals.size(); j++)
+			if (ideals.at(i).name = neighbors.at(j).name)
 			{
-				if (ideals.at(i).name = neighbors.at(j).name) {
-					ideals.at(i).dis = neighbors.at(j).dis;
-					vector_queue.oneToQueue(ideals.get(i));
-				}
+				ideals.at(i).dis = neighbors.at(j).dis;
+				vector_queue.oneToQueue(ideals.at(i));
 			}
 		}
-		return vectorQueue.createCompromise();
 	}
+	return vectorQueue.createCompromise();
+}
 
 }

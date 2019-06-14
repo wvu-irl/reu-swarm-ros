@@ -1,11 +1,16 @@
-#include "Model.h"
-#include "aliceStructs.h"
+#include "alice_swarm/Model.h"
+#include "alice_swarm/aliceStructs.h"
 #include <ros/ros.h>
 
 class Model
 {
 
-ideal Model::generateIdeal()
+Model::Model(int _name){
+	name = _name;
+}
+
+
+	AliceStructs::ideal Model::generateIdeal()
 {
 	ideal toReturn;
 	toReturn.dir = -1;
@@ -23,6 +28,7 @@ ideal Model::generateIdeal()
 				to_return.spd = ideal_list.get(i).mag;
 				to_return.dis = 0;
 				to_return.pri = (ideal_list.size() - i + 1)/(tolerance + 1);
+				to_return.name = name;
 				return to_return;
 			}
 		}
@@ -30,7 +36,7 @@ ideal Model::generateIdeal()
 	}
 }
 
-void addToModel(mail toAdd)
+void Model::addToModel(mail toAdd)
 {
 	for (auto& item : toAdd.obstacles)
 	{
@@ -46,7 +52,7 @@ void addToModel(mail toAdd)
 	}
 }
 
-void clear()
+void Model::clear()
 {
 	obstacles.clear()
 	robots.clear()

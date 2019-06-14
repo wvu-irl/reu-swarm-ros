@@ -1,12 +1,17 @@
+#ifndef ALICESTRUCTS_H
+#define ALICESTRUCTS_H
+
 #include <string>
-
+#include <vector>
+#include <list>
 class AliceStructs {
-
+public:
 	typedef struct {
 		float dir;
 		float spd;
 		float dis;
 		float pri;
+		int name;
 	} ideal;
 
 	typedef struct {
@@ -34,3 +39,5 @@ class AliceStructs {
 		int name;
 	} mail;
 };
+
+#endif
