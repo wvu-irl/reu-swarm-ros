@@ -74,6 +74,8 @@ void Hub::processVicon() //Fills in bots[]
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 		bots.push_back(Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
 				viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000));
+		std::vector<Bot> temp;
+		neighbors.push_back(temp);
 	}
 }
 
@@ -84,7 +86,6 @@ void Hub::processVicon() //Fills in bots[]
  */
 void Hub::findNeighbors()
 {
-	std::cout << "we made it here " << viconBotArray.poseVect.size() << std::endl;
 	for (int botIndex=0; botIndex<viconBotArray.poseVect.size(); botIndex++)
 	{
 		for (int curIndex=0; curIndex<viconBotArray.poseVect.size(); curIndex++)
@@ -96,17 +97,22 @@ void Hub::findNeighbors()
 			Bot temp(bots.at(curIndex));
 			temp.distance = sqrt(pow((bots.at(curIndex).x - bots.at(botIndex).x), 2) + pow((bots.at(curIndex).y - bots.at(botIndex).y), 2));
 			bool done = false;
-			for (std::vector<Bot>::iterator it=neighbors.at(botIndex).begin(); it!=neighbors.at(botIndex).end(); ++it)
+			for (std::vector<Bot>::iterator it=neighbors.at(botIndex).begin(); it!=neighbors.at(botIndex).end(); it++)
 			{
 				if (temp.distance < it->distance) {
+
 					neighbors.at(botIndex).insert(it,temp);
+
 					done=true;
-					std::cout << "we made it here" << std::endl;
+
+					break;
 				}
 
-				continue;
 			}
-			if (neighbors.at(botIndex).size() > NEIGHBOR_COUNT) neighbors.at(botIndex).pop_back();
+			if (neighbors.at(botIndex).size() > NEIGHBOR_COUNT) {
+				neighbors.at(botIndex).pop_back();
+
+			}
 			else if (!done && neighbors.at(botIndex).size()< NEIGHBOR_COUNT) neighbors.at(botIndex).push_back(temp);
 		}
 	}
@@ -132,7 +138,6 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 {
 	std::vector<AliceStructs::obj> t;
 	int num_pts = targets.point.size();
-	std::cout << num_pts << std::endl;
 	for (int j = 0; j < num_pts; j++)
 	{
 		std::pair<float, float> temp = {targets.point.at(j).x,targets.point.at(j).y};
@@ -166,6 +171,7 @@ AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Al
 	AliceStructs::mail temp;
 	addObsPointMail(i, temp);
 	addNeighborMail(i, temp);
+
 	addTargetMail(i, temp);
 	temp.name = i;
 	return temp;

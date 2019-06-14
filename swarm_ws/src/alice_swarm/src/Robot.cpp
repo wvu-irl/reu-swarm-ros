@@ -8,7 +8,7 @@
 #include "alice_swarm/Robot.h"
 #include "alice_swarm/Model.h"
 #include "alice_swarm/VectorQueue.h"
-
+#include "iostream"
 Robot::Robot(){
 
 }
