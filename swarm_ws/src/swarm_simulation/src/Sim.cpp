@@ -144,7 +144,7 @@ void Sim::Run(ros::NodeHandle _n)
 	sleep(1);
 	ros::Publisher pub = _n.advertise < wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array", 1000); //Publishes like Vicon
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
-	ros::Rate loopRate(10);
+	ros::Rate loopRate(50);
 
 	//publishes initial information for each bot
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
