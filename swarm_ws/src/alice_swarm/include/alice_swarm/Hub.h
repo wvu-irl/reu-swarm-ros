@@ -42,7 +42,7 @@ bool compareTwoBots(Bot &a, Bot &b) // Reverses the > operator to sort smallest 
 	return (float) a.distance > (float) b.distance;
 }
 
-static const int BOT_COUNT = 50; // Number of bots in the system
+//static const int BOT_COUNT = 50; // Number of bots in the system
 static const int NEIGHBOR_COUNT = 4; // Number of neighbors desired
 static const int OBS_POINT_COUNT = 4; //random number of obstacles
 static const int TOLERANCE = 12;

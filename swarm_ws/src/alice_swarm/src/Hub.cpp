@@ -182,7 +182,7 @@ AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Al
 
 	addTargetMail(i, temp);
 	temp.name = i;
-	printAliceMail(temp);
+	//printAliceMail(temp);
 	return temp;
 
 }

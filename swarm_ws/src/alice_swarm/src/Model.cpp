@@ -1,5 +1,6 @@
 #include "alice_swarm/Model.h"
 #include "alice_swarm/aliceStructs.h"
+#include <iostream>[
 #include <ros/ros.h>
 
 Model::Model(){
@@ -13,9 +14,9 @@ Model::Model(int _name){
 AliceStructs::ideal Model::generateIdeal()
 {
 	AliceStructs::ideal toReturn;
-	toReturn.dir = -1;
+	toReturn.spd = -1;
 	int tolerance = 1;
-	while ((toReturn.dir == -1) && ros::ok)
+	while ((toReturn.spd == -1) && ros::ok)
 	{
 		std::vector <AliceStructs::vel> ideal_list = {rules.avoidObstacles(obstacles, tolerance),
 			rules.avoidRobots(robots, tolerance),
@@ -27,7 +28,8 @@ AliceStructs::ideal Model::generateIdeal()
 				toReturn.dir = ideal_list.at(i).dir;
 				toReturn.spd = ideal_list.at(i).mag;
 				toReturn.dis = 0;
-				toReturn.pri = (ideal_list.size() - i + 1)/(tolerance + 1);
+				toReturn.pri = (ideal_list.size() - i + 1)/(float) (tolerance + 1);
+
 				toReturn.name = name;
 				return toReturn;
 			}
@@ -58,4 +60,4 @@ void Model::clear()
 	robots.clear();
 	targets.clear();
 }
-		
+

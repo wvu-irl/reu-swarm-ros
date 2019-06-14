@@ -10,7 +10,7 @@
 #include "alice_swarm/VectorQueue.h"
 #include "iostream"
 Robot::Robot(){
-
+name=10000;
 }
 
 Robot::Robot(AliceStructs::mail data)
@@ -24,6 +24,9 @@ Robot::Robot(AliceStructs::mail data)
 
 void Robot::receiveMsg(AliceStructs::mail data)
 {
+	name = data.name;
+	model = Model(data.name);
+	vectorQueue = VectorQueue();
 	model.addToModel(data);
 	neighbors = data.neighbors;
 }

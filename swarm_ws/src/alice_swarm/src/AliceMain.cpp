@@ -28,7 +28,6 @@ int main(int argc, char **argv)
 	ros::Rate loopRate(10);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array > ("final_execute", 1000);
 	Hub aliceBrain(0); // Creates a hub for the conversion of absolute to relative info
-	std::cout << "yo" << std::endl;
 
 	while (ros::ok())
 	{
@@ -47,7 +46,6 @@ int main(int argc, char **argv)
 		aliceBrain.update(tempBotArray, tempTarget, temp_obs_array); //puts in absolute data from subscribers
 		for (int i = 0; i < tempBotArray.poseVect.size(); i++)
 		{
-			aliceMap[i];
 			aliceMap[i].receiveMsg(aliceBrain.getAliceMail(i)); //gives each robot the relative data it needs
 		}
 		std::vector<AliceStructs::ideal> all_ideals;
@@ -67,8 +65,9 @@ int main(int argc, char **argv)
 
 			execute.commands.push_back(temp);
 		}
-		std::cout << "yo" << std::endl;
+
 		pub.publish(execute);
+		std::cout << "execute published" <<std::endl;
 		ros::spinOnce();
 		loopRate.sleep();
 	}

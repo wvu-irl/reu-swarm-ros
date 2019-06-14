@@ -1,7 +1,7 @@
 #include "alice_swarm/VectorQueue.h"
 #include "alice_swarm/aliceStructs.h"
 #include <math.h>
-
+#include <iostream>
 VectorQueue::VectorQueue(){
 
 }
@@ -16,11 +16,14 @@ AliceStructs::vel VectorQueue::createCompromise()
 	float compromise_angle = 0;
 	float compromise_speed = 0;
 	float priority = 0;
+
+
 	while (!vectorQueue.empty())
 	{
 		AliceStructs::ideal current = vectorQueue.back();
 		vectorQueue.pop_back();
 		float current_priority = pow((current.pri / (current.dis + 1)), 2);
+		std::cout << current.pri << std::endl;
 		compromise_angle = (compromise_angle * priority + current.dir * current_priority) / (priority + current_priority);
 		compromise_speed = (compromise_speed * priority + current.spd * current_priority) / (priority + current_priority);
 		priority += current_priority;

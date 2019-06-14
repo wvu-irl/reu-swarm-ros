@@ -15,6 +15,13 @@
 // model to compute the next step in the stimulation, and handles all of the
 // program's interaction with SFML.
 
+struct PrevIteration{
+
+	bool dragging;
+	int botId;
+	bool prevClick;
+};
+
 class Sim {
 private:
     sf::RenderWindow window;
@@ -24,9 +31,10 @@ private:
     Flock flock;
     float bodiesSize;
     vector<sf::CircleShape> shapes;
-
+    vector<sf::RectangleShape> lines;
     void Render();
-    void HandleInput();
+    PrevIteration HandleInput(PrevIteration _pI);
+    bool pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event);
 
 public:
     Sim();
