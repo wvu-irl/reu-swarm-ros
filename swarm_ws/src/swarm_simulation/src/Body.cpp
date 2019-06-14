@@ -99,13 +99,13 @@ void Body::flock(vector<Body> v)
 // the other side.
 void Body::borders()
 {
-		//wrapping code
+		//code for boundary wrapping
     /*if (location.x < 0) location.x += w_width;
     if (location.y < 0) location.y += w_height;
     if (location.x > 300) location.x -= w_width;
     if (location.y > 600) location.y -= w_height;*/
 
-		//boundary condition. Nulls velocity component orthogonal to boundary.
+		//code for hard boundary conditions. Nulls velocity component orthogonal to boundary.
     if ((location.x <=10) ||(location.x >=290))
     {
     	velocity.x = 0;
@@ -131,7 +131,3 @@ float Body::angle(Pvector v)
 	  //^ the way this was written before. Saved it just in case.
     return angle;
 }
-//char[2] Body::getID()
-//{
-//	return ID;
-//}

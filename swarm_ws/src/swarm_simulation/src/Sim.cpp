@@ -85,7 +85,7 @@ Sim::Sim()
 // input, and updates the view
 void Sim::Run(ros::NodeHandle _n)
 {
-	PrevIteration pI{false,0,false};
+	PrevIteration pI{false,0,false};//struct for storing click and drag info.
 	std::cout<<"initialized pI\n";
 	char letters[100] =
 	{ 'D', 'E', 'P', 'A', 'N', 'J', 'G', 'A', 'C', 'T', 'M', 'A', 'M', 'D', 'S', 'C', 'N', 'H', 'V', 'A', 'N', 'Y', 'N',
@@ -105,7 +105,7 @@ void Sim::Run(ros::NodeHandle _n)
 //		std::cout<<"x,y: "<<x<<","<<y<<"\n";
 
 		Body b(x,y, temp); // Starts all bodies in the center of the screen
-		sf::CircleShape shape(8, 3);
+		sf::CircleShape shape(8,3);
 
 		// Changing the Visual Properties of the shape.
 		shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
@@ -115,13 +115,24 @@ void Sim::Run(ros::NodeHandle _n)
 		shape.setOutlineColor(sf::Color::White);
 		shape.setOutlineThickness(1);
 		shape.setRadius(bodiesSize);
+		shape.rotate((180.0/M_PI)*M_PI_2);
+
+		//creates the red line at the head of each bot.
+		sf::RectangleShape line(sf::Vector2f(8, 2));
+		line.setFillColor(sf::Color::Red);
+		line.setPosition(b.location.x, b.location.y);
+		line.setOrigin(-2, 1);
 
 		// Adding the body to the flock and adding the shapes to the vector<sf::CircleShape>
 		flock.addBody(b);
 		shapes.push_back(shape);
-		window.draw(shape);
 
-		//sf::sleep(sf::milliseconds(300));
+		//saves a vector of lines (one for each bot).
+		lines.push_back(line);
+
+		//draw all obejcts on window.
+		window.draw(shape);
+    window.draw(line);
 
 		if(y == 500) //increments the  x pos so bots are drawn in a grid.
 		{
@@ -153,7 +164,7 @@ void Sim::Run(ros::NodeHandle _n)
 	}
 }
 
-PrevIteration Sim::HandleInput(PrevIteration _pI)
+PrevIteration Sim::HandleInput(PrevIteration _pI)//handels input to the graphics window
 {
 	sf::Event event;
 	while (window.pollEvent(event))
@@ -172,7 +183,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)
 		}//-----------------------------------------------------------
 
 		//------------------allows for pause. Press the Pause button.-----------
-		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Pause,
+		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space,
 				pauseSim, &window, event);
 
 		//----------Allows for click and drag. ------------------------------
@@ -206,12 +217,12 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)
 				 }
 				 i++;
 			 }
-		}
+		}//-----------------------------------------------------------------------------------------
 	}
 	return _pI; //tracks state of dragging (see sim.h)
 }
 
-void Sim::Render()
+void Sim::Render() //draws changes in simulation states to the window.
 {
 	window.clear();
 	flock.flocking();
@@ -219,25 +230,18 @@ void Sim::Render()
 	for (int i = 0; i < shapes.size(); i++)
 	{// Matches up the location of the shape to the body
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
+		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
+
+		//still doesnt fucking work.
 
 		// Calculates the angle where the velocity is pointing so that the triangle turns towards it.
-		float theta = 180 / M_PI * flock.getBody(i).angle(flock.getBody(i).velocity);
-		shapes[i].setRotation(theta);
+		float theta = 180.0 / M_PI * (flock.flock.at(i).angle(flock.flock.at(i).velocity));
+		shapes[i].setRotation(90-theta); //alignes body with direction of motion
+		lines[i].setRotation(-theta); //alignes line with direction of motion
+		//^for some reason, sfml has clockwise as +theta direction.
 
-		// Prevent bodies from moving off the screen through wrapping
-		// If body exits right boundary
-		if (shapes[i].getPosition().x > window_width)
-			shapes[i].setPosition(shapes[i].getPosition().x - window_width, shapes[i].getPosition().y);
-		// If body exits bottom boundary
-		if (shapes[i].getPosition().y > window_height)
-			shapes[i].setPosition(shapes[i].getPosition().x, shapes[i].getPosition().y - window_height);
-		// If body exits left boundary
-		if (shapes[i].getPosition().x < 0)
-			shapes[i].setPosition(shapes[i].getPosition().x + window_width, shapes[i].getPosition().y);
-		// If body exits top boundary
-		if (shapes[i].getPosition().y < 0)
-			shapes[i].setPosition(shapes[i].getPosition().x, shapes[i].getPosition().y + window_height);
 		window.draw(shapes[i]);
+		window.draw(lines[i]);
 		flock.flock.at(i).updatedCommand = false;
 		flock.flock.at(i).updatedPosition = false;
 	}
@@ -255,7 +259,7 @@ bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::Ren
 	{
 		if(win->pollEvent(_event))
 		{
-			if ((_event.type == sf::Event::KeyPressed )&&( _event.key.code == sf::Keyboard::Pause))
+			if ((_event.type == sf::Event::KeyPressed )&&( _event.key.code == sf::Keyboard::Space))
 			{//allows for unpause.
 				_pause_sim = false;
 				std::cout<<"unpaused"<<std::endl;
