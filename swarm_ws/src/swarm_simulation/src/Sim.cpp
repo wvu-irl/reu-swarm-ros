@@ -78,13 +78,15 @@ Sim::Sim()
 
 	//std::cout<<"Window h;w = "<<window_height << "; "<<window_width<<"\n";
 	this->window.create(sf::VideoMode(window_width, window_height, desktop.bitsPerPixel),
-			"Flocking Simulation Aleks Hatfield", sf::Style::None);
+			"Swarm Simulation", sf::Style::None);
 }
 
 // Run the simulation. Run creates the bodies that we'll display, checks for user
 // input, and updates the view
 void Sim::Run(ros::NodeHandle _n)
 {
+	PrevIteration pI{false,0,false};
+	std::cout<<"initialized pI\n";
 	char letters[100] =
 	{ 'D', 'E', 'P', 'A', 'N', 'J', 'G', 'A', 'C', 'T', 'M', 'A', 'M', 'D', 'S', 'C', 'N', 'H', 'V', 'A', 'N', 'Y', 'N',
 			'C', 'R', 'I', 'V', 'T', 'K', 'Y', 'T', 'N', 'O', 'H', 'L', 'A', 'I', 'N', 'M', 'S', 'I', 'L', 'A', 'L', 'M', 'E',
@@ -119,6 +121,8 @@ void Sim::Run(ros::NodeHandle _n)
 		shapes.push_back(shape);
 		window.draw(shape);
 
+		//sf::sleep(sf::milliseconds(300));
+
 		if(y == 500) //increments the  x pos so bots are drawn in a grid.
 		{
 			x+=50;
@@ -137,7 +141,7 @@ void Sim::Run(ros::NodeHandle _n)
 	ros::spinOnce();
 	while (window.isOpen() && ros::ok())
 	{
-		HandleInput();
+		pI = HandleInput(pI);
 		Render();
 		wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
 
@@ -149,41 +153,62 @@ void Sim::Run(ros::NodeHandle _n)
 	}
 }
 
-void Sim::HandleInput()
+PrevIteration Sim::HandleInput(PrevIteration _pI)
 {
 	sf::Event event;
 	while (window.pollEvent(event))
 	{
-		// Pressing the escape key will close the program
-		if ((event.type == sf::Event::Closed)|| (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
+		int i = 0; //iterator for dragging while loop
+		bool found = false; //sentinel for finding a selected bot.
+		float mX = event.mouseButton.x; //mouse x pos
+		float mY = event.mouseButton.y; //mouse y pos
+		bool pauseSim = false; //pause boolean.
+
+		//---------- Pressing the escape key will close the program
+		if ((event.type == sf::Event::Closed)|| (event.type == sf::Event::KeyPressed
+				&& event.key.code == sf::Keyboard::Escape))
 		{
 			window.close();
-		}
+		}//-----------------------------------------------------------
 
-		//allows for pause. Press the Pause button.
-		bool pauseSim = false;
-		if((event.type == sf::Event::KeyPressed )&&( event.key.code == sf::Keyboard::Pause)){
-			pauseSim = true;
-			std::cout<<"paused"<<std::endl;
-		}
-		while(pauseSim == true) //runs while pause in effect.
+		//------------------allows for pause. Press the Pause button.-----------
+		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Pause,
+				pauseSim, &window, event);
+
+		//----------Allows for click and drag. ------------------------------
+		if (_pI.dragging == true)
 		{
-			if(window.pollEvent(event))
-			{
-				if ((event.type == sf::Event::KeyPressed )&&( event.key.code == sf::Keyboard::Pause))
-				{//allows for unpause.
-					pauseSim = false;
-					std::cout<<"unpaused"<<std::endl;
-				}
-				if ((event.type == sf::Event::Closed) || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
-				{
-					window.close();
-				}
-		  }
+			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x;//event.mouseButton.x;
+			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y;//event.mouseButton.y;
 		}
-		//allow for moving the bots.
+		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+				&& _pI.prevClick == true)
+		{
+			_pI.dragging = false;
+			_pI.prevClick = false;
+		}
+		else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+				&& _pI.prevClick == false)
+		{
+			 while(found != true)
+			 {
+				 if (((flock.flock.at(i).location.x > mX - 6 ) && (flock.flock.at(i).location.x < mX + 6))
+						 && ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
+				 {
+					 found = true;
+					 _pI.botId = i;
+					 _pI.dragging = true;
+					 _pI.prevClick = true;
+				 }
+				 else if(i==49)
+				 {
+					 found = true;
+				 }
+				 i++;
+			 }
+		}
 	}
-
+	return _pI; //tracks state of dragging (see sim.h)
 }
 
 void Sim::Render()
@@ -192,9 +217,7 @@ void Sim::Render()
 	flock.flocking();
 // Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)
-	{
-
-		// Matches up the location of the shape to the body
+	{// Matches up the location of the shape to the body
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
 		// Calculates the angle where the velocity is pointing so that the triangle turns towards it.
@@ -218,10 +241,32 @@ void Sim::Render()
 		flock.flock.at(i).updatedCommand = false;
 		flock.flock.at(i).updatedPosition = false;
 	}
-
-
-
 	window.display(); //updates display
-
 }
+
+bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event)
+{//checks if pause pressed. Inf loop if so.
+	if(( _key_pressed)&&(_pause_pressed))
+	{
+		_pause_sim = true;
+		std::cout<<"paused"<<std::endl;
+	}
+	while(_pause_sim == true) //runs while pause in effect.
+	{
+		if(win->pollEvent(_event))
+		{
+			if ((_event.type == sf::Event::KeyPressed )&&( _event.key.code == sf::Keyboard::Pause))
+			{//allows for unpause.
+				_pause_sim = false;
+				std::cout<<"unpaused"<<std::endl;
+			}
+			if ((_event.type == sf::Event::Closed) || (_event.type == sf::Event::KeyPressed && _event.key.code == sf::Keyboard::Escape))
+			{
+				win->close();
+			}
+		}
+	}
+	return _pause_sim;
+}
+
 
