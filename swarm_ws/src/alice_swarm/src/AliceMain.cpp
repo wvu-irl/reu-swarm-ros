@@ -26,20 +26,25 @@ int main(int argc, char **argv) {
 			> ("final_execute", 1000);
 	Hub aliceBrain(0); // Creates a hub for the conversion of absolute to relative info
 	std::cout << "yo" << std::endl;
+
 	while (ros::ok()) {
 
-		wvu_swarm_std_msgs::vicon_points tempTarget =
-				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
-						> ("target"));
+		wvu_swarm_std_msgs::vicon_points tempTarget;
+//		=
+//				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
+//						> ("target"));
 		wvu_swarm_std_msgs::vicon_bot_array tempBotArray =
 				*(ros::topic::waitForMessage
 						< wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array"));
-		wvu_swarm_std_msgs::vicon_points temp_obs_array =
-				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
-						> ("virtual_obstacle"));
+		wvu_swarm_std_msgs::vicon_points temp_obs_array;
+//		=
+//				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
+//						> ("virtual_obstacle"));
 
 		aliceBrain.update(tempBotArray, tempTarget, temp_obs_array); //puts in absolute data from subscribers
 		for (int i = 0; i < tempBotArray.poseVect.size(); i++) {
+
+			aliceMap[i];
 			aliceMap[i].receiveMsg(aliceBrain.getAliceMail(i)); //gives each robot the relative data it needs
 		}
 		std::vector<AliceStructs::ideal> all_ideals;

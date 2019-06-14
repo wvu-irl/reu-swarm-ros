@@ -50,6 +50,7 @@ void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b,wvu_swarm_std_msgs::vic
 	targets= _t;
 	obstacles = _o;
 	processVicon(); //needed cause this data needs to be converted first
+	findNeighbors();
 }
 
 
@@ -83,6 +84,7 @@ void Hub::processVicon() //Fills in bots[]
  */
 void Hub::findNeighbors()
 {
+	std::cout << "we made it here " << viconBotArray.poseVect.size() << std::endl;
 	for (int botIndex=0; botIndex<viconBotArray.poseVect.size(); botIndex++)
 	{
 		for (int curIndex=0; curIndex<viconBotArray.poseVect.size(); curIndex++)
@@ -96,8 +98,12 @@ void Hub::findNeighbors()
 			bool done = false;
 			for (std::vector<Bot>::iterator it=neighbors.at(botIndex).begin(); it!=neighbors.at(botIndex).end(); ++it)
 			{
-				if (temp.distance < it->distance) neighbors.at(botIndex).insert(it,temp);
-				done=true;
+				if (temp.distance < it->distance) {
+					neighbors.at(botIndex).insert(it,temp);
+					done=true;
+					std::cout << "we made it here" << std::endl;
+				}
+
 				continue;
 			}
 			if (neighbors.at(botIndex).size() > NEIGHBOR_COUNT) neighbors.at(botIndex).pop_back();
@@ -109,8 +115,9 @@ void Hub::findNeighbors()
 void Hub::addNeighborMail(int i, AliceStructs::mail &_mail)
 {
 	std::vector<AliceStructs::neighbor> n;
-	for (std::vector<Bot>::iterator it=neighbors.at(i).begin(); it!=neighbors.at(i).end(); ++it)
+	for (std::vector<Bot>::iterator it=neighbors.at(i).begin(); it!=neighbors.at(i).end(); it++)
 	{
+
 		AliceStructs::neighbor temp;
 		temp.name = it->id;
     temp.dir = fmod(atan2(it->y - bots[i].y, it->x - bots[i].x)-bots[i].heading+4*M_PI,2*M_PI);
@@ -125,6 +132,7 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 {
 	std::vector<AliceStructs::obj> t;
 	int num_pts = targets.point.size();
+	std::cout << num_pts << std::endl;
 	for (int j = 0; j < num_pts; j++)
 	{
 		std::pair<float, float> temp = {targets.point.at(j).x,targets.point.at(j).y};
