@@ -1,6 +1,6 @@
 #include "alice_swarm/Model.h"
 #include "alice_swarm/aliceStructs.h"
-#include <iostream>[
+#include <iostream>
 #include <ros/ros.h>
 
 Model::Model(){
