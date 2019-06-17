@@ -72,7 +72,6 @@ void info(const char *patt, void *dat)
  */
 void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 {
-	ros::Rate send_rate(10);
 	for (wvu_swarm_std_msgs::robot_command msg : msga.commands)
 	{
 #if DEBUG
@@ -86,7 +85,6 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 		ROS_INFO(PRINT_HEADER"Constructed command: %02d,\t%s", id, cmd.str);
 #endif
 		sendCommandToRobots(cmd, id); // sending to robots through TCP server
-		send_rate.sleep();
 	}
 }
 

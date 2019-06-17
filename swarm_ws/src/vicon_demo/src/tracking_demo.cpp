@@ -78,24 +78,28 @@ int main(int argc, char **argv)
     
     // Generate a Gerono Lemniscate (figure 8) as discrete points
     std::vector<geometry_msgs::Point> path;
-    butterflyLemn(path, lemniscateConstant, lemniscateInterval);
+    genGeronoLemn(path, lemniscateConstant, lemniscateInterval);
     
     // Pick one point out of the path
     geometry_msgs::Point currentPoint = path.at(0);
     int currentIndex = 0;
     ROS_INFO("Point initialized at %f, %f\n", currentPoint.x, currentPoint.y);
     
+    // Get the information of the vicon array
+    wvu_swarm_std_msgs::vicon_bot_array viconArray =
+            *(ros::topic::waitForMessage<wvu_swarm_std_msgs::vicon_bot_array>(viconArrayTopic));
+
+    // Generate a vector of robot commands to publish
+    wvu_swarm_std_msgs::robot_command_array output;
+
+    double minimumPointDistance = 10000.0; // Trivially large number, in cm
+    
     // Run while ros functions
     while(ros::ok())
     {
-        // Get the information of the vicon array
-        wvu_swarm_std_msgs::vicon_bot_array viconArray =
-                *(ros::topic::waitForMessage<wvu_swarm_std_msgs::vicon_bot_array>(viconArrayTopic));
-        
-        // Generate a vector of robot commands to publish
-        wvu_swarm_std_msgs::robot_command_array output;
-        
-        double minimumPointDistance = 10000.0; // Trivially large number, in cm
+        output.commands.clear();
+        viconArray = *(ros::topic::waitForMessage<wvu_swarm_std_msgs::vicon_bot_array>(viconArrayTopic));
+        minimumPointDistance = 10000.0;
         
         // Iterate through all bots
         for(wvu_swarm_std_msgs::vicon_bot iteratorBot : viconArray.poseVect)
