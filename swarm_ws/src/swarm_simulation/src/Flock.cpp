@@ -88,5 +88,7 @@ void Flock::addBody(Body b)
 void Flock::flocking()
 {
     for (int i = 0; i < flock.size(); i++)
-        flock[i].run(flock);
+    {
+    	flock[i].run(flock);
+    }
 }
