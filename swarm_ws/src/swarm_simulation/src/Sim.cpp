@@ -105,7 +105,7 @@ void Sim::Run(ros::NodeHandle _n)
 //		std::cout<<"x,y: "<<x<<","<<y<<"\n";
 
 		Body b(x,y, temp); // Starts all bodies in the center of the screen
-		sf::CircleShape shape(8);
+		sf::CircleShape shape(0);
 
 		// Changing the Visual Properties of the shape.
 		shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
