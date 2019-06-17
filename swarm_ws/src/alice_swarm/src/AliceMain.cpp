@@ -38,10 +38,8 @@ int main(int argc, char **argv)
 //						> ("target"));
 		wvu_swarm_std_msgs::vicon_bot_array tempBotArray = *(ros::topic::waitForMessage
 				< wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array"));
-		wvu_swarm_std_msgs::vicon_points temp_obs_array;
-//		=
-//				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
-//						> ("virtual_obstacle"));
+		wvu_swarm_std_msgs::vicon_points temp_obs_array = *(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
+				> ("virtual_obstacles"));
 
 		aliceBrain.update(tempBotArray, tempTarget, temp_obs_array); //puts in absolute data from subscribers
 		for (int i = 0; i < tempBotArray.poseVect.size(); i++)
@@ -67,7 +65,7 @@ int main(int argc, char **argv)
 		}
 
 		pub.publish(execute);
-		std::cout << "execute published" <<std::endl;
+		std::cout << "execute published" << std::endl;
 		ros::spinOnce();
 		loopRate.sleep();
 	}
