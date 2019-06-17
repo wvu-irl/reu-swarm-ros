@@ -11,7 +11,10 @@ public:
 	std::list <AliceStructs::neighbor> robots;
 	std::list <AliceStructs::obj> targets;
 
+	Rules rules;
+
 	Model();//dummy
+
 
 	Model(int _name);
 
@@ -22,7 +25,6 @@ public:
 	void clear();
 
 private:
-	Rules rules;
 	int name;
 };
 

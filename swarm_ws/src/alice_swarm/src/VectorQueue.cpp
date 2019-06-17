@@ -22,8 +22,7 @@ AliceStructs::vel VectorQueue::createCompromise()
 	{
 		AliceStructs::ideal current = vectorQueue.back();
 		vectorQueue.pop_back();
-		float current_priority = pow((current.pri / (current.dis + 1)), 2);
-		std::cout << current.pri << std::endl;
+		float current_priority = pow((current.pri / (current.dis + 1)), 3);
 		compromise_angle = (compromise_angle * priority + current.dir * current_priority) / (priority + current_priority);
 		compromise_speed = (compromise_speed * priority + current.spd * current_priority) / (priority + current_priority);
 		priority += current_priority;

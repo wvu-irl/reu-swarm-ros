@@ -75,6 +75,7 @@ void Hub::processVicon() //Fills in bots[]
 		bots.push_back(Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
 				viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000));
 		std::vector<Bot> temp;
+		ridOrder.push_back(numID);
 		neighbors.push_back(temp);
 	}
 }
@@ -181,7 +182,7 @@ AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Al
 	addNeighborMail(i, temp);
 
 	addTargetMail(i, temp);
-	temp.name = i;
+	temp.name = ridOrder.at(i);
 	//printAliceMail(temp);
 	return temp;
 
