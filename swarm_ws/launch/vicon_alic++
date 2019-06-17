@@ -1,0 +1,31 @@
+<launch>
+
+	<!--
+		This is a preliminary test to observe the behavior
+		of ALIC++ when coupled with VICON data.
+	-->
+
+	<!-- Launching vicon bridge node -->
+	<node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
+		<param name="stream_mode" value="ClientPull" type="str" />
+		<param name="datastream_hostport" value="192.168.10.1:801" type="str" />
+		<param name="tf_ref_frame_id" value="/world" type="str" />
+	
+		<!-- Don't publish individual points or transforms -->
+		<param name="publish_markers" value="false" type="bool" />
+		<param name="publish_transform" value="false" type="bool" />
+
+		<param name="swarmbot_prefix" value="cardbot_" type="str" />
+	</node>
+
+	<!-- A placeholder virtual obstacle -->
+	<node pkg="swarm_simulation"  type="virtual_obstacle" name="virtual_obstacle" output="screen"/>
+		
+	<!-- Launch ALICE node -->
+ 	<node pkg="alice_swarm" type="AliceMain" name="alice" output="screen">							
+	</node>
+
+	<!-- Launching server node -->
+	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server" output="screen"/>
+	
+</launch>
