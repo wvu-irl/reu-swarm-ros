@@ -172,10 +172,10 @@ void  Body::seperation(vector<Body> _bodies)
 //        		location.y += 30;
 //        	}
 
-        	velocity.x = 0;
-          velocity.y = 0;
-          _bodies.at(i).velocity.x = 0;
-					_bodies.at(i).velocity.y =0;
+//        	velocity.x = 0;
+//          velocity.y = 0;
+//          _bodies.at(i).velocity.x = 0;
+//					_bodies.at(i).velocity.y =0;
 
 
 //            Pvector diff(0,0);
