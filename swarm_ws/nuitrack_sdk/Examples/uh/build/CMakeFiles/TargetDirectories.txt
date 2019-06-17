@@ -1,0 +1,3 @@
+/home/air/swarm_ws/nuitrack_sdk/Examples/uh/build/CMakeFiles/edit_cache.dir
+/home/air/swarm_ws/nuitrack_sdk/Examples/uh/build/CMakeFiles/rebuild_cache.dir
+/home/air/swarm_ws/nuitrack_sdk/Examples/uh/build/CMakeFiles/nuitrack_console_sample.dir
