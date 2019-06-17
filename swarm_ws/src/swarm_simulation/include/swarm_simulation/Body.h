@@ -41,6 +41,7 @@ private:
 		//char[2] getID();
 public:
 		char id [2];
+		float heading;
     bool predator;
     Pvector location;
     Pvector prev_location;

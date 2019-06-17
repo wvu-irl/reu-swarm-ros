@@ -41,7 +41,7 @@ AliceStructs::ideal Robot::generateIdeal()
 
 AliceStructs::vel Robot::generateComp(std::vector<AliceStructs::ideal> ideals)
 {
-	if (model.rules.should_ignore == true)
+	if (model.rules.should_ignore== true)
 	{
 		return vectorQueue.createCompromise();
 	}
