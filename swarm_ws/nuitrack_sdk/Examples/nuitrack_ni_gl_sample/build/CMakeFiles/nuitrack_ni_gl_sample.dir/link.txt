@@ -1,1 +1,0 @@
-/usr/bin/c++      CMakeFiles/nuitrack_ni_gl_sample.dir/src/NiGLSample.cpp.o CMakeFiles/nuitrack_ni_gl_sample.dir/src/main.cpp.o  -o nuitrack_ni_gl_sample  -L/home/air/Downloads/nuitrack/Examples/nuitrack_ni_gl_sample/../../Nuitrack/lib/linux64 -rdynamic -lglut -lGL -lnuitrack -Wl,-rpath,/home/air/Downloads/nuitrack/Examples/nuitrack_ni_gl_sample/../../Nuitrack/lib/linux64 

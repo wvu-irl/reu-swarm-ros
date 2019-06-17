@@ -1,1 +1,0 @@
-/usr/bin/c++      CMakeFiles/nuitrack_console_sample.dir/src/main.cpp.o  -o nuitrack_console_sample  -L/home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_sample/../../Nuitrack/lib/linux64 -rdynamic -lnuitrack -Wl,-rpath,/home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_sample/../../Nuitrack/lib/linux64 
