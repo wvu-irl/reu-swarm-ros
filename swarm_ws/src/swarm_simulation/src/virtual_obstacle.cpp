@@ -9,6 +9,7 @@ void createBoundary(wvu_swarm_std_msgs::vicon_points &in_vector)
 {
 	for (int i = 0; i < 20; i++)
 	{
+
 		wvu_swarm_std_msgs::vicon_point cur0;
 		cur0.x = -50;
 		cur0.y = -100 + 10 * i;
