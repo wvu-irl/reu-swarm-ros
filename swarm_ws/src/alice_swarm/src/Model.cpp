@@ -16,12 +16,15 @@ AliceStructs::ideal Model::generateIdeal()
 	AliceStructs::ideal toReturn;
 	toReturn.spd = -1;
 	int tolerance = 1;
+	rules.should_ignore = false;
 	while ((toReturn.spd == -1) && ros::ok)
 	{
-		std::vector <AliceStructs::vel> ideal_list = {rules.panicAvoid(robots, tolerance),
-			rules.avoidObstacles(obstacles, tolerance),
-			rules.predictiveAvoid(robots, tolerance),
-			rules.maintainSpacing(robots, tolerance)};
+		std::vector <AliceStructs::vel> ideal_list = {
+			//rules.panicAvoid(robots, tolerance),
+			//rules.avoidObstacles(obstacles, tolerance),
+			//rules.predictiveAvoid(robots, tolerance),
+			rules.maintainSpacing(robots, tolerance),
+			};
 		for (int i = 0; i < ideal_list.size(); i++)
 		{
 			if (ideal_list.at(i).mag != -1)

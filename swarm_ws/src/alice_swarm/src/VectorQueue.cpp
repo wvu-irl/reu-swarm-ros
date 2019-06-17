@@ -30,5 +30,6 @@ AliceStructs::vel VectorQueue::createCompromise()
 	AliceStructs::vel to_return;
 	to_return.dir = compromise_angle;
 	to_return.mag = compromise_speed;
+	std::cout << compromise_angle << std::endl;
 	return to_return;
 };

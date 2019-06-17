@@ -146,7 +146,7 @@ void  Body::seperation(vector<Body> _bodies)
 //        	std::cout<<"BOTS ARE TOO CLOSE!"<<std::endl;
 //        	std::cout<<"bot: "<<id[0]<<id[1]<<" and bot: "<<_bodies.at(i).id[0]<<_bodies.at(i).id[1]<<std::endl;
 //        	std::cout<<"seperation is: "<<d<<std::endl;
-        	std::cout<<"-----------------\n";
+        	//std::cout<<"-----------------\n";
         	_bodies.at(i).location.x = _bodies.at(i).prev_location.x;
         	location.x = prev_location.x;
 
