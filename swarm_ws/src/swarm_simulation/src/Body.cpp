@@ -78,9 +78,14 @@ void Body::update()
 // and corrects bodies which are sitting outside of the SFML window
 void Body::run(vector <Body> v)
 {
-    if (updatedPosition==false)update();
-    borders();
-    seperation(v);
+    if (updatedPosition==false)
+    {
+    	update();
+    	seperation(v);
+    	borders();
+    }
+
+
 }
 
 // Applies the three laws to the flock of bodies
@@ -110,24 +115,24 @@ void Body::borders()
     if (location.y > 600) location.y -= w_height;*/
 
 		//code for hard boundary conditions. Nulls velocity component orthogonal to boundary.
-    if ((location.x <=10) ||(location.x >=290))
+    if ((location.x <=12) ||(location.x >=288))
     {
     	velocity.x = 0;
-    	if(location.x <= 10){location.x = 10;}
-    	if(location.x >= 290){location.x = 290;}
+    	if(location.x <= 12){location.x = 12;}
+    	if(location.x >= 288){location.x = 288;}
     }
-    if ((location.y <=10) ||(location.y >=600))
+    if ((location.y <=12) ||(location.y >=588))
 		{
 			velocity.y = 0;
-			if(location.y <=10){location.y = 10;}
-			if(location.y >=590){location.y = 590;}
+			if(location.y <=12){location.y = 12;}
+			if(location.y >=588){location.y = 588;}
 		}
 }
 
 void  Body::seperation(vector<Body> _bodies)
 {
 		// Distance of field of vision for separation between bodies
-    float desiredseparation = 20;
+    float desiredseparation = 24;
     Pvector steer(0, 0);
     int count = 0; //iterator
 
@@ -136,13 +141,12 @@ void  Body::seperation(vector<Body> _bodies)
         // Calculate distance from current body to body we're looking at
     	 float d = location.distance(_bodies.at(i).location);
         // If this is a fellow body and it's too close, move away from it
-        if ((d > 0) && (d < desiredseparation) && (id[0] !=_bodies.at(i).id[0]) && (id[1] !=_bodies.at(i).id[1]))
-        {
-        	std::cout<<"BOTS ARE TOO CLOSE!"<<std::endl;
-        	std::cout<<"bot: "<<id[0]<<id[1]<<" and bot: "<<_bodies.at(i).id[0]<<_bodies.at(i).id[1]<<std::endl;
-        	std::cout<<"seperation is: "<<d<<std::endl;
+        if ((d < desiredseparation) && !((id[0] ==_bodies.at(i).id[0]) && (id[1] ==_bodies.at(i).id[1]))) // (&&d>0))
+        {_bodies.at(i).location.x = _bodies.at(i).prev_location.x;
+//        	std::cout<<"BOTS ARE TOO CLOSE!"<<std::endl;
+//        	std::cout<<"bot: "<<id[0]<<id[1]<<" and bot: "<<_bodies.at(i).id[0]<<_bodies.at(i).id[1]<<std::endl;
+//        	std::cout<<"seperation is: "<<d<<std::endl;
         	std::cout<<"-----------------\n";
-
         	_bodies.at(i).location.x = _bodies.at(i).prev_location.x;
         	location.x = prev_location.x;
 
