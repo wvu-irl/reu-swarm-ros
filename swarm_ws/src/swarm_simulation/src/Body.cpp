@@ -118,13 +118,13 @@ void Body::borders()
 		//code for hard boundary conditions. Nulls velocity component orthogonal to boundary.
     if ((location.x <=12) ||(location.x >=288))
     {
-    	velocity.x = 0;
+    	//velocity.x = 0;
     	if(location.x <= 12){location.x = 12;}
     	if(location.x >= 288){location.x = 288;}
     }
     if ((location.y <=12) ||(location.y >=588))
 		{
-			velocity.y = 0;
+			//velocity.y = 0;
 			if(location.y <=12){location.y = 12;}
 			if(location.y >=588){location.y = 588;}
 		}

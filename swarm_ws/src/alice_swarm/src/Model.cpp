@@ -27,14 +27,14 @@ void Model::normalize(AliceStructs::vel &_vel)
 
 void Model::dDriveAdjust(AliceStructs::vel &_vel) //assumes that vector has already been normalized
 {
-	if (_vel.dir > M_PI / 12 && _vel.dir < M_PI)
+	if (_vel.dir > M_PI / 18 && _vel.dir < M_PI)
 	{
-		_vel.dir = M_PI / 12;
-		_vel.mag = 0;
-	} else if (_vel.dir > M_PI && _vel.dir < 23 * M_PI / 12)
+		_vel.dir = M_PI / 18;
+		_vel.mag = 0.01;
+	} else if (_vel.dir > M_PI && _vel.dir < 35 * M_PI / 18)
 	{
-		_vel.dir = 23 * M_PI / 12;
-		_vel.mag = 0;
+		_vel.dir = 35 * M_PI / 18;
+		_vel.mag = 0.01;
 	}
 
 }
@@ -48,10 +48,10 @@ AliceStructs::ideal Model::generateIdeal()
 	rules.should_ignore = false;
 
 	std::vector<AliceStructs::vel> ideal_list =
-	{// rules.dummy1(),
-	//rules.avoidObstacles(obstacles, tolerance),
-	//rules.predictiveAvoid(robots, tolerance),
-	rules.maintainSpacing(robots, 1),
+	{ //rules.dummy1(),
+			rules.avoidObstacles(obstacles, 5, 30),
+			rules.avoidNeighbors(robots, 5, 30),
+			rules.maintainSpacing(robots, 1)
 			};
 	for (int i = 0; i < ideal_list.size(); i++)
 		addPolarVel(temp, ideal_list.at(i));
@@ -60,7 +60,7 @@ AliceStructs::ideal Model::generateIdeal()
 	//dDriveAdjust(temp);
 	toReturn.dir = temp.dir;
 	toReturn.spd = temp.mag;
-	std::cout << temp.mag << " " << temp.dir << std::endl;
+	//std::cout << temp.mag << " " << temp.dir << std::endl;
 	toReturn.dis = 0;
 	toReturn.pri = 0;	//(ideal_list.size()  + 1) / (float) (tolerance + 1);
 	toReturn.name = name;
@@ -72,6 +72,7 @@ void Model::addToModel(AliceStructs::mail toAdd)
 {
 	for (auto& item : toAdd.obstacles)
 	{
+		std::cout << "yo" << std::endl;
 		obstacles.push_back(item);
 	}
 	for (auto& item : toAdd.neighbors)
@@ -82,6 +83,7 @@ void Model::addToModel(AliceStructs::mail toAdd)
 	{
 		targets.push_back(item);
 	}
+	std::cout << "done" << std::endl;
 }
 
 void Model::clear()
