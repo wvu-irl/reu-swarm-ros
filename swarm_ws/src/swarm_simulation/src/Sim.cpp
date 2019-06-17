@@ -53,7 +53,7 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 					flock.flock.at(i).velocity.set(
 							1 * msg.commands.at(j).r
 									* cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) + msg.commands.at(j).theta),
-							1 * msg.commands.at(i).r
+							-1 * msg.commands.at(i).r
 									* sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) + msg.commands.at(j).theta));
 					//		}
 					flock.flock.at(i).updatedCommand = true;

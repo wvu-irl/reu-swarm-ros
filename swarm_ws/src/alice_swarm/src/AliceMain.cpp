@@ -47,19 +47,15 @@ int main(int argc, char **argv)
 			aliceMap[i].receiveMsg(aliceBrain.getAliceMail(i)); //gives each robot the relative data it needs
 		}
 		std::vector<AliceStructs::ideal> all_ideals;
-		for (std::map<int, Robot>::iterator it = aliceMap.begin(); it != aliceMap.end(); ++it) //eventually run this part asynchronously
-		{
-
-			all_ideals.push_back(it->second.generateIdeal());
-		}
 		wvu_swarm_std_msgs::robot_command_array execute;
 		for (std::map<int, Robot>::iterator it = aliceMap.begin(); it != aliceMap.end(); ++it) //eventually run this part asynchronously
 		{
+
+			AliceStructs::ideal temp1 = it->second.generateIdeal();
 			wvu_swarm_std_msgs::robot_command temp;
-			AliceStructs::vel tempVel = it->second.generateComp(all_ideals);
 			temp.rid = it->second.name;
-			temp.r = tempVel.mag;
-			temp.theta = tempVel.dir;
+			temp.r = temp1.spd;
+			temp.theta = temp1.dir;
 
 			execute.commands.push_back(temp);
 		}
