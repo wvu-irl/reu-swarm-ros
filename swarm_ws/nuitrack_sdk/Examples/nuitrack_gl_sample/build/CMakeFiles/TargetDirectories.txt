@@ -1,0 +1,3 @@
+/home/air/Downloads/nuitrack/Examples/nuitrack_gl_sample/build/CMakeFiles/edit_cache.dir
+/home/air/Downloads/nuitrack/Examples/nuitrack_gl_sample/build/CMakeFiles/rebuild_cache.dir
+/home/air/Downloads/nuitrack/Examples/nuitrack_gl_sample/build/CMakeFiles/nuitrack_gl_sample.dir
