@@ -5,11 +5,13 @@
 #include "math.h"
 
 static const float ROBOT_SIZE = 7; //Size of the robot, in cm
-//static const int SENSE = 1; //Crank this up to improve accuracy, but takes more computational power
+static const int SENSE = 7; //Crank this up to improve accuracy, but takes more computational power
 
 class Rules
 {
 public:
+
+	bool should_ignore;
 
 	Rules();
 
