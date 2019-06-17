@@ -25,7 +25,7 @@ Body::Body(float x, float y, char _id[2])
     velocity = Pvector(0,0);
     location = Pvector(x, y);
     prev_location = Pvector(x,y);
-    maxSpeed = 3;
+    maxSpeed = 1;
     maxForce = 0.5;
     id[0] = _id[0];
     id[1] = _id[1];

@@ -45,7 +45,7 @@ AliceStructs::vel Rules::avoidRobots(std::list <AliceStructs::neighbor> bots, fl
 	}
 	for (auto &bot : bots)
 	{
-		if ((bot.dir < M_PI/12 * tolerance) || (bot.dir > 2*M_PI - M_PI/12 * tolerance)&& (bot.dis < ROBOT_SIZE / 2 * tolerance))
+		if ((bot.dir < M_PI/12 * tolerance) || (bot.dir > 2*M_PI - M_PI/12 * tolerance) && (bot.dis < ROBOT_SIZE / 2 * tolerance))
 		{
 			to_return.dir = fmod((bot.dir + M_PI/2),(2 * M_PI));
 			to_return.mag = 1 - sin(to_return.dir);

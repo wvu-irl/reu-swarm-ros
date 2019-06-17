@@ -18,6 +18,7 @@ public:
 
 	AliceStructs::vel avoidObstacles(std::list <AliceStructs::obj> obstacles, float tolerance);
 
+
 	//vel goToTarget(std::list <obs> targets, float tolerance); to implement later
 
 private:
