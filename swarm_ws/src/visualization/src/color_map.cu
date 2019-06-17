@@ -109,5 +109,6 @@ sf::Color ColorMap::calculateColor(double val)
 			return col;
 		}
 	}
+	return sf::Color::Black;
 }
 #endif
