@@ -5,7 +5,6 @@
 #include "math.h"
 
 static const float ROBOT_SIZE = 7; //Size of the robot, in cm
-static const int SENSE = 7; //Crank this up to improve accuracy, but takes more computational power
 
 class Rules
 {
@@ -15,9 +14,14 @@ public:
 
 	Rules();
 
-	AliceStructs::vel maintainSpacing(std::list <AliceStructs::neighbor> bots, float tolerance);
+	std::pair<float,float> addPolarVectors(std::pair<float,float> v1, std::pair<float,float> v2);
 
-	AliceStructs::vel predictiveAvoid(std::list <AliceStructs::neighbor> bots, float tolerance);
+
+	AliceStructs::vel dummy1();
+
+	AliceStructs::vel maintainSpacing(std::list <AliceStructs::neighbor> bots,float strength);
+
+	AliceStructs::vel avoidNeighbors(std::list <AliceStructs::neighbor> bots, float tolerance);
 
 	AliceStructs::vel avoidObstacles(std::list <AliceStructs::obj> obstacles, float tolerance);
 
