@@ -62,6 +62,7 @@ private:
 
 	std::vector<Bot> bots;
 	std::vector<std::vector <Bot>> neighbors;
+	std::vector<int> ridOrder;
 	AliceStructs::obj getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
 	void processVicon(); //Fills in bots[]
 public:
