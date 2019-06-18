@@ -41,6 +41,7 @@ void Model::dDriveAdjust(AliceStructs::vel &_vel) //assumes that vector has alre
 
 AliceStructs::ideal Model::generateIdeal()
 {
+	std::cout << "got here" << std::endl;
 	AliceStructs::ideal toReturn;
 	AliceStructs::vel temp;
 	temp.mag = 0;
@@ -56,13 +57,14 @@ AliceStructs::ideal Model::generateIdeal()
 	for (int i = 0; i < ideal_list.size(); i++)
 		addPolarVel(temp, ideal_list.at(i));
 
+	toReturn.pri = temp.mag;
 	normalize(temp);
 	//dDriveAdjust(temp);
 	toReturn.dir = temp.dir;
 	toReturn.spd = temp.mag;
-	//std::cout << temp.mag << " " << temp.dir << std::endl;
+	std::cout << temp.mag << " " << temp.dir << std::endl;
 	toReturn.dis = 0;
-	toReturn.pri = 0;	//(ideal_list.size()  + 1) / (float) (tolerance + 1);
+	//(ideal_list.size()  + 1) / (float) (tolerance + 1);
 	toReturn.name = name;
 	return toReturn;
 
@@ -72,7 +74,7 @@ void Model::addToModel(AliceStructs::mail toAdd)
 {
 	for (auto& item : toAdd.obstacles)
 	{
-		std::cout << "yo" << std::endl;
+
 		obstacles.push_back(item);
 	}
 	for (auto& item : toAdd.neighbors)
@@ -83,7 +85,6 @@ void Model::addToModel(AliceStructs::mail toAdd)
 	{
 		targets.push_back(item);
 	}
-	std::cout << "done" << std::endl;
 }
 
 void Model::clear()
