@@ -21,7 +21,9 @@ public:
 
 	AliceStructs::vel maintainSpacing(std::list <AliceStructs::neighbor> bots,float strength);
 
-	AliceStructs::vel avoidNeighbors(std::list <AliceStructs::neighbor> bots, float strength, float fov);
+	AliceStructs::vel magnetAvoid(std::list <AliceStructs::neighbor> bots, float strength, float fov);
+
+	AliceStructs::vel birdAvoid(std::list <AliceStructs::neighbor> bots, float strength, float fov);
 
 	AliceStructs::vel avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength, float fov);
 	//vel goToTarget(std::list <obs> targets, float tolerance); to implement later

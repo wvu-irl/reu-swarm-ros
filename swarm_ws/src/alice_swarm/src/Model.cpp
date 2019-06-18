@@ -50,9 +50,10 @@ AliceStructs::ideal Model::generateIdeal()
 
 	std::vector<AliceStructs::vel> ideal_list =
 	{ //rules.dummy1(),
-			rules.avoidObstacles(obstacles, 5, 30),
-			rules.avoidNeighbors(robots, 5, 30),
-			rules.maintainSpacing(robots, 1)
+			//rules.avoidObstacles(obstacles, 5, 30),
+			rules.magnetAvoid(robots, 5, 30),
+			//rules.magnetAvoid(robots, 5, 30),
+			//rules.maintainSpacing(robots, 1)
 			};
 	for (int i = 0; i < ideal_list.size(); i++)
 		addPolarVel(temp, ideal_list.at(i));
@@ -62,7 +63,7 @@ AliceStructs::ideal Model::generateIdeal()
 	//dDriveAdjust(temp);
 	toReturn.dir = temp.dir;
 	toReturn.spd = temp.mag;
-	std::cout << temp.mag << " " << temp.dir << std::endl;
+	//std::cout << temp.mag << " " << temp.dir << std::endl;
 	toReturn.dis = 0;
 	//(ideal_list.size()  + 1) / (float) (tolerance + 1);
 	toReturn.name = name;
