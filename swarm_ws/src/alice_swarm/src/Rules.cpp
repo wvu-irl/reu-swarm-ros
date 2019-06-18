@@ -71,7 +71,7 @@ AliceStructs::vel Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, float
 	for (auto &bot : bots)
 	{
 		//avoids things in direction of travel
-		if ((bot.dir <M_PI/180*fov || bot.dir > 2 * M_PI - M_PI / 180 * fov) && (bot.dis < ROBOT_SIZE * strength))
+		if ((bot.dir <M_PI/180*fov || bot.dir > 2 * M_PI - M_PI / 180 * fov) && (bot.dis < 2 * (ROBOT_SIZE + strength)))
 		{
 			std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / bot.dis, 3), M_PI + bot.dir);
 			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
