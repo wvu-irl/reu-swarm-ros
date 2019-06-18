@@ -86,7 +86,7 @@ public:
 	ContourMap(sf::Rect<int> bounds, ColorMap);
 
 	// calculation and darwing functions
-	void tick();
+	void tick(int);
 	void render(sf::RenderWindow *window);
 
 	// sets the function the plot is to resemble
@@ -102,5 +102,5 @@ public:
 	// destructor
 	~ContourMap();
 };
-//#include "contour.cpp"
+//#include "contour.cu"
 #endif

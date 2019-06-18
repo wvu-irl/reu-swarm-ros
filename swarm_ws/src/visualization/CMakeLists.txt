@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(visualization)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O3 -O1")
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -15,40 +14,46 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 
-###################################
-## catkin specific configuration ##
-###################################
-catkin_package(
-)
+find_package(CUDA)
+if (CUDA_FOUND)
 
-add_library(color_map src/color_map.cpp)
-target_link_libraries(color_map ${catkin_LIBRARIES})
+	set(CUDA_NVCC_FLAGS "-arch=compute_50 -ccbin g++" CACHE STRING "nvcc flags" FORCE)
+	set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc verbose" FORCE)
+	set(LIB_TYPE STATIC)
+	
+	CUDA_ADD_LIBRARY(color_map ${LIB_TYPE} src/color_map.cu)
+	target_link_libraries(color_map ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
+	CUDA_ADD_LIBRARY(contour ${LIB_TYPE} src/contour.cu)
+	target_link_libraries(contour ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map)
 
-add_library(contour src/contour.cpp)
-target_link_libraries(contour ${catkin_LIBRARIES} color_map)
+	###################################
+	## catkin specific configuration ##
+	###################################
+	catkin_package(
+	)
+	
+	add_executable(table_vis src/table_vis.cpp)
+	
+	###########
+	## Build ##
+	###########
+	
+	## Specify additional locations of header files
+	## Your package locations should be listed before other locations
+	include_directories(
+	# include
+	  ${catkin_INCLUDE_DIRS}
+	)
+	set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
+	#Find any version 2.X of SFML
+	#See the FindSFML.cmake file for additional details and instructions
+	find_package(SFML 2 REQUIRED  graphics window system)
+	find_package(SFML 2 COMPONENTS graphics window system)
+	if(SFML_FOUND)
+	  include_directories(${SFML_INCLUDE_DIR})
+	  target_link_libraries(table_vis ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map contour)
+	endif()
+	
+	add_dependencies(table_vis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(table_vis src/table_vis.cpp)
-target_link_libraries(table_vis ${catkin_LIBRARIES} color_map contour)
-
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
-# include
-  ${catkin_INCLUDE_DIRS}
-)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
-#Find any version 2.X of SFML
-#See the FindSFML.cmake file for additional details and instructions
-find_package(SFML 2 REQUIRED  graphics window system)
-find_package(SFML 2 COMPONENTS graphics window system)
-if(SFML_FOUND)
-  include_directories(${SFML_INCLUDE_DIR})
-  target_link_libraries(table_vis ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
 endif()
-
-add_dependencies(table_vis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-

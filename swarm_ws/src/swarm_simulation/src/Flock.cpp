@@ -29,10 +29,10 @@ wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages() //generates an array
 
 		//add negative sign to cur.angle ############################
 
-		q.setRPY( 0, 0, cur.angle(cur.velocity));  // Create this quaternion from roll=0/pitch=0/ yaw (in radians)
+		q.setRPY( 0, 0, cur.heading); // Create this quaternion from roll=0/pitch=0/ yaw (in radians)
+		//q.setRPY( 0, 0, cur.angle(cur.velocity));
 		//^will have to be changed for a holonomic (apparently direction and heading are different).
 		q.normalize(); // normalizes the quaternion.
-
 
 
 		//translational information

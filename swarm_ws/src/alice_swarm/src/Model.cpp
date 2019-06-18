@@ -20,9 +20,9 @@ AliceStructs::ideal Model::generateIdeal()
 	while ((toReturn.spd == -1) && ros::ok)
 	{
 		std::vector <AliceStructs::vel> ideal_list = {
-			rules.panicAvoid(robots, tolerance),
+			//rules.panicAvoid(robots, tolerance),
 			//rules.avoidObstacles(obstacles, tolerance),
-			rules.predictiveAvoid(robots, tolerance),
+			//rules.predictiveAvoid(robots, tolerance),
 			rules.maintainSpacing(robots, tolerance),
 			};
 		for (int i = 0; i < ideal_list.size(); i++)
