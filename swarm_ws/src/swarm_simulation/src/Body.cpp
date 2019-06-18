@@ -133,7 +133,7 @@ void Body::borders()
 void  Body::seperation(vector<Body> _bodies)
 {
 		// Distance of field of vision for separation between bodies
-    float desiredseparation = 24;
+    float desiredseparation = 15;
     Pvector steer(0, 0);
     int count = 0; //iterator
 
