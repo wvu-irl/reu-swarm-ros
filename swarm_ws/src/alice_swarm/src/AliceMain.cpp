@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 
 			if (tempVel.mag>1) temp.r=1;
 			else temp.r = tempVel.mag;
-			temp.theta = fmod(2*M_PI+tempVel.dir,2*M_PI);
+			temp.theta = 180/M_PI*fmod(2*M_PI+tempVel.dir,2*M_PI);
 
 			execute.commands.push_back(temp);
 		}
