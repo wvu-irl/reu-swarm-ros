@@ -36,28 +36,25 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 //       ^the way this code was before, just in case.
 
 //Prevents sudden turns
-					if (msg.commands.at(j).theta > M_PI / 18)
+
+					if (msg.commands.at(j).theta > M_PI / 18 && msg.commands.at(j).theta < M_PI)
 					{
-						flock.flock.at(i).velocity.set(
-								0.000001 * cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) + M_PI / 18),
-								0.000001 * sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) + M_PI / 18));
+						flock.flock.at(i).velocity.set(0, 0);
 						flock.flock.at(i).heading += M_PI / 18;
 
-					} else if (msg.commands.at(j).theta < -M_PI / 18)
+					} else if (msg.commands.at(j).theta < 35 * M_PI / 18 && msg.commands.at(j).theta > M_PI)
 					{
-						flock.flock.at(i).velocity.set(
-								0.000001 * cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) - M_PI / 18),
-								0.000001 * sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) - M_PI / 18));
+						flock.flock.at(i).velocity.set(0, 0);
 						flock.flock.at(i).heading -= M_PI / 18;
 					} else
 					{
-						flock.flock.at(i).velocity.set(
-								1 * msg.commands.at(j).r
-										* cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) + msg.commands.at(j).theta),
-								-1 * msg.commands.at(i).r
-										* sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) + msg.commands.at(j).theta));
 						flock.flock.at(i).heading += msg.commands.at(j).theta;
+						flock.flock.at(i).velocity.set(1 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
+								-1 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
 					}
+//					if (msg.commands.at(j).r <0.01) {
+//							flock.flock.at(i).velocity.set(0,0);
+//					}
 
 					flock.flock.at(i).updatedCommand = true;
 

@@ -42,7 +42,7 @@ AliceStructs::vel Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots,
 	return to_return;
 }
 
-AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, float strength, float fov)
+AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, float strength)
 {
 	AliceStructs::vel to_return;
 	std::pair<float, float> temp_pair1;
@@ -50,7 +50,7 @@ AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, flo
 	temp_pair1.second = 0;
 	for (auto &bot : bots)
 	{
-		if (bot.dis < ROBOT_SIZE + strength)
+		if (bot.dis < ROBOT_SIZE * strength)
 		{
 			std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / bot.dis, 3), M_PI + bot.dir);
 			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
@@ -71,7 +71,7 @@ AliceStructs::vel Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, float
 	for (auto &bot : bots)
 	{
 		//avoids things in direction of travel
-		if ((bot.dir <M_PI/180*fov || bot.dir > 2 * M_PI - M_PI / 180 * fov) && (bot.dis < 2 * (ROBOT_SIZE + strength)))
+		if ((bot.dir <M_PI/180*fov || bot.dir > 2 * M_PI - M_PI / 180 * fov) && (bot.dis < (ROBOT_SIZE * strength)))
 		{
 			std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / bot.dis, 3), M_PI + bot.dir);
 			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
@@ -96,7 +96,7 @@ AliceStructs::vel Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles, 
 			{
 				std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / obj.dis, 3), M_PI + obj.dir);
 				temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
-			} else if (obj.dis < ROBOT_SIZE * 1.5)
+			} else if (obj.dis < ROBOT_SIZE * strength)
 			{
 				//std::cout << "yeeting" << std::endl;
 				std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / obj.dis, 3), M_PI + obj.dir);

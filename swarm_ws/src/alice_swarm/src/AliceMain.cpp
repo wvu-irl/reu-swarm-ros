@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 	ros::Subscriber sub = n.subscribe("vicon_array", 1000, botCallback); //Subscribes to the Vicon
 	ros::Subscriber sub2 = n.subscribe("target", 1000, pointCallback);
 	ros::Subscriber sub3 = n.subscribe("virtual_obstacles", 1000, obsCallback);
-	ros::Rate loopRate(10);
+	ros::Rate loopRate(50);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array
 			> ("final_execute", 1000);
 	Hub aliceBrain(0); // Creates a hub for the conversion of absolute to relative info
@@ -63,8 +63,10 @@ int main(int argc, char **argv)
 			wvu_swarm_std_msgs::robot_command temp;
 			AliceStructs::vel tempVel = it->second.generateComp(all_ideals);
 			temp.rid = it->second.name;
-			temp.r = tempVel.mag;
-			temp.theta = tempVel.dir;
+
+			if (tempVel.mag>1) temp.r=1;
+			else temp.r = tempVel.mag;
+			temp.theta = fmod(2*M_PI+tempVel.dir,2*M_PI);
 
 			execute.commands.push_back(temp);
 		}

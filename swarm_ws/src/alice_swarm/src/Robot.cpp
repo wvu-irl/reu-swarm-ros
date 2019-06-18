@@ -42,6 +42,7 @@ AliceStructs::ideal Robot::generateIdeal()
 
 AliceStructs::vel Robot::generateComp(std::vector<AliceStructs::ideal> ideals)
 {
+
 	if (model.rules.should_ignore== true)
 	{
 		return vectorQueue.createCompromise();
@@ -50,8 +51,9 @@ AliceStructs::vel Robot::generateComp(std::vector<AliceStructs::ideal> ideals)
 	{
 		for (int j = 0; j < neighbors.size(); j++)
 		{
-			if (ideals.at(i).name = neighbors.at(j).name)
+			if (ideals.at(i).name == neighbors.at(j).name)
 			{
+
 				ideals.at(i).dis = neighbors.at(j).dis;
 				vectorQueue.oneToQueue(ideals.at(i));
 			}

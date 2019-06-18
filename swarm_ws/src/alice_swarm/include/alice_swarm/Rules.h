@@ -21,7 +21,7 @@ public:
 
 	AliceStructs::vel maintainSpacing(std::list <AliceStructs::neighbor> bots,float strength);
 
-	AliceStructs::vel magnetAvoid(std::list <AliceStructs::neighbor> bots, float strength, float fov);
+	AliceStructs::vel magnetAvoid(std::list <AliceStructs::neighbor> bots, float strength);
 
 	AliceStructs::vel birdAvoid(std::list <AliceStructs::neighbor> bots, float strength, float fov);
 
