@@ -36,6 +36,33 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 //       ^the way this code was before, just in case.
 
 //Prevents sudden turns
+
+					float a;
+					float b;
+					float temp_r;
+
+					float theta = msg.commands.at(j).theta/180 * M_PI;
+					float r = msg.commands.at(j).r;
+					if (0 < theta && theta < M_PI) {
+						a = 1;
+						b = r * cos(theta/2);
+						temp_r = b;
+						flock.flock.at(i).heading += M_PI/18 * theta;
+					} else if (M_PI < theta && theta < 2*M_PI) {
+						b = 1;
+						a = -r * cos(theta/2);
+						temp_r = a;
+						flock.flock.at(i).heading -= M_PI/18 * (2*M_PI - theta);
+					}
+
+					//flock.flock.at(i).heading = fmod(flock.flock.at(i).heading + 2*M_PI, 2*M_PI);
+
+					float x = temp_r * cos(flock.flock.at(i).heading);
+					float y = temp_r * sin(flock.flock.at(i).heading);
+
+					flock.flock.at(i).velocity.set(x, -y);
+
+					/*
 					float theta = msg.commands.at(j).theta/180 * M_PI;
 					if (theta > M_PI / 18 && theta < M_PI)
 					{
@@ -51,7 +78,8 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 						flock.flock.at(i).heading += theta;
 						flock.flock.at(i).velocity.set(1 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
 								-1 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
-					}
+					} */
+
 //					if (msg.commands.at(j).r <0.01) {
 //							flock.flock.at(i).velocity.set(0,0);
 //					}
