@@ -50,7 +50,7 @@ AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, flo
 	temp_pair1.second = 0;
 	for (auto &bot : bots)
 	{
-		if (bot.dis < ROBOT_SIZE * 1.5)
+		if (bot.dis < ROBOT_SIZE + strength)
 		{
 			std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / bot.dis, 3), M_PI + bot.dir);
 			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
@@ -58,6 +58,7 @@ AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, flo
 	}
 	to_return.mag = temp_pair1.first;
 	to_return.dir = temp_pair1.second;
+	std::cout << to_return.mag << " - " << to_return.dir << std::endl;
 	return to_return;
 }
 

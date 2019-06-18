@@ -50,14 +50,17 @@ AliceStructs::ideal Model::generateIdeal()
 
 	std::vector<AliceStructs::vel> ideal_list =
 	{ //rules.dummy1(),
-			//rules.avoidObstacles(obstacles, 5, 30),
-			//rules.magnetAvoid(robots, 5, 30),
-			//rules.birdAvoid(robots, 5, 30),
+			rules.avoidObstacles(obstacles, 5, 30),
+			rules.magnetAvoid(robots, 5, 30),
+			rules.birdAvoid(robots, 5, 30),
 			rules.maintainSpacing(robots, 1)
 			};
 	for (int i = 0; i < ideal_list.size(); i++)
-		addPolarVel(temp, ideal_list.at(i));
-
+	{
+		if (ideal_list.at(i).mag > 0.01) {
+			addPolarVel(temp, ideal_list.at(i));
+		}
+	}
 	toReturn.pri = temp.mag;
 	normalize(temp);
 	//dDriveAdjust(temp);
