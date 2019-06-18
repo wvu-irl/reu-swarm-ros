@@ -14,6 +14,10 @@ public:
 	void oneToQueue(AliceStructs::ideal toAdd);
 
 	AliceStructs::vel createCompromise();
+
+private:
+
+	AliceStructs::vel past_vector;
 };
 
 #endif /* VECTORQUEUE_H_ */
