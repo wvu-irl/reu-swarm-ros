@@ -87,7 +87,7 @@ public:
 
 	// calculation and darwing functions
 	void tick(int);
-	void render(sf::RenderWindow *window);
+	void render(sf::RenderTexture *window);
 
 	// sets the function the plot is to resemble
 	void resemble(std::function<double(double, double)> z);

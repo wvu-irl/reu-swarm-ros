@@ -3,8 +3,11 @@
 #include <iostream>
 #include <sstream>
 #include <math.h>
+#include <string.h>
 #include <thread>
 #include <future>
+#include <fstream>
+#include <iomanip>
 
 #include "calculation.cu"
 
@@ -101,7 +104,7 @@ void ContourMap::tick(int tick)
 	free(c_levels);
 }
 
-void ContourMap::render(sf::RenderWindow *window)
+void ContourMap::render(sf::RenderTexture *window)
 {
 	// draws the image to the screen
 	tex.loadFromImage(img);

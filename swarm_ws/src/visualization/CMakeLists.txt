@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(visualization)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O3 -O1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -O1")
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -18,7 +18,7 @@ find_package(CUDA)
 if (CUDA_FOUND)
 
 	set(CUDA_NVCC_FLAGS "-arch=compute_50 -ccbin g++" CACHE STRING "nvcc flags" FORCE)
-	set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc verbose" FORCE)
+	set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc" FORCE)
 	set(LIB_TYPE STATIC)
 	
 	CUDA_ADD_LIBRARY(color_map ${LIB_TYPE} src/color_map.cu)
@@ -30,9 +30,11 @@ if (CUDA_FOUND)
 	## catkin specific configuration ##
 	###################################
 	catkin_package(
+#		FILE ComicSansMS3.ttf
 	)
 	
 	add_executable(table_vis src/table_vis.cpp)
+	add_executable(calibrate_tab src/calibrate.cpp)
 	
 	###########
 	## Build ##
@@ -52,8 +54,10 @@ if (CUDA_FOUND)
 	if(SFML_FOUND)
 	  include_directories(${SFML_INCLUDE_DIR})
 	  target_link_libraries(table_vis ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map contour)
+	  target_link_libraries(calibrate_tab ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES})
 	endif()
 	
 	add_dependencies(table_vis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+	add_dependencies(calibrate_tab ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 endif()
