@@ -72,7 +72,7 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 // Construct window using SFML
 Sim::Sim()
 {
-	this->bodiesSize = 12.0;
+	this->bodiesSize = 7.5;
 	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 	this->window_height = 600;
 	this->window_width = 300;
@@ -110,7 +110,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 		// Changing the Visual Properties of the shape.
 		shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
-		shape.setOrigin(12, 12);
+		shape.setOrigin(7.5, 7.5);
 		//shape.setPosition(window_width, window_height); // Testing purposes, starts all shapes in the center of screen.
 		shape.setFillColor(sf::Color::Yellow);
 		shape.setOutlineColor(sf::Color::White);
@@ -119,7 +119,7 @@ void Sim::Run(ros::NodeHandle _n)
 		shape.rotate((180.0/M_PI)*M_PI_2);
 
 		//creates the red line at the head of each bot.
-		sf::RectangleShape line(sf::Vector2f(8, 2));
+		sf::RectangleShape line(sf::Vector2f(5, 2));
 		line.setFillColor(sf::Color::Red);
 		line.setPosition(b.location.x, b.location.y);
 		line.setOrigin(-2, 1);
@@ -233,7 +233,7 @@ void Sim::Render() //draws changes in simulation states to the window.
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
-		float theta = 180.0 / M_PI * (flock.flock.at(i).angle(flock.flock.at(i).velocity));
+		float theta = 180.0 / M_PI * (flock.flock.at(i).heading);
 		shapes[i].setRotation(90-theta); //alignes body with direction of motion
 		lines[i].setRotation(-theta); //alignes line with direction of motion
 		//^for some reason, sfml has clockwise as +theta direction.

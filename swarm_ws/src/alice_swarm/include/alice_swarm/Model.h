@@ -26,6 +26,9 @@ public:
 
 private:
 	int name;
+	void addPolarVel(AliceStructs::vel &_vel1, AliceStructs::vel &_vel2);
+	void normalize(AliceStructs::vel &_vel);
+	void dDriveAdjust(AliceStructs::vel &_vel); //assumes that vector has already been normalized
 };
 
 #endif /* MODEL_H_ */

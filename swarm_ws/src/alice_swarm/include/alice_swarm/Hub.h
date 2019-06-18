@@ -44,8 +44,7 @@ bool compareTwoBots(Bot &a, Bot &b) // Reverses the > operator to sort smallest 
 
 //static const int BOT_COUNT = 50; // Number of bots in the system
 static const int NEIGHBOR_COUNT = 4; // Number of neighbors desired
-static const int OBS_POINT_COUNT = 4; //random number of obstacles
-static const int TOLERANCE = 100;
+static const int TOLERANCE = 20;
 //Acts as a parser for the data coming out of the VICON or the simulation, turning the bundle of data into 50 packets
 // of individualized information for each swarm bot, allowing them to enact their agent level rules.
 class Hub
