@@ -52,7 +52,7 @@ AliceStructs::ideal Model::generateIdeal()
 	{ //rules.dummy1(),
 			rules.avoidObstacles(obstacles, 5, 360),
 			rules.magnetAvoid(robots, 5),
-			rules.birdAvoid(robots, 5, 30),
+			//rules.birdAvoid(robots, 5, 30),
 			rules.maintainSpacing(robots, 2)
 			};
 	for (int i = 0; i < ideal_list.size(); i++)

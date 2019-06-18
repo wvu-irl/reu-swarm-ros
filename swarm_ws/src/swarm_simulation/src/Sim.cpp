@@ -37,23 +37,7 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 //Prevents sudden turns
 
-					float a;
-					float b;
-					float temp_r;
 
-					float theta = msg.commands.at(j).theta/180 * M_PI;
-					float r = msg.commands.at(j).r;
-					if (0 < theta && theta < M_PI) {
-						a = 1;
-						b = r * cos(theta/2);
-						temp_r = b;
-						flock.flock.at(i).heading += M_PI/18 * theta;
-					} else if (M_PI < theta && theta < 2*M_PI) {
-						b = 1;
-						a = -r * cos(theta/2);
-						temp_r = a;
-						flock.flock.at(i).heading -= M_PI/18 * (2*M_PI - theta);
-					}
 
 					//flock.flock.at(i).heading = fmod(flock.flock.at(i).heading + 2*M_PI, 2*M_PI);
 
