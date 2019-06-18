@@ -17,6 +17,9 @@ public:
 
 private:
 
+	std::pair<float, float> addPolarVectors(std::pair<float, float> v1, std::pair<float, float> v2);
+
+
 	AliceStructs::vel past_vector;
 };
 

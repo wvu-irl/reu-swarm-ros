@@ -36,27 +36,29 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 //       ^the way this code was before, just in case.
 
 //Prevents sudden turns
-//				if (msg.commands.at(j).theta > M_PI / 6)
-//				{
-//					flock.flock.at(i).velocity.set(
-//							0.000001 * cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) + M_PI / 18),
-//							0.000001 * sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) + M_PI / 18));
-//
-//				} else if (msg.commands.at(j).theta < -M_PI / 6)
-//				{
-//					flock.flock.at(i).velocity.set(
-//							0.000001 * cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) - M_PI / 18),
-//							0.000001 * sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) - M_PI / 18));
-//
-//				} else
-//				{
-					flock.flock.at(i).velocity.set(
-							1 * msg.commands.at(j).r
-									* cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) + msg.commands.at(j).theta),
-							-1 * msg.commands.at(i).r
-									* sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) + msg.commands.at(j).theta));
-					//		}
-					flock.flock.at(i).heading += msg.commands.at(j).theta;
+					if (msg.commands.at(j).theta > M_PI / 18)
+					{
+						flock.flock.at(i).velocity.set(
+								0.000001 * cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) + M_PI / 18),
+								0.000001 * sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) + M_PI / 18));
+						flock.flock.at(i).heading += M_PI / 18;
+
+					} else if (msg.commands.at(j).theta < -M_PI / 18)
+					{
+						flock.flock.at(i).velocity.set(
+								0.000001 * cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) - M_PI / 18),
+								0.000001 * sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) - M_PI / 18));
+						flock.flock.at(i).heading -= M_PI / 18;
+					} else
+					{
+						flock.flock.at(i).velocity.set(
+								1 * msg.commands.at(j).r
+										* cos(flock.flock.at(i).angle(flock.flock.at(i).velocity) + msg.commands.at(j).theta),
+								-1 * msg.commands.at(i).r
+										* sin(flock.flock.at(i).angle(flock.flock.at(i).velocity) + msg.commands.at(j).theta));
+						flock.flock.at(i).heading += msg.commands.at(j).theta;
+					}
+
 					flock.flock.at(i).updatedCommand = true;
 
 //				std::cout<<"new (sum) angle"<< o +  n<<"\n";
@@ -78,16 +80,17 @@ Sim::Sim()
 	this->window_width = 300;
 
 	//std::cout<<"Window h;w = "<<window_height << "; "<<window_width<<"\n";
-	this->window.create(sf::VideoMode(window_width, window_height, desktop.bitsPerPixel),
-			"Swarm Simulation", sf::Style::None);
+	this->window.create(sf::VideoMode(window_width, window_height, desktop.bitsPerPixel), "Swarm Simulation",
+			sf::Style::None);
 }
 
 // Run the simulation. Run creates the bodies that we'll display, checks for user
 // input, and updates the view
 void Sim::Run(ros::NodeHandle _n)
 {
-	PrevIteration pI{false,0,false};//struct for storing click and drag info.
-	std::cout<<"initialized pI\n";
+	PrevIteration pI
+	{ false, 0, false }; //struct for storing click and drag info.
+	std::cout << "initialized pI\n";
 	char letters[100] =
 	{ 'D', 'E', 'P', 'A', 'N', 'J', 'G', 'A', 'C', 'T', 'M', 'A', 'M', 'D', 'S', 'C', 'N', 'H', 'V', 'A', 'N', 'Y', 'N',
 			'C', 'R', 'I', 'V', 'T', 'K', 'Y', 'T', 'N', 'O', 'H', 'L', 'A', 'I', 'N', 'M', 'S', 'I', 'L', 'A', 'L', 'M', 'E',
@@ -99,13 +102,14 @@ void Sim::Run(ros::NodeHandle _n)
 
 	for (int i = 0; i < 50; i++)
 	{
-		char temp[2] = {letters[2 * i], letters[2 * i + 1]};
-		int y = 50 * (i%10)+ 50; // y pos of bots
+		char temp[2] =
+		{ letters[2 * i], letters[2 * i + 1] };
+		int y = 50 * (i % 10) + 50; // y pos of bots
 
 //		std::cout<<"----Bot ID: "<<temp[0]<<temp[1]<<"-------\n";
 //		std::cout<<"x,y: "<<x<<","<<y<<"\n";
 
-		Body b(x,y, temp); // Starts all bodies in the center of the screen
+		Body b(x, y, temp); // Starts all bodies in the center of the screen
 		sf::CircleShape shape(0);
 
 		// Changing the Visual Properties of the shape.
@@ -116,7 +120,7 @@ void Sim::Run(ros::NodeHandle _n)
 		shape.setOutlineColor(sf::Color::White);
 		shape.setOutlineThickness(1);
 		shape.setRadius(bodiesSize);
-		shape.rotate((180.0/M_PI)*M_PI_2);
+		shape.rotate((180.0 / M_PI) * M_PI_2);
 
 		//creates the red line at the head of each bot.
 		sf::RectangleShape line(sf::Vector2f(5, 2));
@@ -133,11 +137,11 @@ void Sim::Run(ros::NodeHandle _n)
 
 		//draw all obejcts on window.
 		window.draw(shape);
-    window.draw(line);
+		window.draw(line);
 
-		if(y == 500) //increments the  x pos so bots are drawn in a grid.
+		if (y == 500) //increments the  x pos so bots are drawn in a grid.
 		{
-			x+=50;
+			x += 50;
 		}
 
 	}
@@ -165,7 +169,7 @@ void Sim::Run(ros::NodeHandle _n)
 	}
 }
 
-PrevIteration Sim::HandleInput(PrevIteration _pI)//handels input to the graphics window
+PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphics window
 {
 	sf::Event event;
 	while (window.pollEvent(event))
@@ -177,48 +181,46 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)//handels input to the graphics
 		bool pauseSim = false; //pause boolean.
 
 		//---------- Pressing the escape key will close the program
-		if ((event.type == sf::Event::Closed)|| (event.type == sf::Event::KeyPressed
-				&& event.key.code == sf::Keyboard::Escape))
+		if ((event.type == sf::Event::Closed)
+				|| (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
 		{
 			window.close();
-		}//-----------------------------------------------------------
+		} //-----------------------------------------------------------
 
 		//------------------allows for pause. Press the Pause button.-----------
-		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space,
-				pauseSim, &window, event);
+		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
+				event);
 
 		//----------Allows for click and drag. ------------------------------
 		if (_pI.dragging == true)
 		{
-			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x;//event.mouseButton.x;
-			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y;//event.mouseButton.y;
+			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
+			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
 		}
 		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == true)
 		{
 			_pI.dragging = false;
 			_pI.prevClick = false;
-		}
-		else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == false)
 		{
-			 while(found != true)
-			 {
-				 if (((flock.flock.at(i).location.x > mX - 6 ) && (flock.flock.at(i).location.x < mX + 6))
-						 && ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
-				 {
-					 found = true;
-					 _pI.botId = i;
-					 _pI.dragging = true;
-					 _pI.prevClick = true;
-				 }
-				 else if(i==49)
-				 {
-					 found = true;
-				 }
-				 i++;
-			 }
-		}//-----------------------------------------------------------------------------------------
+			while (found != true)
+			{
+				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
+						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
+				{
+					found = true;
+					_pI.botId = i;
+					_pI.dragging = true;
+					_pI.prevClick = true;
+				} else if (i == 49)
+				{
+					found = true;
+				}
+				i++;
+			}
+		} //-----------------------------------------------------------------------------------------
 	}
 	return _pI; //tracks state of dragging (see sim.h)
 }
@@ -229,12 +231,12 @@ void Sim::Render() //draws changes in simulation states to the window.
 	flock.flocking();
 // Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)
-	{// Matches up the location of the shape to the body
+	{ // Matches up the location of the shape to the body
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
 		float theta = 180.0 / M_PI * (flock.flock.at(i).heading);
-		shapes[i].setRotation(90-theta); //alignes body with direction of motion
+		shapes[i].setRotation(90 - theta); //alignes body with direction of motion
 		lines[i].setRotation(-theta); //alignes line with direction of motion
 		//^for some reason, sfml has clockwise as +theta direction.
 
@@ -247,22 +249,23 @@ void Sim::Render() //draws changes in simulation states to the window.
 }
 
 bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event)
-{//checks if pause pressed. Inf loop if so.
-	if(( _key_pressed)&&(_pause_pressed))
+{ //checks if pause pressed. Inf loop if so.
+	if ((_key_pressed) && (_pause_pressed))
 	{
 		_pause_sim = true;
-		std::cout<<"paused"<<std::endl;
+		std::cout << "paused" << std::endl;
 	}
-	while(_pause_sim == true) //runs while pause in effect.
+	while (_pause_sim == true) //runs while pause in effect.
 	{
-		if(win->pollEvent(_event))
+		if (win->pollEvent(_event))
 		{
-			if ((_event.type == sf::Event::KeyPressed )&&( _event.key.code == sf::Keyboard::Space))
-			{//allows for unpause.
+			if ((_event.type == sf::Event::KeyPressed) && (_event.key.code == sf::Keyboard::Space))
+			{ //allows for unpause.
 				_pause_sim = false;
-				std::cout<<"unpaused"<<std::endl;
+				std::cout << "unpaused" << std::endl;
 			}
-			if ((_event.type == sf::Event::Closed) || (_event.type == sf::Event::KeyPressed && _event.key.code == sf::Keyboard::Escape))
+			if ((_event.type == sf::Event::Closed)
+					|| (_event.type == sf::Event::KeyPressed && _event.key.code == sf::Keyboard::Escape))
 			{
 				win->close();
 			}
@@ -270,5 +273,4 @@ bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::Ren
 	}
 	return _pause_sim;
 }
-
 

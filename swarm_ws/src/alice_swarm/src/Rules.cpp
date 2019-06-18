@@ -58,7 +58,7 @@ AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, flo
 	}
 	to_return.mag = temp_pair1.first;
 	to_return.dir = temp_pair1.second;
-	std::cout << to_return.mag << " - " << to_return.dir << std::endl;
+
 	return to_return;
 }
 

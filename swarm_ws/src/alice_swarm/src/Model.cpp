@@ -41,7 +41,7 @@ void Model::dDriveAdjust(AliceStructs::vel &_vel) //assumes that vector has alre
 
 AliceStructs::ideal Model::generateIdeal()
 {
-	std::cout << "got here" << std::endl;
+
 	AliceStructs::ideal toReturn;
 	AliceStructs::vel temp;
 	temp.mag = 0;
@@ -62,7 +62,7 @@ AliceStructs::ideal Model::generateIdeal()
 		}
 	}
 	toReturn.pri = temp.mag;
-	normalize(temp);
+	//normalize(temp);
 	//dDriveAdjust(temp);
 	toReturn.dir = temp.dir;
 	toReturn.spd = temp.mag;
