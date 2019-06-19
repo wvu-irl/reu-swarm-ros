@@ -177,7 +177,7 @@ void Body::elasticCollisions(vector<Body> _bodies)
 void  Body::inElasticCollisions(vector<Body> _bodies)
 {
 	    //Magnatude of separation between bodies
-	    float desiredseparation = 24;
+	    float desiredseparation = 15;
 	    Pvector steer(0, 0);
 	    int count = 0; //iterator
 
@@ -194,11 +194,9 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 
 	        	float fnx;
 	        	float fny;
-
 	        	float dy = _bodies.at(i).location.y - location.y;
 					  float dx = _bodies.at(i).location.x - location.x;
 					  std::cout<<"dx,dy: "<<dx<<","<<dy<<std::endl;
-
 					  //angle b/w d and origin.
 					  float phi = M_PI_2 + angle(Pvector(dy,dx));
 
@@ -212,7 +210,6 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 						fy = fy/mag;
 
 						float abs_theta = angle(velocity); //global polar angle of velocity
-
 						float rel_theta; //velocity direction in frame of the collision plane.
 
 	        	if(collision == false)
@@ -223,16 +220,23 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 	        	phi = angleConvert(phi); //scales angles to the positive and mods them.
 	        	abs_theta = angleConvert(abs_theta);
 
-//	        	if(((abs_theta>0) && (abs_theta<=M_PI_2)) || ((abs_theta>M_PI) && (abs_theta<=3*M_PI_2)))//Q1 and Q3
-	        	if(((phi>0) && (phi<=M_PI_2)) || ((phi>M_PI) && (phi<=3*M_PI_2)))//Q1 and Q3
+	        	if(((phi>=0) && (phi<M_PI_2)) || ((phi>M_PI) && (phi<3*M_PI_2)))//In in Q1 or Q3
 	        	{
-	        		rel_theta = abs_theta - phi - M_PI_2;
-	        		rel_theta = angleConvert(rel_theta);
-
+	        		//--------------------------------------------------
+	        		if((phi>=0) && (phi<M_PI_2)) //first quadrant and 3rd have different transforms
+							{
+								rel_theta = abs_theta - phi - M_PI_2;
+							}
+							else
+							{
+								rel_theta = abs_theta - phi + M_PI_2;
+							}
+							rel_theta = angleConvert(rel_theta);
+							//-------------------------------------------------------
 	        		std::cout<<"=Bot is in Q1 or 3=, phi is: "<<phi*180/M_PI<<std::endl;
 	        		std::cout<<"*-velocity direction: "<<abs_theta*180/M_PI<<std::endl;
 
-	        		if((dx>=0) && (dy>=0)) //above
+	        		if((dx>=0) && (dy>=0)) //above plane
 	        		{
 	        			std::cout<<"$-Bot is above-$"<<std::endl;
 	        			std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
@@ -253,41 +257,52 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 	        				fny = fy;
 	        			}
 	        		}
-							else //bellow
+							else //bellow plane
 							{
 								std::cout<<"$-Bot is below-$"<<std::endl;
 								std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
 
-								if(((rel_theta >=0) && (rel_theta>M_PI_2)) || ((rel_theta<2*M_PI) && (rel_theta>3*M_PI_2))) //vector has any alignment with plane.
-								{
+								if(((rel_theta >=0) && (rel_theta>M_PI_2)) || ((rel_theta<2*M_PI) && (rel_theta>3*M_PI_2)))
+								{//vector has any alignment with plane.
+									//undoes last step, and replaces it with force application.
+									std::cout<<"directed toward plane"<<std::endl;
 									location.x = prev_location.x;
 									location.y = prev_location.y;
-
 									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
 								  fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 								}
 								else
-								{
+								{//bot keeps moving on previous path
+									std::cout<<"directed away from plane"<<std::endl;
 									fnx = fx;
 									fny = fy;
 								}
 							}
 	        	}
-//						else if(((abs_theta>M_PI_2) && (abs_theta<=M_PI)) || ((abs_theta>3*M_PI_2) && (abs_theta<=2*M_PI)))//Q2 and Q4
-						else if(((phi>M_PI_2) && (phi<=M_PI)) || ((phi>3*M_PI_2) && (phi<=2*M_PI))||((phi<0)&&(phi>-3*M_PI_2)))//Q2 and Q4
+						else if(((phi>=M_PI_2) && (phi<=M_PI)) || ((phi>3*M_PI_2) && (phi<2*M_PI)))//If in Q2 or Q4
 						{
-							rel_theta = abs_theta - phi + M_PI_2;
+							if((phi>=M_PI_2) && (phi<=M_PI)) //first quadrant and 3rd have different transforms
+							{
+								rel_theta = abs_theta - phi + M_PI_2;
+							}
+							else
+							{
+								rel_theta = abs_theta - phi - M_PI_2;
+							}
 							rel_theta = angleConvert(rel_theta);
 
 							std::cout<<"=Bot is in Q2 or 4=, phi is: "<<phi*180/M_PI<<std::endl;
 							std::cout<<"*-velocity direction:"<<abs_theta*180/M_PI<<std::endl;
-							if((dx<=0) && (dy>=0)) //above
+
+							if((dx<=0) && (dy>=0)) //above plane
 							{
 								std::cout<<"$-Bot is above-$"<<std::endl;
 								std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
+
 								if((rel_theta>=M_PI_2)&&(rel_theta<=3*M_PI_2))//vector has any alignment with plane.
 								{
 									std::cout<<"directed towards the plane"<<std::endl;
+
 									location.x = prev_location.x;
 								  location.y = prev_location.y;
 
@@ -295,43 +310,69 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 									fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 								}
 								else
-								{
-									std::cout<<"away from plane"<<std::endl;
+								{//unaltered motion
 									fnx = fx;
 									fny = fy;
 								}
 							}
-							else //bellow
+							else //below plane
 							{
 								std::cout<<"$-Bot is below-$"<<std::endl;
 								std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
+
 								if(((rel_theta >=0) && (rel_theta>M_PI_2)) || ((rel_theta<2*M_PI) && (rel_theta>3*M_PI_2)))//vector has any alignment with plane.
 								{
 									std::cout<<"directed towards the plane"<<std::endl;
+
+									//undoes previous step ,replaces it with force application.
 									location.x = prev_location.x;
 									location.y = prev_location.y;
-
 									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
 								  fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 								}
 								else
-								{
-									std::cout<<"away from plane"<<std::endl;
-									location.x = prev_location.x;
-									location.y = prev_location.y;
-
+								{//motion uneffected
 									fnx = fx;
 									fny = fy;
 								}
 							}
 						}
-						else
+						else if(phi==3*M_PI_2) //special case of head on collision where phi = 3pi/2.
 						{
-							std::cout<<"XXXXXXXXXXX--Fuck You Man--XXXXXXXXXXXXXXXXXXXXXX"<<std::endl;
-							std::cout<<"phi is: "<<phi*180/M_PI<<std::endl;
+							std::cout<<"special case of head on collision"<<std::endl;
+							if(dx > 0) //is "below" the plane. (convection)
+							{
+								if(((abs_theta>=0) && (abs_theta<=M_PI_2))||((abs_theta<=3*M_PI_2) && (abs_theta<2*M_PI)))
+								{//towards the plane
+									location.x = prev_location.x;
+									location.y = prev_location.y;
+									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
+									fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+								}
+								else //away from the plane.
+								{
+									fnx = fx;
+									fny = fy;
+								}
+							}
+							else//is "above" the plane. (convection)
+							{
+								if(((abs_theta>=M_PI_2) && (abs_theta<=3*M_PI_2)))//towards the plane
+								{
+									location.x = prev_location.x;
+									location.y = prev_location.y;
+									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
+									fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+								}
+								else//away from the plane
+								{
+									fnx = fx;
+									fny = fy;
+								}
+							}
 						}
-
-	        	std::cout<<"forc es (fx,fy) "<<fx<<","<<fy<<std::endl;
+	        	//----------- BOT info print statments-----------------------------------------
+	        	std::cout<<"forces (fx,fy) "<<fx<<","<<fy<<std::endl;
 	        	std::cout<<"fn (fnx,fny) "<<fnx<<","<<fny<<std::endl;
 	        	std::cout<<"heading: "<<heading*180/M_PI<<std::endl;
 	        	std::cout<<"sep distance: "<<d<<std::endl;
@@ -341,9 +382,11 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 	        	std::cout<<"adjusted location: "<<location.x<<","<<location.y<<std::endl;
 	        	std::cout<<"----------------------------------------------------"<<std::endl;
 	        	//_bodies.at(i).location.addVector(Pvector(-fnx,-fny));
+	        	//--------------------------------- END ----------------------------------------
 	       }
 		}
 	}
+
 
 void  Body::seperation(vector<Body> _bodies)
 {
