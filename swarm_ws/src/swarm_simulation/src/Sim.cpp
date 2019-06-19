@@ -96,6 +96,7 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 //				std::cout<<"v_new (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
 //				std::cout<<"-----------------------------\n";
 //				^more fun facts, if ya want um.
+					flock.flock.at(i).updatedCommand = true;
 				}
 			}
 		}
@@ -107,6 +108,15 @@ void Sim::obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 	for(int i = 0; i <msg.point.size(); i++)
 	{
 		obstacles.push_back(msg.point.at(i));
+	}
+}
+
+void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
+{
+	targets.clear();
+	for(int i = 0; i <msg.point.size(); i++)
+	{
+		targets.push_back(msg.point.at(i));
 	}
 }
 // Construct window using SFML
@@ -187,7 +197,8 @@ void Sim::Run(ros::NodeHandle _n)
 	sleep(1);
 	ros::Publisher pub = _n.advertise < wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array", 1000); //Publishes like Vicon
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
-	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to funnel
+	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to virtual obstacles
+	ros::Subscriber sub3 = _n.subscribe("virtual_targets",1000,&Sim::targetCallback, this); //gets virtual targets
 	ros::Rate loopRate(50);
 
 	//publishes initial information for each bot
@@ -268,20 +279,34 @@ void Sim::Render() //draws changes in simulation states to the window.
 {
 	window.clear();
 	flock.flocking();
-	for (int i = 0; i <obstacles.size(); i++)
+
+	for (int i = 0; i <targets.size(); i++) //draws targets
 	{
 		sf::CircleShape shape(0);
-		// Changing the Visual Properties of the shape.
+		shape.setPosition(targets.at(i).x*3 + 150, 300 - targets.at(i).y*3); // Sets position of shape to random location that body was set to.
+		shape.setOrigin(7.5, 7.5);
+		shape.setFillColor(sf::Color::Green);
+		shape.setOutlineColor(sf::Color::Black);
+		shape.setOutlineThickness(1);
+		shape.setRadius(15);
+		window.draw(shape);
+		//std::cout<<"obstacle number: "<<i<<std::endl;
+		//std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
+		//obs_shapes.push_back(shape);
+	}
+
+	for (int i = 0; i <obstacles.size(); i++) //draws obstacles
+	{
+		sf::CircleShape shape(0);
 		shape.setPosition(obstacles.at(i).x*3 + 150, 300 - obstacles.at(i).y*3); // Sets position of shape to random location that body was set to.
 		shape.setOrigin(2, 2);
-		//shape.setPosition(window_width, window_height); // Testing purposes, starts all shapes in the center of screen.
 		shape.setFillColor(sf::Color::Blue);
 		shape.setOutlineColor(sf::Color::Black);
 		shape.setOutlineThickness(1);
 		shape.setRadius(2);
 		window.draw(shape);
-		std::cout<<"obstacle number: "<<i<<std::endl;
-		std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
+		//std::cout<<"obstacle number: "<<i<<std::endl;
+		//std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
 		//obs_shapes.push_back(shape);
 	}
 // Draws all of the bodies out, and applies functions that are needed to update.
