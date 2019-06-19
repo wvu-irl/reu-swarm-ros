@@ -29,11 +29,13 @@ private:
     int window_height;
     void vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg);
     void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg);
+    void targetCallback(const wvu_swarm_std_msgs::vicon_points &msg);
     Flock flock;
     float bodiesSize;
     vector<sf::CircleShape> shapes;
     vector<sf::RectangleShape> lines;
     vector<wvu_swarm_std_msgs::vicon_point> obstacles;
+    vector<wvu_swarm_std_msgs::vicon_point> targets;
     vector<sf::CircleShape> obs_shapes;
     //vector<sf::Text> texts;
     void Render();
