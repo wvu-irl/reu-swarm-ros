@@ -32,6 +32,7 @@ private:
     float bodiesSize;
     vector<sf::CircleShape> shapes;
     vector<sf::RectangleShape> lines;
+    //vector<sf::Text> texts;
     void Render();
     PrevIteration HandleInput(PrevIteration _pI);
     bool pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event);

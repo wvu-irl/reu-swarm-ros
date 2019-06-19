@@ -42,6 +42,7 @@ private:
 public:
 		char id [2];
 		float heading;
+		float force;
     bool predator;
     Pvector location;
     Pvector prev_location;
@@ -51,6 +52,7 @@ public:
     float maxForce;
     bool updatedCommand;
     bool updatedPosition;
+    bool collision;
 
 
     Body() {}
@@ -68,6 +70,8 @@ public:
     void flock(vector <Body> v);
     void borders();
     void seperation(vector<Body> _bodies);
+    void inElasticCollisions(vector<Body> _bodies);
+    void elasticCollisions(vector<Body> _bodies);
     float angle(Pvector v);
     void printMessage(int i,wvu_swarm_std_msgs::vicon_bot_array _vb_array);
 };
