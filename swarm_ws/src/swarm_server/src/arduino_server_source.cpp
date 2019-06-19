@@ -4,7 +4,7 @@
 #define DEBUG_CPP 0
 
 // setting this to 1 shows what messages failed and succeeded
-#define DEBUG_MESSAGE 0
+#define DEBUG_MESSAGE 1
 
 #include "arduino_server.h"
 
@@ -163,8 +163,11 @@ void *runClient(void *args)
 				}
 				else
 				{
-					registry->insert(
-							std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
+                                        //Replace entry if already existing
+                                        if(registry->find(rid) != registry->end())
+                                            registry->at(rid) = sockets->at(id);
+                                        else
+					registry->insert(std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
 #if DEBUG_CPP
 					printf("SERVER: Registry size: \033[31m%d\033[0m\n",
 							(int) registry->size());
