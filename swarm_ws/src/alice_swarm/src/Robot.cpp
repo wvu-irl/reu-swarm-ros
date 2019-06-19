@@ -55,6 +55,7 @@ AliceStructs::vel Robot::generateComp(std::vector<AliceStructs::ideal> ideals)
 			{
 
 				ideals.at(i).dis = neighbors.at(j).dis;
+				ideals.at(i).dir += neighbors.at(j).ang;
 				vectorQueue.oneToQueue(ideals.at(i));
 			}
 		}

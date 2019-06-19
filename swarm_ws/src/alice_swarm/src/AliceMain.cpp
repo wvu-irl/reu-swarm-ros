@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "AliceBrain");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("vicon_array", 1000, botCallback); //Subscribes to the Vicon
-	ros::Subscriber sub2 = n.subscribe("target", 1000, pointCallback);
+	ros::Subscriber sub2 = n.subscribe("virtual_targets", 1000, pointCallback);
 	ros::Subscriber sub3 = n.subscribe("virtual_obstacles", 1000, obsCallback);
 	ros::Subscriber sub4 = n.subscribe("virtual_flows", 1000, flowCallback);
 	ros::Rate loopRate(50);

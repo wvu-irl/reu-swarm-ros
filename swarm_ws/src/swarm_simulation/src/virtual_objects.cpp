@@ -84,7 +84,7 @@ void makeObstacles(ros::Publisher _pub)
 void makeTargets(ros::Publisher _pub)
 {
 	wvu_swarm_std_msgs::vicon_points vp_vector;
-	//createFood(vp_vector);
+	createFood(vp_vector);
 	_pub.publish(vp_vector);
 
 }

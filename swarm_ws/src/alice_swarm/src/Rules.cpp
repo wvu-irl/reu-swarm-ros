@@ -32,7 +32,7 @@ AliceStructs::vel Rules::followFlow(std::list<AliceStructs::ideal> flows, float 
 	temp_pair1.second = 0;
 	for (auto &flow : flows)
 	{
-			std::pair<float, float> temp_pair2(flow.spd*strength/flow.dis, flow.dir);
+			std::pair<float, float> temp_pair2(flow.spd*strength/(flow.dis+10), flow.dir);
 			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
 	}
 	to_return.mag = temp_pair1.first;
