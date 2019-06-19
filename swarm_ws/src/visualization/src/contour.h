@@ -86,8 +86,8 @@ public:
 	ContourMap(sf::Rect<int> bounds, ColorMap);
 
 	// calculation and darwing functions
-	void tick();
-	void render(sf::RenderWindow *window);
+	void tick(int);
+	void render(sf::RenderTexture *window);
 
 	// sets the function the plot is to resemble
 	void resemble(std::function<double(double, double)> z);
@@ -102,5 +102,5 @@ public:
 	// destructor
 	~ContourMap();
 };
-//#include "contour.cpp"
+//#include "contour.cu"
 #endif

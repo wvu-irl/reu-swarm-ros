@@ -1,69 +1,102 @@
-#include <ros/ros.h>
-
 /*
  *  Compile using
  *
- *      g++ main.cpp -oContour.o -lsfml-graphics -lsfml-window -lsfml-system
- */
+ *       nvcc -ccbin g++ table_vis.cu -o Contour.o -lsfml-graphics -lsfml-window -lsfml-system -gencode arch=compute_37,code=sm_37 -gencode arch=compute_50,code=sm_50 -gencode arch=compute_52,code=sm_52 -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_70,code=sm_70
 
+ */
 #include "contour.h"
 
 #include <math.h>
+#include <unistd.h>
+#include <string.h>
 
-#define WIDTH 1200
-#define HEIGHT 600
+#include <iostream>
+#include <fstream>
+
+#define WIDTH 1280
+#define HEIGHT 800
 
 ContourMap *cont;
+sf::Sprite displaySprite;
 
 static int g_tick = 0;
 
-double function(double x, double y)
+void calibrateFromFile(std::string path)
 {
-	x -= 600;
-	y -= 300;
-	x /= 50;
-	y /= 50;
-	return (x * x - y * y) * sin(M_PI / 50 * g_tick);
+	std::ifstream fin;
+	fin.open(path);
+	if (fin)
+	{
+		std::string vect;
+		std::string ang;
+		std::string wid;
+		std::string hei;
+		fin >> vect;
+		fin >> ang;
+		fin >> wid;
+		fin >> hei;
+
+		std::cout << vect << "\n" << ang << "\n" << wid << "\n" << hei << std::endl;
+
+		char *vectr = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
+		strcpy(vectr, vect.c_str());
+		char *x = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
+		char *y = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
+		strcpy(x, strtok(vectr, ","));
+		strcpy(y, strtok(NULL, ","));
+
+		sf::Vector2f pos(strtod(x, NULL), strtod(y, NULL));
+		float angle = (float)strtod(ang.c_str(), NULL);
+		float width = (float)strtod(wid.c_str(), NULL);
+		float height = (float)strtod(hei.c_str(), NULL);
+
+		displaySprite.rotate(angle);
+		displaySprite.setPosition(pos);
+		displaySprite.scale(sf::Vector2f(width / WIDTH, height / HEIGHT));
+		free(vectr);
+		free(x);
+		free(y);
+		fin.close();
+	}
 }
 
 void tick()
 {
-	cont->tick();
+	cont->tick(g_tick);
 
 	g_tick++;
-	g_tick %= 100;
+	g_tick %= 1000;
 }
 
 void render(sf::RenderWindow *window)
 {
-	cont->render(window);
+	sf::RenderTexture disp;
+	disp.create(WIDTH, HEIGHT);
+	cont->render(&disp);
+	disp.display();
+	displaySprite.setTexture(disp.getTexture());
+	window->draw(displaySprite);
 }
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "table_vis");
-	ros::NodeHandle n;
-
 	ColorMap cmap(std::pair<double, sf::Color>(-10, sf::Color::Red),
 			std::pair<double, sf::Color>(10, sf::Color::Magenta));
 
-	//cmap.addColor(std::tuple<double, sf::Color>(0, sf::Color::White));
-
+	// cmap.addColor(std::tuple<double, sf::Color>(0, sf::Color::White));
 	cmap.addColor(std::tuple<double, sf::Color>(-6.66667, sf::Color::Yellow));
 	cmap.addColor(std::tuple<double, sf::Color>(-3.33333, sf::Color::Green));
 	cmap.addColor(std::tuple<double, sf::Color>(3.33333, sf::Color::Cyan));
 	cmap.addColor(std::tuple<double, sf::Color>(6.66667, sf::Color::Blue));
 
-	cont = new ContourMap(sf::Rect<int>(0, 0, 1200, 600), cmap);
-
-	int j = 0;
+	cont = new ContourMap(sf::Rect<int>(0, 0, 1280, 800), cmap);
+	calibrateFromFile("calib.config");
 	const double num_levels = 9.0;
 	for (double i = -10.0; i <= 10.0; i += 20.0 / num_levels)
 	{
 		cont->levels.push_back(i);
 		std::cout << "Added level: " << i << std::endl;
 	}
-	cont->resemble(function);
 
 	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Contour Plotting",
 			sf::Style::Default);
@@ -89,5 +122,6 @@ int main(int argc, char **argv)
 			render(&window);
 			window.display();
 		}
+		usleep(1000);
 	}
 }

@@ -122,13 +122,13 @@ void Body::borders()
 		//code for hard boundary conditions. Nulls velocity component orthogonal to boundary.
     if ((location.x <=12) ||(location.x >=288))
     {
-    	velocity.x = 0;
+    	//velocity.x = 0;
     	if(location.x <= 12){location.x = 12;}
     	if(location.x >= 288){location.x = 288;}
     }
     if ((location.y <=12) ||(location.y >=588))
 		{
-			velocity.y = 0;
+			//velocity.y = 0;
 			if(location.y <=12){location.y = 12;}
 			if(location.y >=588){location.y = 588;}
 		}
@@ -338,7 +338,7 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 void  Body::seperation(vector<Body> _bodies)
 {
 		// Distance of field of vision for separation between bodies
-    float desiredseparation = 24;
+    float desiredseparation = 15;
     Pvector steer(0, 0);
     int count = 0; //iterator
 

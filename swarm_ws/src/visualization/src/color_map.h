@@ -13,11 +13,9 @@
  */
 class ColorMap
 {
-private:
+public:
 	// contains all the number color sets
 	std::vector<std::tuple<double, sf::Color>> colors;
-
-public:
 
 	// the map must start out with a max and min
 	ColorMap(std::tuple<double, sf::Color> min,
@@ -29,6 +27,7 @@ public:
 
 	// returns the graduated color value from the assembled gradiant
 	sf::Color calculateColor(double val);
-};
 
+};
+//#include "color_map.cu"
 #endif
