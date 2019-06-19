@@ -61,8 +61,13 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 					float x = temp_r * cos(flock.flock.at(i).heading);
 					float y = temp_r * sin(flock.flock.at(i).heading);
-
-					flock.flock.at(i).velocity.set(x, -y);
+					
+					if(flock.flock.at(i).collision == false)
+					{
+						flock.flock.at(i).heading  = fmod(flock.flock.at(i).heading,(2*M_PI));
+						flock.flock.at(i).velocity.set(x, -y);
+						flock.flock.at(i).updatedCommand = true;
+					}
 					/*
 					float theta = msg.commands.at(j).theta/180 * M_PI;
 					if (theta > M_PI / 18 && theta < M_PI)
@@ -85,7 +90,6 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 //							flock.flock.at(i).velocity.set(0,0);
 //					}
 
-					flock.flock.at(i).updatedCommand = true;
 
 //				std::cout<<"new (sum) angle"<< o +  n<<"\n";
 //				std::cout<<"v_new (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
