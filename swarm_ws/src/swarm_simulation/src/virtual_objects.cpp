@@ -91,7 +91,7 @@ void makeTargets(ros::Publisher _pub)
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "virtual_obstacle");
+	ros::init(argc, argv, "virtual_objects");
 	ros::NodeHandle n;
 	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_obstacles", 1000);
 	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_targets",1000);
