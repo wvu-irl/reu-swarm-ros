@@ -30,6 +30,8 @@ private:
     void vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg);
     void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg);
     void targetCallback(const wvu_swarm_std_msgs::vicon_points &msg);
+    void drawObstacles();
+    void drawTargets();
     Flock flock;
     float bodiesSize;
     vector<sf::CircleShape> shapes;

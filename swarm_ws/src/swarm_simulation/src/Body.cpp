@@ -85,8 +85,8 @@ void Body::run(vector <Body> v)
     {
     	update();
     	//elasticCollisions(v);
-    	//inElasticCollisions(v);
-    	seperation(v);
+    	inElasticCollisions(v);
+    	//seperation(v);
     	borders();
     }
 
@@ -197,28 +197,38 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 
 	        	float dy = _bodies.at(i).location.y - location.y;
 					  float dx = _bodies.at(i).location.x - location.x;
-
 					  std::cout<<"dx,dy: "<<dx<<","<<dy<<std::endl;
 
 					  //angle b/w d and origin.
 					  float phi = M_PI_2 + angle(Pvector(dy,dx));
 
-				   	float fx = velocity.x;
-						float fy = velocity.y;
+//				   	float fx = velocity.x;
+//						float fy = velocity.y;
+
+						float fx = force*cos(heading);
+						float fy = force*sin(heading);
+						float mag = sqrt(pow(fx,2) + pow(fy,2));
+						fx = fx/mag;
+						fy = fy/mag;
+
 						float abs_theta = angle(velocity); //global polar angle of velocity
 
-						float rel_theta; //velocity direction in frame of the collision plane
-//						float rel_theta = abs_theta - phi + M_PI_2 + M_PI; //velocity direction in frame of the collision plane
+						float rel_theta; //velocity direction in frame of the collision plane.
 
 	        	if(collision == false)
 	        	{
 	        		collision = true;
 	        	}
 
+	        	phi = angleConvert(phi); //scales angles to the positive and mods them.
+	        	abs_theta = angleConvert(abs_theta);
+
 //	        	if(((abs_theta>0) && (abs_theta<=M_PI_2)) || ((abs_theta>M_PI) && (abs_theta<=3*M_PI_2)))//Q1 and Q3
 	        	if(((phi>0) && (phi<=M_PI_2)) || ((phi>M_PI) && (phi<=3*M_PI_2)))//Q1 and Q3
 	        	{
 	        		rel_theta = abs_theta - phi - M_PI_2;
+	        		rel_theta = angleConvert(rel_theta);
+
 	        		std::cout<<"=Bot is in Q1 or 3=, phi is: "<<phi*180/M_PI<<std::endl;
 	        		std::cout<<"*-velocity direction: "<<abs_theta*180/M_PI<<std::endl;
 
@@ -227,40 +237,39 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 	        			std::cout<<"$-Bot is above-$"<<std::endl;
 	        			std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
 
-	        			if(((rel_theta>=M_PI_2)&&(rel_theta<=3*M_PI_2))||((rel_theta<=-M_PI_2)&&(rel_theta>=-3*M_PI_2)))//vector has any alignment with plane.
+	        			if((rel_theta>=M_PI_2)&&(rel_theta<=3*M_PI_2))//vector has any alignment with plane.
 	        			{
 	        				std::cout<<"directed towards the plane"<<std::endl;
 	        				location.x = prev_location.x;
 	        				location.y = prev_location.y;
 
-	        				fnx = velocity.x - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-	        			  fny = velocity.y - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+	        				fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
+	        			  fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 	        			}
 	        			else
 	        			{
 	        				std::cout<<"directed away from plane"<<std::endl;
-	        				fnx = velocity.x;
-	        				fny = velocity.y;
+	        				fnx = fx;
+	        				fny = fy;
 	        			}
 	        		}
 							else //bellow
 							{
 								std::cout<<"$-Bot is below-$"<<std::endl;
 								std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
-								if(((rel_theta >=0) && (rel_theta>M_PI_2)) || ((rel_theta<2*M_PI) && (rel_theta>3*M_PI_2))
-										||((rel_theta<=0) && (rel_theta>=-M_PI_2))||((rel_theta<=-3*M_PI_2)&&(rel_theta>=-2*M_PI)))
-									//vector has any alignment with plane.
+
+								if(((rel_theta >=0) && (rel_theta>M_PI_2)) || ((rel_theta<2*M_PI) && (rel_theta>3*M_PI_2))) //vector has any alignment with plane.
 								{
 									location.x = prev_location.x;
 									location.y = prev_location.y;
 
-									fnx = velocity.x - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-								  fny = velocity.y - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
+								  fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 								}
 								else
 								{
-									fnx = velocity.x;
-									fny = velocity.y;
+									fnx = fx;
+									fny = fy;
 								}
 							}
 	        	}
@@ -268,41 +277,42 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 						else if(((phi>M_PI_2) && (phi<=M_PI)) || ((phi>3*M_PI_2) && (phi<=2*M_PI))||((phi<0)&&(phi>-3*M_PI_2)))//Q2 and Q4
 						{
 							rel_theta = abs_theta - phi + M_PI_2;
+							rel_theta = angleConvert(rel_theta);
+
 							std::cout<<"=Bot is in Q2 or 4=, phi is: "<<phi*180/M_PI<<std::endl;
 							std::cout<<"*-velocity direction:"<<abs_theta*180/M_PI<<std::endl;
 							if((dx<=0) && (dy>=0)) //above
 							{
 								std::cout<<"$-Bot is above-$"<<std::endl;
 								std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
-								if(((rel_theta>=M_PI_2)&&(rel_theta<=3*M_PI_2))||((rel_theta<=-M_PI_2)&&(rel_theta>=-3*M_PI_2)))//vector has any alignment with plane.
+								if((rel_theta>=M_PI_2)&&(rel_theta<=3*M_PI_2))//vector has any alignment with plane.
 								{
 									std::cout<<"directed towards the plane"<<std::endl;
 									location.x = prev_location.x;
 								  location.y = prev_location.y;
 
-									fnx = velocity.x - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-									fny = velocity.y - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
+									fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 								}
 								else
 								{
 									std::cout<<"away from plane"<<std::endl;
-									fnx = velocity.x;
-									fny = velocity.y;
+									fnx = fx;
+									fny = fy;
 								}
 							}
 							else //bellow
 							{
 								std::cout<<"$-Bot is below-$"<<std::endl;
 								std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
-								if(((rel_theta >=0) && (rel_theta>M_PI_2)) || ((rel_theta<2*M_PI) && (rel_theta>3*M_PI_2))
-										||((rel_theta < 0) && (rel_theta > -3*M_PI_2)))//vector has any alignment with plane.
+								if(((rel_theta >=0) && (rel_theta>M_PI_2)) || ((rel_theta<2*M_PI) && (rel_theta>3*M_PI_2)))//vector has any alignment with plane.
 								{
 									std::cout<<"directed towards the plane"<<std::endl;
 									location.x = prev_location.x;
 									location.y = prev_location.y;
 
-									fnx = velocity.x - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-								  fny = velocity.y - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
+								  fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 								}
 								else
 								{
@@ -310,8 +320,8 @@ void  Body::inElasticCollisions(vector<Body> _bodies)
 									location.x = prev_location.x;
 									location.y = prev_location.y;
 
-									fnx = velocity.x;
-									fny = velocity.y;
+									fnx = fx;
+									fny = fy;
 								}
 							}
 						}
@@ -408,4 +418,14 @@ float Body::angle(Pvector v)
     //float angle = (float)(atan2(v.x, -v.y) );
 	  //^ the way this was written before. Saved it just in case.
     return angle;
+}
+
+float Body::angleConvert(float _x)
+{
+	if(_x<0)
+	{
+		_x = _x + 2*M_PI;
+	}
+	_x = fmod(_x,2*M_PI);
+	return _x;
 }

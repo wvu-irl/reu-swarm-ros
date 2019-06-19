@@ -102,6 +102,7 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 		}
 	}
 }
+
 void Sim::obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
 	obstacles.clear();
@@ -119,6 +120,7 @@ void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 		targets.push_back(msg.point.at(i));
 	}
 }
+
 // Construct window using SFML
 Sim::Sim()
 {
@@ -280,35 +282,9 @@ void Sim::Render() //draws changes in simulation states to the window.
 	window.clear();
 	flock.flocking();
 
-	for (int i = 0; i <targets.size(); i++) //draws targets
-	{
-		sf::CircleShape shape(0);
-		shape.setPosition(targets.at(i).x*3 + 150, 300 - targets.at(i).y*3); // Sets position of shape to random location that body was set to.
-		shape.setOrigin(7.5, 7.5);
-		shape.setFillColor(sf::Color::Green);
-		shape.setOutlineColor(sf::Color::Black);
-		shape.setOutlineThickness(1);
-		shape.setRadius(15);
-		window.draw(shape);
-		//std::cout<<"obstacle number: "<<i<<std::endl;
-		//std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
-		//obs_shapes.push_back(shape);
-	}
+	drawObstacles();
+	drawTargets();
 
-	for (int i = 0; i <obstacles.size(); i++) //draws obstacles
-	{
-		sf::CircleShape shape(0);
-		shape.setPosition(obstacles.at(i).x*3 + 150, 300 - obstacles.at(i).y*3); // Sets position of shape to random location that body was set to.
-		shape.setOrigin(2, 2);
-		shape.setFillColor(sf::Color::Blue);
-		shape.setOutlineColor(sf::Color::Black);
-		shape.setOutlineThickness(1);
-		shape.setRadius(2);
-		window.draw(shape);
-		//std::cout<<"obstacle number: "<<i<<std::endl;
-		//std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
-		//obs_shapes.push_back(shape);
-	}
 // Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)
 	{ // Matches up the location of the shape to the body
@@ -328,6 +304,41 @@ void Sim::Render() //draws changes in simulation states to the window.
 	window.display(); //updates display
 }
 
+void Sim::drawTargets() //draws targets
+{
+	for (int i = 0; i <targets.size(); i++) //draws targets
+	{
+		sf::CircleShape shape(0);
+		shape.setPosition(targets.at(i).x*3 + 150, 300 - targets.at(i).y*3); // Sets position of shape to random location that body was set to.
+		shape.setOrigin(7.5, 7.5);
+		shape.setFillColor(sf::Color::Green);
+		shape.setOutlineColor(sf::Color::Black);
+		shape.setOutlineThickness(1);
+		shape.setRadius(15);
+		window.draw(shape);
+		//std::cout<<"obstacle number: "<<i<<std::endl;
+		//std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
+		//obs_shapes.push_back(shape);
+	}
+
+}
+void Sim::drawObstacles()// draw obstacles
+{
+	for (int i = 0; i <obstacles.size(); i++) //draws obstacles
+	{
+		sf::CircleShape shape(0);
+		shape.setPosition(obstacles.at(i).x*3 + 150, 300 - obstacles.at(i).y*3); // Sets position of shape to random location that body was set to.
+		shape.setOrigin(2, 2);
+		shape.setFillColor(sf::Color::Blue);
+		shape.setOutlineColor(sf::Color::Black);
+		shape.setOutlineThickness(1);
+		shape.setRadius(2);
+		window.draw(shape);
+		//std::cout<<"obstacle number: "<<i<<std::endl;
+		//std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
+		//obs_shapes.push_back(shape);
+	}
+}
 bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event)
 { //checks if pause pressed. Inf loop if so.
 	if ((_key_pressed) && (_pause_pressed))
