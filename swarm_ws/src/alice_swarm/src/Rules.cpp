@@ -23,6 +23,26 @@ std::pair<float, float> Rules::addPolarVectors(std::pair<float, float> v1, std::
 	v.second = atan2(y, x);
 	return v;
 }
+AliceStructs::vel Rules::goToTarget(std::list<AliceStructs::obj> targets, float strength, float fov)
+{
+	AliceStructs::vel to_return;
+	std::pair<float, float> temp_pair1;
+	temp_pair1.first = 0;
+	temp_pair1.second = 0;
+	for (auto &obj : targets)
+	{
+		//std::cout << "there's shit here" << std::endl;
+		//avoids things in direction of travel
+		if ((obj.dir < M_PI / 180 * fov || obj.dir > 2 * M_PI - M_PI / 180 * fov) )
+		{
+			std::pair<float, float> temp_pair2(ROBOT_SIZE * strength / pow(obj.dis, 0.2), obj.dir);
+			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
+		}
+	}
+	to_return.mag = temp_pair1.first;
+	to_return.dir = temp_pair1.second;
+	return to_return;
+}
 
 AliceStructs::vel Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength)
 {
@@ -41,7 +61,6 @@ AliceStructs::vel Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots,
 	to_return.dir = temp_pair1.second;
 	return to_return;
 }
-
 AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, float strength)
 {
 	AliceStructs::vel to_return;
@@ -50,11 +69,10 @@ AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, flo
 	temp_pair1.second = 0;
 	for (auto &bot : bots)
 	{
-		if (bot.dis < ROBOT_SIZE * strength)
-		{
-			std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / bot.dis, 3), M_PI + bot.dir);
-			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
-		}
+
+		std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (bot.dis - ROBOT_SIZE), 3), M_PI + bot.dir);
+		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
+
 	}
 	to_return.mag = temp_pair1.first;
 	to_return.dir = temp_pair1.second;
@@ -71,7 +89,7 @@ AliceStructs::vel Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, float
 	for (auto &bot : bots)
 	{
 		//avoids things in direction of travel
-		if ((bot.dir <M_PI/180*fov || bot.dir > 2 * M_PI - M_PI / 180 * fov) && (bot.dis < (ROBOT_SIZE * strength)))
+		if ((bot.dir < M_PI / 180 * fov || bot.dir > 2 * M_PI - M_PI / 180 * fov))
 		{
 			std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / bot.dis, 3), M_PI + bot.dir);
 			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
@@ -85,27 +103,26 @@ AliceStructs::vel Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, float
 AliceStructs::vel Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength, float fov)
 {
 	AliceStructs::vel to_return;
-		std::pair<float, float> temp_pair1;
-		temp_pair1.first = 0;
-		temp_pair1.second = 0;
-		for (auto &obj : obstacles)
+	std::pair<float, float> temp_pair1;
+	temp_pair1.first = 0;
+	temp_pair1.second = 0;
+	for (auto &obj : obstacles)
+	{
+		//std::cout << "there's shit here" << std::endl;
+		//avoids things in direction of travel
+		if ((obj.dir < M_PI / 180 * fov || obj.dir > 2 * M_PI - M_PI / 180 * fov))
 		{
-			//std::cout << "there's shit here" << std::endl;
-			//avoids things in direction of travel
-			if ((obj.dir <M_PI/180*fov || obj.dir > 2 * M_PI - M_PI / 180 * fov) && (obj.dis < ROBOT_SIZE * strength))
-			{
-				std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / obj.dis, 3), M_PI + obj.dir);
-				temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
-			} else if (obj.dis < ROBOT_SIZE * strength)
-			{
-				//std::cout << "yeeting" << std::endl;
-				std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / obj.dis, 3), M_PI + obj.dir);
-				temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
-			}
+			std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (obj.dis - ROBOT_SIZE), 3), M_PI + obj.dir);
+			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
 		}
-		to_return.mag = temp_pair1.first;
-		to_return.dir = temp_pair1.second;
-		return to_return;
+		//std::cout << "yeeting" << std::endl;
+		std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (obj.dis - ROBOT_SIZE), 3), M_PI + obj.dir);
+		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
+
+	}
+	to_return.mag = temp_pair1.first;
+	to_return.dir = temp_pair1.second;
+	return to_return;
 }
 
 /*

@@ -19,6 +19,9 @@ public:
 
 	AliceStructs::vel dummy1();
 
+	AliceStructs::vel goToTarget(std::list<AliceStructs::obj> targets, float strength, float fov);
+
+
 	AliceStructs::vel maintainSpacing(std::list <AliceStructs::neighbor> bots,float strength);
 
 	AliceStructs::vel magnetAvoid(std::list <AliceStructs::neighbor> bots, float strength);

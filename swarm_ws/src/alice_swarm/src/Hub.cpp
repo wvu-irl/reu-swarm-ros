@@ -142,7 +142,7 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 	for (int j = 0; j < num_pts; j++)
 	{
 		std::pair<float, float> temp = {targets.point.at(j).x,targets.point.at(j).y};
-		AliceStructs::obj temp2 = getSeparation(bots[i], temp, 10000);
+		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
 		if (temp2.dis > -1)
 		{
 			t.push_back(temp2);
@@ -158,7 +158,7 @@ void Hub::addObsPointMail(int i, AliceStructs::mail &_mail)
 		for (int j = 0; j < num_pts; j++)
 		{
 			std::pair<float, float> temp = {obstacles.point.at(j).x,obstacles.point.at(j).y};
-			AliceStructs::obj temp2 = getSeparation(bots[i], temp, TOLERANCE);
+			AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
 			if (temp2.dis > -1)
 			{
 				o.push_back(temp2);

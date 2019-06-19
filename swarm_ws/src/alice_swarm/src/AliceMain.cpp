@@ -33,10 +33,9 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 
-		wvu_swarm_std_msgs::vicon_points tempTarget;
-//		=
-//				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
-//						> ("target"));
+		wvu_swarm_std_msgs::vicon_points tempTarget=
+				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
+						> ("virtual_targets"));
 		wvu_swarm_std_msgs::vicon_bot_array tempBotArray =
 				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_bot_array
 						> ("vicon_array"));

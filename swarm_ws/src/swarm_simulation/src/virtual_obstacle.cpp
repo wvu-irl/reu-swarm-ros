@@ -49,22 +49,57 @@ void createBoundary(wvu_swarm_std_msgs::vicon_points &in_vector)
 
 }
 
-void makeAndPublish(ros::Publisher _pub)
+void createFood(wvu_swarm_std_msgs::vicon_points &in_vector)
+{
+	wvu_swarm_std_msgs::vicon_point cur0;
+		cur0.x=0;
+		cur0.y=-80;
+		in_vector.point.push_back(cur0);
+//	for (int i=0; i<20; i++)
+//	{
+//	wvu_swarm_std_msgs::vicon_point cur0;
+//	cur0.x=25*cos(2*M_PI*i/20);
+//	cur0.y=50*sin(2*M_PI*i/20);
+//	in_vector.point.push_back(cur0);
+//	wvu_swarm_std_msgs::vicon_point cur1;
+//		cur1.x=15*cos(2*M_PI*i/20);
+//		cur1.y=30*sin(2*M_PI*i/20);
+//		in_vector.point.push_back(cur1);
+//		wvu_swarm_std_msgs::vicon_point cur2;
+//			cur2.x=5*cos(2*M_PI*i/20);
+//			cur2.y=10*sin(2*M_PI*i/20);
+//			in_vector.point.push_back(cur2);
+//	}
+
+}
+
+void makeObstacles(ros::Publisher _pub)
 {
 	wvu_swarm_std_msgs::vicon_points vp_vector;
 	createBoundary(vp_vector);
 	_pub.publish(vp_vector);
 
 }
+
+void makeTargets(ros::Publisher _pub)
+{
+	wvu_swarm_std_msgs::vicon_points vp_vector;
+	createFood(vp_vector);
+	_pub.publish(vp_vector);
+
+}
+
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "virtual_obstacle");
 	ros::NodeHandle n;
-	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_obstacles", 1000);
+	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_obstacles", 1000);
+	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_targets",1000);
 	ros::Rate loopRate(50);
 	while (ros::ok())
 	{
-		makeAndPublish(pub);
+		makeObstacles(pub1);
+		makeTargets(pub2);
 		ros::spinOnce();
 		loopRate.sleep();
 	}
