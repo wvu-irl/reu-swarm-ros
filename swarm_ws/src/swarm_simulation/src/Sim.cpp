@@ -41,34 +41,29 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 					//flock.flock.at(i).heading = fmod(flock.flock.at(i).heading + 2*M_PI, 2*M_PI);
 
-					float a;
-					float b;
-					float temp_r;
+//					float a;
+//					float b;
+//					float temp_r;
+//
+//					float theta = msg.commands.at(j).theta/180 * M_PI;
+//					float r = msg.commands.at(j).r;
+//					if (0 < theta && theta < M_PI) {
+//						a = 1;
+//						b = r * cos(theta/2);
+//						temp_r = b;
+//				   	flock.flock.at(i).heading += M_PI/18 * theta;
+//					} else if (M_PI < theta && theta < 2*M_PI) {
+//						b = 1;
+//						a = -r * cos(theta/2);
+//						temp_r = a;
+//						flock.flock.at(i).heading -= M_PI/18 * (2*M_PI - theta);
+//					}
+//
+//					float x = temp_r * cos(flock.flock.at(i).heading);
+//					float y = temp_r * sin(flock.flock.at(i).heading);
+//
 
-					float theta = msg.commands.at(j).theta/180 * M_PI;
-					float r = msg.commands.at(j).r;
-					if (0 < theta && theta < M_PI) {
-						a = 1;
-						b = r * cos(theta/2);
-						temp_r = b;
-				   	flock.flock.at(i).heading += M_PI/18 * theta;
-					} else if (M_PI < theta && theta < 2*M_PI) {
-						b = 1;
-						a = -r * cos(theta/2);
-						temp_r = a;
-						flock.flock.at(i).heading -= M_PI/18 * (2*M_PI - theta);
-					}
-
-					float x = temp_r * cos(flock.flock.at(i).heading);
-					float y = temp_r * sin(flock.flock.at(i).heading);
 					
-					if(flock.flock.at(i).collision == false)
-					{
-						flock.flock.at(i).heading  = fmod(flock.flock.at(i).heading,(2*M_PI));
-						flock.flock.at(i).velocity.set(x, -y);
-						flock.flock.at(i).updatedCommand = true;
-					}
-					/*
 					float theta = msg.commands.at(j).theta/180 * M_PI;
 					if (theta > M_PI / 18 && theta < M_PI)
 					{
@@ -84,8 +79,14 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 						flock.flock.at(i).heading += theta;
 						flock.flock.at(i).velocity.set(1 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
 								-1 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
-					} */
+					}
 
+//					if(flock.flock.at(i).collision == false)
+//					{
+//						flock.flock.at(i).heading  = fmod(flock.flock.at(i).heading,(2*M_PI));
+//						//flock.flock.at(i).velocity.set(x, -y);
+//						flock.flock.at(i).updatedCommand = true;
+//					}
 //					if (msg.commands.at(j).r <0.01) {
 //							flock.flock.at(i).velocity.set(0,0);
 //					}
@@ -100,7 +101,14 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 		}
 	}
 }
-
+void Sim::obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
+{
+	obstacles.clear();
+	for(int i = 0; i <msg.point.size(); i++)
+	{
+		obstacles.push_back(msg.point.at(i));
+	}
+}
 // Construct window using SFML
 Sim::Sim()
 {
@@ -179,6 +187,7 @@ void Sim::Run(ros::NodeHandle _n)
 	sleep(1);
 	ros::Publisher pub = _n.advertise < wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array", 1000); //Publishes like Vicon
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
+	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to funnel
 	ros::Rate loopRate(50);
 
 	//publishes initial information for each bot
@@ -259,6 +268,22 @@ void Sim::Render() //draws changes in simulation states to the window.
 {
 	window.clear();
 	flock.flocking();
+	for (int i = 0; i <obstacles.size(); i++)
+	{
+		sf::CircleShape shape(0);
+		// Changing the Visual Properties of the shape.
+		shape.setPosition(obstacles.at(i).x*3 + 150, 300 - obstacles.at(i).y*3); // Sets position of shape to random location that body was set to.
+		shape.setOrigin(2, 2);
+		//shape.setPosition(window_width, window_height); // Testing purposes, starts all shapes in the center of screen.
+		shape.setFillColor(sf::Color::Blue);
+		shape.setOutlineColor(sf::Color::Black);
+		shape.setOutlineThickness(1);
+		shape.setRadius(2);
+		window.draw(shape);
+		std::cout<<"obstacle number: "<<i<<std::endl;
+		std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
+		//obs_shapes.push_back(shape);
+	}
 // Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)
 	{ // Matches up the location of the shape to the body
