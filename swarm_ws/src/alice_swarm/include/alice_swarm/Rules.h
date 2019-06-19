@@ -21,6 +21,8 @@ public:
 
 	AliceStructs::vel goToTarget(std::list<AliceStructs::obj> targets, float strength, float fov);
 
+	AliceStructs::vel followFlow(std::list<AliceStructs::ideal> flows, float strength);
+
 
 	AliceStructs::vel maintainSpacing(std::list <AliceStructs::neighbor> bots,float strength);
 

@@ -50,11 +50,12 @@ AliceStructs::ideal Model::generateIdeal()
 
 	std::vector<AliceStructs::vel> ideal_list =
 	{ //rules.dummy1(),
-			rules.goToTarget(targets,5,180),
-			rules.avoidObstacles(obstacles, 4, 180),
-			rules.magnetAvoid(robots, 4),
-			rules.birdAvoid(robots, 4, 30),
-			rules.maintainSpacing(robots, 1)
+		//	rules.goToTarget(targets,5,180),
+			rules.followFlow(flows,8),
+			rules.avoidObstacles(obstacles, 2, 180),
+			rules.magnetAvoid(robots, 2),
+			//rules.birdAvoid(robots, 4, 30),
+			//rules.maintainSpacing(robots, 1)
 			};
 	for (int i = 0; i < ideal_list.size(); i++)
 	{
@@ -90,6 +91,10 @@ void Model::addToModel(AliceStructs::mail toAdd)
 	{
 		targets.push_back(item);
 	}
+	for (auto& item : toAdd.flows)
+		{
+			flows.push_back(item);
+		}
 }
 
 void Model::clear()

@@ -23,6 +23,23 @@ std::pair<float, float> Rules::addPolarVectors(std::pair<float, float> v1, std::
 	v.second = atan2(y, x);
 	return v;
 }
+
+AliceStructs::vel Rules::followFlow(std::list<AliceStructs::ideal> flows, float strength)
+{
+	AliceStructs::vel to_return;
+	std::pair<float, float> temp_pair1;
+	temp_pair1.first = 0;
+	temp_pair1.second = 0;
+	for (auto &flow : flows)
+	{
+			std::pair<float, float> temp_pair2(flow.spd*strength/flow.dis, flow.dir);
+			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
+	}
+	to_return.mag = temp_pair1.first;
+	to_return.dir = temp_pair1.second;
+	return to_return;
+}
+
 AliceStructs::vel Rules::goToTarget(std::list<AliceStructs::obj> targets, float strength, float fov)
 {
 	AliceStructs::vel to_return;

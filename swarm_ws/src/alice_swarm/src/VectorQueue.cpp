@@ -34,7 +34,7 @@ AliceStructs::vel VectorQueue::createCompromise()
 		std::pair<float, float> temp;
 		AliceStructs::ideal current = vectorQueue.back();
 		vectorQueue.pop_back();
-		temp.first= pow((current.spd / (current.dis + 1)), 3);
+		temp.first= pow((current.spd / (current.dis + 10)), 2);
 		temp.second = current.dir;
 		//std:: cout << temp.first << " " << temp.second << std::endl;
 		if (temp.first > 0.01) compromise = addPolarVectors(compromise, temp);

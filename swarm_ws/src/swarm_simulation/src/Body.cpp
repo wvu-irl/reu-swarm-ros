@@ -25,7 +25,7 @@ Body::Body(float x, float y, char _id[2])
     velocity = Pvector(0,0);
     location = Pvector(x, y);
     prev_location = Pvector(x,y);
-    maxSpeed = 0.9;
+    maxSpeed = 0.8;
     maxForce = 0.5;
     id[0] = _id[0];
     id[1] = _id[1];
@@ -85,8 +85,8 @@ void Body::run(vector <Body> v)
     {
     	update();
     	//elasticCollisions(v);
-    	inElasticCollisions(v);
-    	//seperation(v);
+    	//inElasticCollisions(v);
+    	seperation(v);
     	borders();
     }
 
@@ -177,7 +177,7 @@ void Body::elasticCollisions(vector<Body> _bodies)
 void  Body::inElasticCollisions(vector<Body> _bodies)
 {
 	    //Magnatude of separation between bodies
-	    float desiredseparation = 24;
+	    float desiredseparation = 15;
 	    Pvector steer(0, 0);
 	    int count = 0; //iterator
 

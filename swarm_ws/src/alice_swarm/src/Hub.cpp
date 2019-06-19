@@ -9,7 +9,7 @@
 #include <tf/LinearMath/Matrix3x3.h>
 #include <math.h>
 #include <swarm_server/robot_id.h>
-
+#include <chrono>
 AliceStructs::obj Hub::getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance) //helper function for finding obstacle points.
 { // takes current bot and looks at distance to each obs point. If it "sees"[[ it, converts that obs to polar and pushes to its vector stored in polar_obs.
 	float loc_r; //|distance| b/w bot and current obstacle point.
@@ -45,6 +45,7 @@ Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reas
 void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
 		wvu_swarm_std_msgs::vicon_points &_o, wvu_swarm_std_msgs::flows &_f)
 {
+
 	clearHub();
 	viconBotArray = _b;
 	targets = _t;
@@ -52,6 +53,7 @@ void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vi
 	flows = _f;
 	processVicon(); //needed cause this data needs to be converted first
 	findNeighbors();
+
 }
 
 void Hub::processVicon() //Fills in bots[]
@@ -143,12 +145,12 @@ void Hub::addNeighborMail(int i, AliceStructs::mail &_mail)
 void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
 {
 	std::vector<AliceStructs::ideal> f;
-	int num_pts = targets.point.size();
+	int num_pts = flows.flow.size();
 	for (int j = 0; j < num_pts; j++)
 	{
 		std::pair<float, float> temp =
 		{ flows.flow.at(j).x, flows.flow.at(j).y };
-		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
+		AliceStructs::obj temp2 = getSeparation(bots[i], temp, 10000);
 		if (temp2.dis > -1)
 		{
 			AliceStructs::ideal temp3;
@@ -213,6 +215,7 @@ AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Al
 	addObsPointMail(i, temp);
 	addNeighborMail(i, temp);
 	addTargetMail(i, temp);
+
 	addFlowMail(i, temp);
 	temp.name = ridOrder.at(i);
 	//printAliceMail(temp);

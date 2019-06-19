@@ -10,7 +10,7 @@ public:
 	std::list <AliceStructs::obj> obstacles;
 	std::list <AliceStructs::neighbor> robots;
 	std::list <AliceStructs::obj> targets;
-
+	std::list <AliceStructs::ideal> flows;
 	Rules rules;
 
 	Model();//dummy
