@@ -36,7 +36,7 @@
 class Body {
 
 private:
-
+		float angleConvert(float _x);
 	  //wvu_swarm_std_msgs::vicon_bot_array createMessages(std::vector<Body> _flock);//vector<Body> _flock); //operates on flock
 		//char[2] getID();
 public:

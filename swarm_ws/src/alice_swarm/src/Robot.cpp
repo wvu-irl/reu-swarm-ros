@@ -34,7 +34,7 @@ void Robot::receiveMsg(AliceStructs::mail data)
 AliceStructs::ideal Robot::generateIdeal()
 {
 	AliceStructs::ideal to_return = model.generateIdeal();
-	std::cout << name << std::endl;
+	//std::cout << name << std::endl;
 	model.clear();
 	vectorQueue.oneToQueue(to_return/*originally had "ideal", had no idea what was intended*/);
 	return to_return;
