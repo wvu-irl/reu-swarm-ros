@@ -33,18 +33,21 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 
-		wvu_swarm_std_msgs::vicon_points tempTarget=
+		wvu_swarm_std_msgs::vicon_points temp_target=
 				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
 						> ("virtual_targets"));
-		wvu_swarm_std_msgs::vicon_bot_array tempBotArray =
+		wvu_swarm_std_msgs::vicon_bot_array temp_bot_array =
 				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_bot_array
 						> ("vicon_array"));
 		wvu_swarm_std_msgs::vicon_points temp_obs_array =
 				*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
 						> ("virtual_obstacles"));
+		wvu_swarm_std_msgs::flows temp_flow_array =
+						*(ros::topic::waitForMessage < wvu_swarm_std_msgs::flows
+								> ("virtual_flows"));
 
-		aliceBrain.update(tempBotArray, tempTarget, temp_obs_array); //puts in absolute data from subscribers
-		for (int i = 0; i < tempBotArray.poseVect.size(); i++)
+		aliceBrain.update(temp_bot_array, temp_target, temp_obs_array,temp_flow_array); //puts in absolute data from subscribers
+		for (int i = 0; i < temp_bot_array.poseVect.size(); i++)
 		{
 			aliceMap[i].receiveMsg(aliceBrain.getAliceMail(i)); //gives each robot the relative data it needs
 		}

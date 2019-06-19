@@ -32,13 +32,13 @@ add_library(Pvector src/Pvector.cpp)
 
 
 add_executable(main src/main.cpp)
-add_executable(virtual_obstacle src/virtual_obstacle.cpp)
+add_executable(virtual_objects src/virtual_objects.cpp)
 
 target_link_libraries(main ${catkin_LIBRARIES} Sim)
 target_link_libraries(Sim ${catkin_LIBRARIES} Flock Body Pvector)
 target_link_libraries(Body ${catkin_LIBRARIES}) 
 target_link_libraries(Flock ${catkin_LIBRARIES})
-target_link_libraries(virtual_obstacle ${catkin_LIBRARIES})
+target_link_libraries(virtual_objects ${catkin_LIBRARIES})
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 #Find any version 2.X of SFML

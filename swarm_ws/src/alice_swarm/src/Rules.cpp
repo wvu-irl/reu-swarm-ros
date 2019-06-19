@@ -110,11 +110,7 @@ AliceStructs::vel Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles, 
 	{
 		//std::cout << "there's shit here" << std::endl;
 		//avoids things in direction of travel
-		if ((obj.dir < M_PI / 180 * fov || obj.dir > 2 * M_PI - M_PI / 180 * fov))
-		{
-			std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (obj.dis - ROBOT_SIZE), 3), M_PI + obj.dir);
-			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
-		}
+
 		//std::cout << "yeeting" << std::endl;
 		std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (obj.dis - ROBOT_SIZE), 3), M_PI + obj.dir);
 		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);

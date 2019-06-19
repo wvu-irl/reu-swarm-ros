@@ -33,6 +33,8 @@ find_package(catkin REQUIRED COMPONENTS
     robot_command_array.msg
     sensor_data.msg
     obs_point_mail.msg
+    flow.msg
+    flows.msg
   )
 
 ## Generate added messages and services with any dependencies listed here

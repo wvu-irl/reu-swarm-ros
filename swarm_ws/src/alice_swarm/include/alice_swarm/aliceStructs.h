@@ -36,6 +36,7 @@ namespace AliceStructs {
 		std::vector<neighbor> neighbors;
 		std::vector<obj> obstacles;
 		std::vector<obj> targets;
+		std::vector<ideal> flows;
 		int name;
 	} mail;
 };

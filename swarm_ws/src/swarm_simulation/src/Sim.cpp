@@ -65,15 +65,15 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 					
 					float theta = msg.commands.at(j).theta/180 * M_PI;
-					if (theta > M_PI / 18 && theta < M_PI)
+					if (theta > M_PI / 12 && theta < M_PI)
 					{
 						flock.flock.at(i).velocity.set(0, 0);
-						flock.flock.at(i).heading += M_PI / 18;
+						flock.flock.at(i).heading += M_PI / 12;
 
-					} else if (theta < 35 * M_PI / 18 && theta > M_PI)
+					} else if (theta < 23 * M_PI / 12 && theta > M_PI)
 					{
 						flock.flock.at(i).velocity.set(0, 0);
-						flock.flock.at(i).heading -= M_PI / 18;
+						flock.flock.at(i).heading -= M_PI / 12;
 					} else
 					{
 						flock.flock.at(i).heading += theta;

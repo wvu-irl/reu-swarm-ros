@@ -3,7 +3,7 @@
 	<node pkg="swarm_simulation" type="main" name="Simulation" output="screen"/>
 		
 	<!-- Launching virtual obstacle node -->
-	<node pkg="swarm_simulation"  type="virtual_obstacle" name="virtual_obstacle" output="screen"/>
+	<node pkg="swarm_simulation"  type="virtual_objects" name="virtual_objects" output="screen"/>
 		
 	
 	
