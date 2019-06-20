@@ -239,7 +239,7 @@ void Body::borders()
 		}
 }
 
-void Body::inelasticCollisions(vector<Body> _bodies)
+void Body::inElasticCollisions(vector<Body> _bodies)
 {
 	    //Magnitude of separation between bodies
 	    float desiredseparation = 15;
