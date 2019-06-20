@@ -294,6 +294,51 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		} //-----------------------------------------------------------------------------------------
 	}
 	return _pI; //tracks state of dragging (see sim.h)
+
+
+//	// Checks or A to be pressed, draws and adds bodies to flock if so.
+//	  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+//	        // Gets mouse coordinates, sets that as the location of the body and the shape
+//	        sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
+//	        Body b(mouseCoords.x, mouseCoords.y, false);
+//	        sf::CircleShape shape(4);
+//
+//	        // Changing visual properties of newly created body
+//	        shape.setPosition(mouseCoords.x, mouseCoords.y);
+//	        shape.setOutlineColor(sf::Color::White);
+//	        shape.setFillColor(sf::Color::White);
+//	        shape.setOutlineColor(sf::Color::White);
+//	        shape.setOutlineThickness(1);
+//	        shape.setRadius(bodiesSize);
+//
+//	        // Adds newly created body and shape to their respective data structure
+//	        flock.addBody(b);
+//	        shapes.push_back(shape);
+//
+//	        // New Shape is drawn
+//	        window.draw(shapes[shapes.size() - 1]);
+//	    }
+//
+//	    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Delete)) {
+//	          // Gets mouse coordinates, sets that as the location of the body and the shape
+//	          sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
+//	          Body b(mouseCoords.x, mouseCoords.y, false);
+//	          sf::CircleShape shape(4);
+//
+//	          // Changing visual properties of newly created body
+//	          shape.setPosition(mouseCoords.x, mouseCoords.y);
+//	          shape.setOutlineColor(sf::Color::White);
+//	          shape.setFillColor(sf::Color::White);
+//	          shape.setOutlineColor(sf::Color::White);
+//	          shape.setOutlineThickness(1);
+//	          shape.setRadius(bodiesSize);
+//
+//	          //deletes bodies from the second through the hird element
+//	          shapes.erase(shapes.begin() + 1, shapes.begin() + 2);
+//
+//	      }
+
+
 }
 
 void Sim::Render() //draws changes in simulation states to the window.
