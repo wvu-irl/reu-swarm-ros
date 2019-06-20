@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 	ros::Rate loopRate(50);
 	sleep(1); //waits for sim to be awake
 	int i = 0;
-	while (ros::ok() && i < 10)
+	while (ros::ok() && i < 20)
 	{
 		makeObstacles(pub1);
 		makeTargets(pub2);

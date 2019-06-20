@@ -55,7 +55,7 @@ AliceStructs::ideal Model::generateIdeal()
 			rules.avoidObstacles(obstacles, 2, 180),
 			rules.magnetAvoid(robots, 3),
 			//rules.birdAvoid(robots, 4, 30),
-			rules.maintainSpacing(robots, 0.1)
+			rules.maintainSpacing(robots, 0.3)
 			};
 	for (int i = 0; i < ideal_list.size(); i++)
 	{

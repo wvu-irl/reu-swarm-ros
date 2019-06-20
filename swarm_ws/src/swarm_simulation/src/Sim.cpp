@@ -65,12 +65,12 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 					if (theta > M_PI / 12 && theta < M_PI)
 					{
 						flock.flock.at(i).velocity.set(0, 0);
-						flock.flock.at(i).heading += M_PI / 12;
+						flock.flock.at(i).heading += M_PI / 24;
 
 					} else if (theta < 23 * M_PI / 12 && theta > M_PI)
 					{
 						flock.flock.at(i).velocity.set(0, 0);
-						flock.flock.at(i).heading -= M_PI / 12;
+						flock.flock.at(i).heading -= M_PI / 24;
 					} else
 					{
 						flock.flock.at(i).heading += theta;
@@ -299,7 +299,6 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		{
 			targets.point.at(i).x = sf::Mouse::getPosition(window).x/3-50;; //event.mouseButton.x;
 			targets.point.at(i).y = sf::Mouse::getPosition(window).y/-3+100; //event.mouseButton.y;
-			std::cout << "yo" << std::endl;
 		}
 		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == true)
