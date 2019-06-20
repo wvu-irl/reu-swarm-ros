@@ -52,7 +52,7 @@ AliceStructs::vel Robot::generateComp(std::vector<AliceStructs::ideal> ideals)
 	{
 		for (int j = 0; j < neighbors.size(); j++)
 		{
-			if (ideals.at(i).name == neighbors.at(j).name && sid==neighbors.at(j).sid)
+			if (ideals.at(i).name == neighbors.at(j).name && (sid==neighbors.at(j).sid && sid==0))
 			{
 
 				ideals.at(i).dis = neighbors.at(j).dis;

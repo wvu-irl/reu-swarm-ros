@@ -54,12 +54,12 @@ void createFood(wvu_swarm_std_msgs::vicon_points &in_vector)
 	wvu_swarm_std_msgs::vicon_point cur0;
 	cur0.x = 0;
 	cur0.y = -80;
-	cur0.sid = 0;
+	cur0.sid = 1;
 	in_vector.point.push_back(cur0);
 	wvu_swarm_std_msgs::vicon_point cur1;
 	cur1.x = 0;
 	cur1.y = 80;
-	cur1.sid = 1;
+	cur1.sid = 2;
 	in_vector.point.push_back(cur1);
 
 }

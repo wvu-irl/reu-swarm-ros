@@ -77,7 +77,7 @@ void Hub::processVicon() //Fills in bots[]
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 		bots.push_back(
 				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, numID %2));
+						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, numID %2+1));
 		std::vector<Bot> temp;
 		ridOrder.push_back(numID);
 		neighbors.push_back(temp);
