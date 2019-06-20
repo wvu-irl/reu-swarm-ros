@@ -38,17 +38,17 @@ void calibrateFromFile(std::string path)
 
 		std::cout << vect << "\n" << ang << "\n" << wid << "\n" << hei << std::endl;
 
-		char *vectr = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
+		char *vectr = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
 		strcpy(vectr, vect.c_str());
-		char *x = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
-		char *y = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
+		char *x = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
+		char *y = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
 		strcpy(x, strtok(vectr, ","));
 		strcpy(y, strtok(NULL, ","));
 
 		sf::Vector2f pos(strtod(x, NULL), strtod(y, NULL));
-		float angle = (float)strtod(ang.c_str(), NULL);
-		float width = (float)strtod(wid.c_str(), NULL);
-		float height = (float)strtod(hei.c_str(), NULL);
+		float angle = (float) strtod(ang.c_str(), NULL);
+		float width = (float) strtod(wid.c_str(), NULL);
+		float height = (float) strtod(hei.c_str(), NULL);
 
 		displaySprite.rotate(angle);
 		displaySprite.setPosition(pos);
