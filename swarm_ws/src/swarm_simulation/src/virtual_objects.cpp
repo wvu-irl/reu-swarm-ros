@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 	while (ros::ok() && i < 20)
 	{
 		makeObstacles(pub1);
-		makeTargets(pub2);
+
 		makeFlows(pub3);
 		ros::spinOnce();
 		loopRate.sleep();
@@ -126,6 +126,7 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 		makeObstacles(pub1);
+		makeTargets(pub2);
 		makeFlows(pub3);
 		ros::spinOnce();
 		loopRate.sleep();
