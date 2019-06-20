@@ -46,6 +46,7 @@ private:
 public:
 		char id [2];
 		float heading;
+		int sid;
 		float force;
     bool predator;
     Pvector location;

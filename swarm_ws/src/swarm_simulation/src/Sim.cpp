@@ -8,7 +8,6 @@
 #include <math.h>
 #include <wvu_swarm_std_msgs/robot_command_array.h>
 //#include "ros/ros.h"
-
 void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 {
 	for (int i = 0; i < flock.flock.size(); i++)
@@ -41,29 +40,30 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 					//flock.flock.at(i).heading = fmod(flock.flock.at(i).heading + 2*M_PI, 2*M_PI);
 
-//					float a;
-//					float b;
-//					float temp_r;
-//
-//					float theta = msg.commands.at(j).theta/180 * M_PI;
-//					float r = msg.commands.at(j).r;
-//					if (0 < theta && theta < M_PI) {
-//						a = 1;
-//						b = r * cos(theta/2);
-//						temp_r = b;
-//				   	flock.flock.at(i).heading += M_PI/18 * theta;
-//					} else if (M_PI < theta && theta < 2*M_PI) {
-//						b = 1;
-//						a = -r * cos(theta/2);
-//						temp_r = a;
-//						flock.flock.at(i).heading -= M_PI/18 * (2*M_PI - theta);
-//					}
-//
-//					float x = temp_r * cos(flock.flock.at(i).heading);
-//					float y = temp_r * sin(flock.flock.at(i).heading);
-//
+					float a;
+					float b;
+					float temp_r;
 
-					
+					float theta = msg.commands.at(j).theta/180 * M_PI;
+					float r = msg.commands.at(j).r;
+					if (0 < theta && theta < M_PI) {
+						a = 1;
+						b = r * cos(theta/2);
+						temp_r = b;
+				   	flock.flock.at(i).heading += M_PI/90 * theta;
+					} else if (M_PI < theta && theta < 2*M_PI) {
+						b = 1;
+						a = -r * cos(theta/2);
+						temp_r = a;
+						flock.flock.at(i).heading -= M_PI/90 * (2*M_PI - theta);
+					}
+
+					float x = temp_r * cos(flock.flock.at(i).heading);
+					float y = temp_r * sin(flock.flock.at(i).heading);
+
+					flock.flock.at(i).velocity.set(x,-y);
+
+					/*
 					float theta = msg.commands.at(j).theta/180 * M_PI;
 					if (theta > M_PI / 12 && theta < M_PI)
 					{
@@ -93,13 +93,20 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 //					}
 //					if (msg.commands.at(j).r <0.01) {
 //							flock.flock.at(i).velocity.set(0,0);
-//					}
+//					}*/
 
 
 //				std::cout<<"new (sum) angle"<< o +  n<<"\n";
 //				std::cout<<"v_new (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
 //				std::cout<<"-----------------------------\n";
 //				^more fun facts, if ya want um.
+
+					//This code is important for proper function of the physics
+					flock.flock.at(i).heading = fmod(flock.flock.at(i).heading,2*M_PI);
+					if(flock.flock.at(i).heading < 0)
+					{
+						flock.flock.at(i).heading +=2*M_PI;
+					}
 					flock.flock.at(i).updatedCommand = true;
 				}
 			}
@@ -110,7 +117,7 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 void Sim::obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
 	obstacles.clear();
-	for(int i = 0; i <msg.point.size(); i++)
+	for (int i = 0; i < msg.point.size(); i++)
 	{
 		obstacles.push_back(msg.point.at(i));
 	}
@@ -118,11 +125,7 @@ void Sim::obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 
 void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
-	targets.clear();
-	for(int i = 0; i <msg.point.size(); i++)
-	{
-		targets.push_back(msg.point.at(i));
-	}
+	targets = msg;
 }
 
 // Construct window using SFML
@@ -164,13 +167,17 @@ void Sim::Run(ros::NodeHandle _n)
 //		std::cout<<"x,y: "<<x<<","<<y<<"\n";
 
 		Body b(x, y, temp); // Starts all bodies in the center of the screen
+		b.sid = i % 2 + 1;
 		sf::CircleShape shape(0);
 
 		// Changing the Visual Properties of the shape.
 		shape.setPosition(b.location.x, b.location.y); // Sets position of shape to random location that body was set to.
 		shape.setOrigin(7.5, 7.5);
 		//shape.setPosition(window_width, window_height); // Testing purposes, starts all shapes in the center of screen.
-		shape.setFillColor(sf::Color::Yellow);
+		if (b.sid == 1)
+			shape.setFillColor(sf::Color::Yellow);
+		else
+			shape.setFillColor(sf::Color::Cyan);
 		shape.setOutlineColor(sf::Color::White);
 		shape.setOutlineThickness(1);
 		shape.setRadius(bodiesSize);
@@ -182,12 +189,14 @@ void Sim::Run(ros::NodeHandle _n)
 		line.setPosition(b.location.x, b.location.y);
 		line.setOrigin(-2, 1);
 
+
 		// Adding the body to the flock and adding the shapes to the vector<sf::CircleShape>
 		flock.addBody(b);
 		shapes.push_back(shape);
 
 		//saves a vector of lines (one for each bot).
 		lines.push_back(line);
+
 
 		//draw all obejcts on window.
 		window.draw(shape);
@@ -200,11 +209,12 @@ void Sim::Run(ros::NodeHandle _n)
 
 	}
 	window.display();
-	sleep(1);
+
 	ros::Publisher pub = _n.advertise < wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array", 1000); //Publishes like Vicon
+	ros::Publisher pub2 = _n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_targets", 1000);
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
 	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to virtual obstacles
-	ros::Subscriber sub3 = _n.subscribe("virtual_targets",1000,&Sim::targetCallback, this); //gets virtual targets
+	ros::Subscriber sub3 = _n.subscribe("virtual_targets", 1000, &Sim::targetCallback, this); //gets virtual targets
 	ros::Rate loopRate(50);
 
 	//publishes initial information for each bot
@@ -220,6 +230,14 @@ void Sim::Run(ros::NodeHandle _n)
 		//publishing vicon_bot_array
 		//flock.printMessage(vb_array);
 		pub.publish(vb_array);
+//		if (targets.point.size() > 0)
+//		{
+//			targets.point.at(0).x = vb_array.poseVect.at(0).botPose.transform.translation.x;
+//			targets.point.at(0).y = vb_array.poseVect.at(0).botPose.transform.translation.y;
+//			//targets.point.at(0).sid=0;
+//		}
+
+		pub2.publish(targets);
 		ros::spinOnce();
 		loopRate.sleep();
 	}
@@ -359,11 +377,11 @@ void Sim::Render() //draws changes in simulation states to the window.
 
 void Sim::drawTargets() //draws targets
 {
-	for (int i = 0; i <targets.size(); i++) //draws targets
+	for (int i = 0; i < targets.point.size(); i++) //draws targets
 	{
 		sf::CircleShape shape(0);
-		shape.setPosition(targets.at(i).x*3 + 150, 300 - targets.at(i).y*3); // Sets position of shape to random location that body was set to.
-		shape.setOrigin(7.5, 7.5);
+		shape.setPosition(targets.point.at(i).x * 3 + 150, 300 - targets.point.at(i).y * 3); // Sets position of shape to random location that body was set to.
+		shape.setOrigin(15, 15);
 		shape.setFillColor(sf::Color::Green);
 		shape.setOutlineColor(sf::Color::Black);
 		shape.setOutlineThickness(1);
@@ -375,12 +393,12 @@ void Sim::drawTargets() //draws targets
 	}
 
 }
-void Sim::drawObstacles()// draw obstacles
+void Sim::drawObstacles()		// draw obstacles
 {
-	for (int i = 0; i <obstacles.size(); i++) //draws obstacles
+	for (int i = 0; i < obstacles.size(); i++) //draws obstacles
 	{
 		sf::CircleShape shape(0);
-		shape.setPosition(obstacles.at(i).x*3 + 150, 300 - obstacles.at(i).y*3); // Sets position of shape to random location that body was set to.
+		shape.setPosition(obstacles.at(i).x * 3 + 150, 300 - obstacles.at(i).y * 3); // Sets position of shape to random location that body was set to.
 		shape.setOrigin(2, 2);
 		shape.setFillColor(sf::Color::Blue);
 		shape.setOutlineColor(sf::Color::Black);
