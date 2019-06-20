@@ -53,11 +53,115 @@ Body::Body(float x, float y, char _id[2])
 //}
 
 // Adds force Pvector to current force Pvector
-void Body::applyForce(Pvector force)
+
+//void Body::applyForce(Pvector force) //this is the old applyForce
+//{
+//    acceleration.addVector(force);
+//}
+
+float Body::angleConvert(float _x)
 {
-    acceleration.addVector(force);
+	if(_x<0)
+	{
+		_x = _x + 2*M_PI;
+	}
+	_x = fmod(_x,2*M_PI);
+	return _x;
 }
 
+int Body::quadrant(float _phi)//accepts angle of plane, returns quadrant of that plane as int (1,2,3,4).
+{
+	int Q;
+	if((_phi>=0)&&(_phi<M_PI_2))
+	{
+		Q = 1;
+	}
+	else if((_phi>=M_PI_2)&&(_phi<=M_PI))
+	{
+		Q = 2;
+	}
+	else if((_phi>M_PI)&&(_phi<3*M_PI_2))
+	{
+		Q = 3;
+	}
+	else
+	{
+		Q = 4;
+	}
+	std::cout<<"--IN Quadrant: "<<Q<<"--"<<std::endl;
+	return Q;
+}
+
+bool Body::aboveOrBelow(float _dx, float _dy, int _Q)//returns whether bot is above or below collision plane.
+{
+	bool place = false; //above is true, below is false
+	if((_Q == 1)||(_Q == 3))
+	{
+		if((_dx>=0)&&(_dy>=0))
+		{
+			std::cout<<"&- Bot is above the plane -&"<<std::endl;
+			place = true;
+		}
+		else{std::cout<<"&- Bot is below the plane -&"<<std::endl;}
+	}
+	else if((_Q == 2)||(_Q == 4))
+	{
+		if((_dx<=0)&&(_dy>=0))
+		{
+			std::cout<<"&- Bot is above the slope -&"<<std::endl;
+			place = true;
+		}
+		else{std::cout<<"&- Bot is below the plane -&"<<std::endl;}
+	}
+	return place;
+}
+
+float Body::getRelTheta(float _abs_theta, float _phi, int _Q)
+{
+	float rel_theta;
+	if((_Q ==1)||(_Q==4))
+	{
+		rel_theta = _abs_theta - _phi - M_PI_2;
+	}
+	else if((_Q==2)||(_Q==3))
+	{
+		rel_theta = _abs_theta - _phi + M_PI_2;
+	}
+	else
+	{
+		std::cout<<"the program broke getRelTheta()"<<std::endl;
+	}
+	rel_theta = angleConvert(rel_theta); //scales anlge to be positive.
+	return rel_theta;
+}
+
+bool Body::applyForce(bool _aorb,float _rel_theta)
+{
+	bool apply = false;
+	if(_aorb==true) //above the plane
+	{
+		if((_rel_theta > M_PI_2) && (_rel_theta < 3*M_PI_2))
+		{
+			std::cout<<"will apply force"<<std::endl;
+			apply = true;
+		}
+		else{std::cout<<"will not apply force"<<std::endl;}
+	}
+	else if(_aorb == false) //bot is below plane
+	{
+		if(((_rel_theta >=0) && (_rel_theta < M_PI_2)) || ((_rel_theta> 3*M_PI_2) && (_rel_theta < 2*M_PI)))
+		{
+			std::cout<<"will apply force"<<std::endl;
+			apply = true;
+		}
+		else{std::cout<<"will not apply force"<<std::endl;}
+	}
+	else
+	{
+		std::cout<<"shit is broke in applyForce()"<<std::endl;
+	}
+	return apply;
+}
 
 // Modifies velocity, location, and resets acceleration with values that
 // are given by the three laws.
@@ -134,259 +238,96 @@ void Body::borders()
 		}
 }
 
-void Body::elasticCollisions(vector<Body> _bodies)
+void Body::inelasticCollisions(vector<Body> _bodies)
 {
 	    //Magnitude of separation between bodies
-	    float desiredseparation = 24;
-	    Pvector steer(0, 0);
-	    int count = 0; //iterator
-
-	    for (int i = 0; i < _bodies.size(); i++) // For every body in the system, check if it's too close
-	    {
-	    	collision = false;
-	        // Calculate distance from current body to body we're looking at
-	    	 float d = location.distance(_bodies.at(i).location);
-	        // If this is a fellow body and it's too close, move away from it
-	        if ((d <= desiredseparation) && !((id[0] ==_bodies.at(i).id[0]) && (id[1] ==_bodies.at(i).id[1]))) // (&&d>0))
-	        {
-	        	if(collision == false){collision = true;}
-//	        	_bodies.at(i).location.x = _bodies.at(i).prev_location.x;
-//	          location.x = prev_location.x;
-//
-//						_bodies.at(i).location.y = _bodies.at(i).prev_location.y;
-//						location.y = prev_location.y;
-
-	        	float fx = velocity.x;
-	        	float fy = velocity.y;
-	        	float fnx = -fx;
-	      	  float fny = -fy;
-
-	        	std::cout<<"---BOT-- "<<id[0]<<id[1]<<" With Bot: "<<_bodies.at(i).id[0]<<_bodies.at(i).id[1]<<std::endl;
-	        	std::cout<<"forces (fx,fy) "<<fx<<","<<fy<<std::endl;
-	        	std::cout<<"fn (fnx,fny) "<<fnx<<","<<fny<<std::endl;
-	        	std::cout<<"heading"<<heading*180/M_PI<<std::endl;
-
-	        	location.addVector(Pvector(fnx,fny));
-	        	//_bodies.at(i).location.addVector(Pvector(-fnx,-fny));
-	        }
-	    }
-	}
-
-
-
-void  Body::inElasticCollisions(vector<Body> _bodies)
-{
-	    //Magnatude of separation between bodies
 	    float desiredseparation = 15;
-	    Pvector steer(0, 0);
-	    int count = 0; //iterator
-
 	    for (int i = 0; i < _bodies.size(); i++) // For every body in the system, check if it's too close
 	    {
 	    	collision = false;
 	        // Calculate distance from current body to body we're looking at
 	    	 float d = location.distance(_bodies.at(i).location);
-
 	        // If this is a fellow body and it's too close, move away from it
 	        if ((d <= desiredseparation) && !((id[0] ==_bodies.at(i).id[0]) && (id[1] ==_bodies.at(i).id[1]))) // (&&d>0))
 	        {
-	        	std::cout<<"---BOT-- "<<id[0]<<id[1]<<" With Bot: "<<_bodies.at(i).id[0]<<_bodies.at(i).id[1]<<std::endl;
-
-	        	float fnx;
-	        	float fny;
-	        	float dy = _bodies.at(i).location.y - location.y;
-					  float dx = _bodies.at(i).location.x - location.x;
-					  std::cout<<"dx,dy: "<<dx<<","<<dy<<std::endl;
-					  //angle b/w d and origin.
-					  float phi = M_PI_2 + angle(Pvector(dy,dx));
-
-//				   	float fx = velocity.x;
-//						float fy = velocity.y;
-
-						float fx = force*cos(heading);
-						float fy = force*sin(heading);
-						float mag = sqrt(pow(fx,2) + pow(fy,2));
-						fx = fx/mag;
-						fy = fy/mag;
-
-						float abs_theta = angle(velocity); //global polar angle of velocity
-						float rel_theta; //velocity direction in frame of the collision plane.
-
 	        	if(collision == false)
 	        	{
 	        		collision = true;
 	        	}
 
-	        	phi = angleConvert(phi); //scales angles to the positive and mods them.
-	        	abs_theta = angleConvert(abs_theta);
+	        	std::cout<<"---BOT-- "<<id[0]<<id[1]<<" With Bot: "<<_bodies.at(i).id[0]<<_bodies.at(i).id[1]<<std::endl;
 
-	        	if(((phi>=0) && (phi<M_PI_2)) || ((phi>M_PI) && (phi<3*M_PI_2)))//In in Q1 or Q3
-	        	{
-	        		//--------------------------------------------------
-	        		if((phi>=0) && (phi<M_PI_2)) //first quadrant and 3rd have different transforms
-							{
-								rel_theta = abs_theta - phi - M_PI_2;
-							}
-							else
-							{
-								rel_theta = abs_theta - phi + M_PI_2;
-							}
-							rel_theta = angleConvert(rel_theta);
-							//-------------------------------------------------------
-	        		std::cout<<"=Bot is in Q1 or 3=, phi is: "<<phi*180/M_PI<<std::endl;
-	        		std::cout<<"*-velocity direction: "<<abs_theta*180/M_PI<<std::endl;
+						float fnx; //force to be applied (x).
+						float fny; //force to be applied (y).
 
-	        		if((dx>=0) && (dy>=0)) //above plane
-	        		{
-	        			std::cout<<"$-Bot is above-$"<<std::endl;
-	        			std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
+						float dy = _bodies.at(i).location.y - location.y;
+						float dx = _bodies.at(i).location.x - location.x;
 
-	        			if((rel_theta>=M_PI_2)&&(rel_theta<=3*M_PI_2))//vector has any alignment with plane.
-	        			{
-	        				std::cout<<"directed towards the plane"<<std::endl;
-	        				location.x = prev_location.x;
-	        				location.y = prev_location.y;
+						std::cout<<"dx,dy: "<<dx<<","<<dy<<std::endl;
 
-	        				fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-	        			  fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
-	        			}
-	        			else
-	        			{
-	        				std::cout<<"directed away from plane"<<std::endl;
-	        				fnx = fx;
-	        				fny = fy;
-	        			}
-	        		}
-							else //bellow plane
-							{
-								std::cout<<"$-Bot is below-$"<<std::endl;
-								std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
+						//angle b/w d and origin.
+						float d_angle = angle(Pvector(dx,dy));
+						d_angle = angleConvert(d_angle);
 
-								if(((rel_theta >=0) && (rel_theta>M_PI_2)) || ((rel_theta<2*M_PI) && (rel_theta>3*M_PI_2)))
-								{//vector has any alignment with plane.
-									//undoes last step, and replaces it with force application.
-									std::cout<<"directed toward plane"<<std::endl;
-									location.x = prev_location.x;
-									location.y = prev_location.y;
-									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-								  fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
-								}
-								else
-								{//bot keeps moving on previous path
-									std::cout<<"directed away from plane"<<std::endl;
-									fnx = fx;
-									fny = fy;
-								}
-							}
-	        	}
-						else if(((phi>=M_PI_2) && (phi<=M_PI)) || ((phi>3*M_PI_2) && (phi<2*M_PI)))//If in Q2 or Q4
+						float phi = M_PI_2 + d_angle;
+						phi = angleConvert(phi);
+
+						std::cout<<"Angle of seperation: "<<d_angle*180/M_PI<<std::endl;
+						std::cout<<"Angle of collision: "<<phi*180/M_PI<<std::endl;
+//				   	float fx = velocity.x;
+//						float fy = velocity.y;
+//						float abs_theta = angle(velocity); //global polar angle of velocity
+
+						int h = quadrant(heading);
+						float fx = force*cos(heading); //bot force in heading direction(x).
+						float fy = abs(force*sin(heading)); //bot force in heading direction (y).
+
+						if((h == 1)||(h==2))
 						{
-							if((phi>=M_PI_2) && (phi<=M_PI)) //first quadrant and 3rd have different transforms
-							{
-								rel_theta = abs_theta - phi + M_PI_2;
-							}
-							else
-							{
-								rel_theta = abs_theta - phi - M_PI_2;
-							}
-							rel_theta = angleConvert(rel_theta);
-
-							std::cout<<"=Bot is in Q2 or 4=, phi is: "<<phi*180/M_PI<<std::endl;
-							std::cout<<"*-velocity direction:"<<abs_theta*180/M_PI<<std::endl;
-
-							if((dx<=0) && (dy>=0)) //above plane
-							{
-								std::cout<<"$-Bot is above-$"<<std::endl;
-								std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
-
-								if((rel_theta>=M_PI_2)&&(rel_theta<=3*M_PI_2))//vector has any alignment with plane.
-								{
-									std::cout<<"directed towards the plane"<<std::endl;
-
-									location.x = prev_location.x;
-								  location.y = prev_location.y;
-
-									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-									fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
-								}
-								else
-								{//unaltered motion
-									fnx = fx;
-									fny = fy;
-								}
-							}
-							else //below plane
-							{
-								std::cout<<"$-Bot is below-$"<<std::endl;
-								std::cout<<"vel angle in rotated frame: "<<rel_theta*180/M_PI<<std::endl;
-
-								if(((rel_theta >=0) && (rel_theta>M_PI_2)) || ((rel_theta<2*M_PI) && (rel_theta>3*M_PI_2)))//vector has any alignment with plane.
-								{
-									std::cout<<"directed towards the plane"<<std::endl;
-
-									//undoes previous step ,replaces it with force application.
-									location.x = prev_location.x;
-									location.y = prev_location.y;
-									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-								  fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
-								}
-								else
-								{//motion uneffected
-									fnx = fx;
-									fny = fy;
-								}
-							}
+							fy = -fy;
 						}
-						else if(phi==3*M_PI_2) //special case of head on collision where phi = 3pi/2.
+
+						float mag = sqrt(pow(fx,2) + pow(fy,2));
+						fx = fx/mag; //scaled to unit vectors
+						fy = fy/mag;
+
+						float abs_theta = angleConvert(angle(Pvector(fx,fy))); //angle of force in absolute position.
+						abs_theta = angleConvert(abs_theta);
+
+						int Q = quadrant(phi); //quadrant bot is in
+						bool above_below = aboveOrBelow(dx,dy,Q); //gets quadrant collision is happening.
+						float rel_theta = getRelTheta(abs_theta,phi,Q); //velocity direction in frame of the collision plane.
+						bool apply_force = applyForce(above_below, rel_theta); //finds if force points towards the plane.
+
+						if(apply_force == true)
 						{
-							std::cout<<"special case of head on collision"<<std::endl;
-							if(dx > 0) //is "below" the plane. (convection)
-							{
-								if(((abs_theta>=0) && (abs_theta<=M_PI_2))||((abs_theta<=3*M_PI_2) && (abs_theta<2*M_PI)))
-								{//towards the plane
-									location.x = prev_location.x;
-									location.y = prev_location.y;
-									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-									fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
-								}
-								else //away from the plane.
-								{
-									fnx = fx;
-									fny = fy;
-								}
-							}
-							else//is "above" the plane. (convection)
-							{
-								if(((abs_theta>=M_PI_2) && (abs_theta<=3*M_PI_2)))//towards the plane
-								{
-									location.x = prev_location.x;
-									location.y = prev_location.y;
-									fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-									fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
-								}
-								else//away from the plane
-								{
-									fnx = fx;
-									fny = fy;
-								}
-							}
+							location.x = prev_location.x;
+							location.y = prev_location.y;
+							fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
+							fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 						}
-	        	//----------- BOT info print statments-----------------------------------------
-	        	std::cout<<"forces (fx,fy) "<<fx<<","<<fy<<std::endl;
-	        	std::cout<<"fn (fnx,fny) "<<fnx<<","<<fny<<std::endl;
-	        	std::cout<<"heading: "<<heading*180/M_PI<<std::endl;
-	        	std::cout<<"sep distance: "<<d<<std::endl;
+						else
+						{
+							location.x = prev_location.x;
+							location.y = prev_location.y;
+							fnx = fx;
+							fny = fy;
+						}
+						std::cout<<"forces direction: "<<abs_theta*180/M_PI<<std::endl;
+						std::cout<<"forces (fx,fy) "<<fx<<","<<fy<<std::endl;
+						std::cout<<"fn (fnx,fny) "<<fnx<<","<<fny<<std::endl;
+						std::cout<<"heading: "<<heading*180/M_PI<<std::endl;
+						std::cout<<"relative theta: "<<rel_theta*180/M_PI<<std::endl;
+						std::cout<<"sep distance: "<<d<<std::endl;
+						std::cout<<"location pre adjustment: "<<location.x<<","<<location.y<<std::endl;
 
-	        	std::cout<<"location pre adjustment: "<<location.x<<","<<location.y<<std::endl;
-	        	location.addVector(Pvector(fnx,fny));
-	        	std::cout<<"adjusted location: "<<location.x<<","<<location.y<<std::endl;
-	        	std::cout<<"----------------------------------------------------"<<std::endl;
-	        	//_bodies.at(i).location.addVector(Pvector(-fnx,-fny));
-	        	//--------------------------------- END ----------------------------------------
-	       }
-		}
-	}
+						location.addVector(Pvector(fnx,fny));//IMPORTANT
 
+						std::cout<<"adjusted location: "<<location.x<<","<<location.y<<std::endl;
+						std::cout<<"----------------------------------------------------"<<std::endl;
+	        }
+	    }
+}
 
 void  Body::seperation(vector<Body> _bodies)
 {
@@ -461,14 +402,4 @@ float Body::angle(Pvector v)
     //float angle = (float)(atan2(v.x, -v.y) );
 	  //^ the way this was written before. Saved it just in case.
     return angle;
-}
-
-float Body::angleConvert(float _x)
-{
-	if(_x<0)
-	{
-		_x = _x + 2*M_PI;
-	}
-	_x = fmod(_x,2*M_PI);
-	return _x;
 }

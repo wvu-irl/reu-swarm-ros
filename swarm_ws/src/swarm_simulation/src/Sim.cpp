@@ -80,7 +80,11 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 						flock.flock.at(i).velocity.set(1 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
 								-1 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
 					}
-
+					flock.flock.at(i).heading = fmod(flock.flock.at(i).heading,2*M_PI);
+					if(flock.flock.at(i).heading < 0)
+					{
+						flock.flock.at(i).heading +=2*M_PI;
+					}
 //					if(flock.flock.at(i).collision == false)
 //					{
 //						flock.flock.at(i).heading  = fmod(flock.flock.at(i).heading,(2*M_PI));
@@ -124,7 +128,7 @@ void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 // Construct window using SFML
 Sim::Sim()
 {
-	this->bodiesSize = 7.5;
+	this->bodiesSize = 7.5; //7.5
 	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 	this->window_height = 600;
 	this->window_width = 300;
@@ -266,7 +270,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 					_pI.botId = i;
 					_pI.dragging = true;
 					_pI.prevClick = true;
-				} else if (i == 49)
+				} else if (i == flock.flock.size()-1)
 				{
 					found = true;
 				}
