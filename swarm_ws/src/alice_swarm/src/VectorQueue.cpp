@@ -33,7 +33,7 @@ AliceStructs::vel VectorQueue::createCompromise()
 		AliceStructs::ideal current = vectorQueue.back();
 		//std::cout << current.dir << std::endl;
 		vectorQueue.pop_back();
-		float current_pri = current.pri / pow((current.dis/10 + 1), 2);
+		float current_pri = pow(current.pri / (current.dis/10 + 1), 2);
 		dir = (dir * pri + current_pri * current.dir)/(pri + current_pri);
 	}
 	to_return.dir = dir;

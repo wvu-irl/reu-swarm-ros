@@ -82,7 +82,7 @@ AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, floa
 	to_return.dir = 0.0001;
 	for (auto& tar : targets)
 	{
-		float temp_pri = strength * pow(tar.dis, 0.5);
+		float temp_pri = strength * pow(tar.dis, 0.5) / 4;
 		to_return.dir = (to_return.dir * to_return.pri + tar.dir * temp_pri)/(to_return.pri + temp_pri);
 		to_return.pri += temp_pri;
 	}
@@ -96,7 +96,7 @@ AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, floa
 	to_return.dir = 0;
 	for (auto& flow : flows)
 	{
-		float temp_pri = flow.spd*strength/(flow.dis+10);
+		float temp_pri = flow.spd*strength/flow.dis;
 		to_return.dir = (to_return.dir * to_return.pri + flow.dir * temp_pri)/(to_return.pri + temp_pri);
 		to_return.pri += temp_pri;
 	}
