@@ -12,12 +12,10 @@ Model::Model(int _name)
 	name = _name;
 }
 
-void Model::addPolarVel(AliceStructs::vel &_vel1, AliceStructs::vel &_vel2)
+void Model::addIdeal(AliceStructs::ideal &_ideal1, AliceStructs::ideal &_ideal2) // ideals are always polar
 {
-	float x(_vel1.mag * cos(_vel1.dir) + _vel2.mag * cos(_vel2.dir));
-	float y(_vel1.mag * sin(_vel1.dir) + _vel2.mag * sin(_vel2.dir));
-	_vel1.mag = pow(pow(x, 2) + pow(y, 2), 0.5);
-	_vel1.dir = atan2(y, x);
+	_ideal1.dir = (_ideal1.dir * _ideal1.pri + _ideal2.pri * _ideal2.dir)/(_ideal1.pri + _ideal2.pri);
+	_ideal1.pri += _ideal2.pri;
 }
 void Model::normalize(AliceStructs::vel &_vel)
 {
@@ -42,37 +40,29 @@ void Model::dDriveAdjust(AliceStructs::vel &_vel) //assumes that vector has alre
 AliceStructs::ideal Model::generateIdeal()
 {
 
-	AliceStructs::ideal toReturn;
-	AliceStructs::vel temp;
-	temp.mag = 0;
-	temp.dir = 0;
+	AliceStructs::ideal to_return;
+	//AliceStructs::ideal temp;
+	to_return.dir = 0;
+	to_return.pri = 0;
 	rules.should_ignore = false;
 
-	std::vector<AliceStructs::vel> ideal_list =
+	std::vector<AliceStructs::ideal> ideal_list =
 	{ //rules.dummy1(),
-			rules.goToTarget(targets,5,180),
-			//rules.followFlow(flows,10),
-			rules.avoidObstacles(obstacles, 2, 180),
-			rules.magnetAvoid(robots, 3),
-			//rules.birdAvoid(robots, 4, 30),
-			rules.maintainSpacing(robots, 0.1)
+			rules.followFlow(flows, 16),
+			//rules.goToTarget(targets, 16),
+			rules.avoidObstacles(obstacles, 16),
+			rules.magnetAvoid(robots, 16),
+			rules.birdAvoid(robots, 16),
+			rules.maintainSpacing(robots, 16)
 			};
 	for (int i = 0; i < ideal_list.size(); i++)
 	{
-		if (ideal_list.at(i).mag > 0.01) {
-			addPolarVel(temp, ideal_list.at(i));
-		}
+		addIdeal(to_return, ideal_list.at(i));
 	}
-	toReturn.pri = temp.mag;
-	//normalize(temp);
-	//dDriveAdjust(temp);
-	toReturn.dir = temp.dir;
-	toReturn.spd = temp.mag;
-	//std::cout << temp.mag << " " << temp.dir << std::endl;
-	toReturn.dis = 0;
-	//(ideal_list.size()  + 1) / (float) (tolerance + 1);
-	toReturn.name = name;
-	return toReturn;
+	//if (to_return.dir > 2*M_PI) std::cout << to_return.dir << std::endl;
+	to_return.name = name;
+	std::cout << name << std::endl;
+	return to_return;
 
 }
 
@@ -92,9 +82,9 @@ void Model::addToModel(AliceStructs::mail toAdd)
 		targets.push_back(item);
 	}
 	for (auto& item : toAdd.flows)
-		{
-			flows.push_back(item);
-		}
+	{
+		flows.push_back(item);
+	}
 }
 
 void Model::clear()

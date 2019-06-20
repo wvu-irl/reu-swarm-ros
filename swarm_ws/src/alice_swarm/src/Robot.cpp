@@ -34,7 +34,7 @@ void Robot::receiveMsg(AliceStructs::mail data)
 AliceStructs::ideal Robot::generateIdeal()
 {
 	AliceStructs::ideal to_return = model.generateIdeal();
-	//std::cout << name << std::endl;
+	std::cout << name << std::endl;
 	model.clear();
 	vectorQueue.oneToQueue(to_return/*originally had "ideal", had no idea what was intended*/);
 	return to_return;
@@ -43,22 +43,27 @@ AliceStructs::ideal Robot::generateIdeal()
 AliceStructs::vel Robot::generateComp(std::vector<AliceStructs::ideal> ideals)
 {
 
-	if (model.rules.should_ignore== true)
+	if (model.rules.should_ignore == true)
 	{
 		return vectorQueue.createCompromise();
 	}
-	for (int i = 0; i < ideals.size(); i++)
+	else
 	{
-		for (int j = 0; j < neighbors.size(); j++)
+		for (int i = 0; i < ideals.size(); i++)
 		{
-			if (ideals.at(i).name == neighbors.at(j).name)
+			for (int j = 0; j < neighbors.size(); j++)
 			{
-
-				ideals.at(i).dis = neighbors.at(j).dis;
-				ideals.at(i).dir += neighbors.at(j).ang;
-				vectorQueue.oneToQueue(ideals.at(i));
+				if (ideals.at(i).name == neighbors.at(j).name)
+				{
+					//std::cout << neighbors.at(j).dis << std::endl;
+					ideals.at(i).dis = neighbors.at(j).dis;
+					ideals.at(i).dir = fmod(ideals.at(i).dir + neighbors.at(j).ang, 2*M_PI);
+					vectorQueue.oneToQueue(ideals.at(i));
+				}
 			}
 		}
-	}
 	return vectorQueue.createCompromise();
+	}
+	neighbors.clear();
 }
+
