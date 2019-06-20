@@ -34,6 +34,9 @@ private:
     void drawTargets();
     Flock flock;
     float bodiesSize;
+    //float bodiesSize_small;
+    //float bodiesSize_big;
+
     vector<sf::CircleShape> shapes;
     vector<sf::RectangleShape> lines;
     //vector<sf::Text> texts;
