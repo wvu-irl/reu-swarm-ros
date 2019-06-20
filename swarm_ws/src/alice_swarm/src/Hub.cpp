@@ -77,7 +77,7 @@ void Hub::processVicon() //Fills in bots[]
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 		bots.push_back(
 				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, numID %2+1));
+						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, numID % 2 + 1));
 		std::vector<Bot> temp;
 		ridOrder.push_back(numID);
 		neighbors.push_back(temp);
@@ -149,17 +149,20 @@ void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
 	int num_pts = flows.flow.size();
 	for (int j = 0; j < num_pts; j++)
 	{
-		std::pair<float, float> temp =
-		{ flows.flow.at(j).x, flows.flow.at(j).y };
-		AliceStructs::obj temp2 = getSeparation(bots[i], temp, 10000);
-		if (temp2.dis > -1)
+		if (flows.flow.at(j).sid == bots[i].swarm_id)
 		{
-			AliceStructs::ideal temp3;
-			temp3.dis = temp2.dis;
-			temp3.dir = fmod(flows.flow.at(j).theta - bots[i].heading + 2 * M_PI, 2 * M_PI);
-			temp3.spd = flows.flow.at(j).r;
-			temp3.pri = 1;
-			f.push_back(temp3);
+			std::pair<float, float> temp =
+			{ flows.flow.at(j).x, flows.flow.at(j).y };
+			AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
+			if (temp2.dis > -1)
+			{
+				AliceStructs::ideal temp3;
+				temp3.dis = temp2.dis;
+				temp3.dir = fmod(flows.flow.at(j).theta - bots[i].heading + 2 * M_PI, 2 * M_PI);
+				temp3.spd = flows.flow.at(j).r;
+				temp3.pri = 1;
+				f.push_back(temp3);
+			}
 		}
 	}
 	_mail.flows = f;
@@ -175,7 +178,7 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 		{
 			std::pair<float, float> temp =
 			{ targets.point.at(j).x, targets.point.at(j).y };
-			AliceStructs::obj temp2 = getSeparation(bots[i], temp, 5*VISION);
+			AliceStructs::obj temp2 = getSeparation(bots[i], temp, 5 * VISION);
 			if (temp2.dis > -1)
 			{
 				t.push_back(temp2);

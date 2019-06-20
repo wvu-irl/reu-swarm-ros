@@ -140,13 +140,13 @@ void Sim::Run(ros::NodeHandle _n)
 			'V', 'N', 'V', 'N', 'E', 'C', 'O', 'N', 'D', 'S', 'D', 'M', 'T', 'W', 'A', 'I', 'D', 'W', 'Y', 'U', 'T', 'O', 'K',
 			'N', 'M', 'A', 'Z', 'A', 'K', 'H', 'I' };
 
-	int x = 50; //x inital positions for the bots.
+	int x = 150; //x inital positions for the bots.
 
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		char temp[2] =
 		{ letters[2 * i], letters[2 * i + 1] };
-		int y = 50 * (i % 10) + 50; // y pos of bots
+		int y = 400;//50 * (i % 10) + 50; // y pos of bots
 
 //		std::cout<<"----Bot ID: "<<temp[0]<<temp[1]<<"-------\n";
 //		std::cout<<"x,y: "<<x<<","<<y<<"\n";
