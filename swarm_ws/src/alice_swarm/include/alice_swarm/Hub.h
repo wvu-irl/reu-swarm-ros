@@ -19,10 +19,9 @@ typedef struct Bot //The Bot struct holds the pose of a robot, along with its di
 		y = 0;
 		heading = 0;
 		distance = 10000;
-		swarm_id = -1;
 	}
 
-	Bot(int _id, float _x, float _y, float _heading, float _distance,int _sid) //Alternate Constructor
+	Bot(int _id, float _x, float _y, float _heading, float _distance) //Alternate Constructor
 	{
 		id = _id;
 
@@ -30,11 +29,9 @@ typedef struct Bot //The Bot struct holds the pose of a robot, along with its di
 		y = _y;
 		heading = _heading;
 		distance = _distance;
-		swarm_id=_sid;
 	}
 
 	int id; //the id's are the 50 states, from 0 to 49
-	int swarm_id;
 	float x; //position
 	float y; //position
 	float heading; //in radians

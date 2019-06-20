@@ -10,7 +10,6 @@ public:
 	std::list <AliceStructs::obj> obstacles;
 	std::list <AliceStructs::neighbor> robots;
 	std::list <AliceStructs::obj> targets;
-	std::list <AliceStructs::ideal> flows;
 
 	Rules rules;
 
@@ -27,7 +26,7 @@ public:
 
 private:
 	int name;
-	void addIdeal(AliceStructs::ideal &_ideal1, AliceStructs::ideal &_ideal2);
+	void addPolarVel(AliceStructs::vel &_vel1, AliceStructs::vel &_vel2);
 	void normalize(AliceStructs::vel &_vel);
 	void dDriveAdjust(AliceStructs::vel &_vel); //assumes that vector has already been normalized
 };

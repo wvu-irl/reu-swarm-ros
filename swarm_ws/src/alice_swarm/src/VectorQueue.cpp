@@ -24,19 +24,23 @@ std::pair<float, float> VectorQueue::addPolarVectors(std::pair<float, float> v1,
 AliceStructs::vel VectorQueue::createCompromise()
 {
 	AliceStructs::vel to_return;
-	float dir;
-	float pri;
-	//int size = vectorQueue.size();
+	std::pair<float, float> compromise;
+	compromise.first =0;
+	compromise.second=0;
+	int size = vectorQueue.size();
 	//std::cout << "---" << size << std::endl;
 	while (!vectorQueue.empty())
 	{
+		std::pair<float, float> temp;
 		AliceStructs::ideal current = vectorQueue.back();
-		//std::cout << current.dir << std::endl;
 		vectorQueue.pop_back();
-		float current_pri = current.pri / pow((current.dis/10 + 1), 2);
-		dir = (dir * pri + current_pri * current.dir)/(pri + current_pri);
+		temp.first= pow((current.spd / (current.dis + 1)), 3);
+		temp.second = current.dir;
+		//std:: cout << temp.first << " " << temp.second << std::endl;
+		if (temp.first > 0.01) compromise = addPolarVectors(compromise, temp);
 	}
-	to_return.dir = dir;
-	to_return.mag = 1;
+
+	to_return.dir = compromise.second;
+	to_return.mag = compromise.first/size;
 	return to_return;
 };
