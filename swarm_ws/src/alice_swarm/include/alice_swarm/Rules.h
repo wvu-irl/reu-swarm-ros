@@ -17,19 +17,20 @@ public:
 	std::pair<float,float> addPolarVectors(std::pair<float,float> v1, std::pair<float,float> v2);
 
 
-	AliceStructs::vel dummy1();
+	AliceStructs::ideal dummy1();
 
-	AliceStructs::vel goToTarget(std::list<AliceStructs::obj> targets, float strength, float fov);
+	AliceStructs::ideal goToTarget(std::list<AliceStructs::obj> targets, float strength);
 
+	AliceStructs::ideal followFlow(std::list<AliceStructs::ideal> flows, float strength);
 
-	AliceStructs::vel maintainSpacing(std::list <AliceStructs::neighbor> bots,float strength);
+	AliceStructs::ideal maintainSpacing(std::list <AliceStructs::neighbor> bots, float strength);
 
-	AliceStructs::vel magnetAvoid(std::list <AliceStructs::neighbor> bots, float strength);
+	AliceStructs::ideal magnetAvoid(std::list <AliceStructs::neighbor> bots, float strength);
 
-	AliceStructs::vel birdAvoid(std::list <AliceStructs::neighbor> bots, float strength, float fov);
+	AliceStructs::ideal birdAvoid(std::list <AliceStructs::neighbor> bots, float strength);
 
-	AliceStructs::vel avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength, float fov);
-	//vel goToTarget(std::list <obs> targets, float tolerance); to implement later
+	AliceStructs::ideal avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength);
+	//ideal goToTarget(std::list <obs> targets, float tolerance); to implement later
 
 private:
 

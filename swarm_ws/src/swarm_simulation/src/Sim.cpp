@@ -80,11 +80,7 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 						flock.flock.at(i).velocity.set(1 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
 								-1 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
 					}
-					flock.flock.at(i).heading = fmod(flock.flock.at(i).heading,2*M_PI);
-					if(flock.flock.at(i).heading < 0)
-					{
-						flock.flock.at(i).heading +=2*M_PI;
-					}
+
 //					if(flock.flock.at(i).collision == false)
 //					{
 //						flock.flock.at(i).heading  = fmod(flock.flock.at(i).heading,(2*M_PI));
@@ -100,13 +96,6 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 //				std::cout<<"v_new (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
 //				std::cout<<"-----------------------------\n";
 //				^more fun facts, if ya want um.
-
-					//This code is important for proper function of the physics
-					flock.flock.at(i).heading = fmod(flock.flock.at(i).heading,2*M_PI);
-					if(flock.flock.at(i).heading < 0)
-					{
-						flock.flock.at(i).heading +=2*M_PI;
-					}
 					flock.flock.at(i).updatedCommand = true;
 				}
 			}
@@ -131,7 +120,7 @@ void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 // Construct window using SFML
 Sim::Sim()
 {
-	this->bodiesSize = 7.5; //7.5
+	this->bodiesSize = 7.5;
 	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 	this->window_height = 600;
 	this->window_width = 300;
@@ -189,6 +178,20 @@ void Sim::Run(ros::NodeHandle _n)
 		line.setPosition(b.location.x, b.location.y);
 		line.setOrigin(-2, 1);
 
+		//creates text on the bodies
+		/*sf::Font font;
+		 if (!font.loadFromFile("OpenSans-Regular.ttf"))
+		 {
+		 //error i guess
+		 }
+
+		 sf::Text text;
+		 text.setFont(font);
+		 text.setCharacterSize(10);
+		 text.setColor(sf::Color::Black);
+		 text.setString("ye");
+		 text.setStyle(sf::Text::Bold);
+		 text.setOrigin(0, 0);*/
 
 		// Adding the body to the flock and adding the shapes to the vector<sf::CircleShape>
 		flock.addBody(b);
@@ -197,10 +200,12 @@ void Sim::Run(ros::NodeHandle _n)
 		//saves a vector of lines (one for each bot).
 		lines.push_back(line);
 
+		//texts.push_back(text);
 
 		//draw all obejcts on window.
 		window.draw(shape);
 		window.draw(line);
+		//window.draw(text);
 
 		if (y == 500) //increments the  x pos so bots are drawn in a grid.
 		{
@@ -265,11 +270,40 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
 				event);
 
+//		//----------Allows for click and drag. ------------------------------
+//		if (_pI.dragging == true)
+//		{
+//			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
+//			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
+//		}
+//		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+//				&& _pI.prevClick == true)
+//		{
+//			_pI.dragging = false;
+//			_pI.prevClick = false;
+//		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+//				&& _pI.prevClick == false)
+//		{
+//			while (found != true && i < flock.flock.size())
+//			{
+//				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
+//						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
+//				{
+//					found = true;
+//					_pI.botId = i;
+//					_pI.dragging = true;
+//					_pI.prevClick = true;
+//				}
+//				i++;
+//			}
+//		}
+//		i=0;
 		//----------Allows for click and drag. ------------------------------
 		if (_pI.dragging == true)
 		{
-			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
-			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
+			targets.point.at(i).x = sf::Mouse::getPosition(window).x/3-50;; //event.mouseButton.x;
+			targets.point.at(i).y = sf::Mouse::getPosition(window).y/-3+100; //event.mouseButton.y;
+			std::cout << "yo" << std::endl;
 		}
 		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == true)
@@ -279,25 +313,22 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == false)
 		{
-			while (found != true)
+			while (found != true && i<targets.point.size())
 			{
-				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
-						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
+				if (((targets.point.at(i).x  > mX/3-50 - 6) && (targets.point.at(i).x  < mX/3-50 + 6))
+						&& ((targets.point.at(i).y> mY/-3+100 - 6) && (targets.point.at(i).y < mY/-3+100 + 6)))
 				{
 					found = true;
-					_pI.botId = i;
+
 					_pI.dragging = true;
 					_pI.prevClick = true;
-				} else if (i == flock.flock.size()-1)
-				{
-					found = true;
 				}
 				i++;
 			}
+
 		} //-----------------------------------------------------------------------------------------
 	}
 	return _pI; //tracks state of dragging (see sim.h)
-
 
 //	// Checks or A to be pressed, draws and adds bodies to flock if so.
 //	  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
@@ -341,7 +372,6 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //
 //	      }
 
-
 }
 
 void Sim::Render() //draws changes in simulation states to the window.
@@ -357,8 +387,7 @@ void Sim::Render() //draws changes in simulation states to the window.
 	{ // Matches up the location of the shape to the body
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
-        //texts[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
-
+		//texts[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
 		float theta = 180.0 / M_PI * (flock.flock.at(i).heading);
 		shapes[i].setRotation(90 - theta); //alignes body with direction of motion

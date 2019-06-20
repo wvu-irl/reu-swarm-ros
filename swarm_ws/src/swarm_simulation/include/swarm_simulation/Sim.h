@@ -38,7 +38,7 @@ private:
     vector<sf::RectangleShape> lines;
     //vector<sf::Text> texts;
     vector<wvu_swarm_std_msgs::vicon_point> obstacles;
-    vector<wvu_swarm_std_msgs::vicon_point> targets;
+    wvu_swarm_std_msgs::vicon_points targets;
     vector<sf::CircleShape> obs_shapes;
     void Render();
     PrevIteration HandleInput(PrevIteration _pI);

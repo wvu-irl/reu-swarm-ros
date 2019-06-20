@@ -16,6 +16,7 @@ class Robot {
 
 public:
 	int name;
+	int sid;
 
 	VectorQueue vectorQueue;
 
