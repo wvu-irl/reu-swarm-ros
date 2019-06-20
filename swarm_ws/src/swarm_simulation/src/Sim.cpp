@@ -178,6 +178,21 @@ void Sim::Run(ros::NodeHandle _n)
 		line.setPosition(b.location.x, b.location.y);
 		line.setOrigin(-2, 1);
 
+		//creates text on the bodies
+		/*sf::Font font;
+		        if (!font.loadFromFile("OpenSans-Regular.ttf"))
+		        {
+		          //error i guess
+		        }
+
+		        sf::Text text;
+		        text.setFont(font);
+		        text.setCharacterSize(10);
+		        text.setColor(sf::Color::Black);
+		        text.setString("ye");
+		        text.setStyle(sf::Text::Bold);
+		        text.setOrigin(0, 0);*/
+
 		// Adding the body to the flock and adding the shapes to the vector<sf::CircleShape>
 		flock.addBody(b);
 		shapes.push_back(shape);
@@ -185,9 +200,13 @@ void Sim::Run(ros::NodeHandle _n)
 		//saves a vector of lines (one for each bot).
 		lines.push_back(line);
 
+        //texts.push_back(text);
+
+
 		//draw all obejcts on window.
 		window.draw(shape);
 		window.draw(line);
+		//window.draw(text);
 
 		if (y == 500) //increments the  x pos so bots are drawn in a grid.
 		{
@@ -290,14 +309,18 @@ void Sim::Render() //draws changes in simulation states to the window.
 	{ // Matches up the location of the shape to the body
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
+        //texts[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
+
 
 		float theta = 180.0 / M_PI * (flock.flock.at(i).heading);
 		shapes[i].setRotation(90 - theta); //alignes body with direction of motion
 		lines[i].setRotation(-theta); //alignes line with direction of motion
 		//^for some reason, sfml has clockwise as +theta direction.
+		//texts[i].setRotation(90 - theta);
 
 		window.draw(shapes[i]);
 		window.draw(lines[i]);
+		//window.draw(texts[i]);
 		flock.flock.at(i).updatedCommand = false;
 		flock.flock.at(i).updatedPosition = false;
 	}

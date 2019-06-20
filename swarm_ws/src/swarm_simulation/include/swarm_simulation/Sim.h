@@ -36,10 +36,10 @@ private:
     float bodiesSize;
     vector<sf::CircleShape> shapes;
     vector<sf::RectangleShape> lines;
+    //vector<sf::Text> texts;
     vector<wvu_swarm_std_msgs::vicon_point> obstacles;
     vector<wvu_swarm_std_msgs::vicon_point> targets;
     vector<sf::CircleShape> obs_shapes;
-    //vector<sf::Text> texts;
     void Render();
     PrevIteration HandleInput(PrevIteration _pI);
     bool pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event);
