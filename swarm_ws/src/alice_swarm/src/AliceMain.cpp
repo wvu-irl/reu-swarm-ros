@@ -6,23 +6,37 @@
 #include <sstream>
 #include <map>
 #include <chrono>
+
+//made global because i need them for the call back
+//bool is_updated(false);
+wvu_swarm_std_msgs::vicon_bot_array temp_bot_array;
+wvu_swarm_std_msgs::vicon_points temp_obs_array;
+wvu_swarm_std_msgs::vicon_points temp_target;
+wvu_swarm_std_msgs::flows temp_flow_array;
+
 void botCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg)
 {
+
+		temp_bot_array = msg;
 
 }
 void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
+
+		temp_obs_array = msg;
 }
 void pointCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
+
+		temp_target = msg;
 }
 void flowCallback(const wvu_swarm_std_msgs::flows &msg)
 {
+		temp_flow_array = msg;
 }
 int main(int argc, char **argv)
 {
-	wvu_swarm_std_msgs::vicon_bot_array temp_bot_array;
-	wvu_swarm_std_msgs::vicon_points temp_obs_array;
+
 	std::map<int, Robot> aliceMap;
 
 	ros::init(argc, argv, "AliceBrain");
@@ -31,25 +45,14 @@ int main(int argc, char **argv)
 	ros::Subscriber sub2 = n.subscribe("virtual_targets", 1000, pointCallback);
 	ros::Subscriber sub3 = n.subscribe("virtual_obstacles", 1000, obsCallback);
 	ros::Subscriber sub4 = n.subscribe("virtual_flows", 1000, flowCallback);
-	ros::Rate loopRate(50);
+	ros::Rate loopRate(10);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array > ("final_execute", 1000);
 	Hub aliceBrain(0); // Creates a hub for the conversion of absolute to relative info
 
 	while (ros::ok())
 	{
 		auto start = std::chrono::high_resolution_clock::now();
-		 temp_bot_array=*(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_bot_array
-						> ("vicon_array"));
-		temp_obs_array = *(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
-								> ("virtual_obstacles"));
-		wvu_swarm_std_msgs::vicon_points temp_target = *(ros::topic::waitForMessage < wvu_swarm_std_msgs::vicon_points
-				> ("virtual_targets"));
-		wvu_swarm_std_msgs::flows temp_flow_array = *(ros::topic::waitForMessage < wvu_swarm_std_msgs::flows
-				> ("virtual_flows"));
-		auto stop = std::chrono::high_resolution_clock::now();
-						auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
 
-						std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
 		aliceBrain.update(temp_bot_array, temp_target, temp_obs_array, temp_flow_array); //puts in absolute data from subscribers
 		for (int i = 0; i < temp_bot_array.poseVect.size(); i++)
 		{
@@ -79,9 +82,13 @@ int main(int argc, char **argv)
 
 		pub.publish(execute);
 		std::cout << "execute published" << std::endl;
+		auto stop = std::chrono::high_resolution_clock::now();
+		auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
+
+		std::cout << "Time taken by Alice: " << duration.count() << " microseconds" << std::endl;
+		//is_updated = true;
 		ros::spinOnce();
 		loopRate.sleep();
-
 
 	}
 	return 0;

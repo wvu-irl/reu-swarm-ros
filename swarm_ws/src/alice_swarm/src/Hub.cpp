@@ -77,7 +77,7 @@ void Hub::processVicon() //Fills in bots[]
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 		bots.push_back(
 				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000));
+						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, numID %2));
 		std::vector<Bot> temp;
 		ridOrder.push_back(numID);
 		neighbors.push_back(temp);
@@ -137,6 +137,7 @@ void Hub::addNeighborMail(int i, AliceStructs::mail &_mail)
 		temp.dir = fmod(atan2(it->y - bots[i].y, it->x - bots[i].x) - bots[i].heading + 4 * M_PI, 2 * M_PI);
 		temp.dis = it->distance;
 		temp.ang = fmod(it->heading - bots[i].heading + 2 * M_PI, 2 * M_PI);
+		temp.sid = it->swarm_id;
 		n.push_back(temp);
 	}
 	_mail.neighbors = n;
@@ -155,7 +156,7 @@ void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
 		{
 			AliceStructs::ideal temp3;
 			temp3.dis = temp2.dis;
-			temp3.dir = fmod(flows.flow.at(j).theta-bots[i].heading+2*M_PI,2*M_PI);
+			temp3.dir = fmod(flows.flow.at(j).theta - bots[i].heading + 2 * M_PI, 2 * M_PI);
 			temp3.spd = flows.flow.at(j).r;
 			temp3.pri = 1;
 			f.push_back(temp3);
@@ -170,18 +171,19 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 	int num_pts = targets.point.size();
 	for (int j = 0; j < num_pts; j++)
 	{
-		std::pair<float, float> temp =
-		{ targets.point.at(j).x, targets.point.at(j).y };
-		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
-		if (temp2.dis > -1)
+		if (targets.point.at(j).sid == bots[i].swarm_id)
 		{
-			t.push_back(temp2);
+			std::pair<float, float> temp =
+			{ targets.point.at(j).x, targets.point.at(j).y };
+			AliceStructs::obj temp2 = getSeparation(bots[i], temp, 5*VISION);
+			if (temp2.dis > -1)
+			{
+				t.push_back(temp2);
+			}
 		}
 	}
 	_mail.targets = t;
 }
-
-
 
 void Hub::addObsPointMail(int i, AliceStructs::mail &_mail)
 {
@@ -218,6 +220,7 @@ AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Al
 
 	addFlowMail(i, temp);
 	temp.name = ridOrder.at(i);
+	temp.sid = bots[i].swarm_id;
 	//printAliceMail(temp);
 	return temp;
 
