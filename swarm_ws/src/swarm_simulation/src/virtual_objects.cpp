@@ -56,11 +56,11 @@ void createFood(wvu_swarm_std_msgs::vicon_points &in_vector)
 	cur0.y = -80;
 	cur0.sid = 1;
 	in_vector.point.push_back(cur0);
-	wvu_swarm_std_msgs::vicon_point cur1;
-	cur1.x = 0;
-	cur1.y = 80;
-	cur1.sid = 2;
-	in_vector.point.push_back(cur1);
+//	wvu_swarm_std_msgs::vicon_point cur1;
+//	cur1.x = 0;
+//	cur1.y = 80;
+//	cur1.sid = 2;
+//	in_vector.point.push_back(cur1);
 
 }
 
@@ -111,12 +111,24 @@ int main(int argc, char **argv)
 	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_targets", 1000);
 	ros::Publisher pub3 = n.advertise < wvu_swarm_std_msgs::flows > ("virtual_flows", 1000);
 	ros::Rate loopRate(50);
-	while (ros::ok())
+	sleep(1); //waits for sim to be awake
+	int i = 0;
+	while (ros::ok() && i < 10)
 	{
 		makeObstacles(pub1);
 		makeTargets(pub2);
 		makeFlows(pub3);
 		ros::spinOnce();
 		loopRate.sleep();
+		i++;
+
+	}
+	while (ros::ok())
+	{
+		makeObstacles(pub1);
+		makeFlows(pub3);
+		ros::spinOnce();
+		loopRate.sleep();
+
 	}
 }
