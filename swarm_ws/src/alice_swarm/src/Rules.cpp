@@ -7,10 +7,10 @@ Rules::Rules()
 {
 	should_ignore = false;
 }
-AliceStructs::vel Rules::dummy1()
+AliceStructs::ideal Rules::dummy1()
 {
-	AliceStructs::vel to_return;
-	to_return.mag = 1;
+	AliceStructs::ideal to_return;
+	to_return.spd = 1;
 	to_return.dir = 0;
 	return to_return;
 }
@@ -24,123 +24,106 @@ std::pair<float, float> Rules::addPolarVectors(std::pair<float, float> v1, std::
 	return v;
 }
 
-AliceStructs::vel Rules::followFlow(std::list<AliceStructs::ideal> flows, float strength)
+AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength)
 {
-	AliceStructs::vel to_return;
-	std::pair<float, float> temp_pair1;
-	temp_pair1.first = 0;
-	temp_pair1.second = 0;
-	for (auto &flow : flows)
+	AliceStructs::ideal to_return;
+	to_return.pri = 0.0001;
+	to_return.dir = 0.0001;
+	for (auto& bot : bots)
 	{
-			std::pair<float, float> temp_pair2(flow.spd*strength/(flow.dis+10), flow.dir);
-			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
+		to_return.dir += bot.dir/bots.size();
+		to_return.pri += bot.dis/bots.size();
 	}
-	to_return.mag = temp_pair1.first;
-	to_return.dir = temp_pair1.second;
+	to_return.pri = pow(to_return.pri * strength, 0.5);
 	return to_return;
 }
 
-AliceStructs::vel Rules::goToTarget(std::list<AliceStructs::obj> targets, float strength, float fov)
+AliceStructs::ideal Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, float strength)
 {
-	AliceStructs::vel to_return;
-	std::pair<float, float> temp_pair1;
-	temp_pair1.first = 0;
-	temp_pair1.second = 0;
-	for (auto &obj : targets)
+	AliceStructs::ideal to_return;
+	to_return.pri = 0.0001;
+	to_return.dir = 0.0001;
+	to_return.spd = 0;
+	for (auto &bot : bots)
 	{
-		//std::cout << "there's shit here" << std::endl;
-		//avoids things in direction of travel
-		if ((obj.dir < M_PI / 180 * fov || obj.dir > 2 * M_PI - M_PI / 180 * fov) )
+		if (bot.dis < 2 * ROBOT_SIZE)
 		{
-			std::pair<float, float> temp_pair2(ROBOT_SIZE * strength / pow(obj.dis, 0.2), obj.dir);
-			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
+			to_return.dir = fmod(bot.dir + M_PI, 2*M_PI);
+			to_return.pri = 10 * strength * pow(bot.dis, 2);
 		}
 	}
-	to_return.mag = temp_pair1.first;
-	to_return.dir = temp_pair1.second;
 	return to_return;
 }
 
-AliceStructs::vel Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength)
+AliceStructs::ideal Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, float strength)
 {
-	AliceStructs::vel to_return;
-	std::pair<float, float> temp_pair1;
-	temp_pair1.first = 0;
-	temp_pair1.second = 0;
+	AliceStructs::ideal to_return;
+
+	float pri = 0;
+	float temp_pri;
 	for (auto &bot : bots)
 	{
-		std::pair<float, float> temp_pair2(bot.dis, bot.dir);
-
-		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
-	}
-	to_return.mag = temp_pair1.first / bots.size() * strength;
-
-	to_return.dir = temp_pair1.second;
-	return to_return;
-}
-AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, float strength)
-{
-	AliceStructs::vel to_return;
-	std::pair<float, float> temp_pair1;
-	temp_pair1.first = 0;
-	temp_pair1.second = 0;
-	for (auto &bot : bots)
-	{
-
-		std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (bot.dis - ROBOT_SIZE), 3), M_PI + bot.dir);
-		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
-
-	}
-	to_return.mag = temp_pair1.first;
-	to_return.dir = temp_pair1.second;
-
-	return to_return;
-}
-
-AliceStructs::vel Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, float strength, float fov)
-{
-	AliceStructs::vel to_return;
-	std::pair<float, float> temp_pair1;
-	temp_pair1.first = 0;
-	temp_pair1.second = 0;
-	for (auto &bot : bots)
-	{
-		//avoids things in direction of travel
-		if ((bot.dir < M_PI / 180 * fov || bot.dir > 2 * M_PI - M_PI / 180 * fov))
+		temp_pri = strength/((bot.dis - ROBOT_SIZE/2) * abs(bot.dir - M_PI) + 1);
+		if (temp_pri > pri)
 		{
-			std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / bot.dis, 3), M_PI + bot.dir);
-			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
+			pri = temp_pri;
+			to_return.dir = fmod(bot.dir + M_PI, 2*M_PI);
 		}
 	}
-	to_return.mag = temp_pair1.first;
-	to_return.dir = temp_pair1.second;
+	to_return.pri = temp_pri;
 	return to_return;
 }
-//
-AliceStructs::vel Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength, float fov)
+
+AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, float strength)
 {
-	AliceStructs::vel to_return;
-	std::pair<float, float> temp_pair1;
-	temp_pair1.first = 0;
-	temp_pair1.second = 0;
-	for (auto &obj : obstacles)
+	AliceStructs::ideal to_return;
+	to_return.pri = 0.0001;
+	to_return.dir = 0.0001;
+	for (auto& tar : targets)
 	{
-		//std::cout << "there's shit here" << std::endl;
-		//avoids things in direction of travel
-
-		//std::cout << "yeeting" << std::endl;
-		std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (obj.dis - ROBOT_SIZE), 3), M_PI + obj.dir);
-		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
-
+		float temp_pri = ROBOT_SIZE * strength / pow(tar.dis, 0.2);
+		to_return.dir = (to_return.dir * to_return.pri + tar.dir * temp_pri)/(to_return.pri + temp_pri);
+		to_return.pri += temp_pri;
 	}
-	to_return.mag = temp_pair1.first;
-	to_return.dir = temp_pair1.second;
+	return to_return;
+}
+
+AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, float strength)
+{
+	AliceStructs::ideal to_return;
+	to_return.pri = 0;
+	to_return.dir = 0;
+	for (auto& flow : flows)
+	{
+		float temp_pri = flow.spd*strength/(flow.dis+10);
+		to_return.dir = (to_return.dir * to_return.pri + flow.dir * temp_pri)/(to_return.pri + temp_pri);
+		to_return.pri += temp_pri;
+	}
+
+	return to_return;
+}
+
+
+AliceStructs::ideal Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength)
+{
+	AliceStructs::ideal to_return;
+	to_return.pri = 0.0001;
+	to_return.dir = 0.0001;
+	//to_return.spd = 0;
+	for (auto &obs : obstacles)
+	{
+		if (obs.dis < 2 * ROBOT_SIZE)
+		{
+			to_return.dir = fmod(obs.dir + M_PI, 2*M_PI);
+			to_return.pri = 10 * strength * pow(obs.dis, 2);
+		}
+	}
 	return to_return;
 }
 
 /*
- vel goToTarget(std::list <obs> targets, float tolerance)
+ ideal goToTarget(std::list <obs> targets, float tolerance)
  {
- vel to_return;
+ ideal to_return;
 
  }*/
