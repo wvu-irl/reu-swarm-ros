@@ -164,7 +164,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 	int x = 50; //x inital positions for the bots.
 
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		char temp[2] =
 		{ letters[2 * i], letters[2 * i + 1] };
@@ -434,15 +434,14 @@ void Sim::drawFlows() //draws flows
 
 		window.draw(line);
 		window.draw(line1);
-
 	}
 }
 void Sim::updateTargetPos()
 {
 	for(int i = 0; i <targets.point.size(); i++)
 	{
-		targets.point.at(i).x += targets.point.at(i).x;
-		targets.point.at(i).y += targets.point.at(i).y;
+		targets.point.at(i).x += targets.point.at(i).vx;
+		targets.point.at(i).y += -targets.point.at(i).vy;
 	}
 }
 void Sim::drawTargets() //draws targets
