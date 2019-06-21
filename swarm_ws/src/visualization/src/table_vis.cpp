@@ -65,7 +65,7 @@ void calibrateFromFile(std::string path)
 
 void tick()
 {
-	cont->tick(g_tick);
+	//cont->tick(g_tick);
 
 	g_tick++;
 	g_tick %= 1000;
@@ -75,7 +75,17 @@ void render(sf::RenderWindow *window)
 {
 	sf::RenderTexture disp;
 	disp.create(WIDTH, HEIGHT);
-	cont->render(&disp);
+	//cont->render(&disp);
+	sf::Image checker;
+	checker.loadFromFile("src/visualization/assets/Checkerboard.jpg");
+	sf::Texture checker_texture;
+	checker_texture.loadFromImage(checker);
+	sf::Sprite checker_sprite;
+	checker_sprite.setTexture(checker_texture);
+	checker_sprite.setPosition(sf::Vector2f(0,0));
+	checker_sprite.scale(1280.0 / 800.0, 1.0);
+	disp.draw(checker_sprite);
+
 	disp.display();
 
 	sf::Image img = disp.getTexture().copyToImage();
