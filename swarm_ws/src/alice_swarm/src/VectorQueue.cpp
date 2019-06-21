@@ -26,6 +26,7 @@ AliceStructs::vel VectorQueue::createCompromise()
 	AliceStructs::vel to_return;
 	float dir;
 	float pri;
+	float spd;
 	//int size = vectorQueue.size();
 	//std::cout << "---" << size << std::endl;
 	while (!vectorQueue.empty())
@@ -33,10 +34,11 @@ AliceStructs::vel VectorQueue::createCompromise()
 		AliceStructs::ideal current = vectorQueue.back();
 		//std::cout << current.dir << std::endl;
 		vectorQueue.pop_back();
-		float current_pri = pow(current.pri / (current.dis/10 + 1), 2);
+		float current_pri = current.pri / pow((current.dis/10 + 1), 2);
 		dir = (dir * pri + current_pri * current.dir)/(pri + current_pri);
+		spd = (spd * pri + current_pri * current.spd)/(pri + current_pri);
 	}
 	to_return.dir = dir;
-	to_return.mag = 1;
+	to_return.mag = spd;
 	return to_return;
 };

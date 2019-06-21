@@ -15,6 +15,7 @@ Model::Model(int _name)
 void Model::addIdeal(AliceStructs::ideal &_ideal1, AliceStructs::ideal &_ideal2) // ideals are always polar
 {
 	_ideal1.dir = (_ideal1.dir * _ideal1.pri + _ideal2.pri * _ideal2.dir)/(_ideal1.pri + _ideal2.pri);
+	_ideal1.spd = (_ideal1.spd * _ideal1.pri + _ideal2.pri * _ideal2.spd)/(_ideal1.pri + _ideal2.pri);
 	_ideal1.pri += _ideal2.pri;
 }
 void Model::normalize(AliceStructs::vel &_vel)
@@ -44,12 +45,13 @@ AliceStructs::ideal Model::generateIdeal()
 	//AliceStructs::ideal temp;
 	to_return.dir = 0;
 	to_return.pri = 0;
+	to_return.spd = 0;
 	rules.should_ignore = false;
 
 	std::vector<AliceStructs::ideal> ideal_list =
 	{ //rules.dummy1(),
 			//rules.followFlow(flows, 16),
-			rules.goToTarget(targets, 16),
+			rules.goToTarget(targets, 8),
 			rules.avoidObstacles(obstacles, 16),
 			rules.magnetAvoid(robots, 16),
 			rules.birdAvoid(robots, 16),

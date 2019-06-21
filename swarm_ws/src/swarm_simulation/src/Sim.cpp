@@ -271,39 +271,10 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 				event);
 
 //		//----------Allows for click and drag. ------------------------------
-//		if (_pI.dragging == true)
-//		{
-//			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
-//			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
-//		}
-//		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-//				&& _pI.prevClick == true)
-//		{
-//			_pI.dragging = false;
-//			_pI.prevClick = false;
-//		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-//				&& _pI.prevClick == false)
-//		{
-//			while (found != true && i < flock.flock.size())
-//			{
-//				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
-//						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
-//				{
-//					found = true;
-//					_pI.botId = i;
-//					_pI.dragging = true;
-//					_pI.prevClick = true;
-//				}
-//				i++;
-//			}
-//		}
-//		i=0;
-		//----------Allows for click and drag. ------------------------------
 		if (_pI.dragging == true)
 		{
-			targets.point.at(i).x = sf::Mouse::getPosition(window).x/3-50;; //event.mouseButton.x;
-			targets.point.at(i).y = sf::Mouse::getPosition(window).y/-3+100; //event.mouseButton.y;
-			std::cout << "yo" << std::endl;
+			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
+			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
 		}
 		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == true)
@@ -313,20 +284,49 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == false)
 		{
-			while (found != true && i<targets.point.size())
+			while (found != true && i < flock.flock.size())
 			{
-				if (((targets.point.at(i).x  > mX/3-50 - 6) && (targets.point.at(i).x  < mX/3-50 + 6))
-						&& ((targets.point.at(i).y> mY/-3+100 - 6) && (targets.point.at(i).y < mY/-3+100 + 6)))
+				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
+						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
 				{
 					found = true;
-
+					_pI.botId = i;
 					_pI.dragging = true;
 					_pI.prevClick = true;
 				}
 				i++;
 			}
-
-		} //-----------------------------------------------------------------------------------------
+		}
+		i=0;
+		//----------Allows for click and drag. ------------------------------
+//		if (_pI.dragging == true)
+//		{
+//			targets.point.at(i).x = sf::Mouse::getPosition(window).x/3-50;; //event.mouseButton.x;
+//			targets.point.at(i).y = sf::Mouse::getPosition(window).y/-3+100; //event.mouseButton.y;
+//			std::cout << "yo" << std::endl;
+//		}
+//		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+//				&& _pI.prevClick == true)
+//		{
+//			_pI.dragging = false;
+//			_pI.prevClick = false;
+//		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+//				&& _pI.prevClick == false)
+//		{
+//			while (found != true && i<targets.point.size())
+//			{
+//				if (((targets.point.at(i).x  > mX/3-50 - 6) && (targets.point.at(i).x  < mX/3-50 + 6))
+//						&& ((targets.point.at(i).y> mY/-3+100 - 6) && (targets.point.at(i).y < mY/-3+100 + 6)))
+//				{
+//					found = true;
+//
+//					_pI.dragging = true;
+//					_pI.prevClick = true;
+//				}
+//				i++;
+//			}
+//
+//		} //-----------------------------------------------------------------------------------------
 	}
 	return _pI; //tracks state of dragging (see sim.h)
 
