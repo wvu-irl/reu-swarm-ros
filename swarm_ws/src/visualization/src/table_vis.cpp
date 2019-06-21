@@ -11,6 +11,8 @@
 #define WIDTH 1280
 #define HEIGHT 800
 
+#define TAB_DEBUG 0
+
 ContourMap *cont;
 sf::Sprite displaySprite;
 
@@ -87,16 +89,34 @@ void render(sf::RenderWindow *window)
 		int col = i % WIDTH;
 		sf::Vector2f square_pos((float) col, (float) row);
 		sf::Vector2f trap_point = warpPoint(g_trap, WIDTH, HEIGHT, square_pos);
+#if TAB_DEBUG
+//		sf::Vector2f top(scale(square_pos.x, 0, WIDTH, g_trap.tl.x, g_trap.tr.x),
+//				scale(square_pos.x, 0, WIDTH, g_trap.tl.y, g_trap.tr.y));
+//		sf::Vector2f bottom(scale(square_pos.x, 0, WIDTH, g_trap.bl.x, g_trap.br.x),
+//				scale(square_pos.x, 0, WIDTH, g_trap.bl.y, g_trap.br.y));
+//		sf::Vector2f left(scale(square_pos.y, 0, HEIGHT, g_trap.bl.x, g_trap.tl.x),
+//				scale(square_pos.y, 0, HEIGHT, g_trap.bl.y, g_trap.tl.y));
+//		sf::Vector2f right(scale(square_pos.y, 0, HEIGHT, g_trap.bl.x, g_trap.tl.x),
+//				scale(square_pos.y, 0, HEIGHT, g_trap.bl.y, g_trap.tl.y));
+//
+//		sf::VertexArray tb(sf::LineStrip, 2);
+//		tb[0].position = top;
+//		tb[1].position = bottom;
+//		window->draw(tb);
+//
+//		sf::VertexArray lr(sf::LineStrip, 2);
+//		lr[0].position = left;
+//		lr[1].position = right;
+//		window->draw(lr);
 
-//		std::cout << "Got vector: (" << (int) trap_point.x << ","
-//				<< (int) trap_point.y << ") <- (" << col << ", " << row << ")"
-//				<< std::endl;
+		std::cout << "Got vector: (" << (int) trap_point.x << ","
+				<< (int) trap_point.y << ") <- (" << col << ", " << row << ")"
+				<< std::endl;
+#endif
 		sf::Color pix = img.getPixel((int) square_pos.x, (int) square_pos.y);
-//		std::cout << "Writing" << std::endl;
 		if ((int) trap_point.x < WIDTH && (int) trap_point.y < HEIGHT
 				&& (int) trap_point.x >= 0 && (int) trap_point.y >= 0)
 			tf_img.setPixel((int) trap_point.x, (int) trap_point.y, pix);
-//		std::cout << "\033[30;42mWritten\033[0m" << std::endl;
 	}
 
 	sf::Texture tex;
