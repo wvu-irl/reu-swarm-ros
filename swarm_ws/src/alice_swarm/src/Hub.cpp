@@ -178,7 +178,7 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 		{
 			std::pair<float, float> temp =
 			{ targets.point.at(j).x, targets.point.at(j).y };
-			AliceStructs::obj temp2 = getSeparation(bots[i], temp, 5 * VISION);
+			AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
 			if (temp2.dis > -1)
 			{
 				t.push_back(temp2);

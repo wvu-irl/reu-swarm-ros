@@ -28,7 +28,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	wvu_swarm_std_msgs::flow cur0;
 	cur0.x = x +(xd) / r * 10;
 	cur0.y = y + (yd) / r * 10;
-	cur0.r = 10;
+	cur0.r = 20;
 	cur0.theta = atan2(yd,xd);
 	cur0.sid = sid;
 	in_vector.flow.push_back(cur0);
@@ -59,7 +59,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	cur4.x -= xd / r * 20;
 	cur4.y -= yd / r * 20;
 	cur4.theta = cur2.theta + 5 * M_PI / 6;
-	cur4.r = 10;
+	cur4.r = 20;
 	in_vector.flow.push_back(cur4);
 
 	//bottomright
@@ -67,14 +67,14 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	cur5.x -= xd / r * 20;
 	cur5.y -= yd / r * 20;
 	cur5.theta = cur1.theta - 5 * M_PI / 6;
-	cur5.r = 10;
+	cur5.r = 20;
 	in_vector.flow.push_back(cur5);
 
 	//middle
 	wvu_swarm_std_msgs::flow cur6;
 	cur6.x = x;
 	cur6.y = y;
-	cur6.r = 10;
+	cur6.r = 20;
 	cur6.theta = atan2(yd,xd);
 	cur6.sid = sid;
 	in_vector.flow.push_back(cur6);
@@ -203,10 +203,10 @@ int main(int argc, char **argv)
 	ros::Publisher pub3 = n.advertise < wvu_swarm_std_msgs::flows > ("virtual_flows", 1000);
 	ros::Subscriber sub1 = n.subscribe("virtual_targets", 1000, pointCallback);
 	//ros::Subscriber	sub2 = n.subscribe("vicon_array",1000,botCallback;
-			ros::Rate loopRate(50);
-			sleep(1); //waits for sim to be awake
+			ros::Rate loopRate(200);
+			sleep(2); //waits for sim to be awake
 			int i = 0;
-			while (ros::ok() && i < 50)
+			while (ros::ok() && i < 100)
 			{
 				makeObstacles(pub1);
 				makeTargets(pub2);

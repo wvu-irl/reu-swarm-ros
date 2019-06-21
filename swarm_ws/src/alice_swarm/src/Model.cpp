@@ -7,9 +7,10 @@ Model::Model()
 {
 }
 
-Model::Model(int _name)
+Model::Model(int _name,int _sid)
 {
 	name = _name;
+	sid=_sid;
 }
 
 void Model::addPolarVel(AliceStructs::vel &_vel1, AliceStructs::vel &_vel2)
@@ -50,12 +51,12 @@ AliceStructs::ideal Model::generateIdeal()
 
 	std::vector<AliceStructs::vel> ideal_list =
 	{ //rules.dummy1(),
-			rules.goToTarget(targets,4,180),
+			rules.goToTarget(targets,5,180),
 			rules.followFlow(flows,15),
 			rules.avoidObstacles(obstacles, 1, 180),
 			rules.magnetAvoid(robots, 3),
 			//rules.birdAvoid(robots, 4, 30),
-			//rules.maintainSpacing(robots, 0.3)
+			rules.maintainSpacing(robots, 1,30,sid)
 			};
 	for (int i = 0; i < ideal_list.size(); i++)
 	{

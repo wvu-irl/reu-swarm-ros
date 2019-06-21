@@ -16,7 +16,7 @@ name=10000;
 Robot::Robot(AliceStructs::mail data)
 {
 	name = data.name;
-	model = Model(data.name);
+	model = Model(data.name,data.sid);
 	vectorQueue = VectorQueue();
 	model.addToModel(data);
 	neighbors = data.neighbors;
@@ -26,7 +26,7 @@ void Robot::receiveMsg(AliceStructs::mail data)
 {
 	name = data.name;
 	sid = data.sid;
-	model = Model(data.name);
+	model = Model(data.name,data.sid);
 	vectorQueue = VectorQueue();
 	model.addToModel(data);
 	neighbors = data.neighbors;

@@ -41,6 +41,6 @@ AliceStructs::vel VectorQueue::createCompromise()
 	}
 
 	to_return.dir = compromise.second;
-	to_return.mag = compromise.first/size;
+	to_return.mag = compromise.first/size*10;
 	return to_return;
 };

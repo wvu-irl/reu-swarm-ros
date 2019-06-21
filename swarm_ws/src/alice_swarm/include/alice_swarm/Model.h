@@ -16,7 +16,7 @@ public:
 	Model();//dummy
 
 
-	Model(int _name);
+	Model(int _name,int _sid);
 
 	AliceStructs::ideal generateIdeal();
 
@@ -26,6 +26,7 @@ public:
 
 private:
 	int name;
+	int sid;
 	void addPolarVel(AliceStructs::vel &_vel1, AliceStructs::vel &_vel2);
 	void normalize(AliceStructs::vel &_vel);
 	void dDriveAdjust(AliceStructs::vel &_vel); //assumes that vector has already been normalized

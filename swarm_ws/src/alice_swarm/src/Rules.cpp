@@ -58,7 +58,7 @@ AliceStructs::vel Rules::goToTarget(std::list<AliceStructs::obj> targets, float 
 	return to_return;
 }
 
-AliceStructs::vel Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength)
+AliceStructs::vel Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength, float spacing,int sid)
 {
 	AliceStructs::vel to_return;
 	std::pair<float, float> temp_pair1;
@@ -66,13 +66,24 @@ AliceStructs::vel Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots,
 	temp_pair1.second = 0;
 	for (auto &bot : bots)
 	{
+		if (bot.sid==sid){
+
+
 		std::pair<float, float> temp_pair2(bot.dis, bot.dir);
 
 		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
+		}
 	}
-	to_return.mag = temp_pair1.first / bots.size() * strength;
+	if (temp_pair1.first/bots.size() >spacing){
+		to_return.mag = pow((temp_pair1.first / bots.size()-spacing),0.2) * strength;
+		to_return.dir = temp_pair1.second;
+	} else {
+		to_return.mag = ((spacing-temp_pair1.first / bots.size()),0.2) * strength;
+		to_return.dir = temp_pair1.second +M_PI;
+	}
 
-	to_return.dir = temp_pair1.second;
+
+
 	return to_return;
 }
 AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, float strength)
@@ -84,7 +95,7 @@ AliceStructs::vel Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, flo
 	for (auto &bot : bots)
 	{
 
-		std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (bot.dis - ROBOT_SIZE), 3), M_PI + bot.dir);
+		std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (bot.dis - ROBOT_SIZE+1), 3), M_PI + bot.dir);
 		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
 
 	}
@@ -126,7 +137,7 @@ AliceStructs::vel Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles, 
 		//avoids things in direction of travel
 
 		//std::cout << "yeeting" << std::endl;
-		std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (obj.dis - ROBOT_SIZE), 3), M_PI + obj.dir);
+		std::pair<float, float> temp_pair2(pow(ROBOT_SIZE * strength / (obj.dis - ROBOT_SIZE+1), 3), M_PI + obj.dir);
 		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
 
 	}

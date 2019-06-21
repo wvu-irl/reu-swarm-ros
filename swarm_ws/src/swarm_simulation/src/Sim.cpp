@@ -37,56 +37,58 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 //Prevents sudden turns
 
-//flock.flock.at(i).heading = fmod(flock.flock.at(i).heading + 2*M_PI, 2*M_PI);
+					flock.flock.at(i).heading = fmod(flock.flock.at(i).heading + 2 * M_PI, 2 * M_PI);
 
-//					float a;
-//					float b;
-//					float temp_r;
-//
-//					float theta = msg.commands.at(j).theta/180 * M_PI;
-//					float r = msg.commands.at(j).r;
-//					if (0 < theta && theta < M_PI) {
-//						a = 1;
-//						b = r * cos(theta/2);
-//						temp_r = b;
-//				   	flock.flock.at(i).heading += M_PI/18 * theta;
-//					} else if (M_PI < theta && theta < 2*M_PI) {
-//						b = 1;
-//						a = -r * cos(theta/2);
-//						temp_r = a;
-//						flock.flock.at(i).heading -= M_PI/18 * (2*M_PI - theta);
-//					}
-//
-//					float x = temp_r * cos(flock.flock.at(i).heading);
-//					float y = temp_r * sin(flock.flock.at(i).heading);
-//
+					float a;
+					float b;
+					float temp_r;
 
 					float theta = msg.commands.at(j).theta / 180 * M_PI;
-					if (theta > M_PI / 12 && theta < M_PI)
+					float r = msg.commands.at(j).r;
+					if (0 < theta && theta < M_PI)
 					{
-						flock.flock.at(i).velocity.set(0, 0);
-						flock.flock.at(i).heading += M_PI / 24;
-
-					} else if (theta < 23 * M_PI / 12 && theta > M_PI)
+						a = 1;
+						b = r * cos(theta / 2);
+						temp_r = b;
+						flock.flock.at(i).heading += M_PI / 180 * theta;
+					} else if (M_PI < theta && theta < 2 * M_PI)
 					{
-						flock.flock.at(i).velocity.set(0, 0);
-						flock.flock.at(i).heading -= M_PI / 24;
-					} else
-					{
-						flock.flock.at(i).heading += theta;
-						flock.flock.at(i).velocity.set(1 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
-								-1 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
+						b = 1;
+						a = -r * cos(theta / 2);
+						temp_r = a;
+						flock.flock.at(i).heading -= M_PI / 180 * (2 * M_PI - theta);
 					}
+
+					float x = temp_r * cos(flock.flock.at(i).heading);
+					float y = temp_r * sin(flock.flock.at(i).heading);
+
+//					float theta = msg.commands.at(j).theta / 180 * M_PI;
+//					if (theta > M_PI / 24 && theta < M_PI)
+//					{
+//						flock.flock.at(i).velocity.set(0, 0);
+//						flock.flock.at(i).heading += M_PI / 24;
+//
+//					} else if (theta < 47 * M_PI / 24 && theta > M_PI)
+//					{
+//						flock.flock.at(i).velocity.set(0, 0);
+//						flock.flock.at(i).heading -= M_PI / 24;
+//					} else
+//					{
+//						flock.flock.at(i).heading += theta;
+//						flock.flock.at(i).velocity.set(1 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
+//								-1 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
+//					}
 
 //					if(flock.flock.at(i).collision == false)
 //					{
-//						flock.flock.at(i).heading  = fmod(flock.flock.at(i).heading,(2*M_PI));
-//						//flock.flock.at(i).velocity.set(x, -y);
-//						flock.flock.at(i).updatedCommand = true;
-//					}
-//					if (msg.commands.at(j).r <0.01) {
-//							flock.flock.at(i).velocity.set(0,0);
-//					}
+					flock.flock.at(i).heading = fmod(flock.flock.at(i).heading, (2 * M_PI));
+					flock.flock.at(i).velocity.set(x, -y);
+
+
+					if (msg.commands.at(j).r < 0.01)
+					{
+						flock.flock.at(i).velocity.set(0, 0);
+					}
 
 //				std::cout<<"new (sum) angle"<< o +  n<<"\n";
 //				std::cout<<"v_new (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
@@ -121,7 +123,7 @@ Sim::Sim()
 	this->window_height = 600;
 	this->window_width = 300;
 
-	//std::cout<<"Window h;w = "<<window_height << "; "<<window_width<<"\n";
+//std::cout<<"Window h;w = "<<window_height << "; "<<window_width<<"\n";
 	this->window.create(sf::VideoMode(window_width, window_height, desktop.bitsPerPixel), "Swarm Simulation",
 			sf::Style::None);
 }
@@ -142,7 +144,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 	int x = 50; //x inital positions for the bots.
 
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		char temp[2] =
 		{ letters[2 * i], letters[2 * i + 1] };
@@ -216,9 +218,9 @@ void Sim::Run(ros::NodeHandle _n)
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
 	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to virtual obstacles
 	ros::Subscriber sub3 = _n.subscribe("virtual_targets", 1000, &Sim::targetCallback, this); //gets virtual targets
-	ros::Rate loopRate(50);
+	ros::Rate loopRate(200);
 
-	//publishes initial information for each bot
+//publishes initial information for each bot
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
 	pub.publish(vb_array);
 	ros::spinOnce();
@@ -267,38 +269,10 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 				event);
 
 //		//----------Allows for click and drag. ------------------------------
-//		if (_pI.dragging == true)
-//		{
-//			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
-//			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
-//		}
-//		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-//				&& _pI.prevClick == true)
-//		{
-//			_pI.dragging = false;
-//			_pI.prevClick = false;
-//		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-//				&& _pI.prevClick == false)
-//		{
-//			while (found != true && i < flock.flock.size())
-//			{
-//				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
-//						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
-//				{
-//					found = true;
-//					_pI.botId = i;
-//					_pI.dragging = true;
-//					_pI.prevClick = true;
-//				}
-//				i++;
-//			}
-//		}
-//		i=0;
-		//----------Allows for click and drag. ------------------------------
 		if (_pI.dragging == true)
 		{
-			targets.point.at(i).x = sf::Mouse::getPosition(window).x/3-50;; //event.mouseButton.x;
-			targets.point.at(i).y = sf::Mouse::getPosition(window).y/-3+100; //event.mouseButton.y;
+			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
+			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
 		}
 		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == true)
@@ -308,20 +282,48 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == false)
 		{
-			while (found != true && i<targets.point.size())
+			while (found != true && i < flock.flock.size())
 			{
-				if (((targets.point.at(i).x  > mX/3-50 - 6) && (targets.point.at(i).x  < mX/3-50 + 6))
-						&& ((targets.point.at(i).y> mY/-3+100 - 6) && (targets.point.at(i).y < mY/-3+100 + 6)))
+				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
+						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
 				{
 					found = true;
-
+					_pI.botId = i;
 					_pI.dragging = true;
 					_pI.prevClick = true;
 				}
 				i++;
 			}
-
-		} //-----------------------------------------------------------------------------------------
+		}
+		//----------Allows for click and drag. ------------------------------
+//		if (_pI.dragging == true)
+//		{
+//			targets.point.at(i).x = sf::Mouse::getPosition(window).x / 3 - 50;
+//			; //event.mouseButton.x;
+//			targets.point.at(i).y = sf::Mouse::getPosition(window).y / -3 + 100; //event.mouseButton.y;
+//		}
+//		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+//				&& _pI.prevClick == true)
+//		{
+//			_pI.dragging = false;
+//			_pI.prevClick = false;
+//		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+//				&& _pI.prevClick == false)
+//		{
+//			while (found != true && i < targets.point.size())
+//			{
+//				if (((targets.point.at(i).x > mX / 3 - 50 - 6) && (targets.point.at(i).x < mX / 3 - 50 + 6))
+//						&& ((targets.point.at(i).y > mY / -3 + 100 - 6) && (targets.point.at(i).y < mY / -3 + 100 + 6)))
+//				{
+//					found = true;
+//
+//					_pI.dragging = true;
+//					_pI.prevClick = true;
+//				}
+//				i++;
+//			}
+//
+//		} //-----------------------------------------------------------------------------------------
 	}
 	return _pI; //tracks state of dragging (see sim.h)
 
