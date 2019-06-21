@@ -36,8 +36,8 @@ Eigen::MatrixXd calcCoeffs(quadrilateral_t &screen)
 	coeffMat(0, 1) = y[1] - y[0] + coeffMat(0, 2) * y[1];
 	coeffMat(1, 1) = y[3] - y[0] + coeffMat(1, 2) * y[3];
 	coeffMat(2, 1) = y[0];
-	coeffMat(2, 2) = y[0];
-	coeffMat(1, 2) = 0.0;
+	coeffMat(2, 2) = 0.0;
+	coeffMat(1, 2) = y[0];
 
 	return coeffMat;
 }
@@ -45,11 +45,31 @@ Eigen::MatrixXd calcCoeffs(quadrilateral_t &screen)
 perspective_t getTransform(quadrilateral_t &screen)
 {
 	Eigen::MatrixXd coeff = calcCoeffs(screen);
-	double w = 1 / (coeff * Eigen::Vector3d(0,0,1))(2);
-	return (perspective_t) { coeff, w } ;
+	Eigen::MatrixXd trans(3,3);
+	for (int i = 0;i < 3;i++)
+	{
+		for (int j = 0;j < 3;j++)
+		{
+			Eigen::MatrixXd sub(2,2);
+			for (int k = 0;k < 3;k++)
+			{
+				if (k == i)
+					k++;
+				for (int l = 0;l < 3;l++)
+				{
+					if (l == j)
+						l++;
+					sub(k - k > i ? 1 : 0, l - l > j ? 1 : 0) = coeff(i, j);
+				}
+			}
+			trans(i, j) = sub.determinant();
+		}
+	}
+	double w = (trans * Eigen::Vector3d(1,1,1))(2);
+	return (perspective_t) { trans, w } ;
 }
 
-sf::Vector2f warpPoint(perspective_t pers, sf::Rect<int> rect, sf::Vector2f initial)
+sf::Vector2f warpPoint(perspective_t pers, sf::Vector2f initial)
 {
 	Eigen::Vector3d uv1 = pers.coeffs * Eigen::Vector3d(initial.x, initial.y, pers.w);
 	return sf::Vector2f(uv1(0), uv1(1));
