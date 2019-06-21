@@ -37,10 +37,15 @@ class Body {
 
 private:
 		float angleConvert(float _x);
+		int quadrant(float phi);
+		bool aboveOrBelow(float _dx, float _dy, int _Q);
+		float getRelTheta(float _abs_theta, float _phi, int _Q);
+		bool applyForce(bool _aorb,float _rel_theta);
 	  //wvu_swarm_std_msgs::vicon_bot_array createMessages(std::vector<Body> _flock);//vector<Body> _flock); //operates on flock
 		//char[2] getID();
 public:
 		char id [2];
+		wvu_swarm_std_msgs::vicon_points *targets;
 		float heading;
 		int sid;
 		float force;
@@ -59,7 +64,7 @@ public:
     Body() {}
     Body(float x, float y, char _id[2]);
     Body(float x, float y, bool predCheck);
-    void applyForce(Pvector force);
+    //void applyForce(Pvector force);
     // Three Laws that bodies follow
     Pvector Separation(vector<Body> Bodies);
     Pvector Alignment(vector<Body> Bodies);
@@ -70,9 +75,12 @@ public:
     void update();
     void flock(vector <Body> v);
     void borders();
+    std::pair<float,float> borders(float _fx, float _fy);
     void seperation(vector<Body> _bodies);
     void inElasticCollisions(vector<Body> _bodies);
     void elasticCollisions(vector<Body> _bodies);
+    void targetCollision(int i, float _t_sep);
+    float targetSeperation(wvu_swarm_std_msgs::vicon_point);
     float angle(Pvector v);
     void printMessage(int i,wvu_swarm_std_msgs::vicon_bot_array _vb_array);
 };

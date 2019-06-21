@@ -37,7 +37,7 @@ public:
     Body getBody(int i);
     // Mutator Functions
     void addBody(Body b);
-    void flocking();
+    void flocking(wvu_swarm_std_msgs::vicon_points *_targets);
 };
 
 #endif

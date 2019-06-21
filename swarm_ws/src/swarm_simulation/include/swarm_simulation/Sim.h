@@ -6,6 +6,7 @@
 #include "SFML/Graphics.hpp"
 #include <ros/ros.h>
 #include <wvu_swarm_std_msgs/robot_command_array.h>
+#include <wvu_swarm_std_msgs/flows.h>
 //#include <swarm_server/robot_id.h>
 
 #ifndef SIM_H
@@ -30,8 +31,11 @@ private:
     void vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg);
     void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg);
     void targetCallback(const wvu_swarm_std_msgs::vicon_points &msg);
+    void flowCallback(const wvu_swarm_std_msgs::flows &msg);
     void drawObstacles();
     void drawTargets();
+    void updateTargetPos();
+    void drawFlows();
     Flock flock;
     float bodiesSize;
     vector<sf::CircleShape> shapes;
@@ -39,6 +43,7 @@ private:
     //vector<sf::Text> texts;
     vector<wvu_swarm_std_msgs::vicon_point> obstacles;
     wvu_swarm_std_msgs::vicon_points targets;
+    wvu_swarm_std_msgs::flows flows;
     vector<sf::CircleShape> obs_shapes;
     void Render();
     PrevIteration HandleInput(PrevIteration _pI);

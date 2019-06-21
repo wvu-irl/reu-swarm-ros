@@ -140,8 +140,8 @@ void createFood(wvu_swarm_std_msgs::vicon_points &in_vector)
 {
 	//is the puck
 	wvu_swarm_std_msgs::vicon_point cur0;
-	cur0.x = 1;
-	cur0.y = 1;
+	cur0.x = 0.01;
+	cur0.y = 0;
 	cur0.sid = 0;
 	in_vector.point.push_back(cur0);
 }

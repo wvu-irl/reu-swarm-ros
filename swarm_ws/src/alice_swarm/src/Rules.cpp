@@ -64,21 +64,22 @@ AliceStructs::vel Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots,
 	std::pair<float, float> temp_pair1;
 	temp_pair1.first = 0;
 	temp_pair1.second = 0;
+	int count =0;
 	for (auto &bot : bots)
 	{
 		if (bot.sid==sid){
-
+			count++;
 
 		std::pair<float, float> temp_pair2(bot.dis, bot.dir);
 
 		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
 		}
 	}
-	if (temp_pair1.first/bots.size() >spacing){
-		to_return.mag = pow((temp_pair1.first / bots.size()-spacing),0.2) * strength;
+	if (temp_pair1.first/count >spacing){
+		to_return.mag = pow((temp_pair1.first / count-spacing),0.2) * strength;
 		to_return.dir = temp_pair1.second;
 	} else {
-		to_return.mag = ((spacing-temp_pair1.first / bots.size()),0.2) * strength;
+		to_return.mag = pow((spacing-temp_pair1.first / count),0.2) * strength;
 		to_return.dir = temp_pair1.second +M_PI;
 	}
 

@@ -51,12 +51,12 @@ AliceStructs::ideal Model::generateIdeal()
 
 	std::vector<AliceStructs::vel> ideal_list =
 	{ //rules.dummy1(),
-			rules.goToTarget(targets,5,180),
+			rules.goToTarget(targets,6,180),
 			rules.followFlow(flows,15),
-			rules.avoidObstacles(obstacles, 1, 180),
+			rules.avoidObstacles(obstacles, 3, 180),
 			rules.magnetAvoid(robots, 3),
 			//rules.birdAvoid(robots, 4, 30),
-			rules.maintainSpacing(robots, 1,30,sid)
+			rules.maintainSpacing(robots, 3,50,sid)
 			};
 	for (int i = 0; i < ideal_list.size(); i++)
 	{
