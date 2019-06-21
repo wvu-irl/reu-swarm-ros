@@ -121,6 +121,8 @@ void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 Sim::Sim()
 {
 	this->bodiesSize = 7.5;
+	//this->bodiesSize_small = 4.5;
+	//this->bodiesSize_big = 10.5;
 	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 	this->window_height = 600;
 	this->window_width = 300;
@@ -332,6 +334,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 
 //	// Checks or A to be pressed, draws and adds bodies to flock if so.
 //	  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+//	  	std::cout<<"pressed a"<<std::endl;
 //	        // Gets mouse coordinates, sets that as the location of the body and the shape
 //	        sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
 //	        Body b(mouseCoords.x, mouseCoords.y, false);
@@ -354,23 +357,64 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //	    }
 //
 //	    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Delete)) {
+//		  	std::cout<<"pressed delete"<<std::endl;
+//
 //	          // Gets mouse coordinates, sets that as the location of the body and the shape
 //	          sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
 //	          Body b(mouseCoords.x, mouseCoords.y, false);
 //	          sf::CircleShape shape(4);
 //
-//	          // Changing visual properties of newly created body
-//	          shape.setPosition(mouseCoords.x, mouseCoords.y);
-//	          shape.setOutlineColor(sf::Color::White);
-//	          shape.setFillColor(sf::Color::White);
-//	          shape.setOutlineColor(sf::Color::White);
-//	          shape.setOutlineThickness(1);
-//	          shape.setRadius(bodiesSize);
-//
 //	          //deletes bodies from the second through the hird element
 //	          shapes.erase(shapes.begin() + 1, shapes.begin() + 2);
 //
 //	      }
+
+	//	  if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {//add lil bois
+	//	  	std::cout<<"pressed a"<<std::endl;
+	//	        // Gets mouse coordinates, sets that as the location of the body and the shape
+	//	        sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
+	//	        Body b(mouseCoords.x, mouseCoords.y, false);
+	//	        sf::CircleShape shape(4);
+	//
+	//	        // Changing visual properties of newly created body
+	//	        shape.setPosition(mouseCoords.x, mouseCoords.y);
+	//	        shape.setOutlineColor(sf::Color::White);
+	//	        shape.setFillColor(sf::Color::White);
+	//	        shape.setOutlineColor(sf::Color::White);
+	//	        shape.setOutlineThickness(1);
+	//	        shape.setRadius(bodiesSize_small);
+	//
+	//	        // Adds newly created body and shape to their respective data structure
+	//	        flock.addBody(b);
+	//	        shapes.push_back(shape);
+	//
+	//	        // New Shape is drawn
+	//	        window.draw(shapes[shapes.size() - 1]);
+	//	    }
+
+	//	  if (sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
+	//	  	std::cout<<"pressed a"<<std::endl;
+	//	        // Gets mouse coordinates, sets that as the location of the body and the shape
+	//	        sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
+	//	        Body b(mouseCoords.x, mouseCoords.y, false);
+	//	        sf::CircleShape shape(4);
+	//
+	//	        // Changing visual properties of newly created body
+	//	        shape.setPosition(mouseCoords.x, mouseCoords.y);
+	//	        shape.setOutlineColor(sf::Color::White);
+	//	        shape.setFillColor(sf::Color::White);
+	//	        shape.setOutlineColor(sf::Color::White);
+	//	        shape.setOutlineThickness(1);
+	//	        shape.setRadius(bodiesSize_big);
+	//
+	//	        // Adds newly created body and shape to their respective data structure
+	//	        flock.addBody(b);
+	//	        shapes.push_back(shape);
+	//
+	//	        // New Shape is drawn
+	//	        window.draw(shapes[shapes.size() - 1]);
+	//	    }
+	//
 
 }
 
