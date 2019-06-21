@@ -19,45 +19,6 @@ double scale(double val, double o_min, double o_max, double n_min, double n_max)
 	return ((val - o_min) / (o_max - o_min)) * (n_max - n_min) + n_min;
 }
 
-sf::Vector2f operator&&(sf::Vector2f a, sf::Vector2f b)
-{
-	return sf::Vector2f((a.x + b.x) / 2, (a.y + b.y) / 2);
-}
-
-double distance(sf::Vector2f a, sf::Vector2f b)
-{
-	return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
-}
-
-sf::Vector2f toPolar(sf::Vector2f a)
-{
-	return sf::Vector2f(distance(sf::Vector2f(0, 0), a),
-			a.x == 0 ?
-					(a.y < 0 ? 3 * M_PI_2 : M_PI_2) :
-					(atan(a.y / a.x) + (a.x < 0 ? M_PI : 0)));
-}
-
-sf::Vector2f fromPolar(sf::Vector2f p)
-{
-	return sf::Vector2f(p.x * cos(p.y), p.x * sin(p.y));
-}
-
-sf::Vector2f operator-(sf::Vector2f a, sf::Vector2f b)
-{
-	return sf::Vector2f(a.x - b.x, a.y - b.y);
-}
-
-sf::Vector2f operator+(sf::Vector2f a, sf::Vector2f b)
-{
-	return sf::Vector2f(a.x + b.x, a.y + b.y);
-}
-
-bool isBetween(double val, double bound_a, double bound_b)
-{
-	return val <= (bound_a > bound_b ? bound_a : bound_b)
-			&& val >= (bound_a > bound_b ? bound_b : bound_a);
-}
-
 sf::Vector2f warpPoint(quadrilateral_t trap, size_t width, size_t height,
 		sf::Vector2f initial)
 {
