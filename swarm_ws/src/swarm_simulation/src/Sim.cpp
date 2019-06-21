@@ -50,12 +50,12 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 						a = 1;
 						b = r * cos(theta/2);
 						temp_r = b;
-				   	flock.flock.at(i).heading += M_PI/18 * theta;
+				   	flock.flock.at(i).heading += M_PI/36 * theta;
 					} else if (M_PI < theta && theta < 2*M_PI) {
 						b = 1;
 						a = -r * cos(theta/2);
 						temp_r = a;
-						flock.flock.at(i).heading -= M_PI/18 * (2*M_PI - theta);
+						flock.flock.at(i).heading -= M_PI/36 * (2*M_PI - theta);
 					}
 
 					float x = temp_r * cos(flock.flock.at(i).heading);
@@ -68,12 +68,12 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 					if (theta > M_PI / 12 && theta < M_PI)
 					{
 						flock.flock.at(i).velocity.set(0, 0);
-						flock.flock.at(i).heading += M_PI / 12;
+						flock.flock.at(i).heading += M_PI / 24;
 
 					} else if (theta < 23 * M_PI / 12 && theta > M_PI)
 					{
 						flock.flock.at(i).velocity.set(0, 0);
-						flock.flock.at(i).heading -= M_PI / 12;
+						flock.flock.at(i).heading -= M_PI / 24;
 					} else
 					{
 						flock.flock.at(i).heading += theta;
@@ -148,7 +148,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 	int x = 50; //x inital positions for the bots.
 
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		char temp[2] =
 		{ letters[2 * i], letters[2 * i + 1] };
@@ -305,7 +305,6 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		{
 			targets.point.at(i).x = sf::Mouse::getPosition(window).x/3-50;; //event.mouseButton.x;
 			targets.point.at(i).y = sf::Mouse::getPosition(window).y/-3+100; //event.mouseButton.y;
-			std::cout << "yo" << std::endl;
 		}
 		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == true)
