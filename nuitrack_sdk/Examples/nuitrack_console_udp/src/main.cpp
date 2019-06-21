@@ -19,14 +19,11 @@
   
 #define DEBUG 1
 #define PORT 8080 
-#define MAXLINE 1024 
 
 using namespace tdv::nuitrack;
 
 // Global variables for UDP
 int sockfd;
-//char buffer[MAXLINE];
-double buffer;
 struct sockaddr_in servaddr, cliaddr; // netinet/in.h objects
 
 // Global variables for hand data
@@ -116,19 +113,14 @@ void serverLoop(void)
                 // Data is available!
                 std::cout << "Socket is available." << std::endl;
                 
-                // Clear server buffer
-//                for(char &c : buffer) c = '\0';
-                buffer = 0.0;
-
                 int len, n;
-//                n = recvfrom(sockfd, (char*)buffer, MAXLINE, MSG_WAITALL,
-//                        (struct sockaddr*)&cliaddr, (socklen_t*)&len);
-                n = recvfrom(sockfd, (double*)&buffer, MAXLINE, MSG_WAITALL,
+                double rec;
+                
+                // Read into rec
+                n = recvfrom(sockfd, &rec, sizeof(rec), MSG_WAITALL,
                         (struct sockaddr*)&cliaddr, (socklen_t*)&len);
 
-                std::cout << "Client sent " << buffer << std::endl;
-                std::cout << "  Client address: " << (uint32_t)cliaddr.sin_addr.s_addr << std::endl;
-                std::cout << "  My address:     " << (uint32_t)servaddr.sin_addr.s_addr << std::endl;
+                std::cout << "Client sent " << rec << std::endl;
                 
                 // Reset client address
                 memset(&cliaddr, 0, sizeof(cliaddr)); 

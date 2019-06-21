@@ -12,7 +12,6 @@
 #include <signal.h>
 
 #define PORT 8080 
-#define MAXLINE 1024
 
 bool sigint_received = false;
 
@@ -26,8 +25,6 @@ int main(int argc, char** argv) {
     signal(SIGINT, flagger);
     
     int sockfd;
-    char buffer[MAXLINE];
-    char *send = "Client wants data!";
     struct sockaddr_in servaddr;
     
     // Attempt to create the socket file descriptor
@@ -41,17 +38,18 @@ int main(int argc, char** argv) {
     servaddr.sin_addr.s_addr = INADDR_ANY; // Accept messages from any address
     servaddr.sin_port = htons(PORT); // Sets port number, converts byte order
     
-    double test = 0.0;
+    double send = 0.0;
     
     while(!sigint_received)
     {
+        std::cout << "Double to send: ";
+        std::cin >> send;
+        
         // Send to server
-//        if(sendto(sockfd, (const char*)send, strlen(send), MSG_CONFIRM,
-//                (const struct sockaddr*)&servaddr, sizeof(servaddr)) >= 0)
-        if(sendto(sockfd, (const double*)send, sizeof(double), MSG_CONFIRM,
+        if(sendto(sockfd, &send, sizeof(send), MSG_CONFIRM,
                 (const struct sockaddr*)&servaddr, sizeof(servaddr)) >= 0)
         {
-            std::cout << "Sent to server." << std::endl;
+            std::cout << "Sent " << send << " to server." << std::endl;
         }
         else
         {
