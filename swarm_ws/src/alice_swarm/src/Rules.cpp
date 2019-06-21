@@ -14,14 +14,16 @@ AliceStructs::ideal Rules::dummy1()
 	to_return.dir = 0;
 	return to_return;
 }
-std::pair<float, float> Rules::addIdeals(AliceStructs::ideal i1, AliceStructs::ideal i2)
+AliceStructs::ideal Rules::addIdeals(AliceStructs::ideal i1, AliceStructs::ideal i2)
 {
-	std::pair<float, float> v;
-	float x(v1.first * cos(v1.second) + v2.first * cos(v2.second));
-	float y(v1.first * sin(v1.second) + v2.first * sin(v2.second));
-	v.first = pow(pow(x, 2) + pow(y, 2), 0.5);
-	v.second = atan2(y, x);
-	return v;
+	AliceStructs::ideal to_return;
+	float x = (i1.spd * cos(i1.dir) * i1.pri + i2.spd * cos(i2.dir) * i2.pri)/(i1.pri + i2.pri);
+	float y = (i1.spd * sin(i1.dir) * i1.pri + i2.spd * sin(i2.dir) * i2.pri)/(i1.pri + i2.pri);
+	to_return.spd = pow(pow(x, 2) + pow(y, 2), 0.5);
+	to_return.dir = atan2(y, x);
+	to_return.pri = i1.pri + i2.pri;
+	std::cout << to_return.dir << std::endl;
+	return to_return;
 }
 
 AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength)

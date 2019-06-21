@@ -14,7 +14,7 @@ public:
 
 	Rules();
 
-	std::pair<float,float> addPolarVectors(std::pair<float,float> v1, std::pair<float,float> v2);
+	AliceStructs::ideal addIdeals(AliceStructs::ideal i1, AliceStructs::ideal i2);
 
 
 	AliceStructs::ideal dummy1();
