@@ -88,11 +88,6 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 					{
 						flock.flock.at(i).velocity.set(0, 0);
 					}
-
-//				std::cout<<"new (sum) angle"<< o +  n<<"\n";
-//				std::cout<<"v_new (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
-//				std::cout<<"-----------------------------\n";
-//				^more fun facts, if ya want um.
 					flock.flock.at(i).updatedCommand = true;
 				}
 			}
@@ -108,12 +103,10 @@ void Sim::obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 		obstacles.push_back(msg.point.at(i));
 	}
 }
-
 void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
 	targets = msg;
 }
-
 void Sim::flowCallback(const wvu_swarm_std_msgs::flows &msg)
 {
 	flows = msg;
@@ -199,6 +192,7 @@ void Sim::Run(ros::NodeHandle _n)
 	}
 	window.display();
 
+	//Initializes all publishers and subscribers
 	ros::Publisher pub = _n.advertise < wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array", 1000); //Publishes like Vicon
 	ros::Publisher pub2 = _n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_targets", 1000);
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
@@ -211,6 +205,7 @@ void Sim::Run(ros::NodeHandle _n)
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
 	pub.publish(vb_array);
 	ros::spinOnce();
+
 	while (window.isOpen() && ros::ok())
 	{
 		while(game == false && window.isOpen())
@@ -218,9 +213,7 @@ void Sim::Run(ros::NodeHandle _n)
 			pI = HandleInput(pI);
 			Render();
 			wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
-
 			//publishing vicon_bot_array
-			//flock.printMessage(vb_array);
 			pub.publish(vb_array);
 		//		if (targets.point.size() > 0)
 		//		{
@@ -272,7 +265,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
 				event);
 
-		//----------Allows for click and drag. ------------------------------
+		//----------Allows for click and drag for bots. ------------------------------
 //		if (_pI.dragging == true)
 //		{
 //			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
@@ -301,7 +294,9 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //				}
 //				i++;
 //			}
-//		} //-----------------------------------------------------------------------------------------
+//		} //----------------------------------End-------------------------------------------------------
+
+		// ---------------------- Click and Drag for the target ----------------------------------------
 		if (_pI.dragging == true)
 		{
 			targets.point.at(i).x = sf::Mouse::getPosition(window).x / 3 - 50;
@@ -329,7 +324,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 				i++;
 			}
 		}
-	}
+	}//----------------------------- End-------------------------------------
 	return _pI; //tracks state of dragging (see sim.h)
 
 //	// Checks or A to be pressed, draws and adds bodies to flock if so.
@@ -391,172 +386,20 @@ void Sim::Render() //draws changes in simulation states to the window.
 	{ // Matches up the location of the shape to the body
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
-		//texts[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
 		float theta = 180.0 / M_PI * (flock.flock.at(i).heading);
 		shapes[i].setRotation(90 - theta); //alignes body with direction of motion
 		lines[i].setRotation(-theta); //alignes line with direction of motion
 		//^for some reason, sfml has clockwise as +theta direction.
-		//texts[i].setRotation(90 - theta);
 
 		window.draw(shapes[i]);
 		window.draw(lines[i]);
-		//window.draw(texts[i]);
 		flock.flock.at(i).updatedCommand = false;
 		flock.flock.at(i).updatedPosition = false;
 	}
 	window.display(); //updates display
 }
 
-void Sim::drawFlows() //draws flows
-{
-	float x2;
-	float y2;
-
-	//std::cout<<"number of flows: "<<flows.flow.size()<<std::endl;
-	for (int i = 0; i < flows.flow.size(); i++)
-	{
-		sf::RectangleShape line(sf::Vector2f(flows.flow.at(i).r, 1));
-		line.setPosition(flows.flow.at(i).x * 3 + 150, 300 - flows.flow.at(i).y * 3);
-
-		x2 = flows.flow.at(i).r * cos(flows.flow.at(i).theta);
-		y2 = flows.flow.at(i).r * sin(flows.flow.at(i).theta);
-
-		if (y2 < 0)
-		{
-			y2 = -y2;
-		} else
-		{
-			y2 = -y2;
-		}
-
-		//convert r to sim frame
-		line.setFillColor(sf::Color::White);
-		line.setOrigin(0, 0);
-		line.setRotation(-flows.flow.at(i).theta * 180 / M_PI);
-		line.setOutlineColor(sf::Color::Black);
-		line.setOutlineThickness(1);
-
-		sf::RectangleShape line1(sf::Vector2f(1, 1));
-
-		line1.setFillColor(sf::Color::Red);
-		line1.setPosition(flows.flow.at(i).x * 3 + 150 + x2, 300 + y2 - flows.flow.at(i).y * 3);
-		line1.setOrigin(-1, 0);
-		line1.setRotation(-flows.flow.at(i).theta * 180 / M_PI + 130);
-		line1.setOutlineColor(sf::Color::Black);
-		line1.setOutlineThickness(1);
-
-//		sf::RectangleShape line2(sf::Vector2f(7, 1));
-//		line2.setFillColor(sf::Color::White);
-//		line2.setPosition(flows.flow.at(i).x*3 + 150 + x2, 300 + y2 - flows.flow.at(i).y*3);
-//		line2.setOrigin(-1, 1);
-//		line2.setRotation(-flows.flow.at(i).theta*180/M_PI - 130);
-//		line2.setOutlineColor(sf::Color::Black);
-//		line2.setOutlineThickness(1);
-//		window.draw(line2);
-
-		window.draw(line);
-		window.draw(line1);
-
-	}
-}
-
-void Sim::winCheck(int i)
-{
-	if(targets.point.at(i).x > -15 && targets.point.at(i).x < 15)
-	{
-		if(targets.point.at(i).y < -94)
-		{
-			winner = "The Blue Team";
-			game = true;
-		}
-		else if(targets.point.at(i).y > 94)
-		{
-			winner = "The Yellow Team";
-			game = true;
-		}
-		else
-		{
-			game = false;
-		}
-	}
-}
-
-void Sim::updateTargetPos()
-{
-	for (int i = 0; i < targets.point.size(); i++)
-	{
-		winCheck(i);
-
-		if (targets.point.at(i).x < -45 || targets.point.at(i).x > 45)
-			targets.point.at(i).vx *= -1;
-		if (targets.point.at(i).y < -95 || targets.point.at(i).y > 95)
-			targets.point.at(i).vy *= -1;
-		targets.point.at(i).x += targets.point.at(i).vx;
-		targets.point.at(i).y += targets.point.at(i).vy;
-		targets.point.at(i).vx *= 0.99;
-		targets.point.at(i).vy *= 0.99;
-	}
-}
-void Sim::drawTargets() //draws targets
-{
-	for (int i = 0; i < targets.point.size(); i++) //draws targets
-	{
-		sf::CircleShape shape(0);
-		shape.setPosition(targets.point.at(i).x * 3 + 150, 300 - targets.point.at(i).y * 3); // Sets position of shape to random location that body was set to.
-		shape.setOrigin(10, 10);
-		shape.setFillColor(sf::Color::Green);
-		shape.setOutlineColor(sf::Color::Black);
-		shape.setOutlineThickness(1);
-		shape.setRadius(10);
-		window.draw(shape);
-		//std::cout<<"obstacle number: "<<i<<std::endl;
-		//std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
-		//obs_shapes.push_back(shape);
-	}
-
-}
-void Sim::drawObstacles()		// draw obstacles
-{
-	for (int i = 0; i < obstacles.size(); i++) //draws obstacles
-	{
-		sf::CircleShape shape(0);
-		shape.setPosition(obstacles.at(i).x * 3 + 150, 300 - obstacles.at(i).y * 3); // Sets position of shape to random location that body was set to.
-		shape.setOrigin(2, 2);
-		shape.setFillColor(sf::Color::Blue);
-		shape.setOutlineColor(sf::Color::Black);
-		shape.setOutlineThickness(1);
-		shape.setRadius(2);
-		window.draw(shape);
-		//std::cout<<"obstacle number: "<<i<<std::endl;
-		//std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
-		//obs_shapes.push_back(shape);
-	}
-}
-
-void Sim::drawGoals()
-{
-	sf::RectangleShape g1(sf::Vector2f(5, 5));
-	sf::RectangleShape g2(sf::Vector2f(5, 5));
-	sf::RectangleShape g3(sf::Vector2f(5, 5));
-	sf::RectangleShape g4(sf::Vector2f(5, 5));
-
-	g1.setPosition(100,3);
-	g2.setPosition(200,3);
-	g3.setPosition(100,595);
-	g4.setPosition(200,595);
-
-	g1.setOutlineColor(sf::Color::White);
-	g2.setOutlineColor(sf::Color::White);
-	g3.setOutlineColor(sf::Color::White);
-	g4.setOutlineColor(sf::Color::White);
-
-	window.draw(g1);
-	window.draw(g2);
-	window.draw(g3);
-	window.draw(g4);
-
-}
 bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event)
 { //checks if pause pressed. Inf loop if so.
 	if ((_key_pressed) && (_pause_pressed))
@@ -581,4 +424,147 @@ bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::Ren
 		}
 	}
 	return _pause_sim;
+}
+
+void Sim::drawFlows()//draws flows (basically a vector field)
+{
+	float x2;
+	float y2;
+
+	//std::cout<<"number of flows: "<<flows.flow.size()<<std::endl;
+	for (int i = 0; i < flows.flow.size(); i++)
+	{
+		sf::RectangleShape line(sf::Vector2f(flows.flow.at(i).r, 1));
+		line.setPosition(flows.flow.at(i).x * 3 + 150, 300 - flows.flow.at(i).y * 3);
+
+		x2 = flows.flow.at(i).r * cos(flows.flow.at(i).theta);
+		y2 = flows.flow.at(i).r * sin(flows.flow.at(i).theta);
+
+		if (y2 < 0)
+		{
+			y2 = -y2;
+		} else
+		{
+			y2 = -y2;
+		}
+
+		//convert to sim frame
+		line.setFillColor(sf::Color::White);
+		line.setOrigin(0, 0);
+		line.setRotation(-flows.flow.at(i).theta * 180 / M_PI);
+		line.setOutlineColor(sf::Color::Black);
+		line.setOutlineThickness(1);
+		window.draw(line);
+
+		sf::RectangleShape line1(sf::Vector2f(1, 1)); //gives vector direction
+		line1.setFillColor(sf::Color::Red);
+		line1.setPosition(flows.flow.at(i).x * 3 + 150 + x2, 300 + y2 - flows.flow.at(i).y * 3);
+		line1.setOrigin(-1, 0);
+		line1.setRotation(-flows.flow.at(i).theta * 180 / M_PI + 130);
+		line1.setOutlineColor(sf::Color::Black);
+		line1.setOutlineThickness(1);
+		window.draw(line1);
+
+//		sf::RectangleShape line2(sf::Vector2f(7, 1));
+//		line2.setFillColor(sf::Color::White);
+//		line2.setPosition(flows.flow.at(i).x*3 + 150 + x2, 300 + y2 - flows.flow.at(i).y*3);
+//		line2.setOrigin(-1, 1);
+//		line2.setRotation(-flows.flow.at(i).theta*180/M_PI - 130);
+//		line2.setOutlineColor(sf::Color::Black);
+//		line2.setOutlineThickness(1);
+//		window.draw(line2);
+	}
+}
+
+void Sim::drawTargets() //draws targets
+{
+	for (int i = 0; i < targets.point.size(); i++) //draws targets
+	{
+		sf::CircleShape shape(0);
+		shape.setPosition(targets.point.at(i).x * 3 + 150, 300 - targets.point.at(i).y * 3); // Sets position of shape to random location that body was set to.
+		shape.setOrigin(10, 10);
+		shape.setFillColor(sf::Color::Green);
+		shape.setOutlineColor(sf::Color::Black);
+		shape.setOutlineThickness(1);
+		shape.setRadius(10);
+		window.draw(shape);
+	}
+}
+
+void Sim::drawObstacles()//draws obstacles
+{
+	for (int i = 0; i < obstacles.size(); i++)
+	{
+		sf::CircleShape shape(0);
+		shape.setPosition(obstacles.at(i).x * 3 + 150, 300 - obstacles.at(i).y * 3); // Sets position of shape to random location that body was set to.
+		shape.setOrigin(2, 2);
+		shape.setFillColor(sf::Color::Blue);
+		shape.setOutlineColor(sf::Color::Black);
+		shape.setOutlineThickness(1);
+		shape.setRadius(2);
+		window.draw(shape);
+	}
+}
+
+//-#######################Air Hockey Specific Functions ###################################
+
+void Sim::updateTargetPos() //specificly a free particle (puck) with damping. For Airhockey.
+{
+	for (int i = 0; i < targets.point.size(); i++)
+	{
+		winCheck(i);
+
+		if (targets.point.at(i).x < -45 || targets.point.at(i).x > 45)
+			targets.point.at(i).vx *= -1;
+		if (targets.point.at(i).y < -95 || targets.point.at(i).y > 95)
+			targets.point.at(i).vy *= -1;
+		targets.point.at(i).x += targets.point.at(i).vx;
+		targets.point.at(i).y += targets.point.at(i).vy;
+		targets.point.at(i).vx *= 0.99;
+		targets.point.at(i).vy *= 0.99;
+	}
+}
+
+void Sim::winCheck(int i) //checks if the game has been won.
+{
+	if(targets.point.at(i).x > -15 && targets.point.at(i).x < 15)
+	{
+		if(targets.point.at(i).y < -94)
+		{
+			winner = "The Blue Team";
+			game = true;
+		}
+		else if(targets.point.at(i).y > 94)
+		{
+			winner = "The Yellow Team";
+			game = true;
+		}
+		else
+		{
+			game = false;
+		}
+	}
+}
+
+void Sim::drawGoals() //draws the goal posts for airhockey.
+{
+	sf::RectangleShape g1(sf::Vector2f(5, 5));
+	sf::RectangleShape g2(sf::Vector2f(5, 5));
+	sf::RectangleShape g3(sf::Vector2f(5, 5));
+	sf::RectangleShape g4(sf::Vector2f(5, 5));
+
+	g1.setPosition(100,3);
+	g2.setPosition(200,3);
+	g3.setPosition(100,595);
+	g4.setPosition(200,595);
+
+	g1.setOutlineColor(sf::Color::White);
+	g2.setOutlineColor(sf::Color::White);
+	g3.setOutlineColor(sf::Color::White);
+	g4.setOutlineColor(sf::Color::White);
+
+	window.draw(g1);
+	window.draw(g2);
+	window.draw(g3);
+	window.draw(g4);
 }
