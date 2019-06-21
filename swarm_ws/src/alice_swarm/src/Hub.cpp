@@ -149,7 +149,7 @@ void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
 	int num_pts = flows.flow.size();
 	for (int j = 0; j < num_pts; j++)
 	{
-		if (flows.flow.at(j).sid == bots[i].swarm_id)
+		if (flows.flow.at(j).sid == bots[i].swarm_id || flows.flow.at(j).sid == 0)
 		{
 			std::pair<float, float> temp =
 			{ flows.flow.at(j).x, flows.flow.at(j).y };
@@ -174,7 +174,7 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 	int num_pts = targets.point.size();
 	for (int j = 0; j < num_pts; j++)
 	{
-		if (targets.point.at(j).sid == bots[i].swarm_id)
+		if (targets.point.at(j).sid == bots[i].swarm_id|| targets.point.at(j).sid == 0)
 		{
 			std::pair<float, float> temp =
 			{ targets.point.at(j).x, targets.point.at(j).y };

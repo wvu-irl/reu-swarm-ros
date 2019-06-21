@@ -32,8 +32,8 @@ AliceStructs::vel Rules::followFlow(std::list<AliceStructs::ideal> flows, float 
 	temp_pair1.second = 0;
 	for (auto &flow : flows)
 	{
-			std::pair<float, float> temp_pair2(flow.spd*strength/(flow.dis+1), flow.dir);
-			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
+		std::pair<float, float> temp_pair2(flow.spd * strength / (flow.dis + 1), flow.dir);
+		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
 	}
 	to_return.mag = temp_pair1.first;
 	to_return.dir = temp_pair1.second;
@@ -48,13 +48,10 @@ AliceStructs::vel Rules::goToTarget(std::list<AliceStructs::obj> targets, float 
 	temp_pair1.second = 0;
 	for (auto &obj : targets)
 	{
-		//std::cout << "there's shit here" << std::endl;
-		//avoids things in direction of travel
-		if ((obj.dir < M_PI / 180 * fov || obj.dir > 2 * M_PI - M_PI / 180 * fov) )
-		{
-			std::pair<float, float> temp_pair2(ROBOT_SIZE * strength / pow(obj.dis, 0.2), obj.dir);
-			temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
-		}
+
+		std::pair<float, float> temp_pair2(ROBOT_SIZE * strength / pow(obj.dis, 0.2), obj.dir);
+		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
+
 	}
 	to_return.mag = temp_pair1.first;
 	to_return.dir = temp_pair1.second;
