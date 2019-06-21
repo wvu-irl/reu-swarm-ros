@@ -1,0 +1,18 @@
+Scanning dependencies of target nuitrack_console_sample
+[ 50%] Building CXX object CMakeFiles/nuitrack_console_sample.dir/src/main.cpp.o
+In file included from /usr/include/c++/5/cstdlib:72:0,
+                 from /usr/include/c++/5/ext/string_conversions.h:41,
+                 from /usr/include/c++/5/bits/basic_string.h:5249,
+                 from /usr/include/c++/5/string:52,
+                 from /home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include/nuitrack/Nuitrack.h:4,
+                 from /home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/src/main.cpp:1:
+/home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/src/main.cpp: In function ‘void trackerLoop(tdv::nuitrack::HandTracker::Ptr)’:
+/home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/src/main.cpp:136:16: error: return-statement with a value, in function returning 'void' [-fpermissive]
+         return EXIT_FAILURE;
+                ^
+CMakeFiles/nuitrack_console_sample.dir/build.make:62: recipe for target 'CMakeFiles/nuitrack_console_sample.dir/src/main.cpp.o' failed
+make[2]: *** [CMakeFiles/nuitrack_console_sample.dir/src/main.cpp.o] Error 1
+CMakeFiles/Makefile2:67: recipe for target 'CMakeFiles/nuitrack_console_sample.dir/all' failed
+make[1]: *** [CMakeFiles/nuitrack_console_sample.dir/all] Error 2
+Makefile:83: recipe for target 'all' failed
+make: *** [all] Error 2
