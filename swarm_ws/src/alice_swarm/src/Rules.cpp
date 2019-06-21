@@ -29,6 +29,7 @@ AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bot
 	AliceStructs::ideal to_return;
 	to_return.pri = 0;
 	to_return.dir = 0;
+	to_return.spd = 1;
 	for (auto& bot : bots)
 	{
 		to_return.dir += bot.dir/bots.size();
@@ -43,16 +44,20 @@ AliceStructs::ideal Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, f
 	AliceStructs::ideal to_return;
 	to_return.pri = 0;
 	to_return.dir = 0;
-	to_return.spd = 0;
+	to_return.spd = 1;
 	float temp_pri;
 	for (auto &bot : bots)
 	{
+		if (bot.dir < ROBOT_SIZE*3) {
+			to_return.spd -= 0.2;
+		}
 		temp_pri = 10 * strength / pow(2, bot.dis - 3/2*ROBOT_SIZE);
 		to_return.dir = (to_return.dir * to_return.pri + temp_pri * bot.dir)/
 				(temp_pri + to_return.pri);
 		to_return.pri += temp_pri;
 	}
 	to_return.dir = fmod(to_return.dir + M_PI, 2*M_PI);
+	to_return.spd = abs(to_return.spd);
 	return to_return;
 }
 
@@ -69,6 +74,7 @@ AliceStructs::ideal Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, flo
 		{
 			pri = temp_pri;
 			to_return.dir = fmod(bot.dir + M_PI, 2*M_PI);
+			to_return.spd = 1/temp_pri;
 		}
 	}
 	to_return.pri = temp_pri;
@@ -82,7 +88,7 @@ AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, floa
 	to_return.dir = 0.0001;
 	for (auto& tar : targets)
 	{
-		float temp_pri = strength * pow(tar.dis, 0.5) / 4;
+		float temp_pri = strength * pow(tar.dis, 0.5);
 		to_return.dir = (to_return.dir * to_return.pri + tar.dir * temp_pri)/(to_return.pri + temp_pri);
 		to_return.pri += temp_pri;
 	}
@@ -96,8 +102,9 @@ AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, floa
 	to_return.dir = 0;
 	for (auto& flow : flows)
 	{
-		float temp_pri = flow.spd*strength/flow.dis;
+		float temp_pri = flow.spd*strength/(flow.dis+10);
 		to_return.dir = (to_return.dir * to_return.pri + flow.dir * temp_pri)/(to_return.pri + temp_pri);
+		to_return.spd = (to_return.spd * to_return.pri + flow.spd * temp_pri)/(to_return.pri + temp_pri);
 		to_return.pri += temp_pri;
 	}
 
@@ -110,13 +117,15 @@ AliceStructs::ideal Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles
 	AliceStructs::ideal to_return;
 	to_return.pri = 0.0001;
 	to_return.dir = 0.0001;
+	to_return.spd = 1;
 	//to_return.spd = 0;
 	for (auto &obs : obstacles)
 	{
-		if (obs.dis < 2 * ROBOT_SIZE)
+		if (obs.dis < 4 * ROBOT_SIZE)
 		{
+			to_return.spd = 1 / to_return.pri;
 			to_return.dir = fmod(obs.dir + M_PI, 2*M_PI);
-			to_return.pri = 10 * strength / pow(obs.dis, 2);
+			to_return.pri = 10 * strength / pow(2, obs.dis - 3 * ROBOT_SIZE / 2);
 		}
 	}
 	return to_return;
