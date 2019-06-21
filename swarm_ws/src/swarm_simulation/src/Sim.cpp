@@ -126,7 +126,7 @@ Sim::Sim()
 	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 	this->window_height = 600;
 	this->window_width = 300;
-
+	game = false;
 	//std::cout<<"Window h;w = "<<window_height << "; "<<window_width<<"\n";
 	this->window.create(sf::VideoMode(window_width, window_height, desktop.bitsPerPixel), "Swarm Simulation",
 			sf::Style::None);
@@ -213,23 +213,40 @@ void Sim::Run(ros::NodeHandle _n)
 	ros::spinOnce();
 	while (window.isOpen() && ros::ok())
 	{
-		pI = HandleInput(pI);
-		Render();
-		wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
+		while(game == false && window.isOpen())
+		{
+			pI = HandleInput(pI);
+			Render();
+			wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
 
-		//publishing vicon_bot_array
-		//flock.printMessage(vb_array);
-		pub.publish(vb_array);
-//		if (targets.point.size() > 0)
-//		{
-//			targets.point.at(0).x = vb_array.poseVect.at(0).botPose.transform.translation.x;
-//			targets.point.at(0).y = vb_array.poseVect.at(0).botPose.transform.translation.y;
-//			//targets.point.at(0).sid=0;
-//		}
+			//publishing vicon_bot_array
+			//flock.printMessage(vb_array);
+			pub.publish(vb_array);
+		//		if (targets.point.size() > 0)
+		//		{
+		//			targets.point.at(0).x = vb_array.poseVect.at(0).botPose.transform.translation.x;
+		//			targets.point.at(0).y = vb_array.poseVect.at(0).botPose.transform.translation.y;
+		//			//targets.point.at(0).sid=0;
+		//		}
 
-		pub2.publish(targets);
-		ros::spinOnce();
-		loopRate.sleep();
+			pub2.publish(targets);
+			ros::spinOnce();
+			loopRate.sleep();
+		}
+		//---------=Code for winning the game=---------------
+		for (int j = 0; j<50; j++)
+		{
+			std::cout<<winner<<" has won the game!!!!!!!!!!!!"<<std::endl;
+		}
+		game = false;
+		for(int i = 0; i < targets.point.size(); i ++)
+		{
+			targets.point.at(0).x = 0;
+			targets.point.at(0).y = 0;
+			pI.dragging = false;
+			pI.prevClick = false;
+		}
+		//-------------------=End=---------------
 	}
 }
 
@@ -311,7 +328,6 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 				}
 				i++;
 			}
-
 		}
 	}
 	return _pI; //tracks state of dragging (see sim.h)
@@ -363,6 +379,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 void Sim::Render() //draws changes in simulation states to the window.
 {
 	window.clear();
+	drawGoals();
 	flock.flocking(&targets);
 	updateTargetPos();
 	drawObstacles();
@@ -443,10 +460,34 @@ void Sim::drawFlows() //draws flows
 
 	}
 }
+
+void Sim::winCheck(int i)
+{
+	if(targets.point.at(i).x > -15 && targets.point.at(i).x < 15)
+	{
+		if(targets.point.at(i).y < -94)
+		{
+			winner = "The Blue Team";
+			game = true;
+		}
+		else if(targets.point.at(i).y > 94)
+		{
+			winner = "The Yellow Team";
+			game = true;
+		}
+		else
+		{
+			game = false;
+		}
+	}
+}
+
 void Sim::updateTargetPos()
 {
 	for (int i = 0; i < targets.point.size(); i++)
 	{
+		winCheck(i);
+
 		if (targets.point.at(i).x < -45 || targets.point.at(i).x > 45)
 			targets.point.at(i).vx *= -1;
 		if (targets.point.at(i).y < -95 || targets.point.at(i).y > 95)
@@ -455,7 +496,6 @@ void Sim::updateTargetPos()
 		targets.point.at(i).y += targets.point.at(i).vy;
 		targets.point.at(i).vx *= 0.99;
 		targets.point.at(i).vy *= 0.99;
-
 	}
 }
 void Sim::drawTargets() //draws targets
@@ -492,6 +532,30 @@ void Sim::drawObstacles()		// draw obstacles
 		//std::cout<<"x,y: "<<obstacles.at(i).x<<obstacles.at(i).x<<std::endl;
 		//obs_shapes.push_back(shape);
 	}
+}
+
+void Sim::drawGoals()
+{
+	sf::RectangleShape g1(sf::Vector2f(5, 5));
+	sf::RectangleShape g2(sf::Vector2f(5, 5));
+	sf::RectangleShape g3(sf::Vector2f(5, 5));
+	sf::RectangleShape g4(sf::Vector2f(5, 5));
+
+	g1.setPosition(100,3);
+	g2.setPosition(200,3);
+	g3.setPosition(100,595);
+	g4.setPosition(200,595);
+
+	g1.setOutlineColor(sf::Color::White);
+	g2.setOutlineColor(sf::Color::White);
+	g3.setOutlineColor(sf::Color::White);
+	g4.setOutlineColor(sf::Color::White);
+
+	window.draw(g1);
+	window.draw(g2);
+	window.draw(g3);
+	window.draw(g4);
+
 }
 bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event)
 { //checks if pause pressed. Inf loop if so.
