@@ -25,7 +25,6 @@ Robot::Robot(AliceStructs::mail data)
 void Robot::receiveMsg(AliceStructs::mail data)
 {
 	name = data.name;
-	sid = data.sid;
 	model = Model(data.name);
 	vectorQueue = VectorQueue();
 	model.addToModel(data);
@@ -52,11 +51,10 @@ AliceStructs::vel Robot::generateComp(std::vector<AliceStructs::ideal> ideals)
 	{
 		for (int j = 0; j < neighbors.size(); j++)
 		{
-			if (ideals.at(i).name == neighbors.at(j).name && sid==neighbors.at(j).sid )
+			if (ideals.at(i).name == neighbors.at(j).name)
 			{
 
 				ideals.at(i).dis = neighbors.at(j).dis;
-				ideals.at(i).dir += neighbors.at(j).ang;
 				vectorQueue.oneToQueue(ideals.at(i));
 			}
 		}

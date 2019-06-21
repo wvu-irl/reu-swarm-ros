@@ -24,7 +24,6 @@ namespace AliceStructs {
 		float dis;
 		float ang;
 		int name;
-		int sid;
 	} neighbor;
 
 	typedef struct {
@@ -39,7 +38,6 @@ namespace AliceStructs {
 		std::vector<obj> targets;
 		std::vector<ideal> flows;
 		int name;
-		int sid;
 	} mail;
 };
 

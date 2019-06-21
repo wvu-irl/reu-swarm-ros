@@ -85,10 +85,11 @@ void Flock::addBody(Body b)
 
 // Runs the run function for every body in the flock checking against the flock
 // itself. Which in turn applies all the rules to the flock.
-void Flock::flocking()
+void Flock::flocking(wvu_swarm_std_msgs::vicon_points *_targets)
 {
     for (int i = 0; i < flock.size(); i++)
     {
+    	flock[i].targets = _targets;
     	flock[i].run(flock);
     }
 }

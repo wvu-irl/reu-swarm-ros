@@ -39,64 +39,77 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 
 					//flock.flock.at(i).heading = fmod(flock.flock.at(i).heading + 2*M_PI, 2*M_PI);
+					if (flock.flock.at(i).collision == false)
+					{
+						float a;
+						float b;
+						float temp_r;
 
-					float a;
-					float b;
-					float temp_r;
+						float theta = msg.commands.at(j).theta/180 * M_PI;
+						float r = msg.commands.at(j).r;
+						if (0 < theta && theta < M_PI) {
+							a = 1;
+							b = r * cos(theta/2);
+							temp_r = b;
+							flock.flock.at(i).heading += M_PI/90 * theta;
+						} else if (M_PI < theta && theta < 2*M_PI) {
+							b = 1;
+							a = -r * cos(theta/2);
+							temp_r = a;
+							flock.flock.at(i).heading -= M_PI/90 * (2*M_PI - theta);
+						}
 
-					float theta = msg.commands.at(j).theta/180 * M_PI;
-					float r = msg.commands.at(j).r;
-					if (0 < theta && theta < M_PI) {
-						a = 1;
-						b = r * cos(theta/2);
-						temp_r = b;
-				   	flock.flock.at(i).heading += M_PI/18 * theta;
-					} else if (M_PI < theta && theta < 2*M_PI) {
-						b = 1;
-						a = -r * cos(theta/2);
-						temp_r = a;
-						flock.flock.at(i).heading -= M_PI/18 * (2*M_PI - theta);
+						float x = temp_r * cos(flock.flock.at(i).heading);
+						float y = temp_r * sin(flock.flock.at(i).heading);
+
+						flock.flock.at(i).velocity.set(x,-y);
+
+						/*
+						float theta = msg.commands.at(j).theta/180 * M_PI;
+						if (theta > M_PI / 12 && theta < M_PI)
+						{
+							flock.flock.at(i).velocity.set(0, 0);
+							flock.flock.at(i).heading += M_PI / 12;
+
+						} else if (theta < 23 * M_PI / 12 && theta > M_PI)
+						{
+							flock.flock.at(i).velocity.set(0, 0);
+							flock.flock.at(i).heading -= M_PI / 12;
+						} else
+						{
+							flock.flock.at(i).heading += theta;
+							flock.flock.at(i).velocity.set(1 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
+									-1 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
+						}
+						flock.flock.at(i).heading = fmod(flock.flock.at(i).heading,2*M_PI);
+						if(flock.flock.at(i).heading < 0)
+						{
+							flock.flock.at(i).heading +=2*M_PI;
+						}
+	//					if(flock.flock.at(i).collision == false)
+	//					{
+	//						flock.flock.at(i).heading  = fmod(flock.flock.at(i).heading,(2*M_PI));
+	//						//flock.flock.at(i).velocity.set(x, -y);
+	//						flock.flock.at(i).updatedCommand = true;
+	//					}
+	//					if (msg.commands.at(j).r <0.01) {
+	//							flock.flock.at(i).velocity.set(0,0);
+	//					}*/
+
+
+	//				std::cout<<"new (sum) angle"<< o +  n<<"\n";
+	//				std::cout<<"v_new (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
+	//				std::cout<<"-----------------------------\n";
+	//				^more fun facts, if ya want um.
+
+						//This code is important for proper function of the physics
+						flock.flock.at(i).heading = fmod(flock.flock.at(i).heading,2*M_PI);
+						if(flock.flock.at(i).heading < 0)
+						{
+							flock.flock.at(i).heading +=2*M_PI;
+						}
+						flock.flock.at(i).updatedCommand = true;
 					}
-
-					float x = temp_r * cos(flock.flock.at(i).heading);
-					float y = temp_r * sin(flock.flock.at(i).heading);
-
-					flock.flock.at(i).velocity.set(x,-y);
-
-					/*
-					float theta = msg.commands.at(j).theta/180 * M_PI;
-					if (theta > M_PI / 12 && theta < M_PI)
-					{
-						flock.flock.at(i).velocity.set(0, 0);
-						flock.flock.at(i).heading += M_PI / 12;
-
-					} else if (theta < 23 * M_PI / 12 && theta > M_PI)
-					{
-						flock.flock.at(i).velocity.set(0, 0);
-						flock.flock.at(i).heading -= M_PI / 12;
-					} else
-					{
-						flock.flock.at(i).heading += theta;
-						flock.flock.at(i).velocity.set(1 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
-								-1 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
-					}
-
-//					if(flock.flock.at(i).collision == false)
-//					{
-//						flock.flock.at(i).heading  = fmod(flock.flock.at(i).heading,(2*M_PI));
-//						//flock.flock.at(i).velocity.set(x, -y);
-//						flock.flock.at(i).updatedCommand = true;
-//					}
-//					if (msg.commands.at(j).r <0.01) {
-//							flock.flock.at(i).velocity.set(0,0);
-//					}*/
-
-
-//				std::cout<<"new (sum) angle"<< o +  n<<"\n";
-//				std::cout<<"v_new (x,y) = "<<flock.flock.at(j).velocity.x<<","<<flock.flock.at(j).velocity.y<<"\n";
-//				std::cout<<"-----------------------------\n";
-//				^more fun facts, if ya want um.
-					flock.flock.at(i).updatedCommand = true;
 				}
 			}
 		}
@@ -117,12 +130,15 @@ void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 	targets = msg;
 }
 
+void Sim::flowCallback(const wvu_swarm_std_msgs::flows &msg)
+{
+	flows = msg;
+}
+
 // Construct window using SFML
 Sim::Sim()
 {
-	this->bodiesSize = 7.5;
-	//this->bodiesSize_small = 4.5;
-	//this->bodiesSize_big = 10.5;
+	this->bodiesSize = 7.5; //7.5
 	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 	this->window_height = 600;
 	this->window_width = 300;
@@ -148,7 +164,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 	int x = 50; //x inital positions for the bots.
 
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		char temp[2] =
 		{ letters[2 * i], letters[2 * i + 1] };
@@ -180,21 +196,6 @@ void Sim::Run(ros::NodeHandle _n)
 		line.setPosition(b.location.x, b.location.y);
 		line.setOrigin(-2, 1);
 
-		//creates text on the bodies
-		/*sf::Font font;
-		 if (!font.loadFromFile("OpenSans-Regular.ttf"))
-		 {
-		 //error i guess
-		 }
-
-		 sf::Text text;
-		 text.setFont(font);
-		 text.setCharacterSize(10);
-		 text.setColor(sf::Color::Black);
-		 text.setString("ye");
-		 text.setStyle(sf::Text::Bold);
-		 text.setOrigin(0, 0);*/
-
 		// Adding the body to the flock and adding the shapes to the vector<sf::CircleShape>
 		flock.addBody(b);
 		shapes.push_back(shape);
@@ -202,12 +203,10 @@ void Sim::Run(ros::NodeHandle _n)
 		//saves a vector of lines (one for each bot).
 		lines.push_back(line);
 
-		//texts.push_back(text);
 
 		//draw all obejcts on window.
 		window.draw(shape);
 		window.draw(line);
-		//window.draw(text);
 
 		if (y == 500) //increments the  x pos so bots are drawn in a grid.
 		{
@@ -222,6 +221,7 @@ void Sim::Run(ros::NodeHandle _n)
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
 	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to virtual obstacles
 	ros::Subscriber sub3 = _n.subscribe("virtual_targets", 1000, &Sim::targetCallback, this); //gets virtual targets
+	ros::Subscriber sub4 = _n.subscribe("virtual_flows", 1000, &Sim::flowCallback, this); //gets virtual targets
 	ros::Rate loopRate(50);
 
 	//publishes initial information for each bot
@@ -272,7 +272,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
 				event);
 
-//		//----------Allows for click and drag. ------------------------------
+		//----------Allows for click and drag. ------------------------------
 		if (_pI.dragging == true)
 		{
 			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
@@ -286,7 +286,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == false)
 		{
-			while (found != true && i < flock.flock.size())
+			while (found != true)
 			{
 				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
 						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
@@ -295,46 +295,19 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 					_pI.botId = i;
 					_pI.dragging = true;
 					_pI.prevClick = true;
+				} else if (i == flock.flock.size()-1)
+				{
+					found = true;
 				}
 				i++;
 			}
-		}
-		i=0;
-		//----------Allows for click and drag. ------------------------------
-//		if (_pI.dragging == true)
-//		{
-//			targets.point.at(i).x = sf::Mouse::getPosition(window).x/3-50;; //event.mouseButton.x;
-//			targets.point.at(i).y = sf::Mouse::getPosition(window).y/-3+100; //event.mouseButton.y;
-//			std::cout << "yo" << std::endl;
-//		}
-//		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-//				&& _pI.prevClick == true)
-//		{
-//			_pI.dragging = false;
-//			_pI.prevClick = false;
-//		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-//				&& _pI.prevClick == false)
-//		{
-//			while (found != true && i<targets.point.size())
-//			{
-//				if (((targets.point.at(i).x  > mX/3-50 - 6) && (targets.point.at(i).x  < mX/3-50 + 6))
-//						&& ((targets.point.at(i).y> mY/-3+100 - 6) && (targets.point.at(i).y < mY/-3+100 + 6)))
-//				{
-//					found = true;
-//
-//					_pI.dragging = true;
-//					_pI.prevClick = true;
-//				}
-//				i++;
-//			}
-//
-//		} //-----------------------------------------------------------------------------------------
+		} //-----------------------------------------------------------------------------------------
 	}
 	return _pI; //tracks state of dragging (see sim.h)
 
+
 //	// Checks or A to be pressed, draws and adds bodies to flock if so.
 //	  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-//	  	std::cout<<"pressed a"<<std::endl;
 //	        // Gets mouse coordinates, sets that as the location of the body and the shape
 //	        sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
 //	        Body b(mouseCoords.x, mouseCoords.y, false);
@@ -357,81 +330,43 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //	    }
 //
 //	    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Delete)) {
-//		  	std::cout<<"pressed delete"<<std::endl;
-//
 //	          // Gets mouse coordinates, sets that as the location of the body and the shape
 //	          sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
 //	          Body b(mouseCoords.x, mouseCoords.y, false);
 //	          sf::CircleShape shape(4);
+//
+//	          // Changing visual properties of newly created body
+//	          shape.setPosition(mouseCoords.x, mouseCoords.y);
+//	          shape.setOutlineColor(sf::Color::White);
+//	          shape.setFillColor(sf::Color::White);
+//	          shape.setOutlineColor(sf::Color::White);
+//	          shape.setOutlineThickness(1);
+//	          shape.setRadius(bodiesSize);
 //
 //	          //deletes bodies from the second through the hird element
 //	          shapes.erase(shapes.begin() + 1, shapes.begin() + 2);
 //
 //	      }
 
-	//	  if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {//add lil bois
-	//	  	std::cout<<"pressed a"<<std::endl;
-	//	        // Gets mouse coordinates, sets that as the location of the body and the shape
-	//	        sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
-	//	        Body b(mouseCoords.x, mouseCoords.y, false);
-	//	        sf::CircleShape shape(4);
-	//
-	//	        // Changing visual properties of newly created body
-	//	        shape.setPosition(mouseCoords.x, mouseCoords.y);
-	//	        shape.setOutlineColor(sf::Color::White);
-	//	        shape.setFillColor(sf::Color::White);
-	//	        shape.setOutlineColor(sf::Color::White);
-	//	        shape.setOutlineThickness(1);
-	//	        shape.setRadius(bodiesSize_small);
-	//
-	//	        // Adds newly created body and shape to their respective data structure
-	//	        flock.addBody(b);
-	//	        shapes.push_back(shape);
-	//
-	//	        // New Shape is drawn
-	//	        window.draw(shapes[shapes.size() - 1]);
-	//	    }
-
-	//	  if (sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
-	//	  	std::cout<<"pressed a"<<std::endl;
-	//	        // Gets mouse coordinates, sets that as the location of the body and the shape
-	//	        sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
-	//	        Body b(mouseCoords.x, mouseCoords.y, false);
-	//	        sf::CircleShape shape(4);
-	//
-	//	        // Changing visual properties of newly created body
-	//	        shape.setPosition(mouseCoords.x, mouseCoords.y);
-	//	        shape.setOutlineColor(sf::Color::White);
-	//	        shape.setFillColor(sf::Color::White);
-	//	        shape.setOutlineColor(sf::Color::White);
-	//	        shape.setOutlineThickness(1);
-	//	        shape.setRadius(bodiesSize_big);
-	//
-	//	        // Adds newly created body and shape to their respective data structure
-	//	        flock.addBody(b);
-	//	        shapes.push_back(shape);
-	//
-	//	        // New Shape is drawn
-	//	        window.draw(shapes[shapes.size() - 1]);
-	//	    }
-	//
 
 }
 
 void Sim::Render() //draws changes in simulation states to the window.
 {
 	window.clear();
-	flock.flocking();
-
+	flock.flocking(&targets);
+	updateTargetPos();
 	drawObstacles();
 	drawTargets();
+	drawFlows();
 
 // Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)
 	{ // Matches up the location of the shape to the body
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
-		//texts[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
+        //texts[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
+
 
 		float theta = 180.0 / M_PI * (flock.flock.at(i).heading);
 		shapes[i].setRotation(90 - theta); //alignes body with direction of motion
@@ -448,6 +383,67 @@ void Sim::Render() //draws changes in simulation states to the window.
 	window.display(); //updates display
 }
 
+void Sim::drawFlows() //draws flows
+{
+	float x2;
+	float y2;
+
+	//std::cout<<"number of flows: "<<flows.flow.size()<<std::endl;
+	for(int i = 0; i < flows.flow.size() ; i ++)
+	{
+		sf::RectangleShape line(sf::Vector2f(flows.flow.at(i).r, 1));
+		line.setPosition(flows.flow.at(i).x*3 + 150, 300 - flows.flow.at(i).y*3);
+
+		x2 = flows.flow.at(i).r * cos(flows.flow.at(i).theta);
+		y2 = flows.flow.at(i).r * sin(flows.flow.at(i).theta);
+
+		if(y2<0)
+		{
+			y2 = -y2;
+		}
+		else
+		{
+			y2 = -y2;
+		}
+
+		//convert r to sim frame
+		line.setFillColor(sf::Color::White);
+		line.setOrigin(0, 0);
+		line.setRotation(-flows.flow.at(i).theta*180/M_PI);
+		line.setOutlineColor(sf::Color::Black);
+		line.setOutlineThickness(1);
+
+		sf::RectangleShape line1(sf::Vector2f(1, 1));
+
+
+		line1.setFillColor(sf::Color::Red);
+		line1.setPosition(flows.flow.at(i).x*3 + 150 + x2, 300 + y2 - flows.flow.at(i).y*3);
+		line1.setOrigin(-1,0);
+		line1.setRotation(-flows.flow.at(i).theta*180/M_PI + 130);
+		line1.setOutlineColor(sf::Color::Black);
+		line1.setOutlineThickness(1);
+
+//		sf::RectangleShape line2(sf::Vector2f(7, 1));
+//		line2.setFillColor(sf::Color::White);
+//		line2.setPosition(flows.flow.at(i).x*3 + 150 + x2, 300 + y2 - flows.flow.at(i).y*3);
+//		line2.setOrigin(-1, 1);
+//		line2.setRotation(-flows.flow.at(i).theta*180/M_PI - 130);
+//		line2.setOutlineColor(sf::Color::Black);
+//		line2.setOutlineThickness(1);
+//		window.draw(line2);
+
+		window.draw(line);
+		window.draw(line1);
+	}
+}
+void Sim::updateTargetPos()
+{
+	for(int i = 0; i <targets.point.size(); i++)
+	{
+		targets.point.at(i).x += targets.point.at(i).vx;
+		targets.point.at(i).y += -targets.point.at(i).vy;
+	}
+}
 void Sim::drawTargets() //draws targets
 {
 	for (int i = 0; i < targets.point.size(); i++) //draws targets
@@ -466,7 +462,7 @@ void Sim::drawTargets() //draws targets
 	}
 
 }
-void Sim::drawObstacles()		// draw obstacles
+void Sim::drawObstacles()// draw obstacles
 {
 	for (int i = 0; i < obstacles.size(); i++) //draws obstacles
 	{
