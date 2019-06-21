@@ -14,7 +14,7 @@ AliceStructs::ideal Rules::dummy1()
 	to_return.dir = 0;
 	return to_return;
 }
-std::pair<float, float> Rules::addPolarVectors(std::pair<float, float> v1, std::pair<float, float> v2)
+std::pair<float, float> Rules::addIdeals(AliceStructs::ideal i1, AliceStructs::ideal i2)
 {
 	std::pair<float, float> v;
 	float x(v1.first * cos(v1.second) + v2.first * cos(v2.second));
