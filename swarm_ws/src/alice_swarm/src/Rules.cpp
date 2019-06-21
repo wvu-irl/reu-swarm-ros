@@ -121,11 +121,11 @@ AliceStructs::ideal Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles
 	//to_return.spd = 0;
 	for (auto &obs : obstacles)
 	{
-		if (obs.dis < 2 * ROBOT_SIZE)
+		if (obs.dis < 4 * ROBOT_SIZE)
 		{
 			to_return.spd = 1 / to_return.pri;
 			to_return.dir = fmod(obs.dir + M_PI, 2*M_PI);
-			to_return.pri = 10 * strength / pow(obs.dis, 2);
+			to_return.pri = 10 * strength / pow(2, obs.dis - 3 * ROBOT_SIZE / 2);
 		}
 	}
 	return to_return;
