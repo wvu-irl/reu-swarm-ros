@@ -126,7 +126,7 @@ void render(sf::RenderWindow *window)
 	displaySprite.setPosition(sf::Vector2f(0, 0));
 
 	window->draw(displaySprite);
-
+#if TAB_DEBUG
 	sf::VertexArray trapezoid(sf::LineStrip, 5);
 	trapezoid[0].position = g_trap.tl;
 	trapezoid[1].position = g_trap.tr;
@@ -134,6 +134,7 @@ void render(sf::RenderWindow *window)
 	trapezoid[3].position = g_trap.bl;
 	trapezoid[4].position = g_trap.tl;
 	window->draw(trapezoid);
+#endif
 	free(tf_cols);
 }
 
