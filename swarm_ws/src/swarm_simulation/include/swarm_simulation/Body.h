@@ -40,7 +40,7 @@ private:
 		int quadrant(float phi);
 		bool aboveOrBelow(float _dx, float _dy, int _Q);
 		float getRelTheta(float _abs_theta, float _phi, int _Q);
-		bool applyForce(bool _aorb,float _rel_theta);
+		void applyForce(Pvector force);
 	  //wvu_swarm_std_msgs::vicon_bot_array createMessages(std::vector<Body> _flock);//vector<Body> _flock); //operates on flock
 		//char[2] getID();
 public:

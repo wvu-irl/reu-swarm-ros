@@ -51,12 +51,12 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 							a = 1;
 							b = r * cos(theta/2);
 							temp_r = b;
-							flock.flock.at(i).heading += M_PI/90 * theta;
+							flock.flock.at(i).heading += M_PI/9 * theta;
 						} else if (M_PI < theta && theta < 2*M_PI) {
 							b = 1;
 							a = -r * cos(theta/2);
 							temp_r = a;
-							flock.flock.at(i).heading -= M_PI/90 * (2*M_PI - theta);
+							flock.flock.at(i).heading -= M_PI/9 * (2*M_PI - theta);
 						}
 
 						float x = temp_r * cos(flock.flock.at(i).heading);
@@ -164,7 +164,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 	int x = 50; //x inital positions for the bots.
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 50; i++)
 	{
 		char temp[2] =
 		{ letters[2 * i], letters[2 * i + 1] };
