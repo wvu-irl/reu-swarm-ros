@@ -14,21 +14,21 @@
 ContourMap *cont;
 sf::Sprite displaySprite;
 
-perspective_t g_perspec;
+//perspective_t g_perspec;
 quadrilateral_t g_trap;
 
 static int g_tick = 0;
 
 sf::Vector2f readVector(std::string vect)
 {
-	char *vectr = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
+	char *vectr = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
 	strcpy(vectr, vect.c_str());
-	char *x = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
-	char *y = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
+	char *x = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
+	char *y = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
 
 	strcpy(x, strtok(vectr, ","));
 	strcpy(y, strtok(NULL, ","));
-	sf::Vector2f vector((float)strtod(x, NULL), (float)strtod(y, NULL));
+	sf::Vector2f vector((float) strtod(x, NULL), (float) strtod(y, NULL));
 
 	free(y);
 	free(x);
@@ -53,9 +53,10 @@ void calibrateFromFile(std::string path)
 
 		std::cout << tl << "\n" << tr << "\n" << br << "\n" << bl << std::endl;
 
-		g_trap = {readVector(tl), readVector(tr), readVector(br), readVector(bl)};
+		g_trap =
+		{ readVector(tl), readVector(tr), readVector(br), readVector(bl)};
 
-		g_perspec = getTransform(g_trap);
+//		g_perspec = getTransform(g_trap);
 
 	}
 }
@@ -76,24 +77,33 @@ void render(sf::RenderWindow *window)
 	disp.display();
 
 	sf::Image img = disp.getTexture().copyToImage();
-	sf::Uint8 *tf_cols = (sf::Uint8 *)malloc(4 * WIDTH * HEIGHT);
+	sf::Uint8 *tf_cols = (sf::Uint8 *) malloc(4 * WIDTH * HEIGHT);
+	memset(tf_cols, 0, 4 * WIDTH * HEIGHT);
 	sf::Image tf_img;
 	tf_img.create(WIDTH, HEIGHT, tf_cols);
-	for (size_t i = 0;i < HEIGHT * WIDTH;i++)
+	for (size_t i = 0; i < HEIGHT * WIDTH; i++)
 	{
 		int row = i / WIDTH;
 		int col = i % WIDTH;
-		sf::Vector2f square_pos((float)col,(float)row );
-		sf::Vector2f trap_point = warpPoint(g_perspec, square_pos);
+		sf::Vector2f square_pos((float) col, (float) row);
+		sf::Vector2f trap_point = warpPoint(g_trap, WIDTH, HEIGHT, square_pos);
 
-		tf_img.setPixel((int)trap_point.x, (int)trap_point.y, img.getPixel((int)trap_point.x, (int)trap_point.y));
+//		std::cout << "Got vector: (" << (int) trap_point.x << ","
+//				<< (int) trap_point.y << ") <- (" << col << ", " << row << ")"
+//				<< std::endl;
+		sf::Color pix = img.getPixel((int) square_pos.x, (int) square_pos.y);
+//		std::cout << "Writing" << std::endl;
+		if ((int) trap_point.x < WIDTH && (int) trap_point.y < HEIGHT
+				&& (int) trap_point.x >= 0 && (int) trap_point.y >= 0)
+			tf_img.setPixel((int) trap_point.x, (int) trap_point.y, pix);
+//		std::cout << "\033[30;42mWritten\033[0m" << std::endl;
 	}
 
 	sf::Texture tex;
 	tex.loadFromImage(tf_img);
 	displaySprite.setTexture(tex);
 
-	displaySprite.setPosition(sf::Vector2f(0,0));
+	displaySprite.setPosition(sf::Vector2f(0, 0));
 
 	window->draw(displaySprite);
 
