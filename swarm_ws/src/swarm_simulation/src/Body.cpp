@@ -31,7 +31,7 @@ Body::Body(float x, float y, char _id[2])
     id[1] = _id[1];
 
     heading = 0;
-    force =1;
+    force = 1;
     updatedCommand = false;
     updatedPosition = false;
     collision = false;
@@ -60,6 +60,8 @@ Body::Body(float x, float y, char _id[2])
 //    acceleration.addVector(force);
 //}
 
+
+//--------Helper Functions for the Physics engine-----------
 float Body::angleConvert(float _x)
 {
 	if(_x<0)
@@ -163,6 +165,8 @@ bool Body::applyForce(bool _aorb,float _rel_theta)
 	}
 	return apply;
 }
+//----------------------------------------------------------------------------------------------------------
+
 
 // Modifies velocity, location, and resets acceleration with values that
 // are given by the three laws.
@@ -193,9 +197,8 @@ void Body::run(vector <Body> v)
     	inElasticCollisions(v);
     	//seperation(v);
     	borders();
+
     }
-
-
 }
 
 // Applies the three laws to the flock of bodies
@@ -239,6 +242,25 @@ void Body::borders()
 		}
 }
 
+std::pair<float,float> Body::borders(float _fx, float _fy)//applys bounds for the physics engine (adjusts forces)
+{
+	//code for hard boundary conditions. Nulls velocity component orthogonal to boundary.
+	if ((location.x <=12) ||(location.x >=288))
+	{
+		_fx = 0;
+		if(location.x <= 12){location.x = 12;}
+		if(location.x >= 288){location.x = 288;}
+	}
+	if ((location.y <=12) ||(location.y >=588))
+	{
+		_fy = 0;
+		if(location.y <=12){location.y = 12;}
+		if(location.y >=588){location.y = 588;}
+	}
+	std::pair<float,float> that = {_fx,_fy};
+	return that;
+}
+
 void Body::inElasticCollisions(vector<Body> _bodies)
 {
 	    //Magnitude of separation between bodies
@@ -248,6 +270,17 @@ void Body::inElasticCollisions(vector<Body> _bodies)
 	    	collision = false;
 	        // Calculate distance from current body to body we're looking at
 	    	 float d = location.distance(_bodies.at(i).location);
+	    	 float target_sep;
+	    	 if(i<targets->point.size())
+	    	 {
+	    		 target_sep = targetSeperation(targets->point.at(i));
+	    		 targetCollision(i,target_sep);
+
+	    	 }
+	    	 else
+	    	 {
+	    		 target_sep = -10;
+	    	 }
 	        // If this is a fellow body and it's too close, move away from it
 	        if ((d <= desiredseparation) && !((id[0] ==_bodies.at(i).id[0]) && (id[1] ==_bodies.at(i).id[1]))) // (&&d>0))
 	        {
@@ -287,10 +320,12 @@ void Body::inElasticCollisions(vector<Body> _bodies)
 						{
 							fy = -fy;
 						}
-
 						float mag = sqrt(pow(fx,2) + pow(fy,2));
 						fx = fx/mag; //scaled to unit vectors
 						fy = fy/mag;
+						std::pair<float,float> forces = borders(fx,fy);
+						fx = forces.first;
+						fy = forces.second;
 
 						float abs_theta = angleConvert(angle(Pvector(fx,fy))); //angle of force in absolute position.
 						abs_theta = angleConvert(abs_theta);
@@ -336,7 +371,6 @@ void  Body::seperation(vector<Body> _bodies)
     float desiredseparation = 15;
     Pvector steer(0, 0);
     int count = 0; //iterator
-
     for (int i = 0; i < _bodies.size(); i++) // For every body in the system, check if it's too close
     {
         // Calculate distance from current body to body we're looking at
@@ -344,57 +378,49 @@ void  Body::seperation(vector<Body> _bodies)
         // If this is a fellow body and it's too close, move away from it
         if ((d < desiredseparation) && !((id[0] ==_bodies.at(i).id[0]) && (id[1] ==_bodies.at(i).id[1]))) // (&&d>0))
         {_bodies.at(i).location.x = _bodies.at(i).prev_location.x;
-//        	std::cout<<"BOTS ARE TOO CLOSE!"<<std::endl;
-//        	std::cout<<"bot: "<<id[0]<<id[1]<<" and bot: "<<_bodies.at(i).id[0]<<_bodies.at(i).id[1]<<std::endl;
-//        	std::cout<<"seperation is: "<<d<<std::endl;
-//        	std::cout<<"-----------------\n";
         	_bodies.at(i).location.x = _bodies.at(i).prev_location.x;
         	location.x = prev_location.x;
-
         	_bodies.at(i).location.y = _bodies.at(i).prev_location.y;
         	location.y = prev_location.y;
-
-//        	float dx = _bodies.at(i).location.x - location.x;
-//        	float dy = _bodies.at(i).location.y - location.y;
-//        	if(dx>=0)
-//        	{
-//        		_bodies.at(i).location.x += 30;
-//        		location.x -= 30;
-//        	}
-//        	else
-//        	{
-//        		_bodies.at(i).location.x -= 30;
-//        		location.x += 30;
-//        	}
-//        	if(dy>=0)
-//        	{
-//        		_bodies.at(i).location.y += 30;
-//        		location.y -= 30;
-//        	}
-//        	else
-//        	{
-//        		_bodies.at(i).location.y -= 30;
-//        		location.y += 30;
-//        	}
-
-//        	velocity.x = 0;
-//          velocity.y = 0;
-//          _bodies.at(i).velocity.x = 0;
-//					_bodies.at(i).velocity.y =0;
-
-
-//            Pvector diff(0,0);
-//            diff = diff.subTwoVector(location, _bodies.at(i).location);
-//            diff.normalize();
-//            diff.divScalar(d);      // Weight by distance
-//            steer.addVector(diff);
-            count++;
+           count++;
         }
     }
 }
 
+void Body::targetCollision(int i,float _t_sep)
+{
+	if(_t_sep<= 22.5)
+	{
+		float dy = 300 - targets->point.at(i).y * 3 - location.y;
+		float dx = 150 + targets->point.at(i).x * 3 - location.x;
+		float theta = angle(Pvector(dy,dx)); //angle from bot to the target
+		theta = angleConvert(theta); //scaled positive
+
+		//calculates force to be applied to the bot
+		float force = 1;
+		float fx = -force*cos(theta);
+		float fy = force*sin(theta);
+
+		//applies force to bot
+		location.x += fx;
+		location.y += fy;
+
+		//applies velocity to puck
+		targets->point.at(i).vx = velocity.x;
+		targets->point.at(i).vy = velocity.y;
+	}
+}
 // Calculates the angle for the velocity of a body which allows the visual
 // image to rotate in the direction that it is going in.
+
+float Body::targetSeperation(wvu_swarm_std_msgs::vicon_point target)
+{
+	float x = target.x * 3 + 150;
+	float y = 300 - target.y * 3;
+	float target_sep = location.distance(Pvector(x,y));
+	return target_sep;
+
+}
 float Body::angle(Pvector v)
 {
     // From the definition of the dot product. negated to transform to first quadrant from 4th.

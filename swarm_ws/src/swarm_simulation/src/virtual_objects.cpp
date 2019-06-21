@@ -95,9 +95,18 @@ void makeFlows(ros::Publisher _pub)
 	wvu_swarm_std_msgs::flow cur0;
 	cur0.x = 0;
 	cur0.y = 0;
-	cur0.r=100;
+	cur0.r=20;
 	cur0.theta=0;
 	vp_vector.flow.push_back(cur0);
+
+	wvu_swarm_std_msgs::flow cur1;
+	cur1.x = 0;
+	cur1.y = 0;
+	cur1.r=20;
+	cur1.theta=M_PI_2;
+
+	vp_vector.flow.push_back(cur1);
+
 	_pub.publish(vp_vector);
 }
 

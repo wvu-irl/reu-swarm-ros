@@ -45,6 +45,7 @@ private:
 		//char[2] getID();
 public:
 		char id [2];
+		wvu_swarm_std_msgs::vicon_points *targets;
 		float heading;
 		int sid;
 		float force;
@@ -74,9 +75,12 @@ public:
     void update();
     void flock(vector <Body> v);
     void borders();
+    std::pair<float,float> borders(float _fx, float _fy);
     void seperation(vector<Body> _bodies);
     void inElasticCollisions(vector<Body> _bodies);
     void elasticCollisions(vector<Body> _bodies);
+    void targetCollision(int i, float _t_sep);
+    float targetSeperation(wvu_swarm_std_msgs::vicon_point);
     float angle(Pvector v);
     void printMessage(int i,wvu_swarm_std_msgs::vicon_bot_array _vb_array);
 };
