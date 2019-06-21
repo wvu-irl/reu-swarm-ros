@@ -49,7 +49,7 @@ AliceStructs::vel Rules::goToTarget(std::list<AliceStructs::obj> targets, float 
 	for (auto &obj : targets)
 	{
 
-		std::pair<float, float> temp_pair2(ROBOT_SIZE * strength / pow(obj.dis, 0.2), obj.dir);
+		std::pair<float, float> temp_pair2(ROBOT_SIZE * strength / pow(obj.dis+ROBOT_SIZE, 0.5), obj.dir);
 		temp_pair1 = addPolarVectors(temp_pair1, temp_pair2);
 
 	}
