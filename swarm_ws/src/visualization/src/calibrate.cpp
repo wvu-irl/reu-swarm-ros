@@ -40,7 +40,7 @@ sf::Text instruct;
 
 calibrate g_calib;
 
-double scaleX, scaleY;
+double scaleX = 1, scaleY = 1;
 
 void render(sf::RenderWindow *window)
 {
@@ -220,7 +220,7 @@ int main(int argc, char **argv)
 					}
 					else
 					{
-						std::cout << "\033[30;42mDid not write\033[0m" << std::endl;
+						std::cout << "\033[30;41mDid not write\033[0m" << std::endl;
 					}
 					changeInstruction("Done, press R to re-calibrate");
 				}
