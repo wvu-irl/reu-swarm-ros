@@ -1,10 +1,5 @@
-/*
- *  Compile using
- *
- *       nvcc -ccbin g++ table_vis.cu -o Contour.o -lsfml-graphics -lsfml-window -lsfml-system -gencode arch=compute_37,code=sm_37 -gencode arch=compute_50,code=sm_50 -gencode arch=compute_52,code=sm_52 -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_70,code=sm_70
-
- */
 #include "contour.h"
+#include "transform/perspective_transform_gpu.h"
 
 #include <math.h>
 #include <unistd.h>
@@ -16,10 +11,32 @@
 #define WIDTH 1280
 #define HEIGHT 800
 
+#define TAB_DEBUG 0
+
 ContourMap *cont;
 sf::Sprite displaySprite;
 
+//perspective_t g_perspec;
+quadrilateral_t g_trap;
+
 static int g_tick = 0;
+
+vector2f_t readVector(std::string vect)
+{
+	char *vectr = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
+	strcpy(vectr, vect.c_str());
+	char *x = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
+	char *y = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
+
+	strcpy(x, strtok(vectr, ","));
+	strcpy(y, strtok(NULL, ","));
+	vector2f_t vector = {(float) strtod(x, NULL), (float) strtod(y, NULL)};
+
+	free(y);
+	free(x);
+	free(vectr);
+	return vector;
+}
 
 void calibrateFromFile(std::string path)
 {
@@ -27,42 +44,27 @@ void calibrateFromFile(std::string path)
 	fin.open(path);
 	if (fin)
 	{
-		std::string vect;
-		std::string ang;
-		std::string wid;
-		std::string hei;
-		fin >> vect;
-		fin >> ang;
-		fin >> wid;
-		fin >> hei;
+		std::string tl;
+		std::string tr;
+		std::string br;
+		std::string bl;
+		fin >> tl;
+		fin >> tr;
+		fin >> br;
+		fin >> bl;
 
-		std::cout << vect << "\n" << ang << "\n" << wid << "\n" << hei << std::endl;
+		std::cout << tl << "\n" << tr << "\n" << br << "\n" << bl << std::endl;
 
-		char *vectr = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
-		strcpy(vectr, vect.c_str());
-		char *x = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
-		char *y = (char *)malloc(sizeof(char) * strlen(vect.c_str()));
-		strcpy(x, strtok(vectr, ","));
-		strcpy(y, strtok(NULL, ","));
-
-		sf::Vector2f pos(strtod(x, NULL), strtod(y, NULL));
-		float angle = (float)strtod(ang.c_str(), NULL);
-		float width = (float)strtod(wid.c_str(), NULL);
-		float height = (float)strtod(hei.c_str(), NULL);
-
-		displaySprite.rotate(angle);
-		displaySprite.setPosition(pos);
-		displaySprite.scale(sf::Vector2f(width / WIDTH, height / HEIGHT));
-		free(vectr);
-		free(x);
-		free(y);
-		fin.close();
+		g_trap.tl = readVector(tl);
+		g_trap.tr = readVector(tr);
+		g_trap.br = readVector(br);
+		g_trap.bl = readVector(bl);
 	}
 }
 
 void tick()
 {
-	cont->tick(g_tick);
+	//cont->tick(g_tick);
 
 	g_tick++;
 	g_tick %= 1000;
@@ -72,10 +74,44 @@ void render(sf::RenderWindow *window)
 {
 	sf::RenderTexture disp;
 	disp.create(WIDTH, HEIGHT);
-	cont->render(&disp);
+	//cont->render(&disp);
+	sf::Image checker;
+	checker.loadFromFile("src/visualization/assets/Checkerboard.jpg");
+	sf::Texture checker_texture;
+	checker_texture.loadFromImage(checker);
+	sf::Sprite checker_sprite;
+	checker_sprite.setTexture(checker_texture);
+	checker_sprite.setPosition(sf::Vector2f(0,0));
+	checker_sprite.scale(1280.0 / 800.0, 1.0);
+	disp.draw(checker_sprite);
+
 	disp.display();
-	displaySprite.setTexture(disp.getTexture());
+
+	sf::Image img = disp.getTexture().copyToImage();
+	sf::Uint8 *tf_cols = (sf::Uint8 *) malloc(4 * WIDTH * HEIGHT);
+
+	perspectiveTransform(g_trap, &disp, tf_cols);
+
+	sf::Image tf_img;
+	tf_img.create(WIDTH, HEIGHT, tf_cols);
+
+	sf::Texture tex;
+	tex.loadFromImage(tf_img);
+	displaySprite.setTexture(tex);
+
+	displaySprite.setPosition(sf::Vector2f(0, 0));
+
 	window->draw(displaySprite);
+#if TAB_DEBUG
+	sf::VertexArray trapezoid(sf::LineStrip, 5);
+	trapezoid[0].position = g_trap.tl;
+	trapezoid[1].position = g_trap.tr;
+	trapezoid[2].position = g_trap.br;
+	trapezoid[3].position = g_trap.bl;
+	trapezoid[4].position = g_trap.tl;
+	window->draw(trapezoid);
+#endif
+	free(tf_cols);
 }
 
 int main(int argc, char **argv)
@@ -90,7 +126,7 @@ int main(int argc, char **argv)
 	cmap.addColor(std::tuple<double, sf::Color>(6.66667, sf::Color::Blue));
 
 	cont = new ContourMap(sf::Rect<int>(0, 0, 1280, 800), cmap);
-	calibrateFromFile("calib.config");
+	calibrateFromFile("src/visualization/cfg/calib.config");
 	const double num_levels = 9.0;
 	for (double i = -10.0; i <= 10.0; i += 20.0 / num_levels)
 	{

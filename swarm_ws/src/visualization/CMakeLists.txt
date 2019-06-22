@@ -25,6 +25,8 @@ if (CUDA_FOUND)
 	target_link_libraries(color_map ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
 	CUDA_ADD_LIBRARY(contour ${LIB_TYPE} src/contour.cu)
 	target_link_libraries(contour ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map)
+	
+	CUDA_ADD_LIBRARY(perspective_tf ${LIB_TYPE} src/transform/perspective_transform_gpu.cu)
 
 	###################################
 	## catkin specific configuration ##
@@ -53,7 +55,7 @@ if (CUDA_FOUND)
 	find_package(SFML 2 COMPONENTS graphics window system)
 	if(SFML_FOUND)
 	  include_directories(${SFML_INCLUDE_DIR})
-	  target_link_libraries(table_vis ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map contour)
+	  target_link_libraries(table_vis ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map contour perspective_tf)
 	  target_link_libraries(calibrate_tab ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES})
 	endif()
 	
