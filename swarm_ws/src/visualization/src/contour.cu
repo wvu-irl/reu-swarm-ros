@@ -53,7 +53,6 @@ ContourMap::ContourMap(sf::Rect<int> _bounds, ColorMap cm) :
 	bounds = sf::Rect<int>(_bounds); // setting the bounds
 	sprite.setPosition(bounds.left, bounds.top); // sets the sprite position
 	cols = (sf::Uint8 *)malloc(sizeof(sf::Uint8) * bounds.width * bounds.height * 4);
-	hyperthread::init();
 }
 
 void ContourMap::scale(float sx, float sy)

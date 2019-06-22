@@ -1,6 +1,11 @@
 #ifndef TABLE_SETTINGS_H
 #define TABLE_SETTINGS_H
 
+/**
+ * Header for different settings that can be changed in
+ * the table vis source file
+ */
+
 // width and height of generated image
 // also of starting window size in pixels
 #define WIDTH 1280

@@ -131,6 +131,7 @@ void render(sf::RenderWindow *window)
 int main(int argc, char **argv)
 {
 	calibrateFromFile("src/visualization/cfg/calib.config");
+
 #if BACKGROUND == CONTOUR_PLOT
 	ColorMap cmap(std::pair<double, sf::Color>(-10, sf::Color::Red),
 			std::pair<double, sf::Color>(10, sf::Color::Magenta));

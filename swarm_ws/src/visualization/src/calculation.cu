@@ -20,16 +20,13 @@ namespace hyperthread
 int devID;
 cudaDeviceProp deviceProp;
 
-sf::Uint8 *h_cols;
-bool allocated = false;
-
 __device__ void zfunc(double *z, double x, double y, double t)
 {
     x -= 640;
-	y -= 400;
-	x /= 50;
-	y /= 50;
-	*z = (x * x - y * y) * sin(3.14 / 500 * t);
+		y -= 400;
+		x /= 50;
+		y /= 50;
+		*z = (x * x - y * y) * sin(3.14 / 500 * t);
 }
 
 typedef struct
@@ -84,7 +81,7 @@ __device__ double min(double a, double b)
     return a > b ? b : a;
 }
 
-__global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols, 
+__global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     size_t *width, size_t *height, color *colors, double *color_levels, size_t *num_cols, int *t)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -115,7 +112,7 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
             {
                 if (min(zc, zz[l]) <= levels[k] && levels[k] <= max(zc, zz[l]))
                 {
-                    draw = true;   
+                    draw = true;
                 }
             }
 
@@ -141,7 +138,7 @@ void createDeviceVar(void **var, size_t size, void *h_var)
     cudaMemcpyAsync(*var, h_var, size, cudaMemcpyHostToDevice, 0);
 }
 
-void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width, 
+void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     size_t height, color colors[], double color_levels[], size_t num_cols, int t)
 {
     size_t n = width * height;
@@ -149,12 +146,12 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
 
     // setting up device pointers
     sf::Uint8 *d_cols;
-    
+
     double *d_levels;
     size_t *d_num_levels;
-    
+
     size_t *d_width, *d_height;
-    
+
     color *d_colors;
     double *d_color_levels;
     size_t *d_num_colors;
@@ -184,11 +181,11 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     gpuThread<<<blocks, threads>>>(
         d_levels,
         d_num_levels,
-        d_cols, 
-        d_width, 
-        d_height, 
-        d_colors, 
-        d_color_levels, 
+        d_cols,
+        d_width,
+        d_height,
+        d_colors,
+        d_color_levels,
         d_num_colors,
         d_time);
     cudaMemcpyAsync(cols, d_cols, size, cudaMemcpyDeviceToHost, 0);
