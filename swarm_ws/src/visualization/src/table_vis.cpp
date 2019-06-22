@@ -1,3 +1,4 @@
+#include "../cfg/table_settings.h"
 #include "contour.h"
 #include "transform/perspective_transform_gpu.h"
 
@@ -8,14 +9,9 @@
 #include <iostream>
 #include <fstream>
 
-#define WIDTH 1280
-#define HEIGHT 800
-
-#define TAB_DEBUG 0
-
-#define CHECKERBOARD_ON 0
-
+#if BACKGROUND == CONTOUR_PLOT
 ContourMap *cont;
+#endif
 sf::Sprite displaySprite;
 
 //perspective_t g_perspec;
@@ -54,9 +50,9 @@ void calibrateFromFile(std::string path)
 		fin >> tr;
 		fin >> br;
 		fin >> bl;
-
+#if TAB_DEBUG
 		std::cout << tl << "\n" << tr << "\n" << br << "\n" << bl << std::endl;
-
+#endif
 		g_trap.tl = readVector(tl);
 		g_trap.tr = readVector(tr);
 		g_trap.br = readVector(br);
@@ -66,7 +62,7 @@ void calibrateFromFile(std::string path)
 
 void tick()
 {
-#if !CHECKERBOARD_ON
+#if BACKGROUND == CONTOUR_PLOT
 	cont->tick(g_tick);
 #endif
 	g_tick++;
@@ -77,7 +73,7 @@ void render(sf::RenderWindow *window)
 {
 	sf::RenderTexture disp;
 	disp.create(WIDTH, HEIGHT);
-#if CHECKERBOARD_ON
+#if BACKGROUND == CHECKERBOARD
 	sf::Image checker;
 	checker.loadFromFile("src/visualization/assets/Checkerboard.jpg");
 	sf::Texture checker_texture;
@@ -85,11 +81,24 @@ void render(sf::RenderWindow *window)
 	sf::Sprite checker_sprite;
 	checker_sprite.setTexture(checker_texture);
 	checker_sprite.setPosition(sf::Vector2f(0,0));
-	checker_sprite.scale(1280.0 / 800.0, 1.0);
+	checker_sprite.scale(1280.0 / checker.getSize().x, 800.0 / checker.getSize().y);
 	disp.draw(checker_sprite);
-#else
+#endif
+#if BACKGROUND == CONTOUR_PLOT
 	cont->render(&disp);
 #endif
+#if BACKGROUND == HOCKEY
+	sf::Image rink;
+	rink.loadFromFile("src/visualization/assets/HockeyRink.png");
+	sf::Texture rink_texture;
+	rink_texture.loadFromImage(rink);
+	sf::Sprite rink_sprite;
+	rink_sprite.setTexture(rink_texture);
+	rink_sprite.setPosition(sf::Vector2f(0,0));
+	rink_sprite.scale(1280.0 / rink.getSize().x, 800.0 / rink.getSize().y);
+	disp.draw(rink_sprite);
+#endif
+
 	disp.display();
 
 	sf::Image img = disp.getTexture().copyToImage();
@@ -121,24 +130,23 @@ void render(sf::RenderWindow *window)
 
 int main(int argc, char **argv)
 {
+	calibrateFromFile("src/visualization/cfg/calib.config");
+#if BACKGROUND == CONTOUR_PLOT
 	ColorMap cmap(std::pair<double, sf::Color>(-10, sf::Color::Red),
 			std::pair<double, sf::Color>(10, sf::Color::Magenta));
-
 	// cmap.addColor(std::tuple<double, sf::Color>(0, sf::Color::White));
 	cmap.addColor(std::tuple<double, sf::Color>(-6.66667, sf::Color::Yellow));
 	cmap.addColor(std::tuple<double, sf::Color>(-3.33333, sf::Color::Green));
 	cmap.addColor(std::tuple<double, sf::Color>(3.33333, sf::Color::Cyan));
 	cmap.addColor(std::tuple<double, sf::Color>(6.66667, sf::Color::Blue));
-
 	cont = new ContourMap(sf::Rect<int>(0, 0, 1280, 800), cmap);
-	calibrateFromFile("src/visualization/cfg/calib.config");
 	const double num_levels = 9.0;
 	for (double i = -10.0; i <= 10.0; i += 20.0 / num_levels)
 	{
 		cont->levels.push_back(i);
 		std::cout << "Added level: " << i << std::endl;
 	}
-
+#endif
 	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Contour Plotting",
 			sf::Style::Default);
 
