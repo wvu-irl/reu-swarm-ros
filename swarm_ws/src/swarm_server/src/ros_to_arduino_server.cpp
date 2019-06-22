@@ -130,7 +130,7 @@ void *controlThread(void *arg0)
  */
 bool keepAlive()
 {
-	return ros::ok() || !g_flag;
+	return !g_flag;
 }
 
 void warnInfo(const char *str)

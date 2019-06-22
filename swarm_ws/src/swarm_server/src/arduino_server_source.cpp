@@ -335,7 +335,7 @@ int beginServer(std::function<void(command, int)> command_callback,
 	{
 		pthread_join(tid, NULL); // waiting for threads to die
 	}
-
+	close(socket_descriptor);
 	return 0;
 }
 #endif
