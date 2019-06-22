@@ -1,5 +1,5 @@
 #include "contour.h"
-#include "transform/perspective_transform.cpp"
+#include "transform/perspective_transform_gpu.h"
 
 #include <math.h>
 #include <unistd.h>
@@ -21,7 +21,7 @@ quadrilateral_t g_trap;
 
 static int g_tick = 0;
 
-sf::Vector2f readVector(std::string vect)
+vector2f_t readVector(std::string vect)
 {
 	char *vectr = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
 	strcpy(vectr, vect.c_str());
@@ -30,7 +30,7 @@ sf::Vector2f readVector(std::string vect)
 
 	strcpy(x, strtok(vectr, ","));
 	strcpy(y, strtok(NULL, ","));
-	sf::Vector2f vector((float) strtod(x, NULL), (float) strtod(y, NULL));
+	vector2f_t vector = {(float) strtod(x, NULL), (float) strtod(y, NULL)};
 
 	free(y);
 	free(x);
@@ -55,11 +55,10 @@ void calibrateFromFile(std::string path)
 
 		std::cout << tl << "\n" << tr << "\n" << br << "\n" << bl << std::endl;
 
-		g_trap =
-		{ readVector(tl), readVector(tr), readVector(br), readVector(bl)};
-
-//		g_perspec = getTransform(g_trap);
-
+		g_trap.tl = readVector(tl);
+		g_trap.tr = readVector(tr);
+		g_trap.br = readVector(br);
+		g_trap.bl = readVector(bl);
 	}
 }
 
@@ -90,44 +89,46 @@ void render(sf::RenderWindow *window)
 
 	sf::Image img = disp.getTexture().copyToImage();
 	sf::Uint8 *tf_cols = (sf::Uint8 *) malloc(4 * WIDTH * HEIGHT);
-	memset(tf_cols, 0, 4 * WIDTH * HEIGHT);
+
+	perspectiveTransform(g_trap, &disp, tf_cols);
+
 	sf::Image tf_img;
 	tf_img.create(WIDTH, HEIGHT, tf_cols);
-	for (size_t i = 0; i < HEIGHT * WIDTH; i++)
-	{
-		int row = i / WIDTH;
-		int col = i % WIDTH;
-		sf::Vector2f square_pos((float) col, (float) row);
-		sf::Vector2f trap_point = warpPoint(g_trap, WIDTH, HEIGHT, square_pos);
-#if TAB_DEBUG
-//		sf::Vector2f top(scale(square_pos.x, 0, WIDTH, g_trap.tl.x, g_trap.tr.x),
-//				scale(square_pos.x, 0, WIDTH, g_trap.tl.y, g_trap.tr.y));
-//		sf::Vector2f bottom(scale(square_pos.x, 0, WIDTH, g_trap.bl.x, g_trap.br.x),
-//				scale(square_pos.x, 0, WIDTH, g_trap.bl.y, g_trap.br.y));
-//		sf::Vector2f left(scale(square_pos.y, 0, HEIGHT, g_trap.bl.x, g_trap.tl.x),
-//				scale(square_pos.y, 0, HEIGHT, g_trap.bl.y, g_trap.tl.y));
-//		sf::Vector2f right(scale(square_pos.y, 0, HEIGHT, g_trap.bl.x, g_trap.tl.x),
-//				scale(square_pos.y, 0, HEIGHT, g_trap.bl.y, g_trap.tl.y));
+//	for (size_t i = 0; i < HEIGHT * WIDTH; i++)
+//	{
+//		int row = i / WIDTH;
+//		int col = i % WIDTH;
+//		sf::Vector2f square_pos((float) col, (float) row);
+//		sf::Vector2f trap_point = warpPoint(g_trap, WIDTH, HEIGHT, square_pos);
+//#if TAB_DEBUG
+////		sf::Vector2f top(scale(square_pos.x, 0, WIDTH, g_trap.tl.x, g_trap.tr.x),
+////				scale(square_pos.x, 0, WIDTH, g_trap.tl.y, g_trap.tr.y));
+////		sf::Vector2f bottom(scale(square_pos.x, 0, WIDTH, g_trap.bl.x, g_trap.br.x),
+////				scale(square_pos.x, 0, WIDTH, g_trap.bl.y, g_trap.br.y));
+////		sf::Vector2f left(scale(square_pos.y, 0, HEIGHT, g_trap.bl.x, g_trap.tl.x),
+////				scale(square_pos.y, 0, HEIGHT, g_trap.bl.y, g_trap.tl.y));
+////		sf::Vector2f right(scale(square_pos.y, 0, HEIGHT, g_trap.bl.x, g_trap.tl.x),
+////				scale(square_pos.y, 0, HEIGHT, g_trap.bl.y, g_trap.tl.y));
+////
+////		sf::VertexArray tb(sf::LineStrip, 2);
+////		tb[0].position = top;
+////		tb[1].position = bottom;
+////		window->draw(tb);
+////
+////		sf::VertexArray lr(sf::LineStrip, 2);
+////		lr[0].position = left;
+////		lr[1].position = right;
+////		window->draw(lr);
 //
-//		sf::VertexArray tb(sf::LineStrip, 2);
-//		tb[0].position = top;
-//		tb[1].position = bottom;
-//		window->draw(tb);
-//
-//		sf::VertexArray lr(sf::LineStrip, 2);
-//		lr[0].position = left;
-//		lr[1].position = right;
-//		window->draw(lr);
-
-		std::cout << "Got vector: (" << (int) trap_point.x << ","
-				<< (int) trap_point.y << ") <- (" << col << ", " << row << ")"
-				<< std::endl;
-#endif
-		sf::Color pix = img.getPixel((int) square_pos.x, (int) square_pos.y);
-		if ((int) trap_point.x < WIDTH && (int) trap_point.y < HEIGHT
-				&& (int) trap_point.x >= 0 && (int) trap_point.y >= 0)
-			tf_img.setPixel((int) trap_point.x, (int) trap_point.y, pix);
-	}
+//		std::cout << "Got vector: (" << (int) trap_point.x << ","
+//				<< (int) trap_point.y << ") <- (" << col << ", " << row << ")"
+//				<< std::endl;
+//#endif
+//		sf::Color pix = img.getPixel((int) square_pos.x, (int) square_pos.y);
+//		if ((int) trap_point.x < WIDTH && (int) trap_point.y < HEIGHT
+//				&& (int) trap_point.x >= 0 && (int) trap_point.y >= 0)
+//			tf_img.setPixel((int) trap_point.x, (int) trap_point.y, pix);
+//	}
 
 	sf::Texture tex;
 	tex.loadFromImage(tf_img);
