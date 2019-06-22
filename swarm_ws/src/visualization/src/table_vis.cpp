@@ -13,6 +13,8 @@
 
 #define TAB_DEBUG 0
 
+#define CHECKERBOARD_ON 0
+
 ContourMap *cont;
 sf::Sprite displaySprite;
 
@@ -64,8 +66,9 @@ void calibrateFromFile(std::string path)
 
 void tick()
 {
-	//cont->tick(g_tick);
-
+#if !CHECKERBOARD_ON
+	cont->tick(g_tick);
+#endif
 	g_tick++;
 	g_tick %= 1000;
 }
@@ -74,7 +77,7 @@ void render(sf::RenderWindow *window)
 {
 	sf::RenderTexture disp;
 	disp.create(WIDTH, HEIGHT);
-	//cont->render(&disp);
+#if CHECKERBOARD_ON
 	sf::Image checker;
 	checker.loadFromFile("src/visualization/assets/Checkerboard.jpg");
 	sf::Texture checker_texture;
@@ -84,7 +87,9 @@ void render(sf::RenderWindow *window)
 	checker_sprite.setPosition(sf::Vector2f(0,0));
 	checker_sprite.scale(1280.0 / 800.0, 1.0);
 	disp.draw(checker_sprite);
-
+#else
+	cont->render(&disp);
+#endif
 	disp.display();
 
 	sf::Image img = disp.getTexture().copyToImage();
