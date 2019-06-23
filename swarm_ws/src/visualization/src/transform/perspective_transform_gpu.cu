@@ -16,14 +16,14 @@ __device__ vector2f_t warpPoint(quadrilateral_t trap, size_t width,
 		size_t height, vector2f_t initial)
 {
 	// finding connected edges
-	vector2f_t top = {scale((float)initial.x, 0.0f, (float)width, (float)trap.tl.x, (float)trap.tr.x),
-			scale((float)initial.x, 0.0f,(float) width, (float)trap.tl.y, (float)trap.tr.y)};
-	vector2f_t bottom = {scale((float)initial.x, 0.0f, (float)width, (float)trap.bl.x, (float)trap.br.x),
-			scale((float)initial.x, 0.0f, (float)width, (float)trap.bl.y, (float)trap.br.y)};
-	vector2f_t left = {scale((float)initial.y, 0.0f, (float)height, (float)trap.bl.x, (float)trap.tl.x),
-			scale((float)initial.y, 0.0f, (float)height, (float)trap.bl.y, (float)trap.tl.y)};
-	vector2f_t right = {scale((float)initial.y, 0.0f, (float)height, (float)trap.br.x, (float)trap.tr.x),
-			scale((float)initial.y, 0.0f, (float)height, (float)trap.br.y, (float)trap.tr.y)};
+	vector2f_t top = {(float)scale(initial.x, 0.0, width, trap.tl.x, trap.tr.x),
+			(float)scale(initial.x, 0.0, width, trap.tl.y, trap.tr.y)};
+	vector2f_t bottom = {(float)scale(initial.x, 0.0, width, trap.bl.x, trap.br.x),
+			(float)scale(initial.x, 0.0, width, trap.bl.y, trap.br.y)};
+	vector2f_t left = {(float)scale(initial.y, 0.0, height, trap.bl.x, trap.tl.x),
+			(float)scale(initial.y, 0.0, height, trap.bl.y, trap.tl.y)};
+	vector2f_t right = {(float)scale(initial.y, 0.0, height, trap.br.x, trap.tr.x),
+			(float)scale(initial.y, 0.0, height, trap.br.y, trap.tr.y)};
 
 	// linear intersection
 	double m0 = (right.y - left.y) / (right.x - left.x);
@@ -50,6 +50,7 @@ __global__ void transform(sf::Uint8 *cols_in, sf::Uint8 *cols_out, size_t *width
 		// copying pixel from one frame to another
 		int col_ind = i * 4;
 		int o_col_ind = ((int)trap_point.y * (*width) + (int)trap_point.x) * 4;
+
 		for (size_t j = 0;j < 4;j++) // getting values for RGBA
 		{
 			cols_out[o_col_ind + j] = cols_in[col_ind + j];
