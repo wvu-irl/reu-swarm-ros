@@ -199,7 +199,7 @@ void Sim::Run(ros::NodeHandle _n)
 	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to virtual obstacles
 	ros::Subscriber sub3 = _n.subscribe("virtual_targets", 1000, &Sim::targetCallback, this); //gets virtual targets
 	ros::Subscriber sub4 = _n.subscribe("virtual_flows", 1000, &Sim::flowCallback, this); //gets virtual targets
-	ros::Rate loopRate(50);
+	ros::Rate loopRate(200);
 
 	//publishes initial information for each bot
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
