@@ -8,7 +8,7 @@
 #include <math.h>
 #include <wvu_swarm_std_msgs/robot_command_array.h>
 //#include "ros/ros.h"
-
+bool update;
 void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 {
 	for (int i = 0; i < flock.flock.size(); i++)
@@ -105,7 +105,10 @@ void Sim::obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 }
 void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
-	targets = msg;
+	if (!update) {
+		targets = msg;
+		update = true;
+	}
 }
 void Sim::flowCallback(const wvu_swarm_std_msgs::flows &msg)
 {
@@ -199,7 +202,7 @@ void Sim::Run(ros::NodeHandle _n)
 	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to virtual obstacles
 	ros::Subscriber sub3 = _n.subscribe("virtual_targets", 1000, &Sim::targetCallback, this); //gets virtual targets
 	ros::Subscriber sub4 = _n.subscribe("virtual_flows", 1000, &Sim::flowCallback, this); //gets virtual targets
-	ros::Rate loopRate(50);
+	ros::Rate loopRate(200);
 
 	//publishes initial information for each bot
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
@@ -223,6 +226,7 @@ void Sim::Run(ros::NodeHandle _n)
 		//		}
 
 			pub2.publish(targets);
+			update = false;
 			ros::spinOnce();
 			loopRate.sleep();
 		}
@@ -376,7 +380,7 @@ void Sim::Render() //draws changes in simulation states to the window.
 	window.clear();
 	drawGoals();
 	flock.flocking(&targets);
-	updateTargetPos();
+	if (update) updateTargetPos();
 	drawObstacles();
 	drawTargets();
 	//drawFlows();
