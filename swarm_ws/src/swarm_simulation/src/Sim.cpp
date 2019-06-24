@@ -225,8 +225,8 @@ void Sim::Run(ros::NodeHandle _n)
 		//			//targets.point.at(0).sid=0;
 		//		}
 
-			pub2.publish(targets);
-			update = false;
+			if (!update) pub2.publish(targets);
+
 			ros::spinOnce();
 			std::cout<<"iteration complete"<<std::endl;
 			loopRate.sleep();
@@ -388,7 +388,10 @@ void Sim::Render() //draws changes in simulation states to the window.
 	window.clear();
 	drawGoals();
 	flock.flocking(&targets);
-	if (update) updateTargetPos();
+	if (update) {
+		updateTargetPos();
+		update = false;
+	}
 	drawObstacles();
 	drawTargets();
 	//drawFlows();
