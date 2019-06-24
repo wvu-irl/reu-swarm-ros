@@ -53,6 +53,7 @@ int main(int argc, char **argv)
 		aliceBrain.update(temp_bot_array, temp_target, temp_obs_array, temp_flow_array); //puts in absolute data from subscribers
 		for (int i = 0; i < temp_bot_array.poseVect.size(); i++)
 		{
+
 			aliceMap[i].receiveMsg(aliceBrain.getAliceMail(i)); //gives each robot the relative data it needs
 		}
 		std::vector<AliceStructs::ideal> all_ideals; //Creates a vector that stores the robot's initial ideal vectors

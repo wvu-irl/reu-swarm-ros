@@ -198,20 +198,12 @@ void makeTargets(ros::Publisher _pub)
 void makeFlows(ros::Publisher _pub)
 {
 	wvu_swarm_std_msgs::flows vp_vector;
-	wvu_swarm_std_msgs::flow cur0;
-	cur0.x = 0;
-	cur0.y = 0;
-	cur0.r = 20;
-	cur0.theta = 0;
-	vp_vector.flow.push_back(cur0);
-
-	wvu_swarm_std_msgs::flow cur1;
-	cur1.x = 0;
-	cur1.y = 0;
-	cur1.r = 20;
-	cur1.theta = M_PI_2;
-
-	vp_vector.flow.push_back(cur1);
+	std::pair<float, float> goal1(0,100);
+	std::pair<float,float> goal2(0,-100);
+	if (temp_targets.point.size() != 0) {
+		createPuckFlow(vp_vector,temp_targets.point.at(0),goal1,1);
+		//createPuckFlow(vp_vector,temp_targets.point.at(0),goal2,2);
+	}
 
 	_pub.publish(vp_vector);
 }
