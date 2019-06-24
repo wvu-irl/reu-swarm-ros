@@ -206,9 +206,9 @@ void Sim::Run(ros::NodeHandle _n)
 	pub.publish(vb_array);
 	ros::spinOnce();
 
-	while (window.isOpen() && ros::ok())
+	while (window.isOpen() && ros::ok()) //main while loop (runs the simulation).
 	{
-		while(game == false && window.isOpen())
+		while(game == false && window.isOpen() && ros::ok())//secondary loop allows for winning condition.
 		{
 			pI = HandleInput(pI);
 			Render();
@@ -270,37 +270,6 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 				event);
 
 		//----------Allows for click and drag for bots. ------------------------------
-		if (_pI.dragging == true)
-		{
-			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
-			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
-		}
-		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-				&& _pI.prevClick == true)
-		{
-			_pI.dragging = false;
-			_pI.prevClick = false;
-		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-				&& _pI.prevClick == false)
-		{
-			while (found != true)
-			{
-				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
-						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
-				{
-					found = true;
-					_pI.botId = i;
-					_pI.dragging = true;
-					_pI.prevClick = true;
-				} else if (i == flock.flock.size() - 1)
-				{
-					found = true;
-				}
-				i++;
-			}
-//		} //----------------------------------End-------------------------------------------------------
-
-		// ---------------------- Click and Drag for the target ----------------------------------------
 //		if (_pI.dragging == true)
 //		{
 //			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
@@ -314,20 +283,56 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 //				&& _pI.prevClick == false)
 //		{
-//			while (found != true && i < targets.point.size())
+//			while (found != true)
 //			{
-//				if (((targets.point.at(i).x > mX / 3 - 50 - 6) && (targets.point.at(i).x < mX / 3 - 50 + 6))
-//						&& ((targets.point.at(i).y > mY / -3 + 100 - 6) && (targets.point.at(i).y < mY / -3 + 100 + 6)))
+//				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
+//						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
 //				{
 //					found = true;
-//
+//					_pI.botId = i;
 //					_pI.dragging = true;
 //					_pI.prevClick = true;
+//				} else if (i == flock.flock.size() - 1)
+//				{
+//					found = true;
 //				}
 //				i++;
 //			}
-		}//----------------------------- End-------------------------------------
-	}
+//		} //----------------------------------End-------------------------------------------------------
+
+		// ---------------------- Click and Drag for the target ----------------------------------------
+		i=0;
+//		----------Allows for click and drag. ------------------------------
+		if (_pI.dragging == true)
+		{
+			targets.point.at(i).x = sf::Mouse::getPosition(window).x / 3 - 50;
+			; //event.mouseButton.x;
+			targets.point.at(i).y = sf::Mouse::getPosition(window).y / -3 + 100; //event.mouseButton.y;
+			std::cout << "yo" << std::endl;
+		}
+		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+				&& _pI.prevClick == true)
+		{
+			_pI.dragging = false;
+			_pI.prevClick = false;
+		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
+				&& _pI.prevClick == false)
+		{
+			while (found != true && i < targets.point.size())
+			{
+				if (((targets.point.at(i).x > mX / 3 - 50 - 6) && (targets.point.at(i).x < mX / 3 - 50 + 6))
+						&& ((targets.point.at(i).y > mY / -3 + 100 - 6) && (targets.point.at(i).y < mY / -3 + 100 + 6)))
+				{
+					found = true;
+
+					_pI.dragging = true;
+					_pI.prevClick = true;
+				}
+				i++;
+			}
+		}
+	}//----------------------------- End-------------------------------------
+
 	return _pI; //tracks state of dragging (see sim.h)
 
 //	// Checks or A to be pressed, draws and adds bodies to flock if so.
@@ -513,19 +518,33 @@ void Sim::drawObstacles()//draws obstacles
 
 void Sim::updateTargetPos() //specificly a free particle (puck) with damping. For Airhockey.
 {
-//	for (int i = 0; i < targets.point.size(); i++)
-//	{
-//		winCheck(i);
+	for (int i = 0; i < targets.point.size(); i++)
+	{
+		winCheck(i);
+
+		if (targets.point.at(i).x < -45 || targets.point.at(i).x > 45)
+			targets.point.at(i).vx *= -1;
+		if (targets.point.at(i).y < -95 || targets.point.at(i).y > 95)
+			targets.point.at(i).vy *= -1;
+
+//		float heyX = 0;
+//		float heyY = 0;
 //
-//		if (targets.point.at(i).x < -45 || targets.point.at(i).x > 45)
-//			targets.point.at(i).vx *= -1;
-//		if (targets.point.at(i).y < -95 || targets.point.at(i).y > 95)
-//			targets.point.at(i).vy *= -1;
-//		targets.point.at(i).x += targets.point.at(i).vx;
-//		targets.point.at(i).y += targets.point.at(i).vy;
-//		targets.point.at(i).vx *= 0.99;
-//		targets.point.at(i).vy *= 0.99;
-//	}
+//		if (targets.point.at(i).vx > 0){heyX = 0.1;}
+//		else if (targets.point.at(i).vx < 0){heyX = -0.1;}
+//
+//		if (targets.point.at(i).vy > 0){heyX = 0.1;}
+//		else if (targets.point.at(i).vy < 0){heyX = -0.1;}
+//
+//		targets.point.at(i).x += heyX;
+//		targets.point.at(i).y += heyY;
+
+		targets.point.at(i).x += targets.point.at(i).vx;
+		targets.point.at(i).y += -targets.point.at(i).vy;
+
+		targets.point.at(i).vx *= 0.99;
+		targets.point.at(i).vy *= 0.99;
+	}
 }
 
 void Sim::winCheck(int i) //checks if the game has been won.

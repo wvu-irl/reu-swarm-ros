@@ -434,10 +434,11 @@ void Body::targetInElastic(int i, float _t_sep)
 		std::cout<<"abs_theta: "<<abs_theta*180/M_PI<<std::endl;
 		std::cout<<"phi: "<<phi*180/M_PI<<std::endl;
 
-		//calculates force to be applied to the bot
+		//calculates force to be applied by the bot
 		float force = 1;
 		float fx = force*cos(abs_theta);
-		float fy = force*sin(abs_theta);
+		float fy = -force*sin(abs_theta);
+		std::cout<<"force: "<<fx<<","<<fy<<std::endl;
 
 		int Q = quadrant(phi); //quadrant bot is in
 		bool above_below = aboveOrBelow(dx,dy,Q); //gets quadrant collision is happening.
@@ -452,8 +453,8 @@ void Body::targetInElastic(int i, float _t_sep)
 			fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 
 			//applies velocity to puck
-			targets->point.at(i).vx = (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-			targets->point.at(i).vy = (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+			targets->point.at(i).vx += (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi))-targets->point.at(i).vx;
+			targets->point.at(i).vy += (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi))-targets->point.at(i).vy;
 		}
 		else
 		{
@@ -462,10 +463,12 @@ void Body::targetInElastic(int i, float _t_sep)
 			fnx = fx;
 			fny = fy;
 
-			targets->point.at(i).vx = (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-			targets->point.at(i).vy = (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+			targets->point.at(i).vx = targets->point.at(i).vx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
+			targets->point.at(i).vy = targets->point.at(i).vy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 		}
 		location.addVector(Pvector(fnx,fny));
+		std::cout<<"force applied bot: "<<fnx<<","<<fny<<std::endl;
+		std::cout<<"new puck velocity: "<<targets->point.at(i).vx<<","<<targets->point.at(i).vy<<std::endl;
 		std::cout<<"------------------------\n";
 	}
 }
