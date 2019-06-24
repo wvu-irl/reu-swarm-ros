@@ -7,9 +7,10 @@ Model::Model()
 {
 }
 
-Model::Model(int _name)
+Model::Model(int _name,int _sid)
 {
 	name = _name;
+	sid=_sid;
 }
 
 void Model::addIdeal(AliceStructs::ideal &_ideal1, AliceStructs::ideal &_ideal2) // ideals are always polar
@@ -62,11 +63,12 @@ AliceStructs::ideal Model::generateIdeal()
 	std::vector<AliceStructs::ideal> ideal_list =
 	{ //rules.dummy1(),
 			//rules.followFlow(flows, 16),
-			//rules.goToTarget(targets, 16),
+			rules.goToTarget(targets, 16),
 			rules.avoidObstacles(obstacles, 16),
 			rules.magnetAvoid(robots, 16),
 			//rules.birdAvoid(robots, 16),
 			//rules.maintainSpacing(robots, 16)
+
 			};
 	for (int i = 0; i < ideal_list.size(); i++)
 	{

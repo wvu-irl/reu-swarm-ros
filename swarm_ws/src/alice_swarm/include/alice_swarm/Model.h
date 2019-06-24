@@ -17,7 +17,7 @@ public:
 	Model();//dummy
 
 
-	Model(int _name);
+	Model(int _name,int _sid);
 
 	AliceStructs::ideal generateIdeal();
 
@@ -28,6 +28,8 @@ public:
 private:
 	int name;
 	void addIdeal(AliceStructs::ideal &_ideal1, AliceStructs::ideal &_ideal2);
+	int sid;
+
 	void normalize(AliceStructs::vel &_vel);
 	void dDriveAdjust(AliceStructs::vel &_vel); //assumes that vector has already been normalized
 };

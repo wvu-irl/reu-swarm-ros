@@ -174,6 +174,7 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 		if (temp2.dis > -1)
 		{
 			t.push_back(temp2);
+
 		}
 	}
 	_mail.targets = t;
