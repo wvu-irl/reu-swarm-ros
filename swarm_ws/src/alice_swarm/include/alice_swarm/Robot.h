@@ -12,7 +12,8 @@
 #include "alice_swarm/Model.h"
 #include "alice_swarm/VectorQueue.h"
 
-class Robot {
+class Robot
+{
 
 public:
 	int name;
@@ -20,20 +21,20 @@ public:
 
 	VectorQueue vectorQueue;
 
-	Robot();
+	Robot(); //dummy constructor
 
-	Robot(AliceStructs::mail data);
+	Robot(AliceStructs::mail data); //actual constructor
 
-	AliceStructs::ideal generateIdeal();
+	AliceStructs::ideal generateIdeal(); // generates ideal from the env. information given
 
-	AliceStructs::vel generateComp(std::vector <AliceStructs::ideal> ideals);
+	AliceStructs::vel generateComp(std::vector<AliceStructs::ideal> ideals); //generates a vector to go to after accounting for its neighbor's ideals
 
-	void receiveMsg(AliceStructs::mail data);
+	void receiveMsg(AliceStructs::mail data); //takes in the mail struct for processing
 
 private:
-	Model model;
+	Model model; //stores model, which contains info about its surroundings
 
-	std::vector <AliceStructs::neighbor> neighbors;
+	std::vector<AliceStructs::neighbor> neighbors; //stores the robot's neighbors
 
 };
 

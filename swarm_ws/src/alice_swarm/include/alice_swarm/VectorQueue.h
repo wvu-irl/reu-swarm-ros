@@ -7,20 +7,20 @@ class VectorQueue
 {
 public:
 
-	std::vector<AliceStructs::ideal> vectorQueue;
+	std::vector<AliceStructs::ideal> vectorQueue; //stores the ideals to be added together
 
-	VectorQueue();
+	VectorQueue(); //dummy constructor
 
-	void oneToQueue(AliceStructs::ideal toAdd);
+	void oneToQueue(AliceStructs::ideal toAdd); //just adds an ideal to the vector
 
-	AliceStructs::vel createCompromise();
+	AliceStructs::vel createCompromise(); //adds the ideals together using a priority based system
 
 private:
 
-	std::pair<float, float> addPolarVectors(std::pair<float, float> v1, std::pair<float, float> v2);
+	std::pair<float, float> addPolarVectors(std::pair<float, float> v1, std::pair<float, float> v2); //helper for adding vectors together
 
+	AliceStructs::vel past_vector; //deprecated, could be used to keep track of acceleration (change in the velocity commands)
 
-	AliceStructs::vel past_vector;
 };
 
 #endif /* VECTORQUEUE_H_ */
