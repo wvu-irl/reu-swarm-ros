@@ -80,6 +80,7 @@ public:
     void inElasticCollisions(vector<Body> _bodies);
     void elasticCollisions(vector<Body> _bodies);
     void targetCollision(int i, float _t_sep);
+    void targetInElastic(int i, float _t_sep);
     float targetSeperation(wvu_swarm_std_msgs::vicon_point);
     float angle(Pvector v);
     void printMessage(int i,wvu_swarm_std_msgs::vicon_bot_array _vb_array);
