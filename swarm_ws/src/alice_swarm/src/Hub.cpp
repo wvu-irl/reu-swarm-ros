@@ -77,7 +77,7 @@ void Hub::processVicon() //Fills in bots[]
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 		bots.push_back(
 				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000));
+						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i%2+1));
 		std::vector<Bot> temp;
 		ridOrder.push_back(numID); //storing the order of insertion
 		neighbors.push_back(temp); //adds an empty vector to neighbors for future use
@@ -119,7 +119,7 @@ void Hub::findNeighbors()
 			{
 				neighbors.at(botIndex).pop_back();
 
-			}//If there are too few neighbors and the current on hasn't been inserted, it is made a neighbor
+			} //If there are too few neighbors and the current on hasn't been inserted, it is made a neighbor
 			else if (!done && neighbors.at(botIndex).size() < NEIGHBOR_COUNT)
 				neighbors.at(botIndex).push_back(temp);
 		}
@@ -139,6 +139,7 @@ void Hub::addNeighborMail(int i, AliceStructs::mail &_mail)
 		temp.dis = it->distance;
 		//Makes the heading of the neighbor relative to the robot's heading
 		temp.ang = fmod(it->heading - bots[i].heading + 2 * M_PI, 2 * M_PI);
+		temp.sid = it->swarm_id;
 		n.push_back(temp);
 	}
 	_mail.neighbors = n;
@@ -150,18 +151,21 @@ void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
 	int num_pts = flows.flow.size();
 	for (int j = 0; j < num_pts; j++)
 	{
-		std::pair<float, float> temp =
-		{ flows.flow.at(j).x, flows.flow.at(j).y };
-		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
-		if (temp2.dis > -1) //If the flow was in VISION range
+		if (flows.flow.at(j).sid == bots[i].swarm_id || flows.flow.at(j).sid == 0)
 		{
-			AliceStructs::ideal temp3;
-			temp3.dis = temp2.dis;
-			//Makes the direction of the flow relative to the robot's heading
-			temp3.dir = fmod(flows.flow.at(j).theta - bots[i].heading + 2 * M_PI, 2 * M_PI);
-			temp3.spd = flows.flow.at(j).r;
-			temp3.pri = 1;
-			f.push_back(temp3);
+			std::pair<float, float> temp =
+			{ flows.flow.at(j).x, flows.flow.at(j).y };
+			AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
+			if (temp2.dis > -1) //If the flow was in VISION range
+			{
+				AliceStructs::ideal temp3;
+				temp3.dis = temp2.dis;
+				//Makes the direction of the flow relative to the robot's heading
+				temp3.dir = fmod(flows.flow.at(j).theta - bots[i].heading + 2 * M_PI, 2 * M_PI);
+				temp3.spd = flows.flow.at(j).r;
+				temp3.pri = 1;
+				f.push_back(temp3);
+			}
 		}
 	}
 	_mail.flows = f;
@@ -219,6 +223,7 @@ AliceStructs::mail Hub::getAliceMail(int i) //Gathers all the relative informati
 	addTargetMail(i, temp);
 	addFlowMail(i, temp);
 	temp.name = ridOrder.at(i);
+	temp.sid = bots[i].swarm_id;
 	//printAliceMail(temp);
 
 	return temp;
