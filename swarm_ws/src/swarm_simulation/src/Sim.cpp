@@ -245,6 +245,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphics window
 {
+
 	sf::Event event;
 	while (window.pollEvent(event))
 	{
@@ -265,7 +266,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
 				event);
 
-		//----------Allows for click and drag for bots. ------------------------------
+//		//----------Allows for click and drag. ------------------------------
 //		if (_pI.dragging == true)
 //		{
 //			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
@@ -279,7 +280,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 //				&& _pI.prevClick == false)
 //		{
-//			while (found != true)
+//			while (found != true && i < flock.flock.size())
 //			{
 //				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
 //						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
@@ -288,20 +289,18 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //					_pI.botId = i;
 //					_pI.dragging = true;
 //					_pI.prevClick = true;
-//				} else if (i == flock.flock.size() - 1)
-//				{
-//					found = true;
 //				}
 //				i++;
 //			}
-//		} //----------------------------------End-------------------------------------------------------
-
-		// ---------------------- Click and Drag for the target ----------------------------------------
+//		}
+//		i=0;
+		//----------Allows for click and drag. ------------------------------
 		if (_pI.dragging == true)
 		{
 			targets.point.at(i).x = sf::Mouse::getPosition(window).x / 3 - 50;
 			; //event.mouseButton.x;
 			targets.point.at(i).y = sf::Mouse::getPosition(window).y / -3 + 100; //event.mouseButton.y;
+			std::cout << "yo" << std::endl;
 		}
 		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == true)
@@ -324,50 +323,9 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 				i++;
 			}
 		}
-	}//----------------------------- End-------------------------------------
+		//-----------------------------------------------------------------------------------------
+	}
 	return _pI; //tracks state of dragging (see sim.h)
-
-//	// Checks or A to be pressed, draws and adds bodies to flock if so.
-//	  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-//	        // Gets mouse coordinates, sets that as the location of the body and the shape
-//	        sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
-//	        Body b(mouseCoords.x, mouseCoords.y, false);
-//	        sf::CircleShape shape(4);
-//
-//	        // Changing visual properties of newly created body
-//	        shape.setPosition(mouseCoords.x, mouseCoords.y);
-//	        shape.setOutlineColor(sf::Color::White);
-//	        shape.setFillColor(sf::Color::White);
-//	        shape.setOutlineColor(sf::Color::White);
-//	        shape.setOutlineThickness(1);
-//	        shape.setRadius(bodiesSize);
-//
-//	        // Adds newly created body and shape to their respective data structure
-//	        flock.addBody(b);
-//	        shapes.push_back(shape);
-//
-//	        // New Shape is drawn
-//	        window.draw(shapes[shapes.size() - 1]);
-//	    }
-//
-//	    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Delete)) {
-//	          // Gets mouse coordinates, sets that as the location of the body and the shape
-//	          sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
-//	          Body b(mouseCoords.x, mouseCoords.y, false);
-//	          sf::CircleShape shape(4);
-//
-//	          // Changing visual properties of newly created body
-//	          shape.setPosition(mouseCoords.x, mouseCoords.y);
-//	          shape.setOutlineColor(sf::Color::White);
-//	          shape.setFillColor(sf::Color::White);
-//	          shape.setOutlineColor(sf::Color::White);
-//	          shape.setOutlineThickness(1);
-//	          shape.setRadius(bodiesSize);
-//
-//	          //deletes bodies from the second through the hird element
-//	          shapes.erase(shapes.begin() + 1, shapes.begin() + 2);
-//
-//	      }
 
 }
 
@@ -397,7 +355,39 @@ void Sim::Render() //draws changes in simulation states to the window.
 		flock.flock.at(i).updatedCommand = false;
 		flock.flock.at(i).updatedPosition = false;
 	}
+	addText();
 	window.display(); //updates display
+}
+void Sim::addText()
+{
+
+	sf::Font font;
+	//this is not good... /home/jeoseo/git/reu-swarm-ros/swarm_ws
+	font.loadFromFile("/home/jeoseo/git/reu-swarm-ros/swarm_ws/src/swarm_simulation/include/swarm_simulation/ComicSansMS3.ttf");
+
+	for (int i = 0; i < shapes.size(); i++)
+	{
+
+		//creates text on the bodies
+
+		sf::Text text;
+		text.setFont(font);
+		text.setCharacterSize(10);
+		text.setColor(sf::Color::Magenta);
+
+		std::string temp(flock.getBody(i).id);
+		text.setString(temp.substr(0,2));
+		text.setStyle(sf::Text::Bold);
+		text.setOrigin(7.5, 7.5);
+
+		texts.push_back(text);
+
+		window.draw(text);
+
+		window.draw(texts[i]);
+
+		texts[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
+	}
 }
 
 bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event)
