@@ -19,7 +19,7 @@ const int window_width = desktopTemp.width;
 // Body Functions from Body.h
 // ----------------------------
 
-Body::Body(float x, float y, char _id[2])
+Body::Body(float x, float y, char _id[2]) //constructor for each of the bodies (represent bots).
 {
     acceleration = Pvector(0, 0);
     velocity = Pvector(0,0);
@@ -62,7 +62,7 @@ Body::Body(float x, float y, char _id[2])
 
 
 //--------Helper Functions for the Physics engine-----------
-float Body::angleConvert(float _x)
+float Body::angleConvert(float _x) //scales all angles to vals [0,2*pi].
 {
 	if(_x<0)
 	{
@@ -119,8 +119,8 @@ bool Body::aboveOrBelow(float _dx, float _dy, int _Q)//returns whether bot is ab
 	return place;
 }
 
-float Body::getRelTheta(float _abs_theta, float _phi, int _Q)
-{
+float Body::getRelTheta(float _abs_theta, float _phi, int _Q) //converts global theta into frame of collision plane, with collision plane
+{                                                                 //as the vertical axis.
 	float rel_theta;
 	if((_Q ==1)||(_Q==4))
 	{
@@ -134,12 +134,16 @@ float Body::getRelTheta(float _abs_theta, float _phi, int _Q)
 	{
 		std::cout<<"the program broke getRelTheta()"<<std::endl;
 	}
+	if(rel_theta == 3*M_PI_2)
+	{
+		rel_theta = M_PI_2;
+	}
 	rel_theta = angleConvert(rel_theta); //scales anlge to be positive.
 	return rel_theta;
 }
 
-bool Body::applyForce(bool _aorb,float _rel_theta)
-{
+bool Body::applyForce(bool _aorb,float _rel_theta) //decides whether a bot is going towards or away from the plane. Decides if force
+{                                                    //needs to be applied.
 	bool apply = false;
 	if(_aorb==true) //above the plane
 	{
@@ -247,13 +251,13 @@ std::pair<float,float> Body::borders(float _fx, float _fy)//applys bounds for th
 	//code for hard boundary conditions. Nulls velocity component orthogonal to boundary.
 	if ((location.x <=12) ||(location.x >=288))
 	{
-		_fx = 0;
+		_fx = -_fx;
 		if(location.x <= 12){location.x = 12;}
 		if(location.x >= 288){location.x = 288;}
 	}
 	if ((location.y <=12) ||(location.y >=588))
 	{
-		_fy = 0;
+		_fy = -_fy;
 		if(location.y <=12){location.y = 12;}
 		if(location.y >=588){location.y = 588;}
 	}
@@ -274,12 +278,9 @@ void Body::inElasticCollisions(vector<Body> _bodies)
 	    	 if(i<targets->point.size())
 	    	 {
 	    		 target_sep = targetSeperation(targets->point.at(i));
-	    		 targetCollision(i,target_sep);
+//	    		 targetCollision(i,target_sep);
+	    		 targetInElastic(i,target_sep);
 
-	    	 }
-	    	 else
-	    	 {
-	    		 target_sep = -10;
 	    	 }
 	        // If this is a fellow body and it's too close, move away from it
 	        if ((d <= desiredseparation) && !((id[0] ==_bodies.at(i).id[0]) && (id[1] ==_bodies.at(i).id[1]))) // (&&d>0))
@@ -321,8 +322,8 @@ void Body::inElasticCollisions(vector<Body> _bodies)
 							fy = -fy;
 						}
 						float mag = sqrt(pow(fx,2) + pow(fy,2));
-						fx = fx/mag; //scaled to unit vectors
-						fy = fy/mag;
+						//fx = fx/mag; //scaled to unit vectors
+						//fy = fy/mag;
 						std::pair<float,float> forces = borders(fx,fy);
 						fx = forces.first;
 						fy = forces.second;
@@ -414,6 +415,63 @@ void Body::targetCollision(int i,float _t_sep)
 }
 // Calculates the angle for the velocity of a body which allows the visual
 // image to rotate in the direction that it is going in.
+
+void Body::targetInElastic(int i, float _t_sep)
+{
+	if(_t_sep<= 17.5)
+	{
+		float fnx;
+		float fny;
+
+		float dy = 300 - targets->point.at(i).y * 3 - location.y;
+		float dx = 150 + targets->point.at(i).x * 3 - location.x;
+		float abs_theta = angleConvert(heading); //angle from bot to the target
+		float phi = angleConvert(angle(Pvector(dy,dx)) + M_PI_2);
+
+		std::cout<<"---BOT-- "<<id[0]<<id[1]<<" With the puck"<<std::endl;
+		std::cout<<"dx,dy: "<<dx<<","<<dy<<std::endl;
+		std::cout<<"heading: "<<heading*180/M_PI<<std::endl;
+		std::cout<<"abs_theta: "<<abs_theta*180/M_PI<<std::endl;
+		std::cout<<"phi: "<<phi*180/M_PI<<std::endl;
+
+		//calculates force to be applied by the bot
+		float force = 1;
+		float fx = force*cos(abs_theta);
+		float fy = -force*sin(abs_theta);
+		std::cout<<"force: "<<fx<<","<<fy<<std::endl;
+
+		int Q = quadrant(phi); //quadrant bot is in
+		bool above_below = aboveOrBelow(dx,dy,Q); //gets quadrant collision is happening.
+		float rel_theta = getRelTheta(abs_theta,phi,Q); //velocity direction in frame of the collision plane.
+		bool apply_force = applyForce(above_below, rel_theta); //finds if force points towards the plane.
+
+		if(apply_force == true)
+		{
+			location.x = prev_location.x;
+			location.y = prev_location.y;
+			fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
+			fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+
+			//applies velocity to puck
+			targets->point.at(i).vx += (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi))-targets->point.at(i).vx;
+			targets->point.at(i).vy += (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi))-targets->point.at(i).vy;
+		}
+		else
+		{
+			location.x = prev_location.x;
+			location.y = prev_location.y;
+			fnx = fx;
+			fny = fy;
+
+			targets->point.at(i).vx = targets->point.at(i).vx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
+			targets->point.at(i).vy = targets->point.at(i).vy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+		}
+		location.addVector(Pvector(fnx,fny));
+		std::cout<<"force applied bot: "<<fnx<<","<<fny<<std::endl;
+		std::cout<<"new puck velocity: "<<targets->point.at(i).vx<<","<<targets->point.at(i).vy<<std::endl;
+		std::cout<<"------------------------\n";
+	}
+}
 
 float Body::targetSeperation(wvu_swarm_std_msgs::vicon_point target)
 {

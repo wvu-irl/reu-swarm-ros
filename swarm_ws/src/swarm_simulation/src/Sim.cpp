@@ -209,9 +209,9 @@ void Sim::Run(ros::NodeHandle _n)
 	pub.publish(vb_array);
 	ros::spinOnce();
 
-	while (window.isOpen() && ros::ok())
+	while (window.isOpen() && ros::ok()) //main while loop (runs the simulation).
 	{
-		while(game == false && window.isOpen())
+		while(game == false && window.isOpen() && ros::ok())//secondary loop allows for winning condition.
 		{
 			pI = HandleInput(pI);
 			Render();
@@ -228,20 +228,24 @@ void Sim::Run(ros::NodeHandle _n)
 			pub2.publish(targets);
 			update = false;
 			ros::spinOnce();
+			std::cout<<"iteration complete"<<std::endl;
 			loopRate.sleep();
 		}
 		//---------=Code for winning the game=---------------
-		for (int j = 0; j<50; j++)
+		if (game == true)
 		{
-			std::cout<<winner<<" has won the game!!!!!!!!!!!!"<<std::endl;
-		}
-		game = false;
-		for(int i = 0; i < targets.point.size(); i ++)
-		{
-			targets.point.at(0).x = 0;
-			targets.point.at(0).y = 0;
-			pI.dragging = false;
-			pI.prevClick = false;
+			for (int j = 0; j<2; j++)
+			{
+				std::cout<<winner<<" has won the game!!!!!!!!!!!!"<<std::endl;
+			}
+			game = false;
+			for(int i = 0; i < targets.point.size(); i ++)
+			{
+				targets.point.at(0).x = 0;
+				targets.point.at(0).y = 0;
+				pI.dragging = false;
+				pI.prevClick = false;
+			}
 		}
 		//-------------------=End=---------------
 	}
@@ -301,11 +305,14 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //		} //----------------------------------End-------------------------------------------------------
 
 		// ---------------------- Click and Drag for the target ----------------------------------------
+		i=0;
+//		----------Allows for click and drag. ------------------------------
 		if (_pI.dragging == true)
 		{
 			targets.point.at(i).x = sf::Mouse::getPosition(window).x / 3 - 50;
 			; //event.mouseButton.x;
 			targets.point.at(i).y = sf::Mouse::getPosition(window).y / -3 + 100; //event.mouseButton.y;
+			std::cout << "yo" << std::endl;
 		}
 		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
 				&& _pI.prevClick == true)
@@ -329,6 +336,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 			}
 		}
 	}//----------------------------- End-------------------------------------
+
 	return _pI; //tracks state of dragging (see sim.h)
 
 //	// Checks or A to be pressed, draws and adds bodies to flock if so.
@@ -522,8 +530,22 @@ void Sim::updateTargetPos() //specificly a free particle (puck) with damping. Fo
 			targets.point.at(i).vx *= -1;
 		if (targets.point.at(i).y < -95 || targets.point.at(i).y > 95)
 			targets.point.at(i).vy *= -1;
+
+//		float heyX = 0;
+//		float heyY = 0;
+//
+//		if (targets.point.at(i).vx > 0){heyX = 0.1;}
+//		else if (targets.point.at(i).vx < 0){heyX = -0.1;}
+//
+//		if (targets.point.at(i).vy > 0){heyX = 0.1;}
+//		else if (targets.point.at(i).vy < 0){heyX = -0.1;}
+//
+//		targets.point.at(i).x += heyX;
+//		targets.point.at(i).y += heyY;
+
 		targets.point.at(i).x += targets.point.at(i).vx;
-		targets.point.at(i).y += targets.point.at(i).vy;
+		targets.point.at(i).y += -targets.point.at(i).vy;
+
 		targets.point.at(i).vx *= 0.99;
 		targets.point.at(i).vy *= 0.99;
 	}
