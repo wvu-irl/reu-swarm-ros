@@ -147,7 +147,7 @@ void Hub::addNeighborMail(int i, AliceStructs::mail &_mail)
 void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
 {
 	std::vector<AliceStructs::ideal> f;
-	int num_pts = targets.point.size();
+	int num_pts = flows.flow.size();
 	for (int j = 0; j < num_pts; j++)
 	{
 		std::pair<float, float> temp =
@@ -220,6 +220,7 @@ AliceStructs::mail Hub::getAliceMail(int i) //Gathers all the relative informati
 	addFlowMail(i, temp);
 	temp.name = ridOrder.at(i);
 	//printAliceMail(temp);
+
 	return temp;
 
 }
