@@ -106,10 +106,9 @@ AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, floa
 		{
 			if (tar.dis > to_return.pri)
 				to_return.dir = tar.dir;
-			to_return.pri = tar.dis;
-			to_return.spd = (pow(strength, 2) / (0 - pow(tar.dis + strength, 2)) + 1);
+				to_return.pri = tar.dis;
+				to_return.spd = (pow(strength, 2) / (0 - pow(tar.dis + strength - ROBOT_SIZE/2, 2))) + 1;
 		}
-	to_return.spd -= 1;
 	to_return.pri = pow(to_return.pri * strength, 0.2) / 3;
 	}
 return to_return;
@@ -125,12 +124,13 @@ if (flows.size() != 0)
 {
 	for (auto &flow : flows)
 	{
-		float temp_pri = flow.spd * strength / (flow.dis + 10);
+		float temp_pri = pow(strength * flow.spd/(flow.dis + 10), 0.2);
 		to_return.dir = (to_return.dir * to_return.pri + flow.dir * temp_pri) / (to_return.pri + temp_pri);
 		to_return.spd = (to_return.spd * to_return.pri + flow.spd * temp_pri) / (to_return.pri + temp_pri);
 		to_return.pri += temp_pri;
 	}
 }
+to_return.spd = to_return.spd/20;
 return to_return;
 }
 
