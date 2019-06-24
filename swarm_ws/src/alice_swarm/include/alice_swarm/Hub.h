@@ -56,37 +56,37 @@ private:
 	wvu_swarm_std_msgs::vicon_points targets;
 	wvu_swarm_std_msgs::vicon_points obstacles;
 	wvu_swarm_std_msgs::flows flows;
-	//each bot has a vector of obs pairs it can "see". Pairs are form (r,theta).
-//	ros::Timer timer;
-//	ros::Publisher pub;
-//	ros::Subscriber sub;
 
-	std::vector<Bot> bots;
-	std::vector<std::vector<Bot>> neighbors;
-	std::vector<int> ridOrder;
+	std::vector<Bot> bots; //holds locations of all of the bots
+	std::vector<std::vector<Bot>> neighbors; //holds locations of all of the closests bots relative to each other
+	std::vector<int> ridOrder; //holds the order of the id's of the bots
+
+	//Finds the distance between a bot and some object
 	AliceStructs::obj getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
-	void processVicon(); //Fills in bots[]
+	void processVicon(); //Fills in bots[], converst vicon to just the pose data needed
 public:
 	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?
 
+	//Adds the msgs gathere from various topics to the private fields of Hub
 	void update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
 			wvu_swarm_std_msgs::vicon_points &_o, wvu_swarm_std_msgs::flows &_f);
 
+
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
 
-	void printAliceMail(AliceStructs::mail _mail);
+	void printAliceMail(AliceStructs::mail _mail); //Prints mail for debug purposes
 
-	void addFlowMail(int i, AliceStructs::mail &_mail);
+	void addFlowMail(int i, AliceStructs::mail &_mail); //Adds the flows within a robot's VISION range
 
-	void addObsPointMail(int i, AliceStructs::mail &_mail);
+	void addObsPointMail(int i, AliceStructs::mail &_mail); //Adds the obstacles within a robot's VISION range
 
-	void addTargetMail(int i, AliceStructs::mail &_mail);
+	void addTargetMail(int i, AliceStructs::mail &_mail); //Adds the targets within a robot's VISION range
 
-	void addNeighborMail(int i, AliceStructs::mail &_mail); //Creates a neighbor_mail msg
+	void addNeighborMail(int i, AliceStructs::mail &_mail); //Adds the neighbors determined by its closest x
 
-	AliceStructs::mail getAliceMail(int i); //Compiles all info into a single msg
+	AliceStructs::mail getAliceMail(int i); //Gathers all the relative information for a robot into one struct
 
-	void clearHub();
+	void clearHub(); //Clears bot information
 };
 
 //#include "Hub.cpp"

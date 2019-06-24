@@ -59,12 +59,14 @@ void Hub::processVicon() //Fills in bots[]
 
 	for (size_t i = 0; i < viconBotArray.poseVect.size(); i++)
 	{
+		//This char bs-ery is for converting the state initials to numbers in our map
 		char bid[3] =
 		{ '\0' };
 		bid[0] = viconBotArray.poseVect[i].botId[0];
 		bid[1] = viconBotArray.poseVect[i].botId[1];
 		std::string tempID(bid);
 		size_t numID = rid_map[tempID];
+
 		// the incoming geometry_msgs::Quaternion is transformed to a tf::Quaterion
 		tf::Quaternion quat;
 		tf::quaternionMsgToTF(viconBotArray.poseVect[i].botPose.transform.rotation, quat);
@@ -77,8 +79,8 @@ void Hub::processVicon() //Fills in bots[]
 				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
 						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000));
 		std::vector<Bot> temp;
-		ridOrder.push_back(numID);
-		neighbors.push_back(temp);
+		ridOrder.push_back(numID); //storing the order of insertion
+		neighbors.push_back(temp); //adds an empty vector to neighbors for future use
 	}
 }
 
@@ -93,32 +95,32 @@ void Hub::findNeighbors()
 	{
 		for (int curIndex = 0; curIndex < viconBotArray.poseVect.size(); curIndex++)
 		{
-			if (botIndex == curIndex) // Check for duplicates and nonactive bots
+			if (botIndex == curIndex) // Check for duplicates
 			{
 				continue;
 			}
 			Bot temp(bots.at(curIndex));
+
+			//Finds the distance between two bots
 			temp.distance = sqrt(
 					pow((bots.at(curIndex).x - bots.at(botIndex).x), 2) + pow((bots.at(curIndex).y - bots.at(botIndex).y), 2));
-			bool done = false;
+
+			bool done = false; //keeps track of whether or not the bot has been inserted as a neighbor
 			for (std::vector<Bot>::iterator it = neighbors.at(botIndex).begin(); it != neighbors.at(botIndex).end(); it++)
 			{
-				if (temp.distance < it->distance)
+				if (temp.distance < it->distance) //Checks if the current bot is closer than the bot stored as a neighbor
 				{
-
 					neighbors.at(botIndex).insert(it, temp);
-
 					done = true;
-
 					break;
 				}
-
 			}
-			if (neighbors.at(botIndex).size() > NEIGHBOR_COUNT)
+			if (neighbors.at(botIndex).size() > NEIGHBOR_COUNT) //If there are too many neighbors, the furthest one is discarded
 			{
 				neighbors.at(botIndex).pop_back();
 
-			} else if (!done && neighbors.at(botIndex).size() < NEIGHBOR_COUNT)
+			}//If there are too few neighbors and the current on hasn't been inserted, it is made a neighbor
+			else if (!done && neighbors.at(botIndex).size() < NEIGHBOR_COUNT)
 				neighbors.at(botIndex).push_back(temp);
 		}
 	}
@@ -132,8 +134,10 @@ void Hub::addNeighborMail(int i, AliceStructs::mail &_mail)
 
 		AliceStructs::neighbor temp;
 		temp.name = it->id;
+		//Makes the direction of the neighbor relative to the robot's heading
 		temp.dir = fmod(atan2(it->y - bots[i].y, it->x - bots[i].x) - bots[i].heading + 4 * M_PI, 2 * M_PI);
 		temp.dis = it->distance;
+		//Makes the heading of the neighbor relative to the robot's heading
 		temp.ang = fmod(it->heading - bots[i].heading + 2 * M_PI, 2 * M_PI);
 		n.push_back(temp);
 	}
@@ -149,11 +153,12 @@ void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
 		std::pair<float, float> temp =
 		{ flows.flow.at(j).x, flows.flow.at(j).y };
 		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
-		if (temp2.dis > -1)
+		if (temp2.dis > -1) //If the flow was in VISION range
 		{
 			AliceStructs::ideal temp3;
 			temp3.dis = temp2.dis;
-			temp3.dir = fmod(flows.flow.at(j).theta-bots[i].heading+2*M_PI,2*M_PI);
+			//Makes the direction of the flow relative to the robot's heading
+			temp3.dir = fmod(flows.flow.at(j).theta - bots[i].heading + 2 * M_PI, 2 * M_PI);
 			temp3.spd = flows.flow.at(j).r;
 			temp3.pri = 1;
 			f.push_back(temp3);
@@ -162,7 +167,7 @@ void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
 	_mail.flows = f;
 }
 
-void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
+void Hub::addTargetMail(int i, AliceStructs::mail &_mail) //Adds targets within a robots vision range
 {
 	std::vector<AliceStructs::obj> t;
 	int num_pts = targets.point.size();
@@ -171,7 +176,7 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 		std::pair<float, float> temp =
 		{ targets.point.at(j).x, targets.point.at(j).y };
 		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
-		if (temp2.dis > -1)
+		if (temp2.dis > -1) //If the target was in VISION range
 		{
 			t.push_back(temp2);
 
@@ -180,9 +185,7 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail)
 	_mail.targets = t;
 }
 
-
-
-void Hub::addObsPointMail(int i, AliceStructs::mail &_mail)
+void Hub::addObsPointMail(int i, AliceStructs::mail &_mail) //Adds obstacles within a robots vision range
 {
 	std::vector<AliceStructs::obj> o;
 	int num_pts = obstacles.point.size();
@@ -199,7 +202,7 @@ void Hub::addObsPointMail(int i, AliceStructs::mail &_mail)
 	_mail.obstacles = o;
 }
 
-void Hub::printAliceMail(AliceStructs::mail _mail)
+void Hub::printAliceMail(AliceStructs::mail _mail) //Prints mail for debug purposes
 {
 	std::cout << "---Mail for Alice " << _mail.name << "---" << std::endl;
 	for (std::vector<AliceStructs::neighbor>::iterator it = _mail.neighbors.begin(); it != _mail.neighbors.end(); ++it)
@@ -208,7 +211,7 @@ void Hub::printAliceMail(AliceStructs::mail _mail)
 	}
 }
 
-AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Alice into a msg
+AliceStructs::mail Hub::getAliceMail(int i) //Gathers all the relative information for a robot into one struct
 {
 	AliceStructs::mail temp;
 	addObsPointMail(i, temp);
@@ -221,7 +224,7 @@ AliceStructs::mail Hub::getAliceMail(int i) //Turns information to be sent to Al
 
 }
 
-void Hub::clearHub()
+void Hub::clearHub() //Clears information about the robots
 {
 	bots.clear();
 	neighbors.clear();
