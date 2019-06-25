@@ -156,7 +156,7 @@ AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, floa
 			AliceStructs::ideal temp;
 			temp.dir = flow.dir;
 			temp.spd = flow.spd;
-			temp.pri = strength * flow.pri / (pow(flow.dis, 2) + ROBOT_SIZE);
+			temp.pri = strength * flow.pri / (pow(flow.dis, 2) + 10);
 
 			to_return = addIdeals(to_return, temp);
 		}

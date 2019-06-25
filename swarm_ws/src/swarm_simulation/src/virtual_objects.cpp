@@ -105,7 +105,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	wvu_swarm_std_msgs::flow cur9(cur6);
 	cur9.x -= yd / r * 10;
 	cur9.y += xd / r * 10;
-	cur9.pri=1;
+	cur9.pri=1.5;
 	cur9.theta = cur6.theta + 3 * M_PI / 4;
 	in_vector.flow.push_back(cur9);
 
@@ -113,7 +113,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	wvu_swarm_std_msgs::flow cur10(cur6);
 	cur10.x += yd / r * 10;
 	cur10.y -= xd / r * 10;
-	cur10.pri=1;
+	cur10.pri=1.5;
 	cur10.theta = cur6.theta - 3 * M_PI / 4;
 	in_vector.flow.push_back(cur10);
 }
