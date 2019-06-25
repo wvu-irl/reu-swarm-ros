@@ -43,6 +43,8 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <wvu_swarm_std_msgs/vicon_bot.h>
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
+#include <wvu_swarm_std_msgs/vicon_point.h>
+#include <wvu_swarm_std_msgs/vicon_points.h>
 #include <vicon_bridge/viconGrabPose.h>
 #include <iostream>
 #include <string>
@@ -175,6 +177,7 @@ private:
   // Publisher
   ros::Publisher marker_pub_;
   ros::Publisher swarm_pub_; // Publisher for all swarmbots
+  ros::Publisher puck_pub_;
   // TF Broadcaster
   tf::TransformBroadcaster tf_broadcaster_;
   //geometry_msgs::PoseStamped vicon_pose;
@@ -268,6 +271,9 @@ public:
     {
       marker_pub_ = nh.advertise<vicon_bridge::Markers>(tracked_frame_suffix_ + "/markers", 10);
     }
+    
+    // puck
+    puck_pub_ = nh.advertise<wvu_swarm_std_msgs::vicon_points>("/virtual_targets", 10);
     
     startGrabbing();
   }
@@ -531,6 +537,37 @@ private:
     {
       // Finds this subject's name
       subject_name = msvcbridge::GetSubjectName(i_subjects).SubjectName;
+      
+      /* puck */
+      if(subject_name.find("puck") != string::npos)
+      {
+          wvu_swarm_std_msgs::vicon_point pt;
+          wvu_swarm_std_msgs::vicon_points pts;
+          
+          unsigned int n_segments = msvcbridge::GetSegmentCount(subject_name).SegmentCount;
+
+          for (unsigned int i_segments = 0; i_segments < n_segments; i_segments++)
+          {
+            // Grabs orientation and translation from the datastream
+            segment_name = msvcbridge::GetSegmentName(subject_name, i_segments).SegmentName;
+            Output_GetSegmentGlobalTranslation trans = msvcbridge::GetSegmentGlobalTranslation(subject_name, segment_name);
+              
+            if (trans.Result == Result::Success)
+            {
+              if (!trans.Occluded)
+              {
+                pt.x = trans.Translation[0] / 20;
+                pt.y = trans.Translation[1] / 20;
+
+                pts.point.push_back(pt);
+                puck_pub_.publish(pts);
+              }
+            }
+            else
+                ROS_ERROR("HELP PLEASE");
+          }
+      }
+      /* end puck*/
       
       // Only continue if this is the right name for us
       // TODO: make this parameter editable by the launchfile
