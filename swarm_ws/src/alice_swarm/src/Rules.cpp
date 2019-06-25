@@ -7,6 +7,11 @@ Rules::Rules()
 {
 	should_ignore = false;
 }
+Rules::Rules(int _sid)
+{
+	should_ignore = false;
+	sid = _sid;
+}
 AliceStructs::ideal Rules::dummy1()
 {
 	AliceStructs::ideal to_return;
@@ -32,17 +37,25 @@ AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bot
 	to_return.pri = 0;
 	to_return.dir = 0;
 	to_return.spd = 1;
+	float x = 0;
+	float y = 0;
+	float pri = 0;
 	const float BRAKING = 3; //due to latency issues, we need to slow this rule down. Increase this number
 	//if the robots are hitting each other sometimes, or decrease it to slow things down.
 	for (auto& bot : bots)
 	{
-		to_return.dir += bot.dir / bots.size();
-		to_return.pri += bot.dis / bots.size();
-		to_return.spd += (pow(strength, BRAKING) / (0 - pow(bot.dis + pow(strength, BRAKING / 2) - ROBOT_SIZE, 2)) + 1)
-		    / bots.size();
+		if (bot.sid == sid)
+		{
+			x += bot.dis * cos(bot.dir);
+			y += bot.dis * sin(bot.dir);
+			pri += bot.dis;
+		}
 	}
-	to_return.spd -= 1;
-	to_return.pri = pow(to_return.pri * strength - ROBOT_SIZE / 2, 0.2) / 3;
+	to_return.spd = (pow(strength, BRAKING) / (0 - pow(pow(pow(x, 2) + pow(y, 2), 0.5)
+			+ pow(strength, BRAKING / 2) - ROBOT_SIZE, 2)) + 1)
+	    / bots.size();
+	to_return.dir = fmod(atan2(y, x) + 2*M_PI, 2 * M_PI);
+	to_return.pri = pow(pri * strength - ROBOT_SIZE / 2, 0.2) / 3;
 	return to_return;
 }
 

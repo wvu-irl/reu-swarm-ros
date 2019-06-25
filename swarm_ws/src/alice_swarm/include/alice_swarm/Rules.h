@@ -12,7 +12,11 @@ public:
 
 	bool should_ignore;
 
+	int sid;
+
 	Rules();
+
+	Rules(int _sid);
 
 	AliceStructs::ideal addIdeals(AliceStructs::ideal i1, AliceStructs::ideal i2);
 

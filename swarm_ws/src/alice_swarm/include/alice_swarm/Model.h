@@ -12,8 +12,6 @@ public:
 	std::list <AliceStructs::obj> targets;
 	std::list <AliceStructs::ideal> flows;
 
-	Rules rules;
-
 	Model();//dummy
 
 
@@ -24,8 +22,9 @@ public:
 	void addToModel(AliceStructs::mail toAdd);
 
 	void clear();
-
+	Rules rules;
 private:
+
 	int name;
 	void addIdeal(AliceStructs::ideal &_ideal1, AliceStructs::ideal &_ideal2);
 	int sid;
