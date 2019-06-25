@@ -22,6 +22,8 @@ struct PrevIteration
 	bool dragging;
 	int botId;
 	bool prevClick;
+	bool bot; //is true if bot selected
+	bool target; //is true if traget selected
 };
 
 class Sim
@@ -42,11 +44,20 @@ private:
 	bool game;
 	string winner;
 
+<<<<<<< HEAD
 	//text related stuff
 	void addText();
 	float bodiesSize;
 	float bodiesSize_small;
 	float bodiesSize_big;
+=======
+    //Handle graphics rendering and mouse/key inputs
+    PrevIteration HandleInput(PrevIteration _pI);
+    void clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _event);
+    void clickNdragTarget(PrevIteration *_pI,float _mX, float _mY, sf::Event _event);
+    void Render();
+    bool pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event);
+>>>>>>> refs/remotes/origin/safety
 
 	//subscriber input handleing
 	void vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg); //processes info from final_execute
