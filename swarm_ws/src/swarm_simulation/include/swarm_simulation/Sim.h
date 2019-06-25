@@ -44,20 +44,19 @@ private:
 	bool game;
 	string winner;
 
-<<<<<<< HEAD
+
 	//text related stuff
 	void addText();
 	float bodiesSize;
 	float bodiesSize_small;
 	float bodiesSize_big;
-=======
-    //Handle graphics rendering and mouse/key inputs
-    PrevIteration HandleInput(PrevIteration _pI);
-    void clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _event);
-    void clickNdragTarget(PrevIteration *_pI,float _mX, float _mY, sf::Event _event);
-    void Render();
-    bool pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event);
->>>>>>> refs/remotes/origin/safety
+
+	//Handle graphics rendering and mouse/key inputs
+	PrevIteration HandleInput(PrevIteration _pI);
+	void Render();
+	void clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _event);
+	void clickNdragTarget(PrevIteration *_pI,float _mX, float _mY, sf::Event _event);
+	bool pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event);
 
 	//subscriber input handleing
 	void vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg); //processes info from final_execute
@@ -65,18 +64,13 @@ private:
 	void targetCallback(const wvu_swarm_std_msgs::vicon_points &msg);   //processes info from virtual_targets
 	void flowCallback(const wvu_swarm_std_msgs::flows &msg);         //processes info from virtual_flows
 
-	//Handle graphics rendering and mouse/key inputs
-	PrevIteration HandleInput(PrevIteration _pI);
-	void Render();
-	bool pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event);
-
 	//Specific objects to be rendered.
-
 	void drawObstacles();
 	void drawTargets();
 	void updateTargetPos();
 	void drawFlows();
 
+	//hockey sim specific
 	void drawGoals();
 	void winCheck(int i);
 

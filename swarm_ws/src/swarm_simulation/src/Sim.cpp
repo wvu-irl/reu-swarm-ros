@@ -278,7 +278,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		clickNdragBots(&_pI, mX, mY, event); //runs click and drag for bots
 		clickNdragTarget(&_pI, mX, mY, event); //runs click and drag for targets.
 
-
+	}
 	return _pI; //tracks state of dragging (see sim.h)
 
 
@@ -322,8 +322,6 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //	          //deletes bodies from the second through the hird element
 //	          shapes.erase(shapes.begin() + 1, shapes.begin() + 2);
 //
-
-
 }
 
 void Sim::Render() //draws changes in simulation states to the window.
