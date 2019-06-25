@@ -22,8 +22,9 @@ struct PrevIteration
 	bool dragging;
 	int botId;
 	bool prevClick;
-	bool bot; //is true if bot selected
-	bool target; //is true if traget selected
+	bool bot; //is true if bot selected.
+	bool target; //is true if target selected.
+	bool obs; //is true if obstacle selected.
 };
 
 class Sim
@@ -37,7 +38,8 @@ private:
 	vector<sf::CircleShape> shapes;
 	vector<sf::RectangleShape> lines;
 	vector<sf::Text> texts;
-	vector<wvu_swarm_std_msgs::vicon_point> obstacles;
+	//vector<wvu_swarm_std_msgs::vicon_point> obstacles;
+	wvu_swarm_std_msgs::vicon_points obstacles;
 	wvu_swarm_std_msgs::vicon_points targets;
 	wvu_swarm_std_msgs::flows flows;
 	vector<sf::CircleShape> obs_shapes;
@@ -56,6 +58,7 @@ private:
 	void Render();
 	void clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _event);
 	void clickNdragTarget(PrevIteration *_pI,float _mX, float _mY, sf::Event _event);
+	void clickNdragObstacles(PrevIteration *_pI, float _mX, float _mY, sf::Event _event);
 	bool pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event);
 
 	//subscriber input handleing

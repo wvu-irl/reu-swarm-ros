@@ -7,11 +7,16 @@
 #include <wvu_swarm_std_msgs/flows.h>
 
 wvu_swarm_std_msgs::vicon_points temp_targets;
+wvu_swarm_std_msgs::vicon_points temp_obs;
 //wvu_swarm_std_msgs::vicon_points temp_bots;
 void pointCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
-
 	temp_targets = msg;
+}
+
+void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
+{
+	temp_obs = msg;
 }
 
 //creates a flow for hitting a puck to a specified location
@@ -114,7 +119,6 @@ void createBoundary(wvu_swarm_std_msgs::vicon_points &in_vector)
 {
 	for (int i = 0; i < 20; i++)
 	{
-
 		wvu_swarm_std_msgs::vicon_point cur0;
 		cur0.x = -50;
 		cur0.y = -100 + 10 * i;
@@ -219,6 +223,7 @@ int main(int argc, char **argv)
 	ros::Publisher pub3 = n.advertise < wvu_swarm_std_msgs::flows > ("virtual_flows", 1000);
 
 	ros::Subscriber sub1 = n.subscribe("virtual_targets", 1000, pointCallback);
+	ros::Subscriber sub2 = n.subscribe("virtual_obstacles", 1000, obsCallback);
 	//ros::Subscriber	sub2 = n.subscribe("vicon_array",1000,botCallback;
 	ros::Rate loopRate(200);
 	sleep(2); //waits for sim to be awake
@@ -235,8 +240,7 @@ int main(int argc, char **argv)
 	}
 	while (ros::ok())
 	{
-		makeObstacles(pub1);
-
+		//makeObstacles(pub1);
 		makeFlows(pub3);
 		ros::spinOnce();
 		loopRate.sleep();
