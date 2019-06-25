@@ -27,7 +27,7 @@ public:
 
 	AliceStructs::ideal followFlow(std::list<AliceStructs::ideal> flows, float strength);
 
-	AliceStructs::ideal maintainSpacing(std::list <AliceStructs::neighbor> bots,float strength);
+	AliceStructs::ideal maintainSpacing(std::list <AliceStructs::neighbor> bots,float strength,float distance);
 
 	AliceStructs::ideal magnetAvoid(std::list <AliceStructs::neighbor> bots, float strength);
 

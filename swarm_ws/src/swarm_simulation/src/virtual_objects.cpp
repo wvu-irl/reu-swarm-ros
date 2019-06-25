@@ -54,6 +54,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	cur3.x -= xd / r * 20;
 	cur3.y -= yd / r * 20;
 	cur3.theta = cur0.theta;
+	cur3.pri = 2;
 	in_vector.flow.push_back(cur3);
 
 	//bottomleft
@@ -100,6 +101,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	wvu_swarm_std_msgs::flow cur9(cur6);
 	cur9.x -= yd / r * 10;
 	cur9.y += xd / r * 10;
+	cur9.pri=1.5;
 	cur9.theta = cur6.theta + 3 * M_PI / 4;
 	in_vector.flow.push_back(cur9);
 
@@ -107,6 +109,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	wvu_swarm_std_msgs::flow cur10(cur6);
 	cur10.x += yd / r * 10;
 	cur10.y -= xd / r * 10;
+	cur9.pri=1.5;
 	cur10.theta = cur6.theta - 3 * M_PI / 4;
 	in_vector.flow.push_back(cur10);
 }
@@ -200,8 +203,8 @@ void makeTargets(ros::Publisher _pub)
 void makeFlows(ros::Publisher _pub)
 {
 	wvu_swarm_std_msgs::flows vp_vector;
-	std::pair<float, float> goal1(0,100);
-	std::pair<float,float> goal2(0,-100);
+	std::pair<float, float> goal1(0,95);
+	std::pair<float,float> goal2(0,-95);
 	if (temp_targets.point.size() != 0) {
 		createPuckFlow(vp_vector,temp_targets.point.at(0),goal1,1);
 		createPuckFlow(vp_vector,temp_targets.point.at(0),goal2,2);
@@ -221,7 +224,7 @@ int main(int argc, char **argv)
 	ros::Subscriber sub1 = n.subscribe("virtual_targets", 1000, pointCallback);
 	//ros::Subscriber	sub2 = n.subscribe("vicon_array",1000,botCallback;
 	ros::Rate loopRate(200);
-	sleep(2); //waits for sim to be awake
+	sleep(1); //waits for sim to be awake
 	int i = 0;
 	while (ros::ok() && i < 100)
 	{
