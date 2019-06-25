@@ -88,7 +88,7 @@ vector2f_t readVector(std::string vect)
 
 	// separating by commas
 	strcpy(x, strtok(vectr, ","));
-	strcpy(y, strtok(NULL, ","));\
+	strcpy(y, strtok(NULL, ","));
 	// converting to floats
 	vector2f_t vector = {(float) strtod(x, NULL), (float) strtod(y, NULL)};
 
@@ -188,7 +188,9 @@ void render(sf::RenderWindow *window)
 
 	// drawing robots
 	sf::CircleShape bot;
-  int radius = 25;
+	float real_diam = 5;
+
+  float radius = real_diam * 4.0f; // 4 is effectively '/ 2.0 * 800 / 100
 	bot.setRadius(radius);
 	bot.scale(1, 1.25); // scaling to  do a 2:1 screen
 	bot.setFillColor(sf::Color::Yellow);
