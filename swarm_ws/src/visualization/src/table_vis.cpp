@@ -1,10 +1,11 @@
 #include <ros/ros.h>
+#include <wvu_swarm_std_msgs/vicon_point.h>
+#include <wvu_swarm_std_msgs/vicon_points.h>
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/Vector3.h>
 
-#include "../cfg/table_settings.h" // were the settings for what to draw are
 #include "contour.h"
 #include "transform/perspective_transform_gpu.h"
 
@@ -16,9 +17,21 @@
 #include <fstream>
 #include <vector>
 
-#if BACKGROUND == CONTOUR_PLOT
+// params from launch
+static std::string g_background;
+static int g_table_width, g_table_height;
+static int g_robot_diameter;
+
+// width and height of generated image
+// also of starting window size in pixels
+#define WIDTH 1280
+#define HEIGHT 800
+
+// turns on verbose mode
+#define TAB_DEBUG 0
+
 ContourMap *cont; // contour plot pointer
-#endif
+
 // sprite that is drawn to screen
 sf::Sprite displaySprite;
 
@@ -38,24 +51,58 @@ sf::Vector2f operator+=(sf::Vector2f &a, sf::Vector2f b)
 	return a = sf::Vector2f(a.x + b.x, a.y + b.y);
 }
 
+sf::Vector2f operator-(sf::Vector2f a, sf::Vector2f b)
+{
+	return sf::Vector2f(a.x - b.x, a.y - b.y);
+}
+
 // globals for drawing bot's locations to the table
 std::vector<sf::Vector2f> bots_pos;
 std::vector<std::string> bot_ids;
-const sf::Vector2f table_origin = sf::Vector2f(100, 50); // origin on the table relative to my origin
-																												 // in centimeters
+const sf::Vector2f table_origin = sf::Vector2f(g_table_width / 2,
+		g_table_height / 2); // origin on the table relative to my origin
+// in centimeters
+
+// globals for drawing obstacles
+std::vector<sf::Vector2f> obstacles;
+
+// globals for drawing targets
+std::vector<sf::Vector2f> targets;
+
+// Subscription callback for goals
+void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
+{
+	for (size_t i = 0; i < goals.point.size(); i++)
+	{
+		wvu_swarm_std_msgs::vicon_point pnt = goals.point.at(i);
+		targets.push_back(sf::Vector2f(pnt.x, pnt.y));
+	}
+}
+
+// obstacle subscription callback
+void drawObstacles(wvu_swarm_std_msgs::vicon_points points)
+{
+	for (size_t i = 0; i < points.point.size(); i++)
+	{
+		wvu_swarm_std_msgs::vicon_point pnt = points.point.at(i);
+		obstacles.push_back(sf::Vector2f(pnt.x, pnt.y));
+	}
+}
+
 // subscription callback to update bot locations
 void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 {
-	for (size_t i = 0;i < bots.poseVect.size();i++)
+	for (size_t i = 0; i < bots.poseVect.size(); i++)
 	{
 		// getting pose
-		geometry_msgs::Vector3 tf = bots.poseVect.at(i).botPose.transform.translation;
-		sf::Vector2f plain_vect((float)tf.y, -(float)tf.x);
+		geometry_msgs::Vector3 tf =
+				bots.poseVect.at(i).botPose.transform.translation;
+		sf::Vector2f plain_vect((float) tf.y, -(float) tf.x);
 
 		// transforming to screen frame
 		plain_vect += table_origin;
-		plain_vect.x *= WIDTH / 200.0;
-		plain_vect.y *= HEIGHT / 100.0;
+		plain_vect.x *= (double) WIDTH / g_table_width;
+		plain_vect.y *= (double) HEIGHT / g_table_height;
 
 		// adding to list
 		bots_pos.push_back(plain_vect);
@@ -90,7 +137,7 @@ vector2f_t readVector(std::string vect)
 	strcpy(x, strtok(vectr, ","));
 	strcpy(y, strtok(NULL, ","));
 	// converting to floats
-	vector2f_t vector = {(float) strtod(x, NULL), (float) strtod(y, NULL)};
+	vector2f_t vector = { (float) strtod(x, NULL), (float) strtod(y, NULL) };
 
 	// freeing data
 	free(y);
@@ -141,9 +188,10 @@ void calibrateFromFile(std::string path)
  */
 void tick()
 {
-#if BACKGROUND == CONTOUR_PLOT
-	cont->tick(g_tick); // telling the contour plot to advance
-#endif
+	if (strcmp(g_background.c_str(), "Contour") == 0)
+	{
+		cont->tick(g_tick); // telling the contour plot to advance
+	}
 	g_tick++; // stepping time
 	g_tick %= 1000; // 'sawing' time
 }
@@ -160,47 +208,64 @@ void render(sf::RenderWindow *window)
 	sf::RenderTexture disp;
 	disp.create(WIDTH, HEIGHT);
 
-#if BACKGROUND == CHECKERBOARD
-	// drawing checkerboard
-	sf::Image checker;
-	checker.loadFromFile("src/visualization/assets/Checkerboard.jpg");
-	sf::Texture checker_texture;
-	checker_texture.loadFromImage(checker);
-	sf::Sprite checker_sprite;
-	checker_sprite.setTexture(checker_texture);
-	checker_sprite.setPosition(sf::Vector2f(0,0));
-	checker_sprite.scale(WIDTH / checker.getSize().x, HEIGHT / checker.getSize().y);
-	disp.draw(checker_sprite);
-#elif BACKGROUND == CONTOUR_PLOT
-	cont->render(&disp); // drawing contour plot
-#elif BACKGROUND == HOCKEY
-	// drawing hockey rink
-	sf::Image rink;
-	rink.loadFromFile("src/visualization/assets/HockeyRink.png");
-	sf::Texture rink_texture;
-	rink_texture.loadFromImage(rink);
-	sf::Sprite rink_sprite;
-	rink_sprite.setTexture(rink_texture);
-	rink_sprite.setPosition(sf::Vector2f(0,0));
-	rink_sprite.scale(WIDTH / rink.getSize().x, HEIGHT / rink.getSize().y);
-	disp.draw(rink_sprite);
-#endif
+	if (strcmp(g_background.c_str(), "Contour") == 0)
+	{
+		cont->render(&disp); // drawing contour plot
+	}
+	else if (strcmp(g_background.c_str(), "None") == 0)
+	{
+	}
+	else
+	{
+		sf::Image checker;
+		checker.loadFromFile(g_background);
+		sf::Texture checker_texture;
+		checker_texture.loadFromImage(checker);
+		sf::Sprite checker_sprite;
+		checker_sprite.setTexture(checker_texture);
+		checker_sprite.setPosition(sf::Vector2f(0, 0));
+		checker_sprite.scale(WIDTH / checker.getSize().x,
+		HEIGHT / checker.getSize().y);
+		disp.draw(checker_sprite);
+	}
+
+	// draw obstacles
+	sf::CircleShape obs;
+	obs.setRadius(4);
+	obs.scale(1, 1.25);
+	obs.setFillColor(sf::Color::Red);
+	for (size_t i = 0; i < obstacles.size(); i++)
+	{
+		obs.setPosition(obstacles.at(i) - sf::Vector2f(2, 2));
+		disp.draw(obs);
+	}
+
+	// draw targets
+	sf::CircleShape tar;
+	tar.setRadius(4);
+	tar.scale(1, 1.25);
+	tar.setFillColor(sf::Color::Green);
+	for (size_t i = 0; i < targets.size(); i++)
+	{
+		tar.setPosition(targets.at(i) - sf::Vector2f(2, 2));
+		disp.draw(tar);
+	}
 
 	// drawing robots
 	sf::CircleShape bot;
-	float real_diam = 5;
-
-  float radius = real_diam * 4.0f; // 4 is effectively '/ 2.0 * 800 / 100
+	float radius = g_robot_diameter * 4.0f; // 4 is effectively '/ 2.0 * 800 / 100
 	bot.setRadius(radius);
 	bot.scale(1, 1.25); // scaling to  do a 2:1 screen
 	bot.setFillColor(sf::Color::Yellow);
-	for (size_t i = 0;i < bots_pos.size();i++)
+	for (size_t i = 0; i < bots_pos.size(); i++)
 	{
-		bot.setPosition(sf::Vector2f(bots_pos[i].x - radius, bots_pos[i].y - radius));
+		bot.setPosition(
+				sf::Vector2f(bots_pos[i].x - radius, bots_pos[i].y - radius));
 		disp.draw(bot);
 
 		rid_disp.setString(bot_ids.at(i).c_str());
-		rid_disp.setPosition(sf::Vector2f(bots_pos[i].x + radius, bots_pos[i].y - radius));
+		rid_disp.setPosition(
+				sf::Vector2f(bots_pos[i].x + radius, bots_pos[i].y - radius));
 		disp.draw(rid_disp);
 	}
 	bots_pos.clear();
@@ -226,15 +291,6 @@ void render(sf::RenderWindow *window)
 	displaySprite.setPosition(sf::Vector2f(0, 0));
 
 	window->draw(displaySprite);
-#if TAB_DEBUG
-	sf::VertexArray trapezoid(sf::LineStrip, 5);
-	trapezoid[0].position = g_trap.tl;
-	trapezoid[1].position = g_trap.tr;
-	trapezoid[2].position = g_trap.br;
-	trapezoid[3].position = g_trap.bl;
-	trapezoid[4].position = g_trap.tl;
-	window->draw(trapezoid);
-#endif
 	free(tf_cols); // freeing unused data
 }
 
@@ -244,20 +300,46 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "table_vis");
 	ros::NodeHandle n;
 
+	ros::NodeHandle n_priv("~");
+
+	std::string assets, config;
+
+	n_priv.param < std::string
+			> ("asset_path", assets, "/home/ssvnormandy/git/reu-swarm-ros/swarm_ws/src/visualization/assets");
+	n_priv.param < std::string
+			> ("config_path", config, "/home/ssvnormandy/git/reu-swarm-ros/swarm_ws/src/visualization/cfg/calib.config");
+	n_priv.param < std::string
+			> ("background", g_background, assets + "/HockeyRink.png");
+	n_priv.param<int>("table_width", g_table_width, 200);
+	n_priv.param<int>("table_height", g_table_height, 100);
+	n_priv.param<int>("robot_diameter", g_robot_diameter, 5);
+
+#if TAB_DEBUG
+	std::cout << "Got params:\n\t" << g_background << "\n\t" << g_table_width
+			<< "\n\t" << g_table_height << "\n\t" << g_robot_diameter << std::endl;
+
+	char strDir[129] = { 0 };
+	puts(getcwd(strDir, 128));
+	puts(strDir);
+
+#endif
+
 	// Setting up universal graphics objects
-	comic_sans.loadFromFile("src/visualization/assets/ComicSansMS3.ttf");
+	comic_sans.loadFromFile(assets + "/ComicSansMS3.ttf");
 	rid_disp.setFont(comic_sans);
 	rid_disp.setColor(sf::Color::Black);
 	rid_disp.setCharacterSize(18);
 
 	// subscribing to have bot locations
 	ros::Subscriber robots = n.subscribe("/vicon_array", 1000, drawBots);
+	ros::Subscriber obstacles = n.subscribe("virtual_obstacles", 1000,
+			drawObstacles);
+	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
 
 	// calibrating from file
-	calibrateFromFile("src/visualization/cfg/calib.config");
+	calibrateFromFile(config);
 
-#if BACKGROUND == CONTOUR_PLOT
-	// setting up contour plot
+	// setting up contour plotdrawObstacles
 
 	// color map setup
 	ColorMap cmap(std::pair<double, sf::Color>(-10, sf::Color::Red),
@@ -276,9 +358,9 @@ int main(int argc, char **argv)
 	{
 		cont->levels.push_back(i);
 	}
-#endif
+
 	// creating render window
-	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Contour Plotting",
+	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Table Plotting",
 			sf::Style::Default);
 
 	while (window.isOpen()) // main loop
@@ -286,7 +368,8 @@ int main(int argc, char **argv)
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			switch (event.type) // basic event poll
+			switch (event.type)
+			// basic event poll
 			{
 			case sf::Event::Closed: // close window event
 				window.close();
