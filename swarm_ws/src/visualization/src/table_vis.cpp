@@ -245,7 +245,7 @@ int main(int argc, char **argv)
 	// Setting up universal graphics objects
 	comic_sans.loadFromFile("src/visualization/assets/ComicSansMS3.ttf");
 	rid_disp.setFont(comic_sans);
-	rid_disp.setFillColor(sf::Color::Black);
+	rid_disp.setColor(sf::Color::Black);
 	rid_disp.setCharacterSize(18);
 
 	// subscribing to have bot locations
