@@ -39,7 +39,7 @@ AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bot
 		to_return.dir += bot.dir / bots.size();
 		to_return.pri += bot.dis / bots.size();
 		to_return.spd += (pow(strength, BRAKING) / (0 - pow(bot.dis + pow(strength, BRAKING / 2) - ROBOT_SIZE, 2)) + 1)
-		    / bots.size();
+				/ bots.size();
 	}
 	to_return.spd -= 1;
 	to_return.pri = pow(to_return.pri * strength - ROBOT_SIZE / 2, 0.2) / 3;
@@ -77,7 +77,7 @@ AliceStructs::ideal Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, flo
 	to_return.pri = strength / pow(2, bots.front().dis - 3 / 2 * ROBOT_SIZE);
 	to_return.dir = fmod(bots.front().dir + M_PI, 2 * M_PI);
 	to_return.spd = pow(strength, 2)
-	    / (0 - (bots.front().dis + strength - ROBOT_SIZE) * (abs(bots.front().dir + strength - ROBOT_SIZE))) + 1;
+			/ (0 - (bots.front().dis + strength - ROBOT_SIZE) * (abs(bots.front().dir + strength - ROBOT_SIZE))) + 1;
 	/*for (auto &bot : bots)
 	 {
 	 temp_pri = strength/((bot.dis - ROBOT_SIZE/2) * (abs(bot.dir - M_PI)/2) + 1);
@@ -107,58 +107,58 @@ AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, floa
 		{
 			if (tar.dis < temp)
 				to_return.dir = tar.dir;
-				to_return.pri = strength;
-				to_return.spd = (pow(strength, 2) / (0 - pow(tar.dis + strength - ROBOT_SIZE/2, 2))) + 1 ;
+			to_return.spd = 1; //(pow(strength, 2) / (0 - pow(tar.dis + strength - ROBOT_SIZE/2, 2))) + 1 ;
+			to_return.pri = strength*atan(tar.dis / ROBOT_SIZE/3) * M_PI_2;
 		}
-	to_return.pri = pow(to_return.pri * strength, 0.2) / 3;
+
 	}
-return to_return;
+	return to_return;
 }
 
 AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, float strength)
 {
-AliceStructs::ideal to_return;
-to_return.pri = 0.001;
-to_return.dir = 0.001;
-to_return.spd = 0.001;
-if (flows.size() != 0)
-{
-	for (auto &flow : flows)
+	AliceStructs::ideal to_return;
+	to_return.pri = 0.001;
+	to_return.dir = 0.001;
+	to_return.spd = 0.001;
+	if (flows.size() != 0)
 	{
+		for (auto &flow : flows)
+		{
 //		float temp_pri = strength * flow.spd/pow(flow.dis + ROBOT_SIZE, 2);
 //		to_return.dir = (to_return.dir * to_return.pri + flow.dir * temp_pri) / (to_return.pri + temp_pri);
 //		to_return.spd = (to_return.spd * to_return.pri + flow.spd * temp_pri) / (to_return.pri + temp_pri);
 //		to_return.pri += temp_pri;
-		AliceStructs::ideal temp;
-		temp.dir=flow.dir;
-		temp.spd=flow.spd;
-		temp.pri=strength*flow.pri/(pow(flow.dis,2)+ROBOT_SIZE);
+			AliceStructs::ideal temp;
+			temp.dir = flow.dir;
+			temp.spd = flow.spd;
+			temp.pri = strength * flow.pri / (pow(flow.dis, 2) + ROBOT_SIZE);
 
-		to_return= addIdeals(to_return,temp);
+			to_return = addIdeals(to_return, temp);
+		}
 	}
-}
-return to_return;
+	return to_return;
 }
 
 AliceStructs::ideal Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength)
 {
-AliceStructs::ideal to_return;
-to_return.pri = 0.001;
-to_return.dir = 0.001;
-to_return.spd = 1;
-for (auto &obs : obstacles)
-{
-	if (obs.dis < 2 * ROBOT_SIZE)
+	AliceStructs::ideal to_return;
+	to_return.pri = 0.001;
+	to_return.dir = 0.001;
+	to_return.spd = 1;
+	for (auto &obs : obstacles)
 	{
-		AliceStructs::ideal temp;
-		temp.pri = strength / pow(2, obs.dis - 3 / 2 * ROBOT_SIZE);
-		temp.spd = pow(strength, 2) / (0 - pow(obs.dis + strength - ROBOT_SIZE, 2)) + 1;
-		temp.dir = obs.dir;
-		to_return = addIdeals(temp, to_return);
+		if (obs.dis < 2 * ROBOT_SIZE)
+		{
+			AliceStructs::ideal temp;
+			temp.pri = strength / pow(2, obs.dis - 3 / 2 * ROBOT_SIZE);
+			temp.spd = pow(strength, 2) / (0 - pow(obs.dis + strength - ROBOT_SIZE, 2)) + 1;
+			temp.dir = obs.dir;
+			to_return = addIdeals(temp, to_return);
+		}
 	}
-}
-to_return.dir = fmod(to_return.dir + M_PI, 2 * M_PI);
-return to_return;
+	to_return.dir = fmod(to_return.dir + M_PI, 2 * M_PI);
+	return to_return;
 }
 
 /*
