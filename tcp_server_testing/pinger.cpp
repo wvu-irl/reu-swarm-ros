@@ -34,7 +34,7 @@
 #define PORT 4321
 
 // ip that the program is connecting to
-#define IP "10.252.67.11"
+#define IP "127.0.0.1"
 
 // using this namespace because there are many time measurments
 using namespace std::chrono;

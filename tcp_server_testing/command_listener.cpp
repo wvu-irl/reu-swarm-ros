@@ -60,7 +60,7 @@ int main()
 	{
 
 	}
-	strcpy(reg.str, "register YY");
+	strcpy(reg.str, "register NH");
 	int bytes = write(socket_descriptor, (&reg), sizeof(reg));
 	if (bytes < 0)
 	{
