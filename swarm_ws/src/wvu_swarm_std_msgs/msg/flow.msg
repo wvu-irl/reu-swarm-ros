@@ -3,3 +3,4 @@ float32 y
 float32 r
 float32 theta
 int32 sid
+float32 pri

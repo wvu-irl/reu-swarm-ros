@@ -29,7 +29,8 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	wvu_swarm_std_msgs::flow cur0;
 	cur0.x = x + (xd) / r * 10;
 	cur0.y = y + (yd) / r * 10;
-	cur0.r = 20;
+	cur0.r = 1;
+	cur0.pri = 1;
 	cur0.theta = atan2(yd, xd);
 	cur0.sid = sid;
 	in_vector.flow.push_back(cur0);
@@ -60,7 +61,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	cur4.x -= xd / r * 20;
 	cur4.y -= yd / r * 20;
 	cur4.theta = cur2.theta + 5 * M_PI / 6;
-	cur4.r = 20;
+	cur4.r = 1;
 	in_vector.flow.push_back(cur4);
 
 	//bottomright
@@ -68,16 +69,17 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	cur5.x -= xd / r * 20;
 	cur5.y -= yd / r * 20;
 	cur5.theta = cur1.theta - 5 * M_PI / 6;
-	cur5.r = 20;
+	cur5.r = 1;
 	in_vector.flow.push_back(cur5);
 
 	//middle
 	wvu_swarm_std_msgs::flow cur6;
 	cur6.x = x;
 	cur6.y = y;
-	cur6.r = 20;
+	cur6.r = 1;
 	cur6.theta = atan2(yd, xd);
 	cur6.sid = sid;
+	cur6.pri= 1;
 	in_vector.flow.push_back(cur6);
 
 	//right

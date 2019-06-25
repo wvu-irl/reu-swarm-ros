@@ -34,7 +34,7 @@ typedef struct Bot //The Bot struct holds the pose of a robot, along with its di
 	}
 
 	int id; //the id's are the 50 states, from 0 to 49
-	int swarm_id;
+	int swarm_id;//which swarm...
 	float x; //position
 	float y; //position
 	float heading; //in radians

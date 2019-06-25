@@ -100,14 +100,15 @@ AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, floa
 	to_return.pri = 0.001;
 	to_return.dir = 0.001;
 	to_return.spd = 0.001;
+	float temp = 60;
 	if (targets.size() != 0)
 	{
 		for (auto& tar : targets)
 		{
-			if (tar.dis > to_return.pri)
+			if (tar.dis < temp)
 				to_return.dir = tar.dir;
 				to_return.pri = strength;
-				to_return.spd = (pow(strength, 2) / (0 - pow(tar.dis + strength - ROBOT_SIZE/2, 2))) + 1;
+				to_return.spd = (pow(strength, 2) / (0 - pow(tar.dis + strength - ROBOT_SIZE/2, 2))) + 1 ;
 		}
 	to_return.pri = pow(to_return.pri * strength, 0.2) / 3;
 	}
@@ -124,13 +125,18 @@ if (flows.size() != 0)
 {
 	for (auto &flow : flows)
 	{
-		float temp_pri = strength * flow.spd/pow(flow.dis + ROBOT_SIZE, 2);
-		to_return.dir = (to_return.dir * to_return.pri + flow.dir * temp_pri) / (to_return.pri + temp_pri);
-		to_return.spd = (to_return.spd * to_return.pri + flow.spd * temp_pri) / (to_return.pri + temp_pri);
-		to_return.pri += temp_pri;
+//		float temp_pri = strength * flow.spd/pow(flow.dis + ROBOT_SIZE, 2);
+//		to_return.dir = (to_return.dir * to_return.pri + flow.dir * temp_pri) / (to_return.pri + temp_pri);
+//		to_return.spd = (to_return.spd * to_return.pri + flow.spd * temp_pri) / (to_return.pri + temp_pri);
+//		to_return.pri += temp_pri;
+		AliceStructs::ideal temp;
+		temp.dir=flow.dir;
+		temp.spd=flow.spd;
+		temp.pri=strength*flow.pri/(pow(flow.dis,2)+ROBOT_SIZE);
+
+		to_return= addIdeals(to_return,temp);
 	}
 }
-to_return.spd = to_return.spd/20;
 return to_return;
 }
 

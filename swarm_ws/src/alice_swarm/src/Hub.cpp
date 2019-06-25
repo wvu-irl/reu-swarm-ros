@@ -163,7 +163,7 @@ void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
 				//Makes the direction of the flow relative to the robot's heading
 				temp3.dir = fmod(flows.flow.at(j).theta - bots[i].heading + 2 * M_PI, 2 * M_PI);
 				temp3.spd = flows.flow.at(j).r;
-				temp3.pri = 1;
+				temp3.pri = flows.flow.at(j).pri;
 				f.push_back(temp3);
 			}
 		}
