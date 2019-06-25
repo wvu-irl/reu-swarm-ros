@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 	// loading font
 	fon.loadFromFile(sf::String("src/visualization/assets/ComicSansMS3.ttf"));
 	// setting up instruction text
-	instruct.setFillColor(sf::Color::White);
+	instruct.setColor(sf::Color::White);
 	instruct.setFont(fon);
 	instruct.setCharacterSize(20);
 	changeInstruction(instructions[0]);
