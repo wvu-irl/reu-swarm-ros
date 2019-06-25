@@ -134,7 +134,7 @@ Sim::Sim()
 void Sim::Run(ros::NodeHandle _n)
 {
 	PrevIteration pI
-	{ false, 0, false }; //struct for storing click and drag info.
+	{ false, 0, false, false, false }; //struct for storing click and drag info.
 	std::cout << "initialized pI\n";
 	char letters[100] =
 	{ 'D', 'E', 'P', 'A', 'N', 'J', 'G', 'A', 'C', 'T', 'M', 'A', 'M', 'D', 'S', 'C', 'N', 'H', 'V', 'A', 'N', 'Y', 'N',
@@ -203,7 +203,7 @@ void Sim::Run(ros::NodeHandle _n)
 	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to virtual obstacles
 	ros::Subscriber sub3 = _n.subscribe("virtual_targets", 1000, &Sim::targetCallback, this); //gets virtual targets
 	ros::Subscriber sub4 = _n.subscribe("virtual_flows", 1000, &Sim::flowCallback, this); //gets virtual targets
-	ros::Rate loopRate(200);
+	ros::Rate loopRate(50);
 
 	//publishes initial information for each bot
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
@@ -274,70 +274,15 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
 				event);
 
+
 		//----------Allows for click and drag for bots. ------------------------------
-//		if (_pI.dragging == true)
-//		{
-//			flock.flock.at(_pI.botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
-//			flock.flock.at(_pI.botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
-//		}
-//		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-//				&& _pI.prevClick == true)
-//		{
-//			_pI.dragging = false;
-//			_pI.prevClick = false;
-//		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-//				&& _pI.prevClick == false)
-//		{
-//			while (found != true)
-//			{
-//				if (((flock.flock.at(i).location.x > mX - 6) && (flock.flock.at(i).location.x < mX + 6))
-//						&& ((flock.flock.at(i).location.y > mY - 6) && (flock.flock.at(i).location.y < mY + 6)))
-//				{
-//					found = true;
-//					_pI.botId = i;
-//					_pI.dragging = true;
-//					_pI.prevClick = true;
-//				} else if (i == flock.flock.size() - 1)
-//				{
-//					found = true;
-//				}
-//				i++;
-//			}
-//		} //----------------------------------End-------------------------------------------------------
+		clickNdragBots(&_pI, mX, mY, event);
+		//----------------------- End --------------------------------------
 
 		// ---------------------- Click and Drag for the target ----------------------------------------
-		i=0;
-//		----------Allows for click and drag. ------------------------------
-		if (_pI.dragging == true)
-		{
-			targets.point.at(i).x = sf::Mouse::getPosition(window).x / 3 - 50;
-			; //event.mouseButton.x;
-			targets.point.at(i).y = sf::Mouse::getPosition(window).y / -3 + 100; //event.mouseButton.y;
-			std::cout << "yo" << std::endl;
-		}
-		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-				&& _pI.prevClick == true)
-		{
-			_pI.dragging = false;
-			_pI.prevClick = false;
-		} else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left
-				&& _pI.prevClick == false)
-		{
-			while (found != true && i < targets.point.size())
-			{
-				if (((targets.point.at(i).x > mX / 3 - 50 - 6) && (targets.point.at(i).x < mX / 3 - 50 + 6))
-						&& ((targets.point.at(i).y > mY / -3 + 100 - 6) && (targets.point.at(i).y < mY / -3 + 100 + 6)))
-				{
-					found = true;
-
-					_pI.dragging = true;
-					_pI.prevClick = true;
-				}
-				i++;
-			}
-		}
-	}//----------------------------- End-------------------------------------
-
+		clickNdragTarget(&_pI, mX, mY, event);
+		//----------------------------- End-------------------------------------
+	}
 	return _pI; //tracks state of dragging (see sim.h)
 
 //	// Checks or A to be pressed, draws and adds bodies to flock if so.
@@ -380,8 +325,85 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //	          //deletes bodies from the second through the hird element
 //	          shapes.erase(shapes.begin() + 1, shapes.begin() + 2);
 //
-//	      }
 
+
+}
+
+void Sim::clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _event)//for click and drag on bots
+{
+	int i = 0; //iterator for dragging while loop
+	bool found = false; //sentinel for finding a selected bot.
+
+	//----------Allows for click and drag for bots. ------------------------------
+	if (_pI->dragging == true && _pI->bot == true)
+	{
+		flock.flock.at(_pI->botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
+		flock.flock.at(_pI->botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
+	}
+	if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
+			&& _pI->prevClick == true && _pI->bot == true)
+	{
+		_pI->dragging = false;
+		_pI->prevClick = false;
+		_pI->bot = false;
+	} else if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
+			&& _pI->prevClick == false && _pI->bot == false && _pI->target != true)
+	{
+		while (found != true)
+		{
+			if (((flock.flock.at(i).location.x > _mX - 6) && (flock.flock.at(i).location.x < _mX + 6))
+					&& ((flock.flock.at(i).location.y > _mY - 6) && (flock.flock.at(i).location.y < _mY + 6)))
+			{
+				found = true;
+				_pI->botId = i;
+				_pI->dragging = true;
+				_pI->prevClick = true;
+				_pI->bot = true;
+			} else if (i == flock.flock.size() - 1)
+			{
+				found = true;
+			}
+			i++;
+		}
+	}
+}
+
+void Sim::clickNdragTarget(PrevIteration *_pI, float _mX, float _mY, sf::Event _event)//for click and drag on targets
+{
+	int i = 0; //iterator for dragging while loop
+	bool found = false; //sentinel for finding a selected bot.
+	//		----------Allows for click and drag. ------------------------------
+	if (_pI->dragging == true && _pI->target==true)
+	{
+		targets.point.at(i).x = sf::Mouse::getPosition(window).x / 3 - 50;
+		; //event.mouseButton.x;
+		targets.point.at(i).y = sf::Mouse::getPosition(window).y / -3 + 100; //event.mouseButton.y;
+		std::cout << "yo" << std::endl;
+	}
+	if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
+			&& _pI->prevClick == true && _pI->target == true)
+	{
+		_pI->dragging = false;
+		_pI->prevClick = false;
+		_pI->target = false;
+
+	} else if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
+			&& _pI->prevClick == false && _pI->target == false && _pI->bot !=true)
+	{
+		while (found != true && i < targets.point.size())
+		{
+			if (((targets.point.at(i).x > _mX / 3 - 50 - 6) && (targets.point.at(i).x < _mX / 3 - 50 + 6))
+					&& ((targets.point.at(i).y > _mY / -3 + 100 - 6) && (targets.point.at(i).y < _mY / -3 + 100 + 6)))
+			{
+				found = true;
+				_pI->botId = i;
+				_pI->dragging = true;
+				_pI->prevClick = true;
+				_pI->target = true;
+			}
+			i++;
+		}
+	}
 }
 
 void Sim::Render() //draws changes in simulation states to the window.

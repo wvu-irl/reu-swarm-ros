@@ -21,6 +21,8 @@ struct PrevIteration{
 	bool dragging;
 	int botId;
 	bool prevClick;
+	bool bot; //is true if bot selected
+	bool target; //is true if traget selected
 };
 
 class Sim {
@@ -47,6 +49,8 @@ private:
 
     //Handle graphics rendering and mouse/key inputs
     PrevIteration HandleInput(PrevIteration _pI);
+    void clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _event);
+    void clickNdragTarget(PrevIteration *_pI,float _mX, float _mY, sf::Event _event);
     void Render();
     bool pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event);
 
