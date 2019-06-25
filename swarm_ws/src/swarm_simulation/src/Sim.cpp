@@ -274,14 +274,9 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
 				event);
 
-
-		//----------Allows for click and drag for bots. ------------------------------
-		clickNdragBots(&_pI, mX, mY, event);
-		//----------------------- End --------------------------------------
-
-		// ---------------------- Click and Drag for the target ----------------------------------------
+		clickNdragBots(&_pI, mX, mY, event); //click and drag works contingently. 
 		clickNdragTarget(&_pI, mX, mY, event);
-		//----------------------------- End-------------------------------------
+
 	}
 	return _pI; //tracks state of dragging (see sim.h)
 
@@ -346,6 +341,7 @@ void Sim::clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _ev
 		_pI->dragging = false;
 		_pI->prevClick = false;
 		_pI->bot = false;
+		
 	} else if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
 			&& _pI->prevClick == false && _pI->bot == false && _pI->target != true)
 	{
