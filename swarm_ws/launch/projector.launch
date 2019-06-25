@@ -1,0 +1,23 @@
+<launch>
+	<node pkg="visualization" type="table_vis" name="table"
+		output="screen">
+		
+		<!-- Location of assets and config files respectively -->
+		<param name="asset_path" value="/home/ssvnormandy/git/reu-swarm-ros/swarm_ws/src/visualization/assets" type="str"/>
+		<param name="conifg_path" value="/home/ssvnormandy/git/reu-swarm-ros/swarm_ws/src/visualization/cfg/calib.config" type="str"/>
+		
+		<!-- Background - setting to "None" will not draw a background - setting 
+			to "Contour" will draw a contour map - setting to a file path will draw the 
+			image in the path -->
+		<param name="background" value="/home/ssvnormandy/git/reu-swarm-ros/swarm_ws/src/visualization/assets/HockeyRink.png" type="str" />
+
+		<!-- all distances are in cm -->
+		<!-- Width is the long direction of the table -->
+		<param name="table_width" value="200" type="int" />
+		<param name="table_height" value="100" type="int" />
+
+		<!-- diameter of the robot -->
+		<param name="robot_diameter" value="5" type="int" />
+	</node>
+
+</launch>
