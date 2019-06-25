@@ -45,7 +45,7 @@ void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 	{
 		// getting pose
 		geometry_msgs::Vector3 tf = bots.poseVect.at(i).botPose.transform.translation;
-		sf::Vector2f plain_vect((float)tf.x, (float)tf.y);
+		sf::Vector2f plain_vect((float)tf.y, -(float)tf.x);
 
 		// transforming to screen frame
 		plain_vect += table_origin;
@@ -180,11 +180,12 @@ void render(sf::RenderWindow *window)
 
 	// drawing robots
 	sf::CircleShape bot;
-	bot.setRadius(6);
+        int radius = 25;
+	bot.setRadius(radius);
 	bot.setFillColor(sf::Color::Yellow);
 	for (size_t i = 0;i < bots_pos.size();i++)
 	{
-		bot.setPosition(sf::Vector2f(bots_pos[i].x - 3, bots_pos[i].y - 3));
+		bot.setPosition(sf::Vector2f(bots_pos[i].x - radius, bots_pos[i].y - radius));
 		disp.draw(bot);
 	}
 	bots_pos.clear();
