@@ -40,7 +40,7 @@ __device__ vector2f_t warpPoint(quadrilateral_t trap, size_t width,
 __global__ void transform(sf::Uint8 *cols_in, sf::Uint8 *cols_out, size_t *width, size_t *height, quadrilateral_t *trap)
 {
 	int i = blockIdx.x * blockDim.x + threadIdx.x; // finding iteration level
-	int row = i / *width;
+	int row = *height - i / *width;
 	int col = i % *width;
 	vector2f_t square_pos = {(float) col, (float) row}; // creating vector of the current position in the rectangle
 	vector2f_t trap_point = warpPoint(*trap, *width, *height, square_pos); // finding corresponding position

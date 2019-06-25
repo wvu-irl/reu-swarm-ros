@@ -22,6 +22,10 @@ ContourMap *cont; // contour plot pointer
 // sprite that is drawn to screen
 sf::Sprite displaySprite;
 
+// other graphical objects
+sf::Text rid_disp;
+sf::Font comic_sans;
+
 // quad to transform into
 quadrilateral_t g_trap;
 
@@ -36,8 +40,9 @@ sf::Vector2f operator+=(sf::Vector2f &a, sf::Vector2f b)
 
 // globals for drawing bot's locations to the table
 std::vector<sf::Vector2f> bots_pos;
+std::vector<std::string> bot_ids;
 const sf::Vector2f table_origin = sf::Vector2f(100, 50); // origin on the table relative to my origin
-																												 // in cm?
+																												 // in centimeters
 // subscription callback to update bot locations
 void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 {
@@ -54,6 +59,11 @@ void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 
 		// adding to list
 		bots_pos.push_back(plain_vect);
+		char idc[3];
+		idc[0] = bots.poseVect.at(i).botId[0];
+		idc[1] = bots.poseVect.at(i).botId[1];
+		idc[2] = '\0';
+		bot_ids.push_back(std::string(idc));
 	}
 }
 
@@ -159,13 +169,11 @@ void render(sf::RenderWindow *window)
 	sf::Sprite checker_sprite;
 	checker_sprite.setTexture(checker_texture);
 	checker_sprite.setPosition(sf::Vector2f(0,0));
-	checker_sprite.scale(1280.0 / checker.getSize().x, 800.0 / checker.getSize().y);
+	checker_sprite.scale(WIDTH / checker.getSize().x, HEIGHT / checker.getSize().y);
 	disp.draw(checker_sprite);
-#endif
-#if BACKGROUND == CONTOUR_PLOT
+#elif BACKGROUND == CONTOUR_PLOT
 	cont->render(&disp); // drawing contour plot
-#endif
-#if BACKGROUND == HOCKEY
+#elif BACKGROUND == HOCKEY
 	// drawing hockey rink
 	sf::Image rink;
 	rink.loadFromFile("src/visualization/assets/HockeyRink.png");
@@ -174,19 +182,24 @@ void render(sf::RenderWindow *window)
 	sf::Sprite rink_sprite;
 	rink_sprite.setTexture(rink_texture);
 	rink_sprite.setPosition(sf::Vector2f(0,0));
-	rink_sprite.scale(1280.0 / rink.getSize().x, 800.0 / rink.getSize().y);
+	rink_sprite.scale(WIDTH / rink.getSize().x, HEIGHT / rink.getSize().y);
 	disp.draw(rink_sprite);
 #endif
 
 	// drawing robots
 	sf::CircleShape bot;
-        int radius = 25;
+  int radius = 25;
 	bot.setRadius(radius);
+	bot.scale(1, 1.25); // scaling to  do a 2:1 screen
 	bot.setFillColor(sf::Color::Yellow);
 	for (size_t i = 0;i < bots_pos.size();i++)
 	{
 		bot.setPosition(sf::Vector2f(bots_pos[i].x - radius, bots_pos[i].y - radius));
 		disp.draw(bot);
+
+		rid_disp.setString(bot_ids.at(i).c_str());
+		rid_disp.setPosition(sf::Vector2f(bots_pos[i].x + radius, bots_pos[i].y - radius));
+		disp.draw(rid_disp);
 	}
 	bots_pos.clear();
 
@@ -229,6 +242,12 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "table_vis");
 	ros::NodeHandle n;
 
+	// Setting up universal graphics objects
+	comic_sans.loadFromFile("src/visualization/assets/ComicSansMS3.ttf");
+	rid_disp.setFont(comic_sans);
+	rid_disp.setFillColor(sf::Color::Black);
+	rid_disp.setCharacterSize(18);
+
 	// subscribing to have bot locations
 	ros::Subscriber robots = n.subscribe("/vicon_array", 1000, drawBots);
 
@@ -249,11 +268,11 @@ int main(int argc, char **argv)
 	cont = new ContourMap(sf::Rect<int>(0, 0, 1280, 800), cmap);
 
 	// adding levels
-	const double num_levels = 9.0; // number of levels to draw
-	for (double i = -10.0; i <= 10.0; i += 20.0 / num_levels)
+	const double num_levels = 10.0; // number of levels to draw
+	const double range = 20.0;
+	for (double i = -range; i <= range; i += 2 * range / num_levels)
 	{
 		cont->levels.push_back(i);
-		std::cout << "Added level: " << i << std::endl;
 	}
 #endif
 	// creating render window
