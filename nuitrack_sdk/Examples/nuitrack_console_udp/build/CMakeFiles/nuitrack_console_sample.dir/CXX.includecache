@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+../../../../swarm_ws/src/nuitrack_bridge/include/nuitrack_bridge/nuitrack_data.h
+string
+-
+
 ../../../Nuitrack/include/nuitrack/ModuleFunctions.h
 stdio.h
 -
@@ -424,6 +428,8 @@ nuitrack/types/Error.h
 
 /home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/src/main.cpp
 nuitrack/Nuitrack.h
+-
+nuitrack_bridge/nuitrack_data.h
 -
 iomanip
 -

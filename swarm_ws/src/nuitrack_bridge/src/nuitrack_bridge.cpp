@@ -1,4 +1,5 @@
 #include <iostream>
+#include <nuitrack_bridge/nuitrack_data.h>
 
 // ROS includes
 #include <ros/ros.h>
@@ -106,21 +107,28 @@ int main(int argc, char** argv) {
                 std::cout << "Socket is available." << std::endl;
                 
                 int len, n;
-                double rec;
+                //double rec;
                 
                 // Read into rec
+//                n = recvfrom(sockfd, &rec, sizeof(rec), MSG_WAITALL,
+//                        (struct sockaddr*)&cliaddr, (socklen_t*)&len);
+//
+//                std::cout << "Client sent " << rec << std::endl;
+//                
+//                // Handle this request
+//                if(send == 'x')
+//                    x = rec;
+//                else if(send == 'y')
+//                    y = rec;
+//                else if(send == 'z')
+//                    z = rec;
+                
+                nuiData rec;
                 n = recvfrom(sockfd, &rec, sizeof(rec), MSG_WAITALL,
                         (struct sockaddr*)&cliaddr, (socklen_t*)&len);
-
-                std::cout << "Client sent " << rec << std::endl;
-                
-                // Handle this request
-                if(send == 'x')
-                    x = rec;
-                else if(send == 'y')
-                    y = rec;
-                else if(send == 'z')
-                    z = rec;
+                x = rec.leftWristX;
+                y = rec.leftWristY;
+                z = rec.leftWristZ;
                 
                 break;
             }

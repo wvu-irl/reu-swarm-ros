@@ -1,5 +1,7 @@
 #include <nuitrack/Nuitrack.h>
 
+#include <nuitrack_bridge/nuitrack_data.h>
+
 #include <iomanip>
 #include <iostream>
 
@@ -76,20 +78,24 @@ void onHandUpdate(HandTrackerData::Ptr handData)
 
 void serverResponse(char rec)
 {
-    double send = 0.0;
-    
-    if(rec == 'x')
-        send = x;
-    else if(rec == 'y')
-        send = y;
-    else if(rec == 'z')
-        send = z;
-    
+    nuiData send;
+//    double send = 0.0;
+//    
+//    if(rec == 'x')
+//        send = x;
+//    else if(rec == 'y')
+//        send = y;
+//    else if(rec == 'z')
+//        send = z;
+//    
     // Send data
-    if(sendto(sockfd, &send, sizeof(send), MSG_CONFIRM,
+    send.leftWristX = 1.1;
+    send.leftWristY = 2.2;
+    send.leftWristZ = 3.3;
+    if(sendto(sockfd, (void*)&send, sizeof(send), MSG_CONFIRM,
             (const struct sockaddr*)&cliaddr, sizeof(cliaddr)) >= 0)
     {
-        std::cout << "Sent " << send << " to client." << std::endl;
+        std::cout << "Sent " /*<< send*/ << " to client." << std::endl;
     }
     else
     {

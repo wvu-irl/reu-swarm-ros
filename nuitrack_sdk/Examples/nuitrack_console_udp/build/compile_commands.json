@@ -1,12 +1,12 @@
 [
 {
   "directory": "/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build",
-  "command": "/usr/bin/g++   -D_GLIBCXX_USE_CXX11_ABI=0 -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/. -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include/middleware   -pthread -g3 -gdwarf-2   -std=c++11 -o CMakeFiles/client_test.dir/src/client.cpp.o -c /home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/src/client.cpp",
+  "command": "/usr/bin/g++   -D_GLIBCXX_USE_CXX11_ABI=0 -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/. -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include/middleware -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../../swarm_ws/src/nuitrack_bridge/include   -pthread -g3 -gdwarf-2   -std=c++11 -o CMakeFiles/client_test.dir/src/client.cpp.o -c /home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/src/client.cpp",
   "file": "/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/src/client.cpp"
 },
 {
   "directory": "/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build",
-  "command": "/usr/bin/g++   -D_GLIBCXX_USE_CXX11_ABI=0 -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/. -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include/middleware   -pthread -g3 -gdwarf-2   -std=c++11 -o CMakeFiles/nuitrack_console_sample.dir/src/main.cpp.o -c /home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/src/main.cpp",
+  "command": "/usr/bin/g++   -D_GLIBCXX_USE_CXX11_ABI=0 -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/. -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include/middleware -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../../swarm_ws/src/nuitrack_bridge/include   -pthread -g3 -gdwarf-2   -std=c++11 -o CMakeFiles/nuitrack_console_sample.dir/src/main.cpp.o -c /home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/src/main.cpp",
   "file": "/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/src/main.cpp"
 }
 ]

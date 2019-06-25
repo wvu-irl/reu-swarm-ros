@@ -18,6 +18,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../."
   "../../../Nuitrack/include"
   "../../../Nuitrack/include/middleware"
+  "../../../../swarm_ws/src/nuitrack_bridge/include"
   )
 
 # Targets to which this target links.

@@ -6,5 +6,5 @@ CXX_FLAGS =  -pthread -g3 -gdwarf-2   -std=c++11
 
 CXX_DEFINES = -D_GLIBCXX_USE_CXX11_ABI=0
 
-CXX_INCLUDES = -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/. -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include/middleware 
+CXX_INCLUDES = -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/. -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/include/middleware -I/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../../swarm_ws/src/nuitrack_bridge/include 
 
