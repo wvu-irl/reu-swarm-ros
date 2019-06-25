@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp
+CMAKE_SOURCE_DIR = /home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/build
+CMAKE_BINARY_DIR = /home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles /home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles /home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -111,6 +111,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named client_test
+
+# Build rule for target.
+client_test: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 client_test
+.PHONY : client_test
+
+# fast build rule for target.
+client_test/fast:
+	$(MAKE) -f CMakeFiles/client_test.dir/build.make CMakeFiles/client_test.dir/build
+.PHONY : client_test/fast
+
+#=============================================================================
 # Target rules for targets named nuitrack_console_sample
 
 # Build rule for target.
@@ -122,6 +135,33 @@ nuitrack_console_sample: cmake_check_build_system
 nuitrack_console_sample/fast:
 	$(MAKE) -f CMakeFiles/nuitrack_console_sample.dir/build.make CMakeFiles/nuitrack_console_sample.dir/build
 .PHONY : nuitrack_console_sample/fast
+
+src/client.o: src/client.cpp.o
+
+.PHONY : src/client.o
+
+# target to build an object file
+src/client.cpp.o:
+	$(MAKE) -f CMakeFiles/client_test.dir/build.make CMakeFiles/client_test.dir/src/client.cpp.o
+.PHONY : src/client.cpp.o
+
+src/client.i: src/client.cpp.i
+
+.PHONY : src/client.i
+
+# target to preprocess a source file
+src/client.cpp.i:
+	$(MAKE) -f CMakeFiles/client_test.dir/build.make CMakeFiles/client_test.dir/src/client.cpp.i
+.PHONY : src/client.cpp.i
+
+src/client.s: src/client.cpp.s
+
+.PHONY : src/client.s
+
+# target to generate assembly for a file
+src/client.cpp.s:
+	$(MAKE) -f CMakeFiles/client_test.dir/build.make CMakeFiles/client_test.dir/src/client.cpp.s
+.PHONY : src/client.cpp.s
 
 src/main.o: src/main.cpp.o
 
@@ -158,7 +198,11 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... client_test"
 	@echo "... nuitrack_console_sample"
+	@echo "... src/client.o"
+	@echo "... src/client.i"
+	@echo "... src/client.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

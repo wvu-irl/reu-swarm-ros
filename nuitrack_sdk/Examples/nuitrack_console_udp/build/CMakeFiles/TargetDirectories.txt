@@ -1,3 +1,4 @@
-/home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/edit_cache.dir
-/home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/rebuild_cache.dir
-/home/air/swarm_ws/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/nuitrack_console_sample.dir
+/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/edit_cache.dir
+/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/rebuild_cache.dir
+/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/client_test.dir
+/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/nuitrack_console_sample.dir

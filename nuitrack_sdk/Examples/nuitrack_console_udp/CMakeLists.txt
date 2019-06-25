@@ -36,6 +36,7 @@ set(SOURCES
     src/main.cpp)
     
 add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(client_test src/client.cpp)
 
 set(LIBS nuitrack)
 
