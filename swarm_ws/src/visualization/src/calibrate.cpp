@@ -3,7 +3,7 @@
  * g++ calibrate.cpp -o Calibrate.o -lsfml-graphics -lsfml-window -lsfml-system
  * 
  */
-
+#include <ros/ros.h>
 #include <SFML/Graphics.hpp>
 #include <unistd.h>
 #include <math.h>
@@ -12,21 +12,28 @@
 #include <iostream>
 #include <fstream>
 
+// dimensions for window
 #define WIDTH 1280
 #define HEIGHT 800
 
+// definition for debugging messages
 #define DEBUG 0
 
+// dot product operator
 double operator*(sf::Vector2f a, sf::Vector2f b)
 {
 	return a.x * b.x + a.y * b.y;
 }
 
+// instriction list
 const sf::String instructions[] = { "Select TOP LEFT", "Select TOP RIGHT",
 		"Select BOTTOM RIGHT", "Select BOTTOM LEFT",
 		"Press space to write or R to reset" };
+
+// current instruction
 static int state = 0;
 
+// calibration values struct
 typedef struct
 {
 	sf::Vector2f top_left;
@@ -35,27 +42,37 @@ typedef struct
 	sf::Vector2f bottom_left;
 } calibrate;
 
+// drawing instructions
 sf::Font fon;
 sf::Text instruct;
 
+// current calibration values
 calibrate g_calib;
 
+// window scale
+// if the window changes size SFML changes scale
 double scaleX = 1, scaleY = 1;
 
+/**
+ * Renders all the necessary visual elements to the window
+ *
+ * window is a pointer to the render window created in main
+ */
 void render(sf::RenderWindow *window)
 {
 #if DEBUG
 	std::cout << "Started Rendering" << std::endl;
 #endif
+	// creating vertex array to draw later
 	sf::VertexArray trap(sf::LinesStrip, state + 1 + (state == 3 ? 1 : 0));
 #if DEBUG
 	std::cout << "Created vertex array size : "
 			<< (state + 1 + (state == 3 ? 1 : 0)) << std::endl;
 #endif
-	switch (state)
+	switch (state) // checking state
 	{
 	default:
-	case 3:
+	case 3: // cascading switch for each point
 #if DEBUG
 		std::cout << "Drawing state 3" << std::endl;
 #endif
@@ -85,26 +102,11 @@ void render(sf::RenderWindow *window)
 #if DEBUG
 	std::cout << "Drawing lines" << std::endl;
 #endif
-	window->draw(trap);
-	window->draw(instruct);
+	window->draw(trap); // draw vertex array
+	window->draw(instruct); // draw instruction text
 }
 
-double anglebetween(double x0, double y0, double x1, double y1)
-{
-	if (x0 == x1)
-	{
-		if (y0 > y1)
-		{
-			return -M_PI_2;
-		}
-		else
-		{
-			return M_PI_2;
-		}
-	}
-	return atan((y1 - y0) / (x1 - x0)) + (x1 < x0 ? M_PI : 0);
-}
-
+// sets the text of the instruction and re-centers it
 void changeInstruction(sf::String str)
 {
 	instruct.setString(str);
@@ -113,18 +115,24 @@ void changeInstruction(sf::String str)
 			HEIGHT / 2));
 }
 
+// main for hte node
 int main(int argc, char **argv)
 {
+	ros::init(argc, argv, "calibrate");
+
 #if DEBUG
 	std::cout << "Started" << std::endl;
 #endif
+	// initial calibration state
 	state = 0;
 	g_calib.top_left = sf::Vector2f(0, 0);
 	g_calib.top_right = sf::Vector2f(0, 0);
 	g_calib.bottom_right = sf::Vector2f(0, 0);
 	g_calib.bottom_left = sf::Vector2f(0, 0);
 
+	// loading font
 	fon.loadFromFile(sf::String("src/visualization/assets/ComicSansMS3.ttf"));
+	// setting up instruction text
 	instruct.setFillColor(sf::Color::White);
 	instruct.setFont(fon);
 	instruct.setCharacterSize(20);
@@ -132,12 +140,13 @@ int main(int argc, char **argv)
 #if DEBUG
 	std::cout << "Loaded instruction" << std::endl;
 #endif
+	// creating render window
 	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Projector Calibration",
 			sf::Style::Default);
 #if DEBUG
 	std::cout << "Loaded window" << std::endl;
 #endif
-	while (window.isOpen())
+	while (window.isOpen()) // main loop
 	{
 #if DEBUG
 		std::cout << "Entered loop" << std::endl;
@@ -148,21 +157,22 @@ int main(int argc, char **argv)
 #if DEBUG
 			std::cout << "Entered event loop" << std::endl;
 #endif
-			switch (event.type)
+			switch (event.type) // event handling
 			{
-			case sf::Event::Closed:
+			case sf::Event::Closed: // close window event
 #if DEBUG
 				std::cout << "Close Event" << std::endl;
 #endif
 				window.close();
 				break;
-			case sf::Event::MouseMoved:
+			case sf::Event::MouseMoved: // mouse moved event
 #if DEBUG
 				std::cout << "Mouse moved Event" << std::endl;
 #endif
-				switch (state)
+				switch (state) // checking which vertex to move
 				{
 				case 0:
+					// each mouse move is scaled by the current scale
 					g_calib.top_left = sf::Vector2f(event.mouseMove.x * scaleX,
 							event.mouseMove.y * scaleY);
 					break;
@@ -182,32 +192,35 @@ int main(int argc, char **argv)
 					break;
 				}
 				break;
-			case sf::Event::Resized:
+			case sf::Event::Resized: // window resize event
+				// recalculating scale factors
 				scaleX = (float) WIDTH / (float) event.size.width;
 				scaleY = (float) HEIGHT / (float) event.size.height;
 				break;
-			case sf::Event::MouseButtonReleased:
+			case sf::Event::MouseButtonReleased: // mouse pressed
 #if DEBUG
 				std::cout << "Mouse released" << std::endl;
 #endif
-				state += state < 4 ? 1 : 0;
-				changeInstruction(instructions[state]);
+				state += state < 4 ? 1 : 0; // incrementing state reasonably
+				changeInstruction(instructions[state]); // updating instructions
 				break;
-			case sf::Event::KeyPressed:
+			case sf::Event::KeyPressed: // keyboard events
 #if DEBUG
 				std::cout << "Key Press event" << std::endl;
 #endif
-				if (event.key.code == sf::Keyboard::R)
+				if (event.key.code == sf::Keyboard::R) // reset key
 				{
 					state = 0;
 					changeInstruction(sf::String("Select TOP LEFT"));
 				}
-				else if (state == 4 && event.key.code == sf::Keyboard::Space)
+				else if (state == 4 && event.key.code == sf::Keyboard::Space) // write event
 				{
+					// writing vectors to csv file
 					std::ofstream file;
-					file.open("src/visualization/cfg/calib.config", std::ios::out);
-					if (file)
+					file.open("src/visualization/cfg/calib.config", std::ios::out); // file location
+					if (file) // checking for errors
 					{
+						// writing values
 						file << g_calib.top_left.x << "," << g_calib.top_left.y
 								<< std::endl;
 						file << g_calib.top_right.x << "," << g_calib.top_right.y
@@ -222,7 +235,7 @@ int main(int argc, char **argv)
 					{
 						std::cout << "\033[30;41mDid not write\033[0m" << std::endl;
 					}
-					changeInstruction("Done, press R to re-calibrate");
+					changeInstruction("Done, press R to re-calibrate"); // final instruction
 				}
 				break;
 			}
