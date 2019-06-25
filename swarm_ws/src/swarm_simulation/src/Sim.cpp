@@ -248,6 +248,8 @@ void Sim::Run(ros::NodeHandle _n)
 				targets.point.at(0).vy = 0;
 				pI.dragging = false;
 				pI.prevClick = false;
+				pI.bot = false;
+				pI.target = false;
 			}
 		}
 		//-------------------=End=---------------
