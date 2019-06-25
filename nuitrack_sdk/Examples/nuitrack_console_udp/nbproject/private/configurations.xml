@@ -12,6 +12,10 @@
               <in>CMakeCXXCompilerId.cpp</in>
             </df>
           </df>
+          <df name="client_test.dir">
+            <df name="src">
+            </df>
+          </df>
           <df name="CMakeTmp">
           </df>
           <df name="nuitrack_console_sample.dir">
@@ -46,7 +50,7 @@
       </df>
     </df>
   </logicalFolder>
-  <projectmakefile>Makefile</projectmakefile>
+  <projectmakefile>build/Makefile</projectmakefile>
   <confs>
     <conf name="Default" type="0">
       <toolsSet>
@@ -85,7 +89,7 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}"</runcommand>
-        <rundir>.</rundir>
+        <rundir>build</rundir>
         <buildfirst>false</buildfirst>
         <terminal-type>0</terminal-type>
         <remove-instrumentation>0</remove-instrumentation>

@@ -64,14 +64,40 @@ void onHandUpdate(HandTrackerData::Ptr handData)
         return;
     }
 
-    std::cout << std::fixed << std::setprecision(3);
-    std::cout << "Right hand position: "
-                 "x = " << rightHand->xReal << ", "
-                 "y = " << rightHand->yReal << ", "
-                 "z = " << rightHand->zReal << std::endl;
+//    std::cout << std::fixed << std::setprecision(3);
+//    std::cout << "Right hand position: "
+//                 "x = " << rightHand->xReal << ", "
+//                 "y = " << rightHand->yReal << ", "
+//                 "z = " << rightHand->zReal << std::endl;
     x = rightHand->xReal;
     y = rightHand->yReal;
     z = rightHand->zReal;
+}
+
+void serverResponse(char rec)
+{
+    double send = 0.0;
+    
+    if(rec == 'x')
+        send = x;
+    else if(rec == 'y')
+        send = y;
+    else if(rec == 'z')
+        send = z;
+    
+    // Send data
+    if(sendto(sockfd, &send, sizeof(send), MSG_CONFIRM,
+            (const struct sockaddr*)&cliaddr, sizeof(cliaddr)) >= 0)
+    {
+        std::cout << "Sent " << send << " to client." << std::endl;
+    }
+    else
+    {
+        std::cout << "Error in sending!" << std::endl;
+    }
+    
+    // Reset client address
+    memset(&cliaddr, 0, sizeof(cliaddr)); 
 }
 
 void serverLoop(void)
@@ -114,16 +140,16 @@ void serverLoop(void)
                 std::cout << "Socket is available." << std::endl;
                 
                 int len, n;
-                double rec;
+                char rec;
                 
                 // Read into rec
                 n = recvfrom(sockfd, &rec, sizeof(rec), MSG_WAITALL,
                         (struct sockaddr*)&cliaddr, (socklen_t*)&len);
 
-                std::cout << "Client sent " << rec << std::endl;
+                std::cout << "Client sent " << (uint8_t)rec << std::endl;
                 
-                // Reset client address
-                memset(&cliaddr, 0, sizeof(cliaddr)); 
+                // Handle this request
+                serverResponse(rec);
                 
                 break;
             }

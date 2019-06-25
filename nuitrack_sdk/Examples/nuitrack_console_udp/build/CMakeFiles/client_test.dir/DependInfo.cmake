@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/src/main.cpp" "/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/nuitrack_console_sample.dir/src/main.cpp.o"
+  "/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/src/client.cpp" "/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/build/CMakeFiles/client_test.dir/src/client.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

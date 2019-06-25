@@ -41,5 +41,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
+  "CMakeFiles/client_test.dir/DependInfo.cmake"
   "CMakeFiles/nuitrack_console_sample.dir/DependInfo.cmake"
   )
