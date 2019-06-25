@@ -105,7 +105,8 @@ void Sim::obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 }
 void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
-	if (!update) {
+	if (!update)
+	{
 		targets = msg;
 		update = true;
 	}
@@ -388,7 +389,8 @@ void Sim::Render() //draws changes in simulation states to the window.
 	window.clear();
 	drawGoals();
 	flock.flocking(&targets);
-	if (update) {
+	if (update)
+	{
 		updateTargetPos();
 		update = false;
 	}

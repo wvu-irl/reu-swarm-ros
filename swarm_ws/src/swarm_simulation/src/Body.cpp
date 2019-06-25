@@ -426,12 +426,17 @@ void Body::targetInElastic(int i, float _t_sep)
 		float dy = 300 - targets->point.at(i).y * 3 - location.y;
 		float dx = 150 + targets->point.at(i).x * 3 - location.x;
 		float abs_theta = angleConvert(heading); //angle from bot to the target
-		float phi = angleConvert(angle(Pvector(dy,dx)) + M_PI_2);
+		float phi = angleConvert(angle(Pvector(dx,dy)) + M_PI_2);
 
 		std::cout<<"---BOT-- "<<id[0]<<id[1]<<" With the puck"<<std::endl;
 		std::cout<<"dx,dy: "<<dx<<","<<dy<<std::endl;
 		std::cout<<"heading: "<<heading*180/M_PI<<std::endl;
+
+		float sep_a = angleConvert(angle(Pvector(dx,dy)));
+  	std::cout<<"seperation angle: "<<sep_a*180/M_PI<<std::endl;
+
 		std::cout<<"abs_theta: "<<abs_theta*180/M_PI<<std::endl;
+
 		std::cout<<"phi: "<<phi*180/M_PI<<std::endl;
 
 		//calculates force to be applied by the bot
