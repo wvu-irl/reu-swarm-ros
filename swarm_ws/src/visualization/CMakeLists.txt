@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   wvu_swarm_std_msgs
   std_msgs
+  geometry_msgs
 )
 
 find_package(CUDA)

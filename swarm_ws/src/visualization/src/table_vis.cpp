@@ -1,3 +1,9 @@
+#include <ros/ros.h>
+#include <wvu_swarm_std_msgs/vicon_bot_array.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/Transform.h>
+#include <geometry_msgs/Vector3.h>
+
 #include "../cfg/table_settings.h"
 #include "contour.h"
 #include "transform/perspective_transform_gpu.h"
@@ -8,6 +14,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #if BACKGROUND == CONTOUR_PLOT
 ContourMap *cont;
@@ -18,6 +25,27 @@ sf::Sprite displaySprite;
 quadrilateral_t g_trap;
 
 static int g_tick = 0;
+
+sf::Vector2f operator+=(sf::Vector2f &a, sf::Vector2f b)
+{
+	return a = sf::Vector2f(a.x + b.x, a.y + b.y);
+}
+
+std::vector<sf::Vector2f> bots_pos;
+const sf::Vector2f table_origin = sf::Vector2f(100, 50); // origin on the table relative to my origin
+																												 // in cm?
+void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
+{
+	for (size_t i = 0;i < bots.poseVect.size();i++)
+	{
+		geometry_msgs::Vector3 tf = bots.poseVect.at(i).botPose.transform.translation;
+		sf::Vector2f plain_vect((float)tf.x, (float)tf.y);
+		plain_vect += table_origin;
+		plain_vect.x *= WIDTH / 200.0;
+		plain_vect.y *= HEIGHT / 100.0;
+		bots_pos.push_back(plain_vect);
+	}
+}
 
 vector2f_t readVector(std::string vect)
 {
@@ -73,6 +101,17 @@ void render(sf::RenderWindow *window)
 {
 	sf::RenderTexture disp;
 	disp.create(WIDTH, HEIGHT);
+
+	sf::CircleShape bot;
+	bot.setRadius(6);
+	bot.setFillColor(sf::Color::Yellow);
+	for (size_t i = 0;i < bots_pos.size();i++)
+	{
+		bot.setPosition(sf::Vector2f(bots_pos[i].x - 3, bots_pos[i].y - 3));
+		disp.draw(bot);
+	}
+	bots_pos.clear();
+
 #if BACKGROUND == CHECKERBOARD
 	sf::Image checker;
 	checker.loadFromFile("src/visualization/assets/Checkerboard.jpg");
@@ -130,6 +169,11 @@ void render(sf::RenderWindow *window)
 
 int main(int argc, char **argv)
 {
+	ros::init(argc, argv, "table_vis");
+	ros::NodeHandle n;
+
+	ros::Subscriber robots = n.subscribe("/vicon_array", 1000, drawBots);
+
 	calibrateFromFile("src/visualization/cfg/calib.config");
 
 #if BACKGROUND == CONTOUR_PLOT
@@ -172,6 +216,7 @@ int main(int argc, char **argv)
 			render(&window);
 			window.display();
 		}
+		ros::spinOnce();
 		usleep(1000);
 	}
 }
