@@ -274,8 +274,8 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
 				event);
 
-		clickNdragBots(&_pI, mX, mY, event); //click and drag works contingently. 
-		clickNdragTarget(&_pI, mX, mY, event);
+		clickNdragBots(&_pI, mX, mY, event); //runs click and drag for bots
+		clickNdragTarget(&_pI, mX, mY, event); //runs click and drag for targets.
 
 	}
 	return _pI; //tracks state of dragging (see sim.h)
@@ -322,6 +322,39 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //
 
 
+}
+
+void Sim::Render() //draws changes in simulation states to the window.
+{
+	window.clear();
+	drawGoals();
+	flock.flocking(&targets);
+	if (update)
+	{
+		updateTargetPos();
+		update = false;
+	}
+	drawObstacles();
+	drawTargets();
+	//drawFlows();
+
+// Draws all of the bodies out, and applies functions that are needed to update.
+	for (int i = 0; i < shapes.size(); i++)
+	{ // Matches up the location of the shape to the body
+		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
+		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
+
+		float theta = 180.0 / M_PI * (flock.flock.at(i).heading);
+		shapes[i].setRotation(90 - theta); //alignes body with direction of motion
+		lines[i].setRotation(-theta); //alignes line with direction of motion
+		//^for some reason, sfml has clockwise as +theta direction.
+
+		window.draw(shapes[i]);
+		window.draw(lines[i]);
+		flock.flock.at(i).updatedCommand = false;
+		flock.flock.at(i).updatedPosition = false;
+	}
+	window.display(); //updates display
 }
 
 void Sim::clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _event)//for click and drag on bots
@@ -400,39 +433,6 @@ void Sim::clickNdragTarget(PrevIteration *_pI, float _mX, float _mY, sf::Event _
 			i++;
 		}
 	}
-}
-
-void Sim::Render() //draws changes in simulation states to the window.
-{
-	window.clear();
-	drawGoals();
-	flock.flocking(&targets);
-	if (update)
-	{
-		updateTargetPos();
-		update = false;
-	}
-	drawObstacles();
-	drawTargets();
-	//drawFlows();
-
-// Draws all of the bodies out, and applies functions that are needed to update.
-	for (int i = 0; i < shapes.size(); i++)
-	{ // Matches up the location of the shape to the body
-		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
-		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
-
-		float theta = 180.0 / M_PI * (flock.flock.at(i).heading);
-		shapes[i].setRotation(90 - theta); //alignes body with direction of motion
-		lines[i].setRotation(-theta); //alignes line with direction of motion
-		//^for some reason, sfml has clockwise as +theta direction.
-
-		window.draw(shapes[i]);
-		window.draw(lines[i]);
-		flock.flock.at(i).updatedCommand = false;
-		flock.flock.at(i).updatedPosition = false;
-	}
-	window.display(); //updates display
 }
 
 bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event)
