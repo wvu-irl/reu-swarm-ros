@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include <math.h>
 #include <wvu_swarm_std_msgs/robot_command_array.h>
+#include <swarm_simulation/Font.h>
 //#include "ros/ros.h"
 bool update;
 void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
@@ -278,7 +279,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 				|| (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
 		{
 			window.close();
-		} //-----------------------------------------------------------
+		} //------------------------<swarm_simulation/Sim.h>-----------------------------------
 
 		//------------------allows for pause. Press the Pause button.-----------
 		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
@@ -364,7 +365,7 @@ void Sim::Render() //draws changes in simulation states to the window.
 		flock.flock.at(i).updatedCommand = false;
 		flock.flock.at(i).updatedPosition = false;
 	}
-	//addText();
+	addText();
 	window.display(); //updates display
 }
 void Sim::addText()
@@ -372,7 +373,7 @@ void Sim::addText()
 
 	sf::Font font;
 	//this is not good... /home/jeoseo/git/reu-swarm-ros/swarm_ws
-	font.loadFromFile("/home/jeoseo/git/reu-swarm-ros/swarm_ws/src/swarm_simulation/include/swarm_simulation/ComicSansMS3.ttf");
+	font.loadFromMemory(&ComicSansMS3_ttf,  ComicSansMS3_ttf_len);
 
 	for (int i = 0; i < shapes.size(); i++)
 	{
@@ -382,7 +383,7 @@ void Sim::addText()
 		sf::Text text;
 		text.setFont(font);
 		text.setCharacterSize(10);
-		text.setColor(sf::Color::Magenta);
+		text.setColor(sf::Color::Red);
 
 		std::string temp(flock.getBody(i).id);
 		text.setString(temp.substr(0,2));
