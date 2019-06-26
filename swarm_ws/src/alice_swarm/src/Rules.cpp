@@ -68,8 +68,6 @@ AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bot
 			count++;
 		}
 	}
-	//This garbage fire of an equation produces a curve that looks like a translated square root curve capped at 1.
-
 	x /= count;
 	y /= count;
 	float d = pow(pow(x,2)+pow(y,2),0.5);
