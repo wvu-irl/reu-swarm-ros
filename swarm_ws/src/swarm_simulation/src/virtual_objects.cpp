@@ -259,7 +259,7 @@ void makeFlows(ros::Publisher _pub)
 	std::pair<float,float> goal2(0,-100); // creating goal 2
 	if (temp_targets.point.size() != 0) { // checking that there are targets to form flows from
 		createPuckFlow(vp_vector,temp_targets.point.at(0),goal1,1); // creates flow around puck
-		//createPuckFlow(vp_vector,temp_targets.point.at(0),goal2,2);
+		createPuckFlow(vp_vector,temp_targets.point.at(0),goal2,2);
 	}
 
 	_pub.publish(vp_vector); // publishing

@@ -145,7 +145,7 @@ void Sim::Run(ros::NodeHandle _n)
 			'V', 'N', 'V', 'N', 'E', 'C', 'O', 'N', 'D', 'S', 'D', 'M', 'T', 'W', 'A', 'I', 'D', 'W', 'Y', 'U', 'T', 'O', 'K',
 			'N', 'M', 'A', 'Z', 'A', 'K', 'H', 'I' };
 
-	int x = 50; //x inital positions for the bots.
+	int x = 50; //x initial positions for the bots.
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -175,7 +175,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 		//creates the red line at the head of each bot.
 		sf::RectangleShape line(sf::Vector2f(5, 2));
-		line.setFillColor(sf::Color::Red);
+		line.setFillColor(sf::Color::Black);
 		line.setPosition(b.location.x, b.location.y);
 		line.setOrigin(-2, 1);
 
@@ -186,7 +186,7 @@ void Sim::Run(ros::NodeHandle _n)
 		//saves a vector of lines (one for each bot).
 		lines.push_back(line);
 
-		//draw all obejcts on window.
+		//draw all objects on window.
 		window.draw(shape);
 		window.draw(line);
 
@@ -243,7 +243,7 @@ void Sim::Run(ros::NodeHandle _n)
 		{
 			for (int j = 0; j<2; j++)
 			{
-				std::cout<<winner<<" has won the game!!!!!!!!!!!!"<<std::endl;
+				std::cout<<winner<<" has won the game!!!"<<std::endl;
 			}
 			game = false;
 			for(int i = 0; i < targets.point.size(); i ++)
@@ -262,7 +262,7 @@ void Sim::Run(ros::NodeHandle _n)
 	}
 }
 
-PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphics window
+PrevIteration Sim::HandleInput(PrevIteration _pI)		//handles input to the graphics window
 {
 
 	sf::Event event;
@@ -293,12 +293,12 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 	return _pI; //tracks state of dragging (see sim.h)
 
 
-//	// Checks or A to be pressed, draws and adds bodies to flock if so.
+//	// Checks for A to be pressed, draws and adds bodies to flock if so.
 //	  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
 //	        // Gets mouse coordinates, sets that as the location of the body and the shape
 //	        sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
 //	        Body b(mouseCoords.x, mouseCoords.y, false);
-//	        sf::CircleShape shape(4);
+//	        sf::CircleShape shape(0);
 //
 //	        // Changing visual properties of newly created body
 //	        shape.setPosition(mouseCoords.x, mouseCoords.y);
@@ -317,22 +317,12 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 //	    }
 //
 //	    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Delete)) {
-//	          // Gets mouse coordinates, sets that as the location of the body and the shape
-//	          sf::Vector2i mouseCoords = sf::Mouse::getPosition(window);
-//	          Body b(mouseCoords.x, mouseCoords.y, false);
-//	          sf::CircleShape shape(4);
 //
-//	          // Changing visual properties of newly created body
-//	          shape.setPosition(mouseCoords.x, mouseCoords.y);
-//	          shape.setOutlineColor(sf::Color::White);
-//	          shape.setFillColor(sf::Color::White);
-//	          shape.setOutlineColor(sf::Color::White);
-//	          shape.setOutlineThickness(1);
-//	          shape.setRadius(bodiesSize);
 //
-//	          //deletes bodies from the second through the hird element
+//	          //deletes bodies from the second through the third element
 //	          shapes.erase(shapes.begin() + 1, shapes.begin() + 2);
 //
+//	    }
 }
 
 void Sim::Render() //draws changes in simulation states to the window.
@@ -356,8 +346,8 @@ void Sim::Render() //draws changes in simulation states to the window.
 		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
 		float theta = 180.0 / M_PI * (flock.flock.at(i).heading);
-		shapes[i].setRotation(90 - theta); //alignes body with direction of motion
-		lines[i].setRotation(-theta); //alignes line with direction of motion
+		shapes[i].setRotation(90 - theta); //aligns body with direction of motion
+		lines[i].setRotation(-theta); //aligns line with direction of motion
 		//^for some reason, sfml has clockwise as +theta direction.
 
 		window.draw(shapes[i]);
@@ -368,11 +358,10 @@ void Sim::Render() //draws changes in simulation states to the window.
 	addText();
 	window.display(); //updates display
 }
-void Sim::addText()
+void Sim::addText()//adds text for the state abbreviations
 {
 
 	sf::Font font;
-	//this is not good... /home/jeoseo/git/reu-swarm-ros/swarm_ws
 	font.loadFromMemory(&ComicSansMS3_ttf,  ComicSansMS3_ttf_len);
 
 	for (int i = 0; i < shapes.size(); i++)
@@ -496,7 +485,6 @@ void Sim::clickNdragTarget(PrevIteration *_pI, float _mX, float _mY, sf::Event _
 		targets.point.at(i).x = sf::Mouse::getPosition(window).x / 3 - 50;
 		; //event.mouseButton.x;
 		targets.point.at(i).y = sf::Mouse::getPosition(window).y / -3 + 100; //event.mouseButton.y;
-		std::cout << "yo" << std::endl;
 	}
 	if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
 			&& _pI->prevClick == true && _pI->target == true)
@@ -581,7 +569,7 @@ void Sim::drawFlows()//draws flows (basically a vector field)
 		window.draw(line);
 
 		sf::RectangleShape line1(sf::Vector2f(1, 1)); //gives vector direction
-		line1.setFillColor(sf::Color::Red);
+		line1.setFillColor(sf::Color::Black);
 		line1.setPosition(flows.flow.at(i).x * 3 + 150 + x2, 300 + y2 - flows.flow.at(i).y * 3);
 		line1.setOrigin(-1, 0);
 		line1.setRotation(-flows.flow.at(i).theta * 180 / M_PI + 130);
@@ -632,7 +620,7 @@ void Sim::drawObstacles()//draws obstacles
 
 //-#######################Air Hockey Specific Functions ###################################
 
-void Sim::updateTargetPos() //specificly a free particle (puck) with damping. For Airhockey.
+void Sim::updateTargetPos() //specifically a free particle (puck) with damping. For Air hockey.
 {
 	for (int i = 0; i < targets.point.size(); i++)
 	{
@@ -684,7 +672,7 @@ void Sim::winCheck(int i) //checks if the game has been won.
 	}
 }
 
-void Sim::drawGoals() //draws the goal posts for airhockey.
+void Sim::drawGoals() //draws the goal posts for air hockey.
 {
 	sf::RectangleShape g1(sf::Vector2f(5, 5));
 	sf::RectangleShape g2(sf::Vector2f(5, 5));
