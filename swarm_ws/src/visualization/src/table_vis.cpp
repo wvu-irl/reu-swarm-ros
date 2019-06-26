@@ -28,7 +28,7 @@ static int g_robot_diameter;
 #define HEIGHT 800
 
 // turns on verbose mode
-#define TAB_DEBUG 0
+#define TAB_DEBUG 1
 
 ContourMap *cont; // contour plot pointer
 
@@ -59,8 +59,7 @@ sf::Vector2f operator-(sf::Vector2f a, sf::Vector2f b)
 // globals for drawing bot's locations to the table
 std::vector<sf::Vector2f> bots_pos;
 std::vector<std::string> bot_ids;
-const sf::Vector2f table_origin = sf::Vector2f(g_table_width / 2,
-		g_table_height / 2); // origin on the table relative to my origin
+sf::Vector2f table_origin; // origin on the table relative to my origin
 // in centimeters
 
 // globals for drawing obstacles
@@ -71,9 +70,9 @@ std::vector<sf::Vector2f> targets;
 
 sf::Vector2f convertCoordinate(sf::Vector2f a)
 {
-	sf::Vector2f tab_vect(a.y, -a.x);
+	sf::Vector2f tab_vect(a.y + table_origin.x, a.x + table_origin.y);
 
-	tab_vect = tab_vect + table_origin;
+	//tab_vect = tab_vect + table_origin;
 	tab_vect.x *= (double) WIDTH / g_table_width;
 	tab_vect.y *= (double) HEIGHT / g_table_height;
 	return tab_vect;
@@ -82,6 +81,7 @@ sf::Vector2f convertCoordinate(sf::Vector2f a)
 // Subscription callback for goals
 void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
 {
+        targets.clear();
 	for (size_t i = 0; i < goals.point.size(); i++)
 	{
 		wvu_swarm_std_msgs::vicon_point pnt = goals.point.at(i);
@@ -92,6 +92,7 @@ void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
 // obstacle subscription callback
 void drawObstacles(wvu_swarm_std_msgs::vicon_points points)
 {
+        obstacles.clear();
 	for (size_t i = 0; i < points.point.size(); i++)
 	{
 		wvu_swarm_std_msgs::vicon_point pnt = points.point.at(i);
@@ -102,6 +103,7 @@ void drawObstacles(wvu_swarm_std_msgs::vicon_points points)
 // subscription callback to update bot locations
 void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 {
+        bots_pos.clear();
 	for (size_t i = 0; i < bots.poseVect.size(); i++)
 	{
 		// getting pose
@@ -244,7 +246,6 @@ void render(sf::RenderWindow *window)
 		obs.setPosition(obstacles.at(i) - sf::Vector2f(2, 2));
 		disp.draw(obs);
 	}
-	obstacles.clear();
 
 	// draw targets
 	sf::CircleShape tar;
@@ -256,7 +257,7 @@ void render(sf::RenderWindow *window)
 		tar.setPosition(targets.at(i) - sf::Vector2f(2, 2));
 		disp.draw(tar);
 	}
-	targets.clear();
+	
 
 	// drawing robots
 	sf::CircleShape bot;
@@ -275,7 +276,7 @@ void render(sf::RenderWindow *window)
 				sf::Vector2f(bots_pos[i].x + radius, bots_pos[i].y - radius));
 		disp.draw(rid_disp);
 	}
-	bots_pos.clear();
+	
 
 	// filling image
 	disp.display();
@@ -309,6 +310,8 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle n_priv("~");
 
+        ros::Rate rate(50);
+        
 	std::string assets, config;
 
 	n_priv.param < std::string
@@ -320,14 +323,13 @@ int main(int argc, char **argv)
 	n_priv.param<int>("table_width", g_table_width, 200);
 	n_priv.param<int>("table_height", g_table_height, 100);
 	n_priv.param<int>("robot_diameter", g_robot_diameter, 5);
+        
+        table_origin = sf::Vector2f(g_table_width / 2,
+		g_table_height / 2);
 
 #if TAB_DEBUG
-	std::cout << "Got params:\n\t" << g_background << "\n\t" << g_table_width
+	std::cout << "Got params:\n\t" << g_background << "\n\t" << config << "\n\t" << g_table_width
 			<< "\n\t" << g_table_height << "\n\t" << g_robot_diameter << std::endl;
-
-	char strDir[129] = { 0 };
-	puts(getcwd(strDir, 128));
-	puts(strDir);
 
 #endif
 
@@ -396,6 +398,6 @@ int main(int argc, char **argv)
 
 		// looking for callbacks
 		ros::spinOnce();
-		usleep(1000); // rate
+		rate.sleep(); // rate
 	}
 }
