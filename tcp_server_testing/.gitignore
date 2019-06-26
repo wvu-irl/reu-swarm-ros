@@ -1,3 +1,4 @@
 /client_swarm.o
 /pinger.o
 *.o
+/latency_log(IRL_ROBONET w Internet).csv
