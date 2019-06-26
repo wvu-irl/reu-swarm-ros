@@ -7,9 +7,10 @@
 #include <wvu_swarm_std_msgs/vicon_points.h>
 #include <wvu_swarm_std_msgs/flows.h>
 
-#define VOBJ_DEBUG 1
+#define VOBJ_DEBUG 0
 
 wvu_swarm_std_msgs::vicon_points temp_targets;
+wvu_swarm_std_msgs::vicon_points temp_temp_targets;
 wvu_swarm_std_msgs::vicon_points temp_obs;
 //wvu_swarm_std_msgs::vicon_points temp_bots;
 void pointCallback(const wvu_swarm_std_msgs::vicon_points &msg)
@@ -30,7 +31,7 @@ void pointCallback(const wvu_swarm_std_msgs::vicon_points &msg)
             std::cout << "\t[" << i << "]: (" << msg.point[i].x << ", " << msg.point[i].y << ")" << std::endl;
     }
 #endif
-        temp_targets = msg; // resets current target point
+        temp_targets = temp_temp_targets; // resets current target point
 }
 
 void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)

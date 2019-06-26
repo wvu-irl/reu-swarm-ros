@@ -30,11 +30,12 @@
 #include <signal.h>
 
 #include <chrono>
+#include <fstream>
 
 #define PORT 4321
 
 // ip that the program is connecting to
-#define IP "127.0.0.1"
+#define IP "192.168.10.187"
 
 // using this namespace because there are many time measurments
 using namespace std::chrono;
@@ -114,13 +115,18 @@ int main()
 					max_late = late;
 					new_max = true;
 				}
+				// writing to file
+				std::ofstream file;
+				file.open("latency_log.csv", std::ios::out | std::ios::app);
+				file << late << std::endl;
+				file.close();
 				// displaying latency results
 				printf("Latency: %s%4.3lf\033[0m\tmax:%s%4.3lf ms\033[0m\n",
 						prev >= late ? "\033[32m" : "\033[31m", late,
 						new_max ? "\033[30;41m" : "\033[0m", max_late);
 				prev = late;
 				// sleeping
-				usleep(500000);
+				//usleep(500000);
 				write(socket_descriptor, "ping", 4); // sending a ping
 				start_time = high_resolution_clock::now(); // resetting start time
 
@@ -153,7 +159,7 @@ int main()
 		// writes another ping if missed
 		write(socket_descriptor, "ping", 4);
 		start_time = high_resolution_clock::now();
-		usleep(500000); // sleeping 0.5s
+		//usleep(500000); // sleeping 0.5s
 	}
 	puts("\033[37;44mEnding\033[0m");
 	return 0;

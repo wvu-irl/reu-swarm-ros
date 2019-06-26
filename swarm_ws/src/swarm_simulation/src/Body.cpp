@@ -12,6 +12,8 @@ sf::VideoMode desktopTemp = sf::VideoMode::getDesktopMode();
 const int window_height = desktopTemp.height;
 const int window_width = desktopTemp.width;
 
+#define BOD_DEBUG 1
+
 #define w_height 600
 #define w_width 300
 #define PI 3.141592635
@@ -393,6 +395,9 @@ void Body::targetCollision(int i,float _t_sep)
 	//std::cout << _t_sep << std::endl;
 	if(_t_sep<= 17.5)
 	{
+
+
+
 		float dy = 300 - targets->point.at(i).y * 3 - location.y;
 		float dx = 150 + targets->point.at(i).x * 3 - location.x;
 		float theta = angle(Pvector(dy,dx)); //angle from bot to the target
@@ -427,24 +432,26 @@ void Body::targetInElastic(int i, float _t_sep)
 		float dx = 150 + targets->point.at(i).x * 3 - location.x;
 		float abs_theta = angleConvert(heading); //angle from bot to the target
 		float phi = angleConvert(angle(Pvector(dx,dy)) + M_PI_2);
-
-		std::cout<<"---BOT-- "<<id[0]<<id[1]<<" With the puck"<<std::endl;
+#if BOD_DEBUG
+		std::cout<<"\033[32m---BOT-- \033[0m"<<id[0]<<id[1]<<" With the puck"<<std::endl;
 		std::cout<<"dx,dy: "<<dx<<","<<dy<<std::endl;
 		std::cout<<"heading: "<<heading*180/M_PI<<std::endl;
-
+#endif
 		float sep_a = angleConvert(angle(Pvector(dx,dy)));
+#if BOD_DEBUG
   	std::cout<<"seperation angle: "<<sep_a*180/M_PI<<std::endl;
 
 		std::cout<<"abs_theta: "<<abs_theta*180/M_PI<<std::endl;
 
 		std::cout<<"phi: "<<phi*180/M_PI<<std::endl;
-
+#endif
 		//calculates force to be applied by the bot
 		float force = 1;
 		float fx = force*cos(abs_theta);
 		float fy = -force*sin(abs_theta);
+#if BOD_DEBUG
 		std::cout<<"force: "<<fx<<","<<fy<<std::endl;
-
+#endif
 		int Q = quadrant(phi); //quadrant bot is in
 		bool above_below = aboveOrBelow(dx,dy,Q); //gets quadrant collision is happening.
 		float rel_theta = getRelTheta(abs_theta,phi,Q); //velocity direction in frame of the collision plane.
@@ -472,9 +479,11 @@ void Body::targetInElastic(int i, float _t_sep)
 			targets->point.at(i).vy = targets->point.at(i).vy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
 		}
 		location.addVector(Pvector(fnx,fny));
+#if BOD_DEBUG
 		std::cout<<"force applied bot: "<<fnx<<","<<fny<<std::endl;
 		std::cout<<"new puck velocity: "<<targets->point.at(i).vx<<","<<targets->point.at(i).vy<<std::endl;
 		std::cout<<"------------------------\n";
+#endif
 	}
 }
 

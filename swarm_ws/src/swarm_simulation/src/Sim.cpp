@@ -235,7 +235,7 @@ void Sim::Run(ros::NodeHandle _n)
 				pub3.publish(obstacles);
 			}
 			ros::spinOnce();
-			std::cout<<"iteration complete"<<std::endl;
+//			std::cout<<"iteration complete"<<std::endl;
 			loopRate.sleep();
 		}
 		//---------=Code for winning the game=---------------
