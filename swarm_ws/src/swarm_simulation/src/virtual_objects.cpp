@@ -7,11 +7,16 @@
 #include <wvu_swarm_std_msgs/flows.h>
 
 wvu_swarm_std_msgs::vicon_points temp_targets;
+wvu_swarm_std_msgs::vicon_points temp_obs;
 //wvu_swarm_std_msgs::vicon_points temp_bots;
 void pointCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
-
 	temp_targets = msg;
+}
+
+void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
+{
+	temp_obs = msg;
 }
 
 //creates a flow for hitting a puck to a specified location
@@ -39,7 +44,6 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	wvu_swarm_std_msgs::flow cur1(cur0);
 	cur1.x += (yd) / r * 10;
 	cur1.y -= (xd) / r * 10;
-	cur1.pri=1.5;
 	cur1.theta = cur0.theta - M_PI_2;
 	in_vector.flow.push_back(cur1);
 
@@ -48,7 +52,6 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	cur2.x -= yd / r * 10;
 	cur2.y += xd / r * 10;
 	cur2.theta = cur0.theta + M_PI_2;
-	cur2.pri=1.5;
 	in_vector.flow.push_back(cur2);
 //
 //		//bottom
@@ -56,7 +59,6 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	cur3.x -= xd / r * 20;
 	cur3.y -= yd / r * 20;
 	cur3.theta = cur0.theta;
-	cur3.pri = 2;
 	in_vector.flow.push_back(cur3);
 
 	//bottomleft
@@ -82,30 +84,27 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	cur6.r = 1;
 	cur6.theta = atan2(yd, xd);
 	cur6.sid = sid;
-	cur6.pri= 2;
+	cur6.pri= 1;
 	in_vector.flow.push_back(cur6);
 
 	//right
 	wvu_swarm_std_msgs::flow cur7(cur6);
 	cur7.x += yd / r * 20;
 	cur7.y -= xd / r * 20;
-	cur7.pri=3;
-	cur7.theta = cur6.theta + 3*M_PI/4;
+	cur7.theta = cur6.theta + M_PI;
 	in_vector.flow.push_back(cur7);
 
 	//left
 	wvu_swarm_std_msgs::flow cur8(cur6);
 	cur8.x -= yd / r * 20;
 	cur8.y += xd / r * 20;
-	cur8.pri=3;
-	cur8.theta = cur6.theta + 5*M_PI/4;
+	cur8.theta = cur6.theta + M_PI;
 	in_vector.flow.push_back(cur8);
 
 	//left2
 	wvu_swarm_std_msgs::flow cur9(cur6);
 	cur9.x -= yd / r * 10;
 	cur9.y += xd / r * 10;
-	cur9.pri=1.5;
 	cur9.theta = cur6.theta + 3 * M_PI / 4;
 	in_vector.flow.push_back(cur9);
 
@@ -113,7 +112,6 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	wvu_swarm_std_msgs::flow cur10(cur6);
 	cur10.x += yd / r * 10;
 	cur10.y -= xd / r * 10;
-	cur10.pri=1.5;
 	cur10.theta = cur6.theta - 3 * M_PI / 4;
 	in_vector.flow.push_back(cur10);
 }
@@ -121,7 +119,6 @@ void createBoundary(wvu_swarm_std_msgs::vicon_points &in_vector)
 {
 	for (int i = 0; i < 20; i++)
 	{
-
 		wvu_swarm_std_msgs::vicon_point cur0;
 		cur0.x = -50;
 		cur0.y = -100 + 10 * i;
@@ -207,11 +204,11 @@ void makeTargets(ros::Publisher _pub)
 void makeFlows(ros::Publisher _pub)
 {
 	wvu_swarm_std_msgs::flows vp_vector;
-	std::pair<float, float> goal1(0,105);
-	std::pair<float,float> goal2(0,-105);
+	std::pair<float, float> goal1(0,100);
+	std::pair<float,float> goal2(0,-100);
 	if (temp_targets.point.size() != 0) {
 		createPuckFlow(vp_vector,temp_targets.point.at(0),goal1,1);
-		//createPuckFlow(vp_vector,temp_targets.point.at(0),goal2,2);
+		createPuckFlow(vp_vector,temp_targets.point.at(0),goal2,2);
 	}
 
 	_pub.publish(vp_vector);
@@ -226,9 +223,10 @@ int main(int argc, char **argv)
 	ros::Publisher pub3 = n.advertise < wvu_swarm_std_msgs::flows > ("virtual_flows", 1000);
 
 	ros::Subscriber sub1 = n.subscribe("virtual_targets", 1000, pointCallback);
+	ros::Subscriber sub2 = n.subscribe("virtual_obstacles", 1000, obsCallback);
 	//ros::Subscriber	sub2 = n.subscribe("vicon_array",1000,botCallback;
 	ros::Rate loopRate(200);
-	sleep(1); //waits for sim to be awake
+	sleep(2); //waits for sim to be awake
 	int i = 0;
 	while (ros::ok() && i < 100)
 	{
@@ -242,8 +240,7 @@ int main(int argc, char **argv)
 	}
 	while (ros::ok())
 	{
-		makeObstacles(pub1);
-
+		//makeObstacles(pub1);
 		makeFlows(pub3);
 		ros::spinOnce();
 		loopRate.sleep();

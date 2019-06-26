@@ -1,0 +1,35 @@
+<launch>
+
+	<node pkg="swarm_simulation" type="main" name="Simulation" />
+
+	<!-- Launching virtual obstacle node -->
+	<node pkg="swarm_simulation" type="virtual_objects"
+		name="virtual_objects" />
+
+
+
+	<!-- TODO launch ALICE nodes -->
+	<node pkg="alice_swarm" type="AliceMain" name="alice" />
+
+
+
+	<node pkg="visualization" type="table_vis" name="table"
+		output="screen">
+
+		<!-- Location of assets and config files respectively -->
+		<param name="asset_path"
+			value="/home/ssvnormandy/git/reu-swarm-ros/swarm_ws/src/visualization/assets"
+			type="str" />
+		<param name="conifg_path"
+			value="/home/ssvnormandy/git/reu-swarm-ros/swarm_ws/src/visualization/cfg/calib.config"
+			type="str" />
+
+		<!-- Background - setting to "None" will not draw a background - setting 
+			to "Contour" will draw a contour map - setting to a file path will draw the 
+			image in the path -->
+		<param name="background"
+			value="/home/ssvnormandy/git/reu-swarm-ros/swarm_ws/src/visualization/assets/HockeyRink.png"
+			type="str" />
+	</node>
+
+</launch>
