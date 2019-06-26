@@ -468,8 +468,8 @@ void Sim::clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _ev
 	{
 		while (found != true)
 		{
-			if (((flock.flock.at(i).location.x > _mX - 6) && (flock.flock.at(i).location.x < _mX + 6))
-					&& ((flock.flock.at(i).location.y > _mY - 6) && (flock.flock.at(i).location.y < _mY + 6)))
+			if (((flock.flock.at(i).location.x > _mX - bodiesSize) && (flock.flock.at(i).location.x < _mX +  bodiesSize))
+					&& ((flock.flock.at(i).location.y > _mY -  bodiesSize) && (flock.flock.at(i).location.y < _mY +  bodiesSize)))
 			{
 				found = true;
 				_pI->botId = i;

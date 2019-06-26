@@ -175,6 +175,7 @@ AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, floa
 			to_return = addIdeals(to_return, temp);
 		}
 	}
+	to_return.dir = fmod(to_return.dir+2*M_PI,2*M_PI);
 	return to_return;
 }
 
