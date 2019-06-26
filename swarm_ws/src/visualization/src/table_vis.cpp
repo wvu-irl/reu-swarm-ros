@@ -229,8 +229,8 @@ void render(sf::RenderWindow *window)
 		sf::Sprite checker_sprite;
 		checker_sprite.setTexture(checker_texture);
 		checker_sprite.setPosition(sf::Vector2f(0, 0));
-		checker_sprite.scale(WIDTH / checker.getSize().x,
-		HEIGHT / checker.getSize().y);
+		checker_sprite.scale((double)WIDTH / checker.getSize().x,
+		(double)HEIGHT / checker.getSize().y);
 		disp.draw(checker_sprite);
 	}
 
@@ -369,7 +369,7 @@ int main(int argc, char **argv)
 	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Table Plotting",
 			sf::Style::Default);
 
-	while (window.isOpen()) // main loop
+	while (window.isOpen() && ros::ok()) // main loop
 	{
 		sf::Event event;
 		while (window.pollEvent(event))
@@ -383,11 +383,10 @@ int main(int argc, char **argv)
 			}
 		}
 
-		tick(); // running calculations
-
 		// drawomg
-		if (window.isOpen())
+		if (window.isOpen() && ros::ok())
 		{
+			tick(); // running calculations
 			window.clear();
 			render(&window);
 			window.display();
