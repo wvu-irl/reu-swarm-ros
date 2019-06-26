@@ -244,6 +244,7 @@ void render(sf::RenderWindow *window)
 		obs.setPosition(obstacles.at(i) - sf::Vector2f(2, 2));
 		disp.draw(obs);
 	}
+	obstacles.clear();
 
 	// draw targets
 	sf::CircleShape tar;
@@ -255,6 +256,7 @@ void render(sf::RenderWindow *window)
 		tar.setPosition(targets.at(i) - sf::Vector2f(2, 2));
 		disp.draw(tar);
 	}
+	targets.clear();
 
 	// drawing robots
 	sf::CircleShape bot;
