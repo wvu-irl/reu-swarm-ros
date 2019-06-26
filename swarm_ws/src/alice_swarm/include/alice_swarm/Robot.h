@@ -18,6 +18,10 @@ class Robot
 {
 
 public:
+
+	int name;
+	int sid;
+
 	/*
 	 * Dummy constructor, exists only for compiler reasons
 	 */
@@ -45,9 +49,6 @@ public:
 	AliceStructs::vel generateComp(std::vector<AliceStructs::ideal> ideals);
 
 private:
-
-	int name;
-	int sid;
 
 	VectorQueue vectorQueue;
 	Model model;
