@@ -69,7 +69,7 @@ AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bot
 		}
 	}
 	//This garbage fire of an equation produces a curve that looks like a translated square root curve capped at 1.
-
+	if (count ==0) return to_return;
 	x /= count;
 	y /= count;
 	float d = pow(pow(x,2)+pow(y,2),0.5);
@@ -78,7 +78,7 @@ AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bot
 //	    / bots.size();
 	if (d >distance) to_return.dir = fmod(atan2(y, x) + 2*M_PI, 2 * M_PI);
 	else to_return.dir = fmod(atan2(y, x) + M_PI, 2 * M_PI);
-	to_return.pri = pow(abs(d-distance)* strength, 0.2) ;
+	to_return.pri = pow(abs(d-distance)* strength, 0.2)/1000;
 	return to_return;
 }
 

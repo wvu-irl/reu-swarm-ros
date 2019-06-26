@@ -146,7 +146,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 	int x = 50; //x inital positions for the bots.
 
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		char temp[2] =
 		{ letters[2 * i], letters[2 * i + 1] };
