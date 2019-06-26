@@ -102,27 +102,21 @@ AliceStructs::ideal Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, f
 }
 
 AliceStructs::ideal Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, float strength)
-{ //I don't know how or why this method works. Fair warning.
+{
 	AliceStructs::ideal to_return;
-
-	//float pri = 16;
-	to_return.pri = strength / pow(2, bots.front().dis - 3 / 2 * ROBOT_SIZE);
-	to_return.dir = fmod(bots.front().dir + M_PI, 2 * M_PI);
-	to_return.spd = pow(strength, 2)
-			/ (0 - (bots.front().dis + strength - ROBOT_SIZE) * (abs(bots.front().dir + strength - ROBOT_SIZE))) + 1;
-	/*for (auto &bot : bots)
-	 {
-	 temp_pri = strength/((bot.dis - ROBOT_SIZE/2) * (abs(bot.dir - M_PI)/2) + 1);
-	 if (temp_pri > pri)
-	 {
-	 std::cout << bot.dis << " - " << bot.dir << std::endl;
-	 pri = temp_pri;
-	 to_return.dir = fmod(bot.dir + M_PI, 2*M_PI);
-	 to_return.spd = pow(strength, 2) / (0 - (bot.dis + strength - ROBOT_SIZE) *
-	 (abs(bot.dir + strength - ROBOT_SIZE))) + 1;
-	 }
-	 }*/
-	//to_return.pri = temp_pri;
+	to_return.dir = 0.001;
+	to_return.pri = 0.001;
+	to_return.spd = 1;
+	for (auto &bot : bots)
+	{
+		float temp_pri = pow(strength, 2) / ((bot.dis-3/2 * ROBOT_SIZE) * ((abs(bot.dir - M_PI) + 1)));
+		if (temp_pri > to_return.pri)
+		{
+			to_return.pri = temp_pri;
+			to_return.spd = pow(strength, 2) / (0 - ((bot.dis + strength - ROBOT_SIZE) * (abs(bot.dir - M_PI) + 1))) + 1;
+			to_return.dir = fmod(bot.dir + M_PI, 2);
+		}
+	}
 	return to_return;
 }
 
