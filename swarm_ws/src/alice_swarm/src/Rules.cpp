@@ -3,15 +3,23 @@
 #include <math.h>
 #include <iostream>
 
+/*
+ * Dummy constructor for compiler
+ */
 Rules::Rules()
 {
 	should_ignore = false;
 }
+
 Rules::Rules(int _sid)
 {
 	should_ignore = false;
 	sid = _sid;
 }
+
+/*
+ * Dummy rule for testing other parts of Alice
+ */
 AliceStructs::ideal Rules::dummy1()
 {
 	AliceStructs::ideal to_return;
@@ -19,6 +27,10 @@ AliceStructs::ideal Rules::dummy1()
 	to_return.dir = 0;
 	return to_return;
 }
+
+/*
+ * Performs weighted vector additon to add two ideal vectors together, then returns the result.
+ */
 AliceStructs::ideal Rules::addIdeals(AliceStructs::ideal i1, AliceStructs::ideal i2)
 {
 	AliceStructs::ideal to_return;
@@ -27,10 +39,12 @@ AliceStructs::ideal Rules::addIdeals(AliceStructs::ideal i1, AliceStructs::ideal
 	to_return.spd = pow(pow(x, 2) + pow(y, 2), 0.5);
 	to_return.dir = atan2(y, x);
 	to_return.pri = i1.pri + i2.pri;
-	//std::cout << to_return.dir << std::endl;
 	return to_return;
 }
 
+/*
+ * Makes bots converge to the center of the swarm. Usually counterbalanced with magnetAvoid, which does the opposite.
+ */
 AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength)
 {
 	AliceStructs::ideal to_return;
@@ -40,7 +54,7 @@ AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bot
 	float x = 0;
 	float y = 0;
 	float pri = 0;
-	const float BRAKING = 3; //due to latency issues, we need to slow this rule down. Increase this number
+	const float BRAKING = 3; //due to latency issues, we often need to slow this rule down. Increase this number
 	//if the robots are hitting each other sometimes, or decrease it to slow things down.
 	for (auto& bot : bots)
 	{
@@ -51,14 +65,17 @@ AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bot
 			pri += bot.dis;
 		}
 	}
+	//This garbage fire of an equation produces a curve that looks like a translated square root curve capped at 1.
 	to_return.spd = (pow(strength, BRAKING) / (0 - pow(pow(pow(x, 2) + pow(y, 2), 0.5)
-			+ pow(strength, BRAKING / 2) - ROBOT_SIZE, 2)) + 1)
-	    / bots.size();
+			+ pow(strength, BRAKING / 2) - ROBOT_SIZE, 2)) + 1) / bots.size();
 	to_return.dir = fmod(atan2(y, x) + 2*M_PI, 2 * M_PI);
 	to_return.pri = pow(pri * strength - ROBOT_SIZE / 2, 0.2) / 3;
 	return to_return;
 }
 
+/*
+ * Uses an electromagnetic-style "force" to prevents robots from getting too close.
+ */
 AliceStructs::ideal Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, float strength)
 {
 	AliceStructs::ideal to_return;
@@ -68,19 +85,14 @@ AliceStructs::ideal Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, f
 	float temp_pri;
 	for (auto &bot : bots)
 	{
-		std::cout << bot.dis << std::endl;
 		AliceStructs::ideal temp;
 		temp.pri = strength / pow(2, bot.dis - 3 / 2 * ROBOT_SIZE);
 		temp.spd = pow(strength, 2) / (0 - pow(bot.dis + strength - ROBOT_SIZE, 2)) + 1;
 		temp.dir = bot.dir;
 		to_return = addIdeals(temp, to_return);
-		//to_return.pri += temp_pri;
-		//std::cout << to_return.dir << " - " << bot.dir << std::endl;
 	}
-	//to_return.pri = to_return.pri;
 	to_return.dir = fmod(to_return.dir + M_PI, 2 * M_PI);
-	//to_return.spd = abs(to_return.spd);
-	if (to_return.pri < 0.001)
+	if (to_return.pri < 0.001) // Handles the possibility that a robots has no neighbors
 	{
 		to_return.pri = 0.001;
 		to_return.dir = 0.001;
@@ -114,6 +126,9 @@ AliceStructs::ideal Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, flo
 	return to_return;
 }
 
+/*
+ * Moves a robot towards a target
+ */
 AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, float strength)
 {
 	AliceStructs::ideal to_return;
@@ -127,7 +142,8 @@ AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, floa
 		{
 			if (tar.dis < temp)
 				to_return.dir = tar.dir;
-			to_return.spd = 1; //(pow(strength, 2) / (0 - pow(tar.dis + strength - ROBOT_SIZE/2, 2))) + 1 ;
+			// Produces another capped inverse polynomial
+			to_return.spd = (pow(strength, 2) / (0 - pow(tar.dis + strength - ROBOT_SIZE/2, 2))) + 1;
 			to_return.pri = strength*atan(tar.dis / ROBOT_SIZE/3) * M_PI_2;
 		}
 
@@ -135,6 +151,9 @@ AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, floa
 	return to_return;
 }
 
+/*
+ * Makes the robots follow a flow, or a vector with a position
+ */
 AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, float strength)
 {
 	AliceStructs::ideal to_return;
@@ -145,10 +164,6 @@ AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, floa
 	{
 		for (auto &flow : flows)
 		{
-//		float temp_pri = strength * flow.spd/pow(flow.dis + ROBOT_SIZE, 2);
-//		to_return.dir = (to_return.dir * to_return.pri + flow.dir * temp_pri) / (to_return.pri + temp_pri);
-//		to_return.spd = (to_return.spd * to_return.pri + flow.spd * temp_pri) / (to_return.pri + temp_pri);
-//		to_return.pri += temp_pri;
 			AliceStructs::ideal temp;
 			temp.dir = flow.dir;
 			temp.spd = flow.spd;
@@ -160,6 +175,9 @@ AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, floa
 	return to_return;
 }
 
+/*
+ * Makes the robot avoid obstacles if they get too close.
+ */
 AliceStructs::ideal Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength)
 {
 	AliceStructs::ideal to_return;
@@ -180,10 +198,3 @@ AliceStructs::ideal Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles
 	to_return.dir = fmod(to_return.dir + M_PI, 2 * M_PI);
 	return to_return;
 }
-
-/*
- ideal goToTarget(std::list <obs> targets, float tolerance)
- {
- ideal to_return;
-
- }*/
