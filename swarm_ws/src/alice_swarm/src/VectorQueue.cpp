@@ -36,7 +36,7 @@ AliceStructs::vel VectorQueue::createCompromise()
 		vectorQueue.pop_back();
 
 		//math to figure out how important the vector to be followed is
-		float current_pri = current.pri / pow((current.dis / 10 + 1), 2);
+		float current_pri = current.pri / (1+pow(current.dis / 10,2));
 		dir = (dir * pri + current_pri * current.dir) / (pri + current_pri);
 		spd = (spd * pri + current_pri * current.spd) / (pri + current_pri);
 	}

@@ -42,10 +42,12 @@ AliceStructs::ideal Rules::addIdeals(AliceStructs::ideal i1, AliceStructs::ideal
 	return to_return;
 }
 
+
 /*
  * Makes bots converge to the center of the swarm. Usually counterbalanced with magnetAvoid, which does the opposite.
  */
-AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength)
+
+AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength, float distance)
 {
 	AliceStructs::ideal to_return;
 	to_return.pri = 0;
@@ -56,20 +58,27 @@ AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bot
 	float pri = 0;
 	const float BRAKING = 3; //due to latency issues, we often need to slow this rule down. Increase this number
 	//if the robots are hitting each other sometimes, or decrease it to slow things down.
+	float count =0;
 	for (auto& bot : bots)
 	{
 		if (bot.sid == sid)
 		{
 			x += bot.dis * cos(bot.dir);
 			y += bot.dis * sin(bot.dir);
-			pri += bot.dis;
+			count++;
 		}
 	}
 	//This garbage fire of an equation produces a curve that looks like a translated square root curve capped at 1.
-	to_return.spd = (pow(strength, BRAKING) / (0 - pow(pow(pow(x, 2) + pow(y, 2), 0.5)
-			+ pow(strength, BRAKING / 2) - ROBOT_SIZE, 2)) + 1) / bots.size();
-	to_return.dir = fmod(atan2(y, x) + 2*M_PI, 2 * M_PI);
-	to_return.pri = pow(pri * strength - ROBOT_SIZE / 2, 0.2) / 3;
+
+	x /= count;
+	y /= count;
+	float d = pow(pow(x,2)+pow(y,2),0.5);
+	to_return.spd = 1;//(pow(strength, BRAKING) / (0 - pow(pow(pow(x, 2) + pow(y, 2), 0.5)
+//			+ pow(strength, BRAKING / 2) - ROBOT_SIZE, 2)) + 1)
+//	    / bots.size();
+	if (d >distance) to_return.dir = fmod(atan2(y, x) + 2*M_PI, 2 * M_PI);
+	else to_return.dir = fmod(atan2(y, x) + M_PI, 2 * M_PI);
+	to_return.pri = pow(abs(d-distance)* strength, 0.2) ;
 	return to_return;
 }
 
@@ -86,17 +95,17 @@ AliceStructs::ideal Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, f
 	for (auto &bot : bots)
 	{
 		AliceStructs::ideal temp;
-		temp.pri = strength / pow(2, bot.dis - 3 / 2 * ROBOT_SIZE);
-		temp.spd = pow(strength, 2) / (0 - pow(bot.dis + strength - ROBOT_SIZE, 2)) + 1;
+		temp.pri = strength / pow(bot.dis - ROBOT_SIZE,2);
+		temp.spd = 1;//pow(strength, 2) / (0 - pow(bot.dis + strength - ROBOT_SIZE, 2)) + 1;
 		temp.dir = bot.dir;
 		to_return = addIdeals(temp, to_return);
 	}
 	to_return.dir = fmod(to_return.dir + M_PI, 2 * M_PI);
 	if (to_return.pri < 0.001) // Handles the possibility that a robots has no neighbors
 	{
-		to_return.pri = 0.001;
-		to_return.dir = 0.001;
-		to_return.spd = 1;
+		to_return.pri = 0;
+		to_return.dir = 0;
+		to_return.spd = 0;
 	}
 	return to_return;
 }
@@ -126,9 +135,9 @@ AliceStructs::ideal Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, flo
 AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, float strength)
 {
 	AliceStructs::ideal to_return;
-	to_return.pri = 0.001;
-	to_return.dir = 0.001;
-	to_return.spd = 0.001;
+	to_return.pri = 0;
+	to_return.dir = 0;
+	to_return.spd = 0;
 	float temp = 60;
 	if (targets.size() != 0)
 	{
@@ -151,9 +160,9 @@ AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, floa
 AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, float strength)
 {
 	AliceStructs::ideal to_return;
-	to_return.pri = 0.001;
-	to_return.dir = 0.001;
-	to_return.spd = 0.001;
+	to_return.pri = 0;
+	to_return.dir = 0;
+	to_return.spd = 0;
 	if (flows.size() != 0)
 	{
 		for (auto &flow : flows)
@@ -175,8 +184,8 @@ AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, floa
 AliceStructs::ideal Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength)
 {
 	AliceStructs::ideal to_return;
-	to_return.pri = 0.001;
-	to_return.dir = 0.001;
+	to_return.pri = 0;
+	to_return.dir = 0;
 	to_return.spd = 1;
 	for (auto &obs : obstacles)
 	{
@@ -184,7 +193,7 @@ AliceStructs::ideal Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles
 		{
 			AliceStructs::ideal temp;
 			temp.pri = strength / pow(2, obs.dis - 3 / 2 * ROBOT_SIZE);
-			temp.spd = pow(strength, 2) / (0 - pow(obs.dis + strength - ROBOT_SIZE, 2)) + 1;
+			temp.spd = 1;
 			temp.dir = obs.dir;
 			to_return = addIdeals(temp, to_return);
 		}
