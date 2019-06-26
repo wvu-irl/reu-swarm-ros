@@ -1,8 +1,10 @@
 /*
- * Robot.h
+ * Robot
  *
- *  Created on: Jun 13, 2019
- *      Author: smart6
+ * The robot class serves as the interface to Alice's brain. It calls and updates Model and VectorQueue to ultimately
+ * generate a velocity vector, which is then sent the low-level controllers.
+ *
+ * Authors: Jeongwoo Seo and Casey Edmonds-Estes
  */
 
 #ifndef ROBOT_H_
@@ -16,25 +18,42 @@ class Robot
 {
 
 public:
+	/*
+	 * Dummy constructor, exists only for compiler reasons
+	 */
+	Robot();
+
+	/*
+	 *	Initializes the model and passes data from the sensors to the model
+	 */
+	Robot(AliceStructs::mail data);
+
+	/*
+	 * Passes data from the sensors to the sensors to the model
+	 */
+	void receiveMsg(AliceStructs::mail data);
+
+	/*
+	 * Generates an ideal vector using the model, then passes that vector to the VectorQueue
+	 */
+	AliceStructs::ideal generateIdeal();
+
+	/*
+	 * This method first passes ideal vectors from neighbors in its swarm to its VectorQueue, then
+	 * uses the updated queue to generate a velocity vector to be passed to the low-level controls
+	 */
+	AliceStructs::vel generateComp(std::vector<AliceStructs::ideal> ideals);
+
+private:
+
 	int name;
 	int sid;
 
 	VectorQueue vectorQueue;
+	Model model;
 
-	Robot(); //dummy constructor
 
-	Robot(AliceStructs::mail data); //actual constructor
-
-	AliceStructs::ideal generateIdeal(); // generates ideal from the env. information given
-
-	AliceStructs::vel generateComp(std::vector<AliceStructs::ideal> ideals); //generates a vector to go to after accounting for its neighbor's ideals
-
-	void receiveMsg(AliceStructs::mail data); //takes in the mail struct for processing
-
-private:
-	Model model; //stores model, which contains info about its surroundings
-
-	std::vector<AliceStructs::neighbor> neighbors; //stores the robot's neighbors
+	std::vector<AliceStructs::neighbor> neighbors;
 
 };
 

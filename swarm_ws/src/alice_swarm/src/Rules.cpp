@@ -29,7 +29,7 @@ AliceStructs::ideal Rules::dummy1()
 }
 
 /*
- * Performs weighted vector additon to add two ideal vectors together, then returns the result.
+ * Performs weighted vector addition to add two ideal vectors together, then returns the result.
  */
 AliceStructs::ideal Rules::addIdeals(AliceStructs::ideal i1, AliceStructs::ideal i2)
 {
@@ -42,11 +42,14 @@ AliceStructs::ideal Rules::addIdeals(AliceStructs::ideal i1, AliceStructs::ideal
 	return to_return;
 }
 
-
 /*
- * Makes bots converge to the center of the swarm. Usually counterbalanced with magnetAvoid, which does the opposite.
+ * End of the helper and init methods. Everything under this line is a rule
+<=====================================================================================================================>
  */
 
+/*
+ * Makes bots converge to be some distance away from the center of their neighbors.
+ */
 AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength, float distance)
 {
 	AliceStructs::ideal to_return;
@@ -110,6 +113,9 @@ AliceStructs::ideal Rules::magnetAvoid(std::list<AliceStructs::neighbor> bots, f
 	return to_return;
 }
 
+/*
+ * Makes the robot avoid robots in front of it, to make flocking behavior more elegant
+ */
 AliceStructs::ideal Rules::birdAvoid(std::list<AliceStructs::neighbor> bots, float strength)
 {
 	AliceStructs::ideal to_return;
@@ -155,7 +161,7 @@ AliceStructs::ideal Rules::goToTarget(std::list<AliceStructs::obj> targets, floa
 }
 
 /*
- * Makes the robots follow a flow, or a vector with a position
+ * Makes the robots follow a flow, which is a vector with a position
  */
 AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, float strength)
 {
@@ -180,7 +186,7 @@ AliceStructs::ideal Rules::followFlow(std::list<AliceStructs::ideal> flows, floa
 }
 
 /*
- * Makes the robot avoid obstacles if they get too close.
+ * Makes the robot avoid obstacles using an electromagnetic model.
  */
 AliceStructs::ideal Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength)
 {

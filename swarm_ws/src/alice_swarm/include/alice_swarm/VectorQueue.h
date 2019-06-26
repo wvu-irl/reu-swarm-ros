@@ -1,3 +1,12 @@
+/*
+ * VectorQueue
+ *
+ * This class stores ideal vectors and uses them to generate a velocity vector to send to
+ * the low-level controllers
+ *
+ * Authors: Casey Edmonds-Estes and Jeongwoo Seo
+ */
+
 #ifndef VECTORQUEUE_H_
 #define VECTORQUEUE_H_
 
@@ -7,20 +16,20 @@ class VectorQueue
 {
 public:
 
-	std::vector<AliceStructs::ideal> vectorQueue; //stores the ideals to be added together
+	std::vector<AliceStructs::ideal> vectorQueue; //Stores the ideal vectors
 
-	VectorQueue(); //dummy constructor
+	VectorQueue();
 
-	void oneToQueue(AliceStructs::ideal toAdd); //just adds an ideal to the vector
+	/*
+	 * Adds a single ideal vector to the queue.
+	 */
+	void oneToQueue(AliceStructs::ideal toAdd);
 
-	AliceStructs::vel createCompromise(); //adds the ideals together using a priority based system
-
-private:
-
-	std::pair<float, float> addPolarVectors(std::pair<float, float> v1, std::pair<float, float> v2); //helper for adding vectors together
-
-	AliceStructs::vel past_vector; //deprecated, could be used to keep track of acceleration (change in the velocity commands)
-
+	/*
+	 * This method takes a weighted average of the ideal vectors in the queue, which
+	 * it then uses to generate a velocity vector
+	 */
+	AliceStructs::vel createCompromise();
 };
 
 #endif /* VECTORQUEUE_H_ */
