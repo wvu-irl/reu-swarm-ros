@@ -46,9 +46,9 @@ quadrilateral_t g_trap;
 static int g_tick = 0;
 
 // summation operator for 2 vectors
-sf::Vector2f operator+=(sf::Vector2f &a, sf::Vector2f b)
+sf::Vector2f operator+(sf::Vector2f a, sf::Vector2f b)
 {
-	return a = sf::Vector2f(a.x + b.x, a.y + b.y);
+	return sf::Vector2f(a.x + b.x, a.y + b.y);
 }
 
 sf::Vector2f operator-(sf::Vector2f a, sf::Vector2f b)
@@ -69,13 +69,23 @@ std::vector<sf::Vector2f> obstacles;
 // globals for drawing targets
 std::vector<sf::Vector2f> targets;
 
+sf::Vector2f convertCoordinate(sf::Vector2f a)
+{
+	sf::Vector2f tab_vect(a.y, -a.x);
+
+	tab_vect = tab_vect + table_origin;
+	tab_vect.x *= (double) WIDTH / g_table_width;
+	tab_vect.y *= (double) HEIGHT / g_table_height;
+	return tab_vect;
+}
+
 // Subscription callback for goals
 void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
 {
 	for (size_t i = 0; i < goals.point.size(); i++)
 	{
 		wvu_swarm_std_msgs::vicon_point pnt = goals.point.at(i);
-		targets.push_back(sf::Vector2f(pnt.x, pnt.y));
+		targets.push_back(convertCoordinate(sf::Vector2f(pnt.x, pnt.y)));
 	}
 }
 
@@ -85,7 +95,7 @@ void drawObstacles(wvu_swarm_std_msgs::vicon_points points)
 	for (size_t i = 0; i < points.point.size(); i++)
 	{
 		wvu_swarm_std_msgs::vicon_point pnt = points.point.at(i);
-		obstacles.push_back(sf::Vector2f(pnt.x, pnt.y));
+		obstacles.push_back(convertCoordinate(sf::Vector2f(pnt.x, pnt.y)));
 	}
 }
 
@@ -97,12 +107,7 @@ void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 		// getting pose
 		geometry_msgs::Vector3 tf =
 				bots.poseVect.at(i).botPose.transform.translation;
-		sf::Vector2f plain_vect((float) tf.y, -(float) tf.x);
-
-		// transforming to screen frame
-		plain_vect += table_origin;
-		plain_vect.x *= (double) WIDTH / g_table_width;
-		plain_vect.y *= (double) HEIGHT / g_table_height;
+		sf::Vector2f plain_vect = convertCoordinate(sf::Vector2f(tf.x, tf.y));
 
 		// adding to list
 		bots_pos.push_back(plain_vect);
@@ -332,6 +337,7 @@ int main(int argc, char **argv)
 
 	// subscribing to have bot locations
 	ros::Subscriber robots = n.subscribe("/vicon_array", 1000, drawBots);
+	// subscribing for other objects
 	ros::Subscriber obstacles = n.subscribe("virtual_obstacles", 1000,
 			drawObstacles);
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
