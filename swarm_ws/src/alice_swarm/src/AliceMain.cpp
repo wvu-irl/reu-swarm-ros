@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 		}
 
 		pub.publish(execute);
-		std::cout << "execute published" << std::endl;
+//		std::cout << "execute published" << std::endl;
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
 
