@@ -78,7 +78,7 @@ AliceStructs::ideal Rules::maintainSpacing(std::list<AliceStructs::neighbor> bot
 //	    / bots.size();
 	if (d >distance) to_return.dir = fmod(atan2(y, x) + 2*M_PI, 2 * M_PI);
 	else to_return.dir = fmod(atan2(y, x) + M_PI, 2 * M_PI);
-	to_return.pri = pow(abs(d-distance)* strength, 0.2)/1000;
+	to_return.pri = pow(abs(d-distance)* strength, 0.2)/30;
 	return to_return;
 }
 
