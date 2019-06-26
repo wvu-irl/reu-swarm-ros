@@ -97,12 +97,11 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 void Sim::obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
-	obstacles = msg;
-//	obstacles.clear();
-//	for (int i = 0; i < msg.point.size(); i++)
-//	{
-//		obstacles.push_back(msg.point.at(i));
-//	}
+	obstacles.clear();
+	for (int i = 0; i < msg.point.size(); i++)
+	{
+		obstacles.push_back(msg.point.at(i));
+	}
 }
 void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
@@ -135,7 +134,7 @@ Sim::Sim()
 void Sim::Run(ros::NodeHandle _n)
 {
 	PrevIteration pI
-	{ false, 0, false, false, false, false }; //struct for storing click and drag info.
+	{ false, 0, false, false, false }; //struct for storing click and drag info.
 	std::cout << "initialized pI\n";
 	char letters[100] =
 	{ 'D', 'E', 'P', 'A', 'N', 'J', 'G', 'A', 'C', 'T', 'M', 'A', 'M', 'D', 'S', 'C', 'N', 'H', 'V', 'A', 'N', 'Y', 'N',
@@ -146,7 +145,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 	int x = 50; //x inital positions for the bots.
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		char temp[2] =
 		{ letters[2 * i], letters[2 * i + 1] };
@@ -200,12 +199,11 @@ void Sim::Run(ros::NodeHandle _n)
 	//Initializes all publishers and subscribers
 	ros::Publisher pub = _n.advertise < wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array", 1000); //Publishes like Vicon
 	ros::Publisher pub2 = _n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_targets", 1000);
-	ros::Publisher pub3 = _n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_obstacles", 1000);
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
 	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to virtual obstacles
 	ros::Subscriber sub3 = _n.subscribe("virtual_targets", 1000, &Sim::targetCallback, this); //gets virtual targets
 	ros::Subscriber sub4 = _n.subscribe("virtual_flows", 1000, &Sim::flowCallback, this); //gets virtual targets
-	ros::Rate loopRate(50);
+	ros::Rate loopRate(200);
 
 	//publishes initial information for each bot
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
@@ -228,11 +226,8 @@ void Sim::Run(ros::NodeHandle _n)
 		//			//targets.point.at(0).sid=0;
 		//		}
 
-			if (!update)
-			{
-				pub2.publish(targets);
-				pub3.publish(obstacles);
-			}
+			if (!update) pub2.publish(targets);
+
 			ros::spinOnce();
 			std::cout<<"iteration complete"<<std::endl;
 			loopRate.sleep();
@@ -284,9 +279,8 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handels input to the graphi
 		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
 				event);
 
-		clickNdragBots(&_pI, mX, mY, event);      //runs click and drag for bots
-		clickNdragTarget(&_pI, mX, mY, event);    //runs click and drag for targets.
-		clickNdragObstacles(&_pI, mX, mY, event); //allows for click and drag on obstacles
+		clickNdragBots(&_pI, mX, mY, event); //runs click and drag for bots
+		clickNdragTarget(&_pI, mX, mY, event); //runs click and drag for targets.
 
 	}
 	return _pI; //tracks state of dragging (see sim.h)
@@ -346,7 +340,7 @@ void Sim::Render() //draws changes in simulation states to the window.
 	}
 	drawObstacles();
 	drawTargets();
-	//drawFlows();
+	drawFlows();
 
 // Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)
@@ -399,52 +393,6 @@ void Sim::addText()
 	}
 }
 
-void Sim::clickNdragObstacles(PrevIteration *_pI, float _mX, float _mY, sf::Event _event)//for click and drag on bots
-{
-	int i = 0; //iterator for dragging while loop
-	bool found = false; //sentinel for finding a selected bot.
-
-	float x_pos;
-	float y_pos;
-
-	//----------Allows for click and drag for bots. ------------------------------
-	if (_pI->dragging == true && _pI->obs == true)
-	{
-		obstacles.point.at(_pI->botId).x = (sf::Mouse::getPosition(window).x - 150)/3; //event.mouseButton.x;
-		obstacles.point.at(_pI->botId).y = (300 - sf::Mouse::getPosition(window).y)/3; //event.mouseButton.y;
-	}
-	if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
-			&& _pI->prevClick == true && _pI->obs == true)
-	{
-		_pI->dragging = false;
-		_pI->prevClick = false;
-		_pI->obs = false;
-
-	} else if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
-			&& _pI->prevClick == false && _pI->obs == false && _pI->bot == false && _pI->target == false)
-	{
-		while (found != true)
-		{
-			x_pos = 150 + obstacles.point.at(i).x * 3;
-			y_pos = 300 - obstacles.point.at(i).y * 3;
-			if (x_pos > _mX - 3 && x_pos < _mX + 3
-					&& y_pos > _mY - 3 && y_pos < _mY + 3)
-			{
-				found = true;
-				_pI->botId = i;
-				_pI->dragging = true;
-				_pI->prevClick = true;
-				_pI->obs = true;
-
-			} else if (i == obstacles.point.size() - 1)
-			{
-				found = true;
-			}
-			i++;
-		}
-	}
-}
-
 void Sim::clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _event)//for click and drag on bots
 {
 	int i = 0; //iterator for dragging while loop
@@ -464,7 +412,7 @@ void Sim::clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _ev
 		_pI->bot = false;
 		
 	} else if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
-			&& _pI->prevClick == false && _pI->obs == false && _pI->bot == false && _pI->target == false)
+			&& _pI->prevClick == false && _pI->bot == false && _pI->target != true)
 	{
 		while (found != true)
 		{
@@ -505,7 +453,7 @@ void Sim::clickNdragTarget(PrevIteration *_pI, float _mX, float _mY, sf::Event _
 		_pI->target = false;
 
 	} else if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
-			&& _pI->prevClick == false && _pI->obs == false && _pI->bot == false && _pI->target == false)
+			&& _pI->prevClick == false && _pI->target == false && _pI->bot !=true)
 	{
 		while (found != true && i < targets.point.size())
 		{
@@ -616,15 +564,15 @@ void Sim::drawTargets() //draws targets
 
 void Sim::drawObstacles()//draws obstacles
 {
-	for (int i = 0; i < obstacles.point.size(); i++)
+	for (int i = 0; i < obstacles.size(); i++)
 	{
 		sf::CircleShape shape(0);
-		shape.setPosition(obstacles.point.at(i).x * 3 + 150, 300 - obstacles.point.at(i).y * 3); // Sets position of shape to random location that body was set to.
+		shape.setPosition(obstacles.at(i).x * 3 + 150, 300 - obstacles.at(i).y * 3); // Sets position of shape to random location that body was set to.
 		shape.setOrigin(2, 2);
 		shape.setFillColor(sf::Color::Blue);
 		shape.setOutlineColor(sf::Color::Black);
 		shape.setOutlineThickness(1);
-		shape.setRadius(3);
+		shape.setRadius(2);
 		window.draw(shape);
 	}
 }
