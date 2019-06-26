@@ -208,7 +208,7 @@ void makeFlows(ros::Publisher _pub)
 	std::pair<float,float> goal2(0,-100);
 	if (temp_targets.point.size() != 0) {
 		createPuckFlow(vp_vector,temp_targets.point.at(0),goal1,1);
-		//createPuckFlow(vp_vector,temp_targets.point.at(0),goal2,2);
+		createPuckFlow(vp_vector,temp_targets.point.at(0),goal2,2);
 	}
 
 	_pub.publish(vp_vector);

@@ -59,17 +59,17 @@ AliceStructs::ideal Model::generateIdeal()
 	//AliceStructs::ideal temp;
 	to_return.dir = 0;
 	to_return.pri = 0.001;
-	to_return.spd = 1;
+	to_return.spd = 0.001;
 	rules.should_ignore = true;
 
 	std::vector<AliceStructs::ideal> ideal_list =
 	{ //rules.dummy1(),
-			//rules.followFlow(flows, 16),
-			rules.goToTarget(targets, 1),
+			rules.followFlow(flows, 16),
+			rules.goToTarget(targets, 0.5),
 			rules.avoidObstacles(obstacles, 16),
-			//rules.magnetAvoid(robots, 16),
-			rules.birdAvoid(robots, 16),
-			//rules.maintainSpacing(robots, 0.0001, 30)
+			rules.magnetAvoid(robots, 16),
+			//rules.birdAvoid(robots, 16),
+			rules.maintainSpacing(robots, 16, 50)
 	    };
 	for (int i = 0; i < ideal_list.size(); i++)
 	{
