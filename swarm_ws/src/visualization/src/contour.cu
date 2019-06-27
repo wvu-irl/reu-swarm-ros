@@ -11,7 +11,7 @@
 
 #include "calculation.cu"
 
-#include "contour.h"
+#include <visualization/contour.h>
 
 #define DEBUG_CONT_SRC 0
 

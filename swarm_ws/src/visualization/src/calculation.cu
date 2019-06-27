@@ -10,7 +10,7 @@
 #include <SFML/Graphics.hpp>
 #include <functional>
 #include <math.h>
-#include "color_map.h"
+#include <visualization/color_map.h>
 
 /**
  * namespace for doing stupid amounts of calculations
@@ -29,7 +29,7 @@ cudaDeviceProp deviceProp;
  * x and y are coordinates on the plane perpendicular to the view
  * t is a saw function of time (goes from 0 to 1000 incrementing by 1 every tick)
  */
-const double q = 1.42; // this is a magic number
+const double q = 1.245; // this is a magic number
 __device__ void zfunc(double *z, double x, double y, double t)
 {
     x -= 640;
@@ -41,21 +41,33 @@ __device__ void zfunc(double *z, double x, double y, double t)
 		double spread = 2 * abs(sin(M_PI / 200 * t));
 
 		*z = 0;
+		double theta = x == 0 ? (y > 0 ? M_PI_2 : -M_PI_2) : (atan(y/x) + (x < 0 ? M_PI : 0));
+		double r = sqrt(x*x + y*y);
 
-		//*z = (x * x - y * y) * sin(3.14 / 500 * t);
-		double r0 = sqrt(x*x + y*y);
+		theta += M_PI_4;
+
+		double a = 5;
+		double b = 1;
+
+		double x_app = r * cos(theta);
+		double y_app = r * sin(theta);
+
+		double r0 = (a * b) / sqrt(a * a * x_app * x_app + y_app * y_app * b * b);
 		if (r0 < spread * M_PI / q)
 			*z += amp / 2.0 * cos(q * r0 / spread) + amp / 2.0;
 
-		y -= 3;
-		double r1 = sqrt(x*x + y*y);
+
+		a = 2;
+		b = 3;
+
+		theta += M_PI_2;
+
+		x_app = r * cos(theta);
+		y_app = r * sin(theta) + 3;
+
+		double r1 = (a * b) / sqrt(a * a * x_app * x_app + y_app * y_app * b * b);
 		if (r1 < spread * M_PI / q)
 			*z += amp / 2.0 * cos(q * r1 / spread) + amp / 2.0;
-
-		y += 6;
-		double r2 = sqrt(x*x + y*y);
-		if (r2 < spread * M_PI / q)
-			*z += amp / 2.0 * cos(q * r2 / spread) + amp / 2.0;
 }
 
 /*

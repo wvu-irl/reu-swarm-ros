@@ -34,6 +34,7 @@ if (CUDA_FOUND)
 	###################################
 	catkin_package(
 #		FILE ComicSansMS3.ttf
+		INCLUDE_DIRS include
 	)
 	
 	add_executable(table_vis src/table_vis.cpp)
@@ -46,7 +47,7 @@ if (CUDA_FOUND)
 	## Specify additional locations of header files
 	## Your package locations should be listed before other locations
 	include_directories(
-	# include
+	  include
 	  ${catkin_INCLUDE_DIRS}
 	)
 	set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})

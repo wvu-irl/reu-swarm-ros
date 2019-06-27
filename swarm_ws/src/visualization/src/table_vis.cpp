@@ -6,7 +6,7 @@
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/Vector3.h>
 
-#include "contour.h"
+#include <visualization/contour.h>
 #include "transform/perspective_transform_gpu.h"
 
 #include <math.h>
@@ -366,7 +366,7 @@ int main(int argc, char **argv)
 
 	// adding levels
 	const double num_levels = 10.0; // number of levels to draw
-	const double range = 20.0;
+	const double range = 25.0;
 	for (double i = range / num_levels; i <= range; i += range / num_levels)
 	{
 		cont->levels.push_back(i);
