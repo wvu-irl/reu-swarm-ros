@@ -7,7 +7,7 @@ Model::Model(int _name)
 	name = _name;
 }
 
-model::sensorUpdate(AliceStructs::mail _toAdd)
+Model::sensorUpdate(AliceStructs::mail _toAdd)
 {
 	current_obstacles = _toAdd.obstacles;
 	current_heat_map = _toAdd.heat_map;
@@ -21,4 +21,19 @@ Model::pass()
 Model::forget()
 {
 	//See pass
+}
+
+string Model::getCollisionState()
+{
+	for (auto& obstacle : current_obstacles)
+	{
+		int dis = findLocalMin(obstacle);
+
+	}
+	return "Free";
+}
+
+int Model::findLocalMin(AliceStructs::obstacle)
+{
+
 }

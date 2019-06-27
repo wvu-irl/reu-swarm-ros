@@ -43,7 +43,17 @@ public:
 	/*
 	 * Forgets unneeded data
 	 */
-	void forget()
+	void forget();
+
+	/*
+	 * Calculates the collision state, or what the robot needs to do to avoid obstacles
+	 */
+	string getCollisionState();
+
+	/*
+	 * Finds the nearest point on an obstacle
+	 */
+	int findLocalMin(AliceStructs::obstacle);
 
 private:
 

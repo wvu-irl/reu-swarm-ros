@@ -10,6 +10,7 @@ Rules::Rules(Model _model)
 
 AliceStructs::vel Rules::stateLoop()
 {
+	priorState = state;
 	switch (state)
 	{
 	case "Explore":
@@ -33,11 +34,15 @@ AliceStructs::vel Rules::stateLoop()
 
 void Rules::avoidCollsions()
 {
+	string collision_state = model.getCollisionState();
 	switch (collision_state)
 	{
+	case "Free":
+		state = priorState;
+		to_return.mag = -1;
+		return to_return;
 	case "Blocked":
-		final_vel.mag = 0;
-		final_vel.dir = 0;
+		if ()
 		break;
 	case "Recontre":
 

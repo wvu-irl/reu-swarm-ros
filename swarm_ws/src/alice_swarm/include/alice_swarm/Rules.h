@@ -30,7 +30,6 @@ private:
 
 	Model model;
 	string state;
-	string collision_state
 	AliceStructs::vel final_vel;
 
 	/*
