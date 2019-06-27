@@ -15,6 +15,16 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
 )
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
+		#Find any version 2.X of SFML
+		#See the FindSFML.cmake file for additional details and instructions
+find_package(SFML 2 REQUIRED  graphics window system)
+find_package(SFML 2 COMPONENTS graphics window system)
+
+ADD_LIBRARY(color_map ${LIB_TYPE} src/color_map.cpp)
+target_link_libraries(color_map ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
+
+
 find_package(CUDA)
 if (CUDA_FOUND)
 
@@ -22,8 +32,6 @@ if (CUDA_FOUND)
 	set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc" FORCE)
 	set(LIB_TYPE STATIC)
 	
-	CUDA_ADD_LIBRARY(color_map ${LIB_TYPE} src/color_map.cu)
-	target_link_libraries(color_map ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
 	CUDA_ADD_LIBRARY(contour ${LIB_TYPE} src/contour.cu)
 	target_link_libraries(contour ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map)
 	
@@ -50,11 +58,8 @@ if (CUDA_FOUND)
 	  include
 	  ${catkin_INCLUDE_DIRS}
 	)
-	set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
-	#Find any version 2.X of SFML
-	#See the FindSFML.cmake file for additional details and instructions
-	find_package(SFML 2 REQUIRED  graphics window system)
-	find_package(SFML 2 COMPONENTS graphics window system)
+	
+	
 	if(SFML_FOUND)
 	  include_directories(${SFML_INCLUDE_DIR})
 	  target_link_libraries(table_vis ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map contour perspective_tf)
