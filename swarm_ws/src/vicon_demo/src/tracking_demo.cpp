@@ -18,6 +18,20 @@
 #include <wvu_swarm_std_msgs/robot_command.h>
 #include <wvu_swarm_std_msgs/robot_command_array.h>
 #include "robot_id.h"
+#include <thread>
+
+bool g_charging = false;
+
+std::thread cinLooper;
+
+void cinLoop(void)
+{
+    while(true){
+        std::cin.clear();
+        std::cin >> g_charging;
+        std::cout << g_charging << std::endl;
+    }
+}
 
 void msgCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg) {}
 
@@ -40,6 +54,10 @@ double processBot(wvu_swarm_std_msgs::robot_command_array &outputMsg, std::strin
 
 int main(int argc, char **argv)
 {
+    // Start a cin thread for charge switching
+    cinLooper = std::thread(cinLoop);
+    bool prevCharge = false;
+    
     // Initialize a node
     ros::init(argc, argv, "tracker");
     
@@ -111,8 +129,28 @@ int main(int argc, char **argv)
             if(thisDist < minimumPointDistance) minimumPointDistance = thisDist;
         }
         
+        // If charging now, move the point
+        if(g_charging && !prevCharge) {
+            prevCharge = true;
+            
+            geometry_msgs::Point pt;
+            pt.x = 0;
+            pt.y = 50;
+            pt.z = 0;
+            currentPoint = pt;
+        
+            ROS_INFO("Point moved to %f, %f\n", currentPoint.x, currentPoint.y);
+        }
+        // If no longer charging, go back to path
+        else if(!g_charging && prevCharge) {
+            prevCharge = false;
+            
+            currentPoint = path.at(currentIndex);
+        
+            ROS_INFO("Point moved to %f, %f\n", currentPoint.x, currentPoint.y);
+        }
         // Move the point if any bot has come too close
-        if(minimumPointDistance < cutoffRadius) {
+        else if(minimumPointDistance < cutoffRadius) {
             // Rotate through vector if needed
             if(currentIndex + 1 >= path.size())
                 currentIndex = 0;
@@ -130,6 +168,8 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
+    
+    cinLooper.join();
 }
 
 double getDist(const geometry_msgs::Point first, const geometry_msgs::Point second)
