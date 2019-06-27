@@ -46,26 +46,26 @@ __device__ void zfunc(double *z, double x, double y, double t)
 
 		theta += M_PI_4;
 
-		double a = 5;
-		double b = 1;
+		double a = 2;
+		double b = 0.5;
 
 		double x_app = r * cos(theta);
 		double y_app = r * sin(theta);
 
-		double r0 = (a * b) / sqrt(a * a * x_app * x_app + y_app * y_app * b * b);
+		double r0 = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
 		if (r0 < spread * M_PI / q)
-			*z += amp / 2.0 * cos(q * r0 / spread) + amp / 2.0;
+			*z += (amp / 2.0) * cos(q * r0 / spread) + (amp / 2.0);
 
 
-		a = 2;
-		b = 3;
+		a = 3;
+		b = 1;
 
 		theta += M_PI_2;
 
 		x_app = r * cos(theta);
 		y_app = r * sin(theta) + 3;
 
-		double r1 = (a * b) / sqrt(a * a * x_app * x_app + y_app * y_app * b * b);
+		double r1 = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
 		if (r1 < spread * M_PI / q)
 			*z += amp / 2.0 * cos(q * r1 / spread) + amp / 2.0;
 }
