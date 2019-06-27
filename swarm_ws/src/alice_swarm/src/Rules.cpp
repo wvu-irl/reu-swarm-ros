@@ -8,7 +8,7 @@ Rules::Rules(Model _model)
 	model = _model;
 }
 
-Rules::stateLoop()
+AliceStructs::vel Rules::stateLoop()
 {
 	switch (state)
 	{
@@ -26,7 +26,22 @@ Rules::stateLoop()
 		break;
 	case "findUpdraft":
 		findUpdraft();
-
+		break;
 	}
 	return final_vel;
+}
+
+void Rules::avoidCollsions()
+{
+	switch (collision_state)
+	{
+	case "Blocked":
+		final_vel.mag = 0;
+		final_vel.dir = 0;
+		break;
+	case "Recontre":
+
+	case "Rendevous":
+
+	}
 }
