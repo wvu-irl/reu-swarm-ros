@@ -29,23 +29,33 @@ cudaDeviceProp deviceProp;
  * x and y are coordinates on the plane perpendicular to the view
  * t is a saw function of time (goes from 0 to 1000 incrementing by 1 every tick)
  */
+const double q = 1.42; // this is a magic number
 __device__ void zfunc(double *z, double x, double y, double t)
 {
     x -= 640;
 		y -= 400;
 		x /= 50;
 		y /= 50;
+
+		double amp = 20;
+		double spread = 2 * abs(sin(M_PI / 200 * t));
+
+		*z = 0;
+
 		//*z = (x * x - y * y) * sin(3.14 / 500 * t);
 		double r0 = sqrt(x*x + y*y);
-		*z = 20 * pow(M_E, -pow(r0, 2) / (2 * pow(sin(M_PI / 200 * t), 2)));
+		if (r0 < spread * M_PI / q)
+			*z += amp / 2.0 * cos(q * r0 / spread) + amp / 2.0;
 
 		y -= 3;
 		double r1 = sqrt(x*x + y*y);
-		*z += 20 * pow(M_E, -pow(r1, 2) / (2 * pow(sin(M_PI / 200 * t), 2)));
+		if (r1 < spread * M_PI / q)
+			*z += amp / 2.0 * cos(q * r1 / spread) + amp / 2.0;
 
 		y += 6;
 		double r2 = sqrt(x*x + y*y);
-		*z += 20 * pow(M_E, -pow(r2, 2) / (2 * pow(sin(M_PI / 200 * t), 2)));
+		if (r2 < spread * M_PI / q)
+			*z += amp / 2.0 * cos(q * r2 / spread) + amp / 2.0;
 }
 
 /*
