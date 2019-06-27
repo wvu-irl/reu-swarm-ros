@@ -79,17 +79,18 @@ public:
 
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
 
-	void printAliceMail(AliceStructs::mail _mail); //Prints mail for debug purposes
+//	void printAliceMail(wvu_swarm_std_msgs::alice_mail_array _mail); //Prints mail for debug purposes
 
-	void addFlowMail(int i, AliceStructs::mail &_mail); //Adds the flows within a robot's VISION range
+	void addFlowMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the flows within a robot's VISION range
 
-	void addObsPointMail(int i, AliceStructs::mail &_mail); //Adds the obstacles within a robot's VISION range
+	void addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the obstacles within a robot's VISION range
 
-	void addTargetMail(int i, AliceStructs::mail &_mail); //Adds the targets within a robot's VISION range
+	void addTargetMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the targets within a robot's VISION range
 
-	void addNeighborMail(int i, AliceStructs::mail &_mail); //Adds the neighbors determined by its closest x
+	void addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the neighbors determined by its closest x
 
-	AliceStructs::mail getAliceMail(int i); //Gathers all the relative information for a robot into one struct
+
+	wvu_swarm_std_msgs::alice_mail_array getAliceMail(); //Gathers all the relative information for a robot into one msg
 
 	void clearHub(); //Clears bot information
 };

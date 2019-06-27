@@ -41,7 +41,6 @@ AliceStructs::obj Hub::getSeparation(Bot _bot, std::pair<float, float> _obs, flo
 
 Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reasons?
 {
-
 }
 
 void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
@@ -61,7 +60,6 @@ void Hub::processVicon() //Fills in bots[]
 
 	for (size_t i = 0; i < viconBotArray.poseVect.size(); i++)
 	{
-
 		//This char bs-ery is for converting the state initials to numbers in our map
 		char bid[3] =
 		{ '\0' };
@@ -78,29 +76,12 @@ void Hub::processVicon() //Fills in bots[]
 		double roll, pitch, yaw;
 
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-		bool foundID = false;
-		int j;
-		for (j = 0; j < ridOrder.size(); j++)
-		{
-			if (ridOrder.at(j) == numID)
-			{
-				foundID = true;
-				break;
-			}
-		}
-		if (foundID)
-		{
-			bots.at(j) = Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-					viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1);
-		} else
-		{
-			bots.push_back(
-					Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-							viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1));
-			ridOrder.push_back(numID); //storing the order of insertion
-
-		}
-
+		bots.push_back(
+				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
+						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1));
+		std::vector<Bot> temp;
+		ridOrder.push_back(numID); //storing the order of insertion
+		neighbors.push_back(temp); //adds an empty vector to neighbors for future use
 	}
 }
 
@@ -111,13 +92,9 @@ void Hub::processVicon() //Fills in bots[]
  */
 void Hub::findNeighbors()
 {
-	for (int i = 0; i<ridOrder.size();i++){
-	std::vector<Bot> temp;
-			neighbors.push_back(temp); //adds an empty vector to neighbors for future use
-	}
-	for (int botIndex = 0; botIndex < ridOrder.size(); botIndex++)
+	for (int botIndex = 0; botIndex < viconBotArray.poseVect.size(); botIndex++)
 	{
-		for (int curIndex = 0; curIndex < ridOrder.size(); curIndex++)
+		for (int curIndex = 0; curIndex < viconBotArray.poseVect.size(); curIndex++)
 		{
 			if (botIndex == curIndex) // Check for duplicates
 			{
@@ -150,28 +127,24 @@ void Hub::findNeighbors()
 	}
 }
 
-void Hub::addNeighborMail(int i, AliceStructs::mail &_mail)
+void Hub::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 {
-	std::vector<AliceStructs::neighbor> n;
 	for (std::vector<Bot>::iterator it = neighbors.at(i).begin(); it != neighbors.at(i).end(); it++)
 	{
-
-		AliceStructs::neighbor temp;
-		temp.name = it->id;
+		wvu_swarm_std_msgs::neighbor_mail temp;
+		temp.name= it->id;
 		//Makes the direction of the neighbor relative to the robot's heading
 		temp.dir = fmod(atan2(it->y - bots[i].y, it->x - bots[i].x) - bots[i].heading + 4 * M_PI, 2 * M_PI);
 		temp.dis = it->distance;
 		//Makes the heading of the neighbor relative to the robot's heading
 		temp.ang = fmod(it->heading - bots[i].heading + 2 * M_PI, 2 * M_PI);
 		temp.sid = it->swarm_id;
-		n.push_back(temp);
+		_mail.neighborMail.push_back(temp);
 	}
-	_mail.neighbors = n;
 }
 
-void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
+void Hub::addFlowMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 {
-	std::vector<AliceStructs::ideal> f;
 	int num_pts = flows.flow.size();
 	for (int j = 0; j < num_pts; j++)
 	{
@@ -182,22 +155,20 @@ void Hub::addFlowMail(int i, AliceStructs::mail &_mail)
 			AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
 			if (temp2.dis > -1) //If the flow was in VISION range
 			{
-				AliceStructs::ideal temp3;
+				wvu_swarm_std_msgs::flow_mail temp3;
 				temp3.dis = temp2.dis;
 				//Makes the direction of the flow relative to the robot's heading
 				temp3.dir = fmod(flows.flow.at(j).theta - bots[i].heading + 2 * M_PI, 2 * M_PI);
 				temp3.spd = flows.flow.at(j).r;
 				temp3.pri = flows.flow.at(j).pri;
-				f.push_back(temp3);
+				_mail.flowMail.push_back(temp3);
 			}
 		}
 	}
-	_mail.flows = f;
 }
 
-void Hub::addTargetMail(int i, AliceStructs::mail &_mail) //Adds targets within a robots vision range
+void Hub::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds targets within a robots vision range
 {
-	std::vector<AliceStructs::obj> t;
 	int num_pts = targets.point.size();
 	for (int j = 0; j < num_pts; j++)
 	{
@@ -206,16 +177,17 @@ void Hub::addTargetMail(int i, AliceStructs::mail &_mail) //Adds targets within 
 		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
 		if (temp2.dis > -1) //If the target was in VISION range
 		{
-			t.push_back(temp2);
-
+			wvu_swarm_std_msgs::obj_mail temp3;
+			temp3.radius =temp2.dis;
+			temp3.theta=temp2.dir;
+			_mail.targetMail.push_back(temp3);
 		}
 	}
-	_mail.targets = t;
 }
 
-void Hub::addObsPointMail(int i, AliceStructs::mail &_mail) //Adds obstacles within a robots vision range
+void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds obstacles within a robots vision range
 {
-	std::vector<AliceStructs::obj> o;
+
 	int num_pts = obstacles.point.size();
 	for (int j = 0; j < num_pts; j++)
 	{
@@ -224,34 +196,37 @@ void Hub::addObsPointMail(int i, AliceStructs::mail &_mail) //Adds obstacles wit
 		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
 		if (temp2.dis > -1)
 		{
-			o.push_back(temp2);
+			wvu_swarm_std_msgs::obj_mail temp3;
+			temp3.radius = temp2.dis;
+			temp3.theta =temp2.dir;
+			_mail.obsPointMail.push_back(temp3);
 		}
 
 	}
-	_mail.obstacles = o;
-
+	}
 }
 
-void Hub::printAliceMail(AliceStructs::mail _mail) //Prints mail for debug purposes
-{
-	std::cout << "--- Mail for Alice " << _mail.name << "," << _mail.sid << " ---" << std::endl;
-	std::cout << "Neighbors - " << _mail.neighbors.size() << std::endl;
-	for (std::vector<AliceStructs::neighbor>::iterator it = _mail.neighbors.begin(); it != _mail.neighbors.end(); ++it)
-	{
-
-		std::cout << it->dir << " " << it->dis << " " << it->ang << " " << it->name << std::endl;
-	}
-//	std::cout << "Obstacles - " << _mail.obstacles.size() << std::endl;
-//	for (std::vector<AliceStructs::obj>::iterator it = _mail.obstacles.begin(); it != _mail.obstacles.end(); ++it)
+//void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail _mail) //Prints mail for debug purposes
+//{
+//	std::cout << "--- Mail for Alice " << _mail.name << "," << _mail.sid << " ---" << std::endl;
+//	std::cout << "Neighbors - " << _mail.neighbors.size() << std::endl;
+//	for (std::vector<AliceStructs::neighbor>::iterator it = _mail.neighbors.begin(); it != _mail.neighbors.end(); ++it)
 //	{
 //
 //		std::cout << it->dir << " " << it->dis << " " << it->ang << " " << it->name << std::endl;
 //	}
-	//will finish if necessary but seems unnecessary...
-}
+////	std::cout << "Obstacles - " << _mail.obstacles.size() << std::endl;
+////	for (std::vector<AliceStructs::obj>::iterator it = _mail.obstacles.begin(); it != _mail.obstacles.end(); ++it)
+////	{
+////
+////		std::cout << it->dir << " " << it->dis << " " << it->ang << " " << it->name << std::endl;
+////	}
+//	//will finish if necessary but seems unnecessary...
+//}
 
-AliceStructs::mail Hub::getAliceMail(int i) //Gathers all the relative information for a robot into one struct
+wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relative information for a robot into one msg
 {
+<<<<<<< HEAD
 
 	AliceStructs::mail temp;
 	addObsPointMail(i, temp);
@@ -260,10 +235,24 @@ AliceStructs::mail Hub::getAliceMail(int i) //Gathers all the relative informati
 	addFlowMail(i, temp);
 	temp.name = ridOrder.at(i);
 	temp.sid = bots[i].swarm_id;
+=======
+	wvu_swarm_std_msgs::alice_mail_array to_return;
+	for (std::vector<int>::iterator it = ridOrder.begin(); it != ridOrder.end(); ++it)
+	{
+		wvu_swarm_std_msgs::alice_mail temp;
+		addObsPointMail(*it, temp);
+		addNeighborMail(*it, temp);
+		addTargetMail(*it, temp);
+		addFlowMail(*it, temp);
+		temp.name = *it;
+		temp.sid = bots[*it].swarm_id;
+		to_return.mails.push_back(temp);
+	}
+>>>>>>> 5d78f88... needed hub
 #if DEBUG_HUB
 	printAliceMail(temp);
 #endif
-	return temp;
+	return to_return;
 
 }
 
@@ -271,5 +260,4 @@ void Hub::clearHub() //Clears information about the robots
 {
 	//bots.clear(); DO NOT
 	neighbors.clear();
-
 }
