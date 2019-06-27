@@ -59,7 +59,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	float yd = to.second - y;
 
 //		//top
-	wvu_swarm_std_msgs::flow_mail cur0; // creating a local temporary flow vecotr
+	wvu_swarm_std_msgs::flow cur0; // creating a local temporary flow vecotr
 	cur0.x = x + (xd) / r * 10; // calculating direction
 	cur0.y = y + (yd) / r * 10;
 	cur0.r = 1;
@@ -69,28 +69,28 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	in_vector.flow.push_back(cur0); // adding to list
 //
 //		//topright
-	wvu_swarm_std_msgs::flow_mail cur1(cur0);
+	wvu_swarm_std_msgs::flow cur1(cur0);
 	cur1.x += (yd) / r * 10;
 	cur1.y -= (xd) / r * 10;
 	cur1.theta = cur0.theta - M_PI_2;
 	in_vector.flow.push_back(cur1);
 
 	//topleft
-	wvu_swarm_std_msgs::flow_mail cur2(cur0);
+	wvu_swarm_std_msgs::flow cur2(cur0);
 	cur2.x -= yd / r * 10;
 	cur2.y += xd / r * 10;
 	cur2.theta = cur0.theta + M_PI_2;
 	in_vector.flow.push_back(cur2);
 //
 //		//bottom
-	wvu_swarm_std_msgs::flow_mail cur3(cur0);
+	wvu_swarm_std_msgs::flow cur3(cur0);
 	cur3.x -= xd / r * 20;
 	cur3.y -= yd / r * 20;
 	cur3.theta = cur0.theta;
 	in_vector.flow.push_back(cur3);
 
 	//bottomleft
-	wvu_swarm_std_msgs::flow_mail cur4(cur2);
+	wvu_swarm_std_msgs::flow cur4(cur2);
 	cur4.x -= xd / r * 20;
 	cur4.y -= yd / r * 20;
 	cur4.theta = cur2.theta + 5 * M_PI / 6;
@@ -98,7 +98,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	in_vector.flow.push_back(cur4);
 
 	//bottomright
-	wvu_swarm_std_msgs::flow_mail cur5(cur1);
+	wvu_swarm_std_msgs::flow cur5(cur1);
 	cur5.x -= xd / r * 20;
 	cur5.y -= yd / r * 20;
 	cur5.theta = cur1.theta - 5 * M_PI / 6;
@@ -106,7 +106,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	in_vector.flow.push_back(cur5);
 
 	//middle
-	wvu_swarm_std_msgs::flow_mail cur6;
+	wvu_swarm_std_msgs::flow cur6;
 	cur6.x = x;
 	cur6.y = y;
 	cur6.r = 1;
@@ -116,28 +116,28 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	in_vector.flow.push_back(cur6);
 
 	//right
-	wvu_swarm_std_msgs::flow_mail cur7(cur6);
+	wvu_swarm_std_msgs::flow cur7(cur6);
 	cur7.x += yd / r * 20;
 	cur7.y -= xd / r * 20;
 	cur7.theta = cur6.theta + M_PI;
 	in_vector.flow.push_back(cur7);
 
 	//left
-	wvu_swarm_std_msgs::flow_mail cur8(cur6);
+	wvu_swarm_std_msgs::flow cur8(cur6);
 	cur8.x -= yd / r * 20;
 	cur8.y += xd / r * 20;
 	cur8.theta = cur6.theta + M_PI;
 	in_vector.flow.push_back(cur8);
 
 	//left2
-	wvu_swarm_std_msgs::flow_mail cur9(cur6);
+	wvu_swarm_std_msgs::flow cur9(cur6);
 	cur9.x -= yd / r * 10;
 	cur9.y += xd / r * 10;
 	cur9.theta = cur6.theta + 3 * M_PI / 4;
 	in_vector.flow.push_back(cur9);
 
 	//right2
-	wvu_swarm_std_msgs::flow_mail cur10(cur6);
+	wvu_swarm_std_msgs::flow cur10(cur6);
 	cur10.x += yd / r * 10;
 	cur10.y -= xd / r * 10;
 	cur10.theta = cur6.theta - 3 * M_PI / 4;

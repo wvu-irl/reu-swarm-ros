@@ -24,7 +24,6 @@ find_package(catkin REQUIRED COMPONENTS
     FILES
     neighbor_mail.msg
     alice_mail_array.msg
-    alice_mail.msg
     rtheta.msg
     vicon_bot.msg
     vicon_bot_array.msg
@@ -33,8 +32,8 @@ find_package(catkin REQUIRED COMPONENTS
     robot_command.msg
     robot_command_array.msg
     sensor_data.msg
-    obj_mail.msg
-    flow_mail.msg
+    obs_point_mail.msg
+    flow.msg
     flows.msg
   )
 

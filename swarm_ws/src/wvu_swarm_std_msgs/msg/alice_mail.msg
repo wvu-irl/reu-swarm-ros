@@ -1,7 +1,0 @@
-wvu_swarm_std_msgs/neighbor_mail[] neighborMail
-wvu_swarm_std_msgs/obj_mail[] obsPointMail
-wvu_swarm_std_msgs/obj_mail[] targetMail
-wvu_swarm_std_msgs/flow_mail[] flowMail
-int32 name
-int32 sid
-		
