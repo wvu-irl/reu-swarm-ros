@@ -1,1 +1,1 @@
-wvu_swarm_std_msgs/flow[] flow
+wvu_swarm_std_msgs/flow_mail[] flow
