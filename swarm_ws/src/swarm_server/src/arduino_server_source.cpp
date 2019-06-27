@@ -1,10 +1,13 @@
 #ifndef ARDINO_SERVER_SOURCE
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
-#define DEBUG_CPP 0
+#define DEBUG_CPP 1
+#if DEBUG_CPP
+#include <iostream>
+#endif
 
 // setting this to 1 shows what messages failed and succeeded
-#define DEBUG_MESSAGE 0
+#define DEBUG_MESSAGE 1
 
 #include "arduino_server.h"
 
@@ -62,22 +65,27 @@ std::vector<ConnectionInfo> *monitors;
 void sendCommandToRobots(command cmd, int recip_rid)
 {
 #if DEBUG_CPP || DEBUG_MESSAGE
-	//printf("[\033[1;33marduino_server_source\033[0m] Command executing\033[0m\n");
-	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0)
+//	printf("[\033[1;33marduino_server_source\033[0m] Command executing\033[0m\n");
+	if (registry->find(recip_rid) != registry->end() && registry->size() > 0)
 		printf("\033[30;42mSERVER: sending message [%02d <-> %s]: %s\t%d\033[0m\n",
 				recip_rid, rid_indexing[recip_rid].c_str(), cmd.str,
 				registry->at(recip_rid).getConnectionDescriptor());
+//        else
+//            printf("[\033[1;33marduino_server_source\033[0m] Could not locate info\n");
 #endif
 
+        int nbytes = 0;
 	// sending directly to recipiant
-	if (registry->find(recip_rid)->first == recip_rid && registry->size() > 0) // check to see that the location in the map exists
-		send(registry->at(recip_rid).getConnectionDescriptor(), &cmd, COMMAND_SIZE,
+	if (registry->find(recip_rid) != registry->end() && registry->size() > 0) // check to see that the location in the map exists
+		nbytes = send(registry->at(recip_rid).getConnectionDescriptor(), &cmd, COMMAND_SIZE,
 				0); // sending message
 #if DEBUG_CPP || DEBUG_MESSAGE
 	else
-		printf(
-				"\033[37;41mCould not locate ConnectionInfo for %02d <-> %s\033[0m\n",
+		printf("\033[37;41mCould not locate ConnectionInfo for %02d <-> %s\033[0m\n",
 				recip_rid, rid_indexing[recip_rid].c_str());
+        
+        if (nbytes != COMMAND_SIZE)
+            printf("\033[30;41mError failed to send to robot\033[0m\n");
 #endif
 
 	// checking for monitors
@@ -163,8 +171,11 @@ void *runClient(void *args)
 				}
 				else
 				{
-					registry->insert(
-							std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
+                                        //Replace entry if already existing
+                                        if(registry->find(rid) != registry->end())
+                                            registry->at(rid) = sockets->at(id);
+                                        else
+					registry->insert(std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
 #if DEBUG_CPP
 					printf("SERVER: Registry size: \033[31m%d\033[0m\n",
 							(int) registry->size());
