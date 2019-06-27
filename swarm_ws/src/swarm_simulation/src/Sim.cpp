@@ -337,7 +337,7 @@ void Sim::Render() //draws changes in simulation states to the window.
 	}
 	drawObstacles();
 	drawTargets();
-	//drawFlows();
+	drawFlows();
 
 // Draws all of the bodies out, and applies functions that are needed to update.
 	for (int i = 0; i < shapes.size(); i++)

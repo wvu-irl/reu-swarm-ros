@@ -43,7 +43,7 @@ AliceStructs::ideal Model::generateIdeal()
 	for (int i = 0; i < ideal_list.size(); i++)
 	{
 		//Prints out what each rule wants tells the robot to do. Is on one line to make commenting it out easier
-		//std::cout << "dir: " << ideal_list.at(i).dir << " spd: " << ideal_list.at(i).spd << " pri: " << ideal_list.at(i).pri << std::endl;
+	//	std::cout << "dir: " << ideal_list.at(i).dir << " spd: " << ideal_list.at(i).spd << " pri: " << ideal_list.at(i).pri << std::endl;
 		to_return = rules.addIdeals(to_return, ideal_list.at(i));
 	}
 	to_return.name = name;

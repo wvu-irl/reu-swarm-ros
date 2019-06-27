@@ -31,7 +31,7 @@ void pointCallback(const wvu_swarm_std_msgs::vicon_points &msg)
             std::cout << "\t[" << i << "]: (" << msg.point[i].x << ", " << msg.point[i].y << ")" << std::endl;
     }
 #endif
-        temp_targets = temp_temp_targets; // resets current target point
+        temp_targets = msg; // resets current target point
 }
 
 void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
@@ -261,6 +261,7 @@ void makeFlows(ros::Publisher _pub)
 	if (temp_targets.point.size() != 0) { // checking that there are targets to form flows from
 		createPuckFlow(vp_vector,temp_targets.point.at(0),goal1,1); // creates flow around puck
 		createPuckFlow(vp_vector,temp_targets.point.at(0),goal2,2);
+
 	}
 
 	_pub.publish(vp_vector); // publishing

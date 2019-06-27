@@ -9,6 +9,7 @@
 #include <tf/LinearMath/Matrix3x3.h>
 #include <math.h>
 #include <swarm_server/robot_id.h>
+#define DEBUG_HUB 0
 
 AliceStructs::obj Hub::getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance) //helper function for finding obstacle points.
 { // takes current bot and looks at distance to each obs point. If it "sees"[[ it, converts that obs to polar and pushes to its vector stored in polar_obs.
@@ -77,7 +78,7 @@ void Hub::processVicon() //Fills in bots[]
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 		bots.push_back(
 				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i%2+1));
+						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1));
 		std::vector<Bot> temp;
 		ridOrder.push_back(numID); //storing the order of insertion
 		neighbors.push_back(temp); //adds an empty vector to neighbors for future use
@@ -208,11 +209,20 @@ void Hub::addObsPointMail(int i, AliceStructs::mail &_mail) //Adds obstacles wit
 
 void Hub::printAliceMail(AliceStructs::mail _mail) //Prints mail for debug purposes
 {
-	std::cout << "---Mail for Alice " << _mail.name << "---" << std::endl;
+	std::cout << "--- Mail for Alice " << _mail.name << "," << _mail.sid << " ---" << std::endl;
+	std::cout << "Neighbors - " << _mail.neighbors.size() << std::endl;
 	for (std::vector<AliceStructs::neighbor>::iterator it = _mail.neighbors.begin(); it != _mail.neighbors.end(); ++it)
 	{
+
 		std::cout << it->dir << " " << it->dis << " " << it->ang << " " << it->name << std::endl;
 	}
+//	std::cout << "Obstacles - " << _mail.obstacles.size() << std::endl;
+//	for (std::vector<AliceStructs::obj>::iterator it = _mail.obstacles.begin(); it != _mail.obstacles.end(); ++it)
+//	{
+//
+//		std::cout << it->dir << " " << it->dis << " " << it->ang << " " << it->name << std::endl;
+//	}
+	//will finish if necessary but seems unnecessary...
 }
 
 AliceStructs::mail Hub::getAliceMail(int i) //Gathers all the relative information for a robot into one struct
@@ -224,8 +234,9 @@ AliceStructs::mail Hub::getAliceMail(int i) //Gathers all the relative informati
 	addFlowMail(i, temp);
 	temp.name = ridOrder.at(i);
 	temp.sid = bots[i].swarm_id;
-	//printAliceMail(temp);
-
+#if DEBUG_HUB
+	printAliceMail(temp);
+#endif
 	return temp;
 
 }
