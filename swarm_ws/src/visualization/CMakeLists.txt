@@ -32,7 +32,7 @@ find_package(SFML 2 REQUIRED  graphics window system)
 find_package(SFML 2 COMPONENTS graphics window system)
 
 ADD_LIBRARY(color_map ${LIB_TYPE} src/color_map.cpp)
-target_link_libraries(color_map ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
+target_link_libraries(color_map ${catkin_LIBRARIES})
 
 
 find_package(CUDA)

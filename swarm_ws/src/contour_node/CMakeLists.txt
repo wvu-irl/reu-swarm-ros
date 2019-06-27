@@ -13,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   wvu_swarm_std_msgs
+  geometry_msgs
+  visualization_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -49,11 +51,13 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 # Generate messages in the 'msg' folder
- add_message_files(
+add_message_files(
    FILES
-   gaussian.msg
    ellipse.msg
- )
+   gaussian.msg
+   map_level.msg
+   map_levels.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -70,10 +74,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs#   wvu_swarm_std_msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs wvu_swarm_std_msgs contour_node visualization_msgs geometry_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -105,9 +109,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+   INCLUDE_DIRS include
+   CATKIN_DEPENDS geometry_msgs message_runtime roscpp 
 #  LIBRARIES contour_node
-#  CATKIN_DEPENDS genmsg roscpp rospy std_msgs wvu_swarm_std_msgs
 #  DEPENDS system_lib
 )
 
@@ -116,9 +120,9 @@ catkin_package(
 ###########
 
 ## Specify additional locations of header files
-## Your package locations should be listed before other locations
+## Your package locations should be lisgeometry_msgsted before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -131,6 +135,8 @@ include_directories(
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_library(level_descriptor src/level_description.cpp)
+ target_link_libraries(level_descriptor ${catkin_LIBRARIES})
 
 # Declare a C++ executable
 # With catkin_make all packages are built within a single CMake context
@@ -148,6 +154,5 @@ include_directories(
  add_dependencies(mapping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 # Specify libraries to link a library or executable target against
- target_link_libraries(mapping
-   ${catkin_LIBRARIES}
- )
+ target_link_libraries(mapping ${catkin_LIBRARIES})
+ 

@@ -91,8 +91,10 @@ int main()
 	}
 	puts("\033[37;42mConnected to socket\033[0m");
 
+	int count = 0;
+
 	// main loop
-	while (true)
+	while (count < 200000)
 	{
 		int message_size = 0;
 		char str[32];
@@ -101,7 +103,7 @@ int main()
 		start_time = high_resolution_clock::now();
 
 		//reading the message
-		while ((message_size = read(socket_descriptor, str, sizeof(str))) > 0)
+		while ((message_size = read(socket_descriptor, str, sizeof(str))) > 0 && count < 200000)
 		{
 			// looking for pong return
 			if (strstr(str, "pong") == str)
@@ -120,8 +122,9 @@ int main()
 				file.open("latency_log.csv", std::ios::out | std::ios::app);
 				file << late << std::endl;
 				file.close();
+				count++;
 				// displaying latency results
-				printf("Latency: %s%4.3lf\033[0m\tmax:%s%4.3lf ms\033[0m\n",
+				printf("[%07d]Latency: %s%4.3lf\033[0m\tmax:%s%4.3lf ms\033[0m\n", count,
 						prev >= late ? "\033[32m" : "\033[31m", late,
 						new_max ? "\033[30;41m" : "\033[0m", max_late);
 				prev = late;

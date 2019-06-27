@@ -23,8 +23,10 @@
 #include <sys/wait.h>
 #include <errno.h>
 
+#include <iostream>
+
 #define PORT 4321
-#define IP "127.0.0.1"
+#define IP "192.168.10.187"
 
 struct command
 {
@@ -60,7 +62,7 @@ int main()
 	{
 
 	}
-	strcpy(reg.str, "register NH");
+	strcpy(reg.str, "register YY");
 	int bytes = write(socket_descriptor, (&reg), sizeof(reg));
 	if (bytes < 0)
 	{
@@ -70,6 +72,7 @@ int main()
 
 	while (true)
 	{
+		std::cout << "Top of loop" << std::endl;
 		int message_size = 0;
 		char str[32];
 
@@ -78,7 +81,9 @@ int main()
 		//reading the message
 		while ((message_size = read(socket_descriptor, str, sizeof(str))) > 0)
 		{
+			std::cout << "Message Recieved" << std::endl;
 			printf("CLIENT GOT: %s\n", str);
+			sleep(1);
 		}
 
 		// Display if there was an error
@@ -87,6 +92,7 @@ int main()
 			puts("Error receiving message.");
 			return 1;
 		}
+		sleep(1);
 	}
 	return 0;
 }
