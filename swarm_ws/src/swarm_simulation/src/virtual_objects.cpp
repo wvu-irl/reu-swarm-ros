@@ -6,12 +6,15 @@
 #include <math.h>
 #include <wvu_swarm_std_msgs/vicon_points.h>
 #include <wvu_swarm_std_msgs/flows.h>
+#include <wvu_swarm_std_msgs/virtual_objects.h>
+#include <wvu_swarm_std_msgs/virtual_object.h>
 
 #define VOBJ_DEBUG 0
 
 wvu_swarm_std_msgs::vicon_points temp_targets;
 wvu_swarm_std_msgs::vicon_points temp_temp_targets;
 wvu_swarm_std_msgs::vicon_points temp_obs;
+bool first = true; //so basically, this is a fix for the air_hockey sim obstacles publishing issue (they only need to be created once).
 //wvu_swarm_std_msgs::vicon_points temp_bots;
 void pointCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
@@ -59,7 +62,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	float yd = to.second - y;
 
 //		//top
-	wvu_swarm_std_msgs::flow cur0; // creating a local temporary flow vecotr
+	wvu_swarm_std_msgs::flow_mail cur0; // creating a local temporary flow vecotr
 	cur0.x = x + (xd) / r * 10; // calculating direction
 	cur0.y = y + (yd) / r * 10;
 	cur0.r = 1;
@@ -69,28 +72,28 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	in_vector.flow.push_back(cur0); // adding to list
 //
 //		//topright
-	wvu_swarm_std_msgs::flow cur1(cur0);
+	wvu_swarm_std_msgs::flow_mail cur1(cur0);
 	cur1.x += (yd) / r * 10;
 	cur1.y -= (xd) / r * 10;
 	cur1.theta = cur0.theta - M_PI_2;
 	in_vector.flow.push_back(cur1);
 
 	//topleft
-	wvu_swarm_std_msgs::flow cur2(cur0);
+	wvu_swarm_std_msgs::flow_mail cur2(cur0);
 	cur2.x -= yd / r * 10;
 	cur2.y += xd / r * 10;
 	cur2.theta = cur0.theta + M_PI_2;
 	in_vector.flow.push_back(cur2);
 //
 //		//bottom
-	wvu_swarm_std_msgs::flow cur3(cur0);
+	wvu_swarm_std_msgs::flow_mail cur3(cur0);
 	cur3.x -= xd / r * 20;
 	cur3.y -= yd / r * 20;
 	cur3.theta = cur0.theta;
 	in_vector.flow.push_back(cur3);
 
 	//bottomleft
-	wvu_swarm_std_msgs::flow cur4(cur2);
+	wvu_swarm_std_msgs::flow_mail cur4(cur2);
 	cur4.x -= xd / r * 20;
 	cur4.y -= yd / r * 20;
 	cur4.theta = cur2.theta + 5 * M_PI / 6;
@@ -98,7 +101,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	in_vector.flow.push_back(cur4);
 
 	//bottomright
-	wvu_swarm_std_msgs::flow cur5(cur1);
+	wvu_swarm_std_msgs::flow_mail cur5(cur1);
 	cur5.x -= xd / r * 20;
 	cur5.y -= yd / r * 20;
 	cur5.theta = cur1.theta - 5 * M_PI / 6;
@@ -106,7 +109,7 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	in_vector.flow.push_back(cur5);
 
 	//middle
-	wvu_swarm_std_msgs::flow cur6;
+	wvu_swarm_std_msgs::flow_mail cur6;
 	cur6.x = x;
 	cur6.y = y;
 	cur6.r = 1;
@@ -116,28 +119,28 @@ void createPuckFlow(wvu_swarm_std_msgs::flows &in_vector, wvu_swarm_std_msgs::vi
 	in_vector.flow.push_back(cur6);
 
 	//right
-	wvu_swarm_std_msgs::flow cur7(cur6);
+	wvu_swarm_std_msgs::flow_mail cur7(cur6);
 	cur7.x += yd / r * 20;
 	cur7.y -= xd / r * 20;
 	cur7.theta = cur6.theta + M_PI;
 	in_vector.flow.push_back(cur7);
 
 	//left
-	wvu_swarm_std_msgs::flow cur8(cur6);
+	wvu_swarm_std_msgs::flow_mail cur8(cur6);
 	cur8.x -= yd / r * 20;
 	cur8.y += xd / r * 20;
 	cur8.theta = cur6.theta + M_PI;
 	in_vector.flow.push_back(cur8);
 
 	//left2
-	wvu_swarm_std_msgs::flow cur9(cur6);
+	wvu_swarm_std_msgs::flow_mail cur9(cur6);
 	cur9.x -= yd / r * 10;
 	cur9.y += xd / r * 10;
 	cur9.theta = cur6.theta + 3 * M_PI / 4;
 	in_vector.flow.push_back(cur9);
 
 	//right2
-	wvu_swarm_std_msgs::flow cur10(cur6);
+	wvu_swarm_std_msgs::flow_mail cur10(cur6);
 	cur10.x += yd / r * 10;
 	cur10.y -= xd / r * 10;
 	cur10.theta = cur6.theta - 3 * M_PI / 4;
@@ -225,12 +228,34 @@ void createFood(wvu_swarm_std_msgs::vicon_points &in_vector)
  * 
  * @param _pub publisher that publishes to an obstacles topic
  */
-void makeObstacles(ros::Publisher _pub)
+void makeObstacles(ros::Publisher _pub, ros::Publisher _pub2)
 {
-	wvu_swarm_std_msgs::vicon_points vp_vector; // points
-	createBoundary(vp_vector); // creates bounding box for table
-	_pub.publish(vp_vector); // publishes points
+	if (first == true)
+	{
+		wvu_swarm_std_msgs::vicon_points vp_vector; // points
+		createBoundary(vp_vector); // creates bounding box for table
+		_pub.publish(vp_vector); // publishes points
+		first = false;
+	}
+	else
+	{
+		_pub.publish(temp_obs);
+	}
+	//-----------------------------------------------------------
+	float r = 5; //cm
+	std::vector<float> x_origins = {10,-10,-10,10};
+	std::vector<float> y_origins ={10,-10,10,-10};
 
+	wvu_swarm_std_msgs::virtual_objects vos;
+	for(int i = 0; i <x_origins.size(); i++)
+	{
+		wvu_swarm_std_msgs::virtual_object cur_vo;
+		cur_vo.x = x_origins.at(i);
+		cur_vo.y = y_origins.at(i);
+		cur_vo.r = r;
+		vos.v_object.push_back(cur_vo);
+	}
+	_pub2.publish(vos);
 }
 
 /**
@@ -272,21 +297,22 @@ int main(int argc, char **argv) // begin here
         // ros initialize
 	ros::init(argc, argv, "virtual_objects");
 	ros::NodeHandle n;
-	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_obstacles", 1000); // pub to obstacles
+	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("air_hockey_virtual_obstacles", 1000); // pub to obstacles
 	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_targets", 1000); // pub to targets
 	ros::Publisher pub3 = n.advertise < wvu_swarm_std_msgs::flows > ("virtual_flows", 1000); // pub to flows
+	ros::Publisher pub4 = n.advertise < wvu_swarm_std_msgs::virtual_objects > ("virtual_objects", 1000); // pub to flows
 
         // subscribing
 	ros::Subscriber sub1 = n.subscribe("virtual_targets", 1000, pointCallback);
-	ros::Subscriber sub2 = n.subscribe("virtual_obstacles", 1000, obsCallback);
+	ros::Subscriber sub2 = n.subscribe("air_hockey_virtual_obstacles", 1000, obsCallback);
 	//ros::Subscriber	sub2 = n.subscribe("vicon_array",1000,botCallback;
 	ros::Rate loopRate(100);
 	sleep(2); //waits for sim to be awake
 	int i = 0;
 	while (ros::ok() && i < 10000) // setup loop
 	{
-		makeObstacles(pub1); // creating obstacles
-		
+		makeObstacles(pub1, pub4); // creating obstacles
+		makeTargets(pub2); // creating targets
 		makeFlows(pub3); // creating flows
 		ros::spinOnce(); // spinning callbacks
 //		loopRate.sleep();
@@ -299,7 +325,7 @@ int main(int argc, char **argv) // begin here
 #endif 
 	while (ros::ok()) // main loop
 	{
-		makeObstacles(pub1); // publishing obstacles
+		makeObstacles(pub1, pub4); // publishing obstacles
 		makeFlows(pub3); // publishing flows
 		ros::spinOnce(); // spinning callbacks
 		loopRate.sleep();

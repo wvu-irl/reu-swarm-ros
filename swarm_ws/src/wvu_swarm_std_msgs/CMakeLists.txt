@@ -36,7 +36,8 @@ find_package(catkin REQUIRED COMPONENTS
     obj_mail.msg
     flow_mail.msg
     flows.msg
-    flow.msg
+    virtual_objects.msg
+    virtual_object.msg
   )
 
 ## Generate added messages and services with any dependencies listed here

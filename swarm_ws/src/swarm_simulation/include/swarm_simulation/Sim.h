@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 #include <wvu_swarm_std_msgs/robot_command_array.h>
 #include <wvu_swarm_std_msgs/flows.h>
+#include <wvu_swarm_std_msgs/virtual_objects.h>
 //#include <swarm_server/robot_id.h>
 
 #ifndef SIM_H
@@ -50,8 +51,6 @@ private:
 	//text related stuff
 	void addText();
 	float bodiesSize;
-	float bodiesSize_small;
-	float bodiesSize_big;
 
 	//Handle graphics rendering and mouse/key inputs
 	PrevIteration HandleInput(PrevIteration _pI);

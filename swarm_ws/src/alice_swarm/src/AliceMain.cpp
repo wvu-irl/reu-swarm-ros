@@ -7,11 +7,28 @@
 #include <map>
 #include <chrono>
 
-wvu_swarm_std_msgs::alice_mail_array temp_mail;
+//made global because i need them for the call back
+//bool is_updated(false);
+wvu_swarm_std_msgs::vicon_bot_array temp_bot_array;
+wvu_swarm_std_msgs::vicon_points temp_obs_array;
+wvu_swarm_std_msgs::vicon_points temp_target;
+wvu_swarm_std_msgs::flows temp_flow_array;
 
-void aliceCallback(const wvu_swarm_std_msgs::alice_mail_array &msg)
+void botCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg)
 {
-	temp_mail=msg;
+		temp_bot_array = msg;
+}
+void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
+{
+		temp_obs_array = msg;
+}
+void pointCallback(const wvu_swarm_std_msgs::vicon_points &msg)
+{
+		temp_target = msg;
+}
+void flowCallback(const wvu_swarm_std_msgs::flows &msg)
+{
+		temp_flow_array = msg;
 }
 int main(int argc, char **argv)
 {
@@ -21,16 +38,24 @@ int main(int argc, char **argv)
 	//Creates an AliceBrain node, and subscribes/publishes to the necessary topics
 	ros::init(argc, argv, "AliceBrain");
 	ros::NodeHandle n;
-	ros::Subscriber sub = n.subscribe("alice_mail_array", 1000, aliceCallback);
+	ros::Subscriber sub = n.subscribe("vicon_array", 1000, botCallback); //Subscribes to the Vicon
+	ros::Subscriber sub2 = n.subscribe("virtual_targets", 1000, pointCallback);
+	ros::Subscriber sub3 = n.subscribe("air_hockey_virtual_obstacles", 1000, obsCallback);
+	ros::Subscriber sub4 = n.subscribe("virtual_flows", 1000, flowCallback);
 	ros::Rate loopRate(200);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array > ("final_execute", 1000);
+	Hub aliceBrain(0); // Creates a hub for the conversion of absolute to relative info
+
 	while (ros::ok())
 	{
 		auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of Alice
-//		for (int i = 0; i < temp_mail.mails.size(); i++)
-//		{
-//			aliceMap[temp_mail.mails.at(i).name].receiveMsg(temp_mail.mails.at(i)); //gives each robot the relative data it needs
-//		}
+
+		aliceBrain.update(temp_bot_array, temp_target, temp_obs_array, temp_flow_array); //puts in absolute data from subscribers
+		for (int i = 0; i < temp_bot_array.poseVect.size(); i++)
+		{
+
+			aliceMap[i].receiveMsg(aliceBrain.getAliceMail(i)); //gives each robot the relative data it needs
+		}
 		std::vector<AliceStructs::ideal> all_ideals; //Creates a vector that stores the robot's initial ideal vectors
 		for (std::map<int, Robot>::iterator it = aliceMap.begin(); it != aliceMap.end(); ++it) //eventually run this part asynchronously
 		{
