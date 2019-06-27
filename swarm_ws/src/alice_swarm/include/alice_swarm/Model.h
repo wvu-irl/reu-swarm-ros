@@ -28,12 +28,12 @@ public:
 	AliceStructs::obstacles memento_obstacles;
 	//AliceStructs::heatMap memento_heat_map; See above
 
-	Model(int name);
+	Model(int _name);
 
 	/*
-	 * Updates the model; called by Alice
+	 * Updates the model from the sensors; called by Alice
 	 */
-	void updateModel(AliceStructs::mail _toAdd)
+	void sensorUpdate(AliceStructs::mail _toAdd)
 
 	/*
 	 * Passes data to neighbors
@@ -43,7 +43,8 @@ public:
 	/*
 	 * Forgets unneeded data
 	 */
-	void forget(
+	void forget()
+
 private:
 
 	/*

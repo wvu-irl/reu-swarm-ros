@@ -19,12 +19,6 @@ class Alice
 
 public:
 	int name;
-
-	/*
-	 * Dummy constructor for the compiler
-	 */
-	Alice();
-
 	/*
 	 * Initializes Alice, rules, and the model
 	 */
