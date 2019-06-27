@@ -232,8 +232,8 @@ void Sim::Run(ros::NodeHandle _n)
 			if (!update)
 			{
 				pub2.publish(targets);
-				pub3.publish(obstacles);
 			}
+			pub3.publish(obstacles);
 			ros::spinOnce();
 //			std::cout<<"iteration complete"<<std::endl;
 			loopRate.sleep();
