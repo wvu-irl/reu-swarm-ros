@@ -8,6 +8,10 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include "alice_swarm/aliceStructs.h"
+#include "alice_swarm/Alice.h"
+#include "alice_swarm/Rules.h"
+
 class Model
 {
 public:

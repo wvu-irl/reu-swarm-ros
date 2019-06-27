@@ -1,80 +1,61 @@
 /*
- * Rules
+ * Rules.h
  *
- * This class doesn't actually contain any information, other than the robot's name and the swarm to which it belongs.
- * Instead, it contains a series of rules methods, which are called by the model to generate and ideal vector.
- * For more info, see Model.cpp
+ * A finite state machine that takes data from the model and outputs vectors
  *
- * Authors: Casey Edmonds-Estes and Jeongwoo Seo
+ * Author: Casey Edmonds-Estes
  */
 
-#ifndef RULES_H_
-#define RULES_H_
+#ifndef RULES_H
+#define RULES_H
 
 #include "alice_swarm/aliceStructs.h"
-#include "math.h"
+#include "alice_swarm/Model.h"
+#include "alice_swarm/Alice.h"
 
-static const float ROBOT_SIZE = 7; //Size of the physical robot, in centimeters.
 
 class Rules
 {
 public:
 
-	bool should_ignore;
-
-	int sid; //Swarm ID, or which swarm the robot belongs to.
+	Rules(Model _model);
 
 	/*
-	 * Dummy constructor for compiler
+	 * Determines which state Alice is in
 	 */
-	Rules();
+	AliceStructs::vel stateLoop();
 
-	Rules(int _sid);
 
-	/*
-	 * Performs weighted vector addition to add two ideal vectors together, then returns the result.
-	 */
-	AliceStructs::ideal addIdeals(AliceStructs::ideal i1, AliceStructs::ideal i2);
+private:
 
-	/*
-	 * Dummy rule for testing other parts of Alice
-	 */
-	AliceStructs::ideal dummy1();
+	Model model;
+	string state;
+	AliceStructs::vel final_vel;
 
 	/*
-	 * End of the helper and init methods. Everything under this line is a rule
-	<=====================================================================================================================>
+	 * Makes Alice explore new territory
 	 */
+	void Explore();
 
 	/*
-	 * Makes bots converge to be some distance away from the center of their neighbors.
+	 * Prevents Alice from hitting obstacles or other robots
 	 */
-	AliceStructs::ideal maintainSpacing(std::list<AliceStructs::neighbor> bots, float strength, float distance);
+	void avoidCollisions();
 
 	/*
-	 * Uses an electromagnetic-style "force" to prevents robots from getting too close.
+	 * Makes Alice find a charging station
 	 */
-	AliceStructs::ideal magnetAvoid(std::list <AliceStructs::neighbor> bots, float strength);
+	void Charge();
 
 	/*
-	 * Makes the robot avoid robots in front of it, to make flocking behavior more elegant
+	 * Makes Alice find food
 	 */
-	AliceStructs::ideal birdAvoid(std::list <AliceStructs::neighbor> bots, float strength);
+	void findFood();
 
 	/*
-	 * Moves a robot towards a target
+	 * Makes Alice seek higher elevations
 	 */
-	AliceStructs::ideal goToTarget(std::list<AliceStructs::obj> targets, float strength);
-
-	/*
-	 * Makes the robots follow a flow, which is a vector with a position
-	 */
-	AliceStructs::ideal followFlow(std::list<AliceStructs::ideal> flows, float strength);
-
-	/*
-	 * Makes the robot avoid obstacles using an electromagnetic model.
-	 */
-	AliceStructs::ideal avoidObstacles(std::list<AliceStructs::obj> obstacles, float strength);
+	void findUpdraft();
 };
 
-#endif /* RULES_H_ */
+#endif /* RULES_H */

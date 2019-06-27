@@ -11,6 +11,8 @@
 #define ALICE_H
 
 #include "alice_swarm/aliceStructs.h"
+#include "alice_swarm/Model.h"
+#include "alice_swarm/Rules.h"
 
 class Alice
 {
