@@ -201,9 +201,9 @@ void Sim::Run(ros::NodeHandle _n)
 	//Initializes all publishers and subscribers
 	ros::Publisher pub = _n.advertise < wvu_swarm_std_msgs::vicon_bot_array > ("vicon_array", 1000); //Publishes like Vicon
 	ros::Publisher pub2 = _n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_targets", 1000);
-	ros::Publisher pub3 = _n.advertise < wvu_swarm_std_msgs::vicon_points > ("air_hockey_virtual_obstacles", 1000);
+	ros::Publisher pub3 = _n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_obstacles", 1000);
 	ros::Subscriber sub = _n.subscribe("final_execute", 1000, &Sim::vectorCallback, this); //subscribes to funnel
-	ros::Subscriber sub2 = _n.subscribe("air_hockey_virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to virtual obstacles
+	ros::Subscriber sub2 = _n.subscribe("virtual_obstacles", 1000, &Sim::obsCallback, this); //subscribes to virtual obstacles
 	ros::Subscriber sub3 = _n.subscribe("virtual_targets", 1000, &Sim::targetCallback, this); //gets virtual targets
 	ros::Subscriber sub4 = _n.subscribe("virtual_flows", 1000, &Sim::flowCallback, this); //gets virtual targets
 	ros::Rate loopRate(50);

@@ -228,7 +228,7 @@ void createFood(wvu_swarm_std_msgs::vicon_points &in_vector)
  * 
  * @param _pub publisher that publishes to an obstacles topic
  */
-void makeObstacles(ros::Publisher _pub, ros::Publisher _pub2)
+void makeObstacles(ros::Publisher _pub)
 {
 	if (first == true)
 	{
@@ -241,21 +241,23 @@ void makeObstacles(ros::Publisher _pub, ros::Publisher _pub2)
 	{
 		_pub.publish(temp_obs);
 	}
-	//-----------------------------------------------------------
+}
+void makeObjects(ros::Publisher _pub)
+{
 	float r = 5; //cm
-	std::vector<float> x_origins = {10,-10,-10,10};
-	std::vector<float> y_origins ={10,-10,10,-10};
+		std::vector<float> x_origins = {10,-10,-10,10};
+		std::vector<float> y_origins ={10,-10,10,-10};
 
-	wvu_swarm_std_msgs::virtual_objects vos;
-	for(int i = 0; i <x_origins.size(); i++)
-	{
-		wvu_swarm_std_msgs::virtual_object cur_vo;
-		cur_vo.x = x_origins.at(i);
-		cur_vo.y = y_origins.at(i);
-		cur_vo.r = r;
-		vos.v_object.push_back(cur_vo);
-	}
-	_pub2.publish(vos);
+		wvu_swarm_std_msgs::virtual_objects vos;
+		for(int i = 0; i <x_origins.size(); i++)
+		{
+			wvu_swarm_std_msgs::virtual_object cur_vo;
+			cur_vo.x = x_origins.at(i);
+			cur_vo.y = y_origins.at(i);
+			cur_vo.r = r;
+			vos.v_object.push_back(cur_vo);
+		}
+		_pub.publish(vos);
 }
 
 /**
@@ -297,23 +299,24 @@ int main(int argc, char **argv) // begin here
         // ros initialize
 	ros::init(argc, argv, "virtual_objects");
 	ros::NodeHandle n;
-	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("air_hockey_virtual_obstacles", 1000); // pub to obstacles
+	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_obstacles", 1000); // pub to obstacles
 	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("virtual_targets", 1000); // pub to targets
 	ros::Publisher pub3 = n.advertise < wvu_swarm_std_msgs::flows > ("virtual_flows", 1000); // pub to flows
-	ros::Publisher pub4 = n.advertise < wvu_swarm_std_msgs::virtual_objects > ("virtual_objects", 1000); // pub to flows
+	//ros::Publisher pub4 = n.advertise < wvu_swarm_std_msgs::virtual_objects > ("virtual_objects", 1000); // pub to
 
         // subscribing
 	ros::Subscriber sub1 = n.subscribe("virtual_targets", 1000, pointCallback);
-	ros::Subscriber sub2 = n.subscribe("air_hockey_virtual_obstacles", 1000, obsCallback);
+	ros::Subscriber sub2 = n.subscribe("virtual_obstacles", 1000, obsCallback);
 	//ros::Subscriber	sub2 = n.subscribe("vicon_array",1000,botCallback;
 	ros::Rate loopRate(100);
 	sleep(2); //waits for sim to be awake
 	int i = 0;
 	while (ros::ok() && i < 10000) // setup loop
 	{
-		makeObstacles(pub1, pub4); // creating obstacles
+		makeObstacles(pub1); // creating obstacles
 		makeTargets(pub2); // creating targets
 		makeFlows(pub3); // creating flows
+		//makeObjects(pub4);
 		ros::spinOnce(); // spinning callbacks
 //		loopRate.sleep();
                 usleep(10);
@@ -325,8 +328,9 @@ int main(int argc, char **argv) // begin here
 #endif 
 	while (ros::ok()) // main loop
 	{
-		makeObstacles(pub1, pub4); // publishing obstacles
+		makeObstacles(pub1); // publishing obstacles
 		makeFlows(pub3); // publishing flows
+		//makeObjects(pub4);
 		ros::spinOnce(); // spinning callbacks
 		loopRate.sleep();
 

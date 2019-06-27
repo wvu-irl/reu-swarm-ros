@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 
 		alice_hub.update(temp_bot_array, temp_target, temp_obs_array, temp_flow_array); //puts in absolute data from subscribers
 
-		wvu_swarm_std_msgs::alice_mail_array = alice_hub.getAliceMail(i))
+		wvu_swarm_std_msgs::alice_mail_array mail = alice_hub.getAliceMail();
 
 		pub.publish(mail);
 		auto stop = std::chrono::high_resolution_clock::now();
