@@ -27,9 +27,10 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 		auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of Alice
-		for (int i = 0; i < temp_mail.mails.size(); i++)
-		{
-		}
+//		for (int i = 0; i < temp_mail.mails.size(); i++)
+//		{
+//			aliceMap[temp_mail.mails.at(i).name].receiveMsg(temp_mail.mails.at(i)); //gives each robot the relative data it needs
+//		}
 		std::vector<AliceStructs::ideal> all_ideals; //Creates a vector that stores the robot's initial ideal vectors
 		for (std::map<int, Robot>::iterator it = aliceMap.begin(); it != aliceMap.end(); ++it) //eventually run this part asynchronously
 		{

@@ -24,22 +24,19 @@ find_package(catkin REQUIRED COMPONENTS
     FILES
     neighbor_mail.msg
     alice_mail_array.msg
+    alice_mail.msg
+    rtheta.msg
     vicon_bot.msg
     vicon_bot_array.msg
     vicon_point.msg
     vicon_points.msg
     robot_command.msg
     robot_command_array.msg
-    obs_point_mail.msg
-    flow.msg
-    flows.msg
-    ellipse.msg
-    gaussian.msg
-    map_level.msg
-    map_levels.msg
-    obstacle.msg
     sensor_data.msg
-    nuitrack_data.msg
+    obj_mail.msg
+    flow_mail.msg
+    flows.msg
+    flow.msg
   )
 
 ## Generate added messages and services with any dependencies listed here
