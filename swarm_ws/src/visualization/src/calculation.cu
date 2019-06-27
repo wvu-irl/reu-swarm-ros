@@ -9,6 +9,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <functional>
+#include <math.h>
 #include "color_map.h"
 
 /**
@@ -34,7 +35,17 @@ __device__ void zfunc(double *z, double x, double y, double t)
 		y -= 400;
 		x /= 50;
 		y /= 50;
-		*z = (x * x - y * y) * sin(3.14 / 500 * t);
+		//*z = (x * x - y * y) * sin(3.14 / 500 * t);
+		double r0 = sqrt(x*x + y*y);
+		*z = 20 * pow(M_E, -pow(r0, 2) / (2 * pow(sin(M_PI / 200 * t), 2)));
+
+		y -= 3;
+		double r1 = sqrt(x*x + y*y);
+		*z += 20 * pow(M_E, -pow(r1, 2) / (2 * pow(sin(M_PI / 200 * t), 2)));
+
+		y += 6;
+		double r2 = sqrt(x*x + y*y);
+		*z += 20 * pow(M_E, -pow(r2, 2) / (2 * pow(sin(M_PI / 200 * t), 2)));
 }
 
 /*

@@ -211,6 +211,9 @@ void tick()
  */
 void render(sf::RenderWindow *window)
 {
+#if TAB_DEBUG
+	std::cout << "Starting render" << std::endl;
+#endif
 	// creating render texture
 	sf::RenderTexture disp;
 	disp.create(WIDTH, HEIGHT);
@@ -352,19 +355,19 @@ int main(int argc, char **argv)
 	// setting up contour plotdrawObstacles
 
 	// color map setup
-	ColorMap cmap(std::pair<double, sf::Color>(-10, sf::Color::Red),
-			std::pair<double, sf::Color>(10, sf::Color::Magenta));
+	ColorMap cmap(std::pair<double, sf::Color>(0, sf::Color::Red),
+			std::pair<double, sf::Color>(20, sf::Color::Magenta));
 	// cmap.addColor(std::tuple<double, sf::Color>(0, sf::Color::White));
-	cmap.addColor(std::tuple<double, sf::Color>(-6.66667, sf::Color::Yellow));
-	cmap.addColor(std::tuple<double, sf::Color>(-3.33333, sf::Color::Green));
-	cmap.addColor(std::tuple<double, sf::Color>(3.33333, sf::Color::Cyan));
-	cmap.addColor(std::tuple<double, sf::Color>(6.66667, sf::Color::Blue));
+	cmap.addColor(std::tuple<double, sf::Color>(4, sf::Color::Yellow));
+	cmap.addColor(std::tuple<double, sf::Color>(8, sf::Color::Green));
+	cmap.addColor(std::tuple<double, sf::Color>(12, sf::Color::Cyan));
+	cmap.addColor(std::tuple<double, sf::Color>(16, sf::Color::Blue));
 	cont = new ContourMap(sf::Rect<int>(0, 0, 1280, 800), cmap);
 
 	// adding levels
 	const double num_levels = 10.0; // number of levels to draw
 	const double range = 20.0;
-	for (double i = -range; i <= range; i += 2 * range / num_levels)
+	for (double i = range / num_levels; i <= range; i += range / num_levels)
 	{
 		cont->levels.push_back(i);
 	}
