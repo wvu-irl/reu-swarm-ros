@@ -13,11 +13,7 @@
 
 #include <visualization/contour.h>
 
-#define DEBUG_CONT_SRC 0
-
-// switches between drawing a heat map in the background and
-// making the contours use the color mapping
-#define SHOW_HEAT_MAP 1
+#define DEBUG_CONT_SRC 1
 
 // constructor
 Vector3D::Vector3D(double x, double y, double z) :
@@ -50,6 +46,9 @@ std::ostream &operator<<(std::ostream &os, const Vector3D &f)
 ContourMap::ContourMap(sf::Rect<int> _bounds, ColorMap cm) :
 		color_mapping(cm) // setting the color map
 {
+#if DEBUG_CONT_SRC
+    std::cout << "\033[32mCreating contour map\033[0m" << std::endl;
+#endif
 	bounds = sf::Rect<int>(_bounds); // setting the bounds
 	sprite.setPosition(bounds.left, bounds.top); // sets the sprite position
 	cols = (sf::Uint8 *)malloc(sizeof(sf::Uint8) * bounds.width * bounds.height * 4);

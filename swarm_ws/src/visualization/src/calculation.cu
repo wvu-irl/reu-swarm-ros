@@ -13,6 +13,8 @@
 #include <visualization/color_map.h>
 #include <contour_node/map_level.h>
 
+#define CALC_DEBUG 1
+
 /**
  * namespace for doing stupid amounts of calculations
  */
@@ -253,6 +255,10 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     map->eqs = (contour_node::gaussian *)malloc(sizeof(contour_node::gaussian) * funk.functions.size());
     map->num_eqs = funk.functions.size();
 
+#if CALC_DEBUG
+    std::cout << "\033[32mGot equation:\033[0m\n" << funk << "\n" << std::endl;
+#endif
+
     // setting up device pointers
     sf::Uint8 *d_cols;
 
@@ -286,6 +292,9 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     checkCudaErrors(cudaEventCreate(&stop));
 
     cudaEventRecord(start, 0);
+#if CALC_DEBUG
+    std::cout << "started calculation" << std::endl;
+#endif
     gpuThread<<<blocks, threads>>>(
         d_levels,
         d_num_levels,

@@ -24,6 +24,8 @@ add_library(Rules src/Rules.cpp)
 add_library(Robot src/Robot.cpp)
 add_library(Model src/Model.cpp)
 
+add_dependencies(Hub wvu_swarm_std_msgs_generate_messages_cpp)
+
 add_executable(AliceMain src/AliceMain.cpp)
 target_link_libraries(Hub ${catkin_LIBRARIES} )
 target_link_libraries(VectorQueue ${catkin_LIBRARIES})

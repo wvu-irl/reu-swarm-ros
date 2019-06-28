@@ -31,7 +31,7 @@ static int g_draw_level;
 #define HEIGHT 800
 
 // turns on verbose mode
-#define TAB_DEBUG 0
+#define TAB_DEBUG 1
 
 ContourMap *cont; // contour plot pointer
 
@@ -205,7 +205,18 @@ void tick()
 {
 	if (strcmp(g_background.c_str(), "Contour") == 0)
 	{
+#if TAB_DEBUG
+		std::cout << "Starting contour calc" << std::endl;
+		std::cout << "\nDrawing level:\n" << map.levels[g_draw_level] << std::endl;
+#endif
+		cont->resemble(map.levels[g_draw_level]);
+#if TAB_DEBUG
+		std::cout << "Resemble contour calc" << std::endl;
+#endif
 		cont->tick(); // telling the contour plot to advance
+#if TAB_DEBUG
+		std::cout << "Finished contour calc" << std::endl;
+#endif
 	}
 }
 
@@ -218,7 +229,7 @@ void tick()
 void render(sf::RenderWindow *window)
 {
 #if TAB_DEBUG
-	std::cout << "Starting render" << std::endl;
+//	std::cout << "Starting render" << std::endl;
 #endif
 	// creating render texture
 	sf::RenderTexture disp;

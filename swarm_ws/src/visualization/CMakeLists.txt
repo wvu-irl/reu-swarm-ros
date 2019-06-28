@@ -43,7 +43,8 @@ if (CUDA_FOUND)
 	set(LIB_TYPE STATIC)
 	
 	CUDA_ADD_LIBRARY(contour ${LIB_TYPE} src/contour.cu)
-	target_link_libraries(contour ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map)
+	add_dependencies(contour contour_node_generate_messages_cpp)
+	target_link_libraries(contour ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
 	
 	CUDA_ADD_LIBRARY(perspective_tf ${LIB_TYPE} src/transform/perspective_transform_gpu.cu)
 
