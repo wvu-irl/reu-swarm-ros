@@ -20,6 +20,7 @@ namespace AliceStructs {
 		float dis;
 		float pri;
 		int name;
+		int t;
 	} flow;
 
 	/*
@@ -48,6 +49,7 @@ namespace AliceStructs {
 		float x_rad;
 		float y_rad;
 		float theta_offset;
+		int t;
 	} obj;
 
 	/*
@@ -57,7 +59,19 @@ namespace AliceStructs {
 		float x;
 		float y;
 		float z;
+		int t;
 	} pnt;
+
+	/*
+	 * A box of all these structs, for easy transport
+	 */
+	typedef struct {
+		std::vector<neighbor> neighbors;
+		std::vector<obj> obstacles;
+		std::vector<pnt> targets;
+		std::vector<flow> flows;
+		int name;
+	} mail;
 };
 
 #endif

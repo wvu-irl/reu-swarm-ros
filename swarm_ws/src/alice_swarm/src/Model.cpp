@@ -1,5 +1,6 @@
 #include "alice_swarm/Model.h"
 #include "alice_swarm/aliceStructs.h"
+#include "wvu_swarm_std_msgs"
 #include <iostream>
 
 Model::Model(int _name)
@@ -7,10 +8,12 @@ Model::Model(int _name)
 	name = _name;
 }
 
-Model::sensorUpdate(AliceStructs::mail _toAdd)
+model::sensorUpdate(aliceStructs::mail _toAdd)
 {
-	current_obstacles = _toAdd.obstacles;
-	current_heat_map = _toAdd.heat_map;
+	for (auto& obstacle : _toAdd.obstacles) {
+		obstacles.push_back(obstacle);
+	}
+
 }
 
 Model::pass()
@@ -21,19 +24,4 @@ Model::pass()
 Model::forget()
 {
 	//See pass
-}
-
-string Model::getCollisionState()
-{
-	for (auto& obstacle : current_obstacles)
-	{
-		int dis = findLocalMin(obstacle);
-
-	}
-	return "Free";
-}
-
-int Model::findLocalMin(AliceStructs::obstacle)
-{
-
 }

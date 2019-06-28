@@ -1,6 +1,7 @@
 #include "alice_swarm/Alice.h"
 #include "alice_swarm/Rules.h"
 #include "alice_swarm/Model.h"
+#include "wvu_swarm_std_msgs"
 #include <iostream>
 
 Alice::Alice(AliceStructs::mail _data)
@@ -11,7 +12,7 @@ Alice::Alice(AliceStructs::mail _data)
 	model.updateModel(_data);
 }
 
-void Alice::updateModel(AliceStructs::mail _data)
+void Alice::updateModel(wvu_swarm_std_msgs::mail _data)
 {
 	model.updateModel(_data);
 }

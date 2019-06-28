@@ -20,13 +20,14 @@ public:
 	 * Information about Alice's immediate environment
 	 */
 	AliceStructs::obstacles current_obstacles;
-	//AliceStructs::heat_map current_heat_map; Need to figure this out with Jeongwoo
+	AliceStructs::pnt current_level;
+	std::vector<AliceStructs::neighbor> neighbors;
 
 	/*
 	 * Information Alice is storing about the wider world
 	 */
-	AliceStructs::obstacles memento_obstacles;
-	//AliceStructs::heatMap memento_heat_map; See above
+	AliceStructs::obstacles archived_obstacles;
+	std::vector<AliceStructs::pnt> archived_levels;
 
 	Model(int _name);
 
