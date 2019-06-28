@@ -12,5 +12,7 @@
  	<!--<node pkg="alice_swarm" type="AliceMain" name="alice" output="screen">	-->						
 	</node>
 
+	<node pkg="visualization"  type="alice_pov_main" name="map_debug" output="screen"/>
+	
 	
 </launch>
