@@ -70,6 +70,7 @@ namespace AliceStructs {
 		std::vector<pnt> targets;
 		std::vector<flow> flows;
 		int name;
+		float level;
 	} mail;
 };
 

@@ -10,10 +10,23 @@ Model::Model(int _name)
 
 model::sensorUpdate(aliceStructs::mail _toAdd)
 {
-	for (auto& obstacle : _toAdd.obstacles) {
+	for (auto& obstacle : _toAdd.obstacles)
+	{
 		obstacles.push_back(obstacle);
 	}
-
+	for (auto& flow : _toAdd.flows)
+	{
+		flows.push_back(flow);
+	}
+	for (auto& neighbor : _toAdd.neighbors)
+	{
+		neighbors.push_back(neighbor);
+	}
+	for (auto& tar : _toAdd.targets)
+	{
+		targets.push_back(tar);
+	}
+	current_level.z = _toAdd.level;
 }
 
 Model::pass()

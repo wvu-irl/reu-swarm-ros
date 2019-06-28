@@ -49,7 +49,8 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::mail _data)
 		flow.spd = _flow.spd;
 		mail.flows.push_back(flow);
 	}
-	mail.name = name;
+	mail.name = _data.name;
+	mail.level = _data.level;
 	return mail
 }
 
@@ -61,5 +62,5 @@ void Alice::updateModel(wvu_swarm_std_msgs::mail _data)
 
 AliceStructs::vel generateVel()
 {
-	rules.generateVel();
+	return rules.generateVel();
 }
