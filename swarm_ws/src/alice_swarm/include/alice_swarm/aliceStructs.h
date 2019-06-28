@@ -19,7 +19,6 @@ namespace AliceStructs {
 		float spd;
 		float dis;
 		float pri;
-		int name;
 		int t;
 	} flow;
 
