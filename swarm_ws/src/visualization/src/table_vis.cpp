@@ -31,7 +31,7 @@ static int g_draw_level;
 #define HEIGHT 800
 
 // turns on verbose mode
-#define TAB_DEBUG 1
+#define TAB_DEBUG 0
 
 ContourMap *cont; // contour plot pointer
 
