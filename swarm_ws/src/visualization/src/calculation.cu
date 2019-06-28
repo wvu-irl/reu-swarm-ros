@@ -11,6 +11,7 @@
 #include <functional>
 #include <math.h>
 #include <visualization/color_map.h>
+#include <contour_node/map_level.h>
 
 /**
  * namespace for doing stupid amounts of calculations
@@ -22,6 +23,13 @@ namespace hyperthread
 int devID;
 cudaDeviceProp deviceProp;
 
+// necessary structs to pass data
+typedef struct
+{
+	contour_node::gaussian *eqs;
+	size_t num_eqs;
+} map_level_t;
+
 /**
  * 4d surface function to be calculated
  *
@@ -29,45 +37,34 @@ cudaDeviceProp deviceProp;
  * x and y are coordinates on the plane perpendicular to the view
  * t is a saw function of time (goes from 0 to 1000 incrementing by 1 every tick)
  */
-const double q = 1.245; // this is a magic number
-__device__ void zfunc(double *z, double x, double y, double t)
+const double q = 1.245; // this is a magic number DO NOT CHANGE IT
+__device__ void zfunc(double *z, double x, double y, map_level_t map)
 {
     x -= 640;
 		y -= 400;
-		x /= 50;
-		y /= 50;
-
-		double amp = 20;
-		double spread = 2 * abs(sin(M_PI / 200 * t));
-
+		x *= 1280.0 / 200.0;
+		y *= 800.0 / 100.0;
 		*z = 0;
 		double theta = x == 0 ? (y > 0 ? M_PI_2 : -M_PI_2) : (atan(y/x) + (x < 0 ? M_PI : 0));
 		double r = sqrt(x*x + y*y);
 
-		theta += M_PI_4;
+		for (size_t i = 0;i < map.num_eqs;i++)
+		{
+			contour_node::gaussian curr_eq = map.eqs[i];
+			double a = curr_eq.ellipse.x_rad;
+			double b = curr_eq.ellipse.y_rad;
 
-		double a = 2;
-		double b = 0.5;
+			double x_app = r * cos(theta + curr_eq.ellipse.theta_offset);
+			double y_app = r * sin(theta + curr_eq.ellipse.theta_offset);
 
-		double x_app = r * cos(theta);
-		double y_app = r * sin(theta);
+			double re = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
 
-		double r0 = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
-		if (r0 < spread * M_PI / q)
-			*z += (amp / 2.0) * cos(q * r0 / spread) + (amp / 2.0);
-
-
-		a = 3;
-		b = 1;
-
-		theta += M_PI_2;
-
-		x_app = r * cos(theta);
-		y_app = r * sin(theta) + 3;
-
-		double r1 = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
-		if (r1 < spread * M_PI / q)
-			*z += amp / 2.0 * cos(q * r1 / spread) + amp / 2.0;
+			if (re < M_PI / q)
+			{
+				double amp = curr_eq.amplitude / 2.0;
+				*z += amp * cos(q * re) + amp;
+			}
+		}
 }
 
 /*
@@ -168,7 +165,8 @@ __device__ double min(double a, double b)
  *
  */
 __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
-    size_t *width, size_t *height, color *colors, double *color_levels, size_t *num_cols, int *t)
+    size_t *width, size_t *height, color *colors, double *color_levels, size_t *num_cols,
+		map_level_t *lev)
 {
 		// finding where in the image the process is
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -178,7 +176,7 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
 
     // calculating function
     double zc;
-    zfunc(&zc, (double)j, (double)i, (double)(*t));
+    zfunc(&zc, (double)j, (double)i, *lev);
 
     // determining gradiant color
     color c = calculateColor(zc, colors, color_levels, *num_cols);
@@ -192,10 +190,10 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     {
     		// calculating neighbors
         double zz[4];
-        zfunc(zz, (double)j, (double)i - 1, (double)(*t));
-        zfunc(zz + 1, (double)j, (double)i + 1, (double)(*t));
-        zfunc(zz + 2, (double)j - 1, (double)i, (double)(*t));
-        zfunc(zz + 3, (double)j + 1, (double)i, (double)(*t));
+        zfunc(zz, (double)j, (double)i - 1, *lev);
+        zfunc(zz + 1, (double)j, (double)i + 1, *lev);
+        zfunc(zz + 2, (double)j - 1, (double)i, *lev);
+        zfunc(zz + 3, (double)j + 1, (double)i, *lev);
 
         // checking levels
         for (size_t k = 0;k < *num_levels;k++)
@@ -243,14 +241,17 @@ void createDeviceVar(void **var, size_t size, void *h_var)
  *
  * colors color_levels num_cols are a separation of relevant data from a ColorMap
  *
- * t is the tick saw function
- *
  */
 void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
-    size_t height, color colors[], double color_levels[], size_t num_cols, int t)
+    size_t height, color colors[], double color_levels[], size_t num_cols,
+		contour_node::map_level funk)
 {
     size_t n = width * height;
     size_t size = n * 4;
+
+    map_level_t *map = (map_level_t *) malloc(sizeof(map_level_t));
+    map->eqs = (contour_node::gaussian *)malloc(sizeof(contour_node::gaussian) * funk.functions.size());
+    map->num_eqs = funk.functions.size();
 
     // setting up device pointers
     sf::Uint8 *d_cols;
@@ -263,10 +264,9 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     color *d_colors;
     double *d_color_levels;
     size_t *d_num_colors;
-
-    int *d_time;
-
     size_t n_levels = levels.size();
+
+    map_level_t *d_funk;
 
     createDeviceVar((void **)&d_cols, size, cols);
     createDeviceVar((void **)&d_levels, sizeof(double) * levels.size(), levels.data());
@@ -276,7 +276,7 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     createDeviceVar((void **)&d_colors, sizeof(color) * num_cols, colors);
     createDeviceVar((void **)&d_color_levels, sizeof(double) * num_cols, color_levels);
     createDeviceVar((void **)&d_num_colors, sizeof(size_t), &(num_cols));
-    createDeviceVar((void **)&d_time, sizeof(int), &t);
+    createDeviceVar((void **)&d_funk, sizeof(map_level_t) + sizeof(contour_node::gaussian) * funk.functions.size(), map);
 
     dim3 threads(1024, 1);
     dim3 blocks(n / threads.x, 1);
@@ -295,7 +295,7 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
         d_colors,
         d_color_levels,
         d_num_colors,
-        d_time);
+				d_funk);
     cudaMemcpyAsync(cols, d_cols, size, cudaMemcpyDeviceToHost, 0);
     cudaEventRecord(stop, 0);
 
@@ -315,8 +315,11 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     checkCudaErrors(cudaFree(d_colors));
     checkCudaErrors(cudaFree(d_color_levels));
     checkCudaErrors(cudaFree(d_num_colors));
-    checkCudaErrors(cudaFree(d_time));
+    checkCudaErrors(cudaFree(d_funk));
     std::cout << "\033[0m" << std::flush;
+
+    free(map->eqs);
+    free(map);
 }
 
 void init()

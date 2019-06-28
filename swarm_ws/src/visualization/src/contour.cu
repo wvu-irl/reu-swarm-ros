@@ -68,7 +68,7 @@ ContourMap::~ContourMap()
 }
 
 // setter for the function
-void ContourMap::resemble(std::function<double(double, double)> z)
+void ContourMap::resemble(contour_node::map_level z)
 {
 #if DEBUG_CONT_SRC
     std::cout << "setting funk" << std::endl;
@@ -76,7 +76,7 @@ void ContourMap::resemble(std::function<double(double, double)> z)
 	this->zfunc = z;
 }
 
-void ContourMap::tick(int tick)
+void ContourMap::tick()
 {
 	hyperthread::color *colors = (hyperthread::color *)malloc(sizeof(hyperthread::color) * color_mapping.colors.size());
 	double *c_levels = (double *)malloc(sizeof(double) * color_mapping.colors.size());
@@ -88,9 +88,9 @@ void ContourMap::tick(int tick)
 	}
 
 	hyperthread::calc(cols, 
-		levels, 
-		bounds.width, bounds.height, 
-		colors, c_levels, color_mapping.colors.size(), tick);
+		levels,
+		bounds.width, bounds.height,
+		colors, c_levels, color_mapping.colors.size(), zfunc);
 
 	// for (size_t i = 0;i < bounds.width * bounds.height * 4;i++)
 	// {

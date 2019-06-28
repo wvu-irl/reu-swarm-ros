@@ -5,7 +5,7 @@
 #include <contour_node/map_levels.h>
 
 
-namespace map
+namespace map_ns
 {
 
 
@@ -13,7 +13,8 @@ namespace map
 enum LEVEL
 {
 	TARGET,
-	OBJECT
+	OBJECT,
+	COMBINED
 };
 
 /**
@@ -24,6 +25,7 @@ enum LEVEL
  *
  */
 double calculate(contour_node::map_level ml, wvu_swarm_std_msgs::vicon_point loc);
+contour_node::map_level combineLevels(contour_node::map_level a, contour_node::map_level b);
 
 };
 #endif

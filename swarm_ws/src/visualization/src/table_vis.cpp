@@ -7,6 +7,8 @@
 #include <geometry_msgs/Vector3.h>
 
 #include <visualization/contour.h>
+#include <contour_node/map_levels.h>
+#include <contour_node/level_description.h>
 #include "transform/perspective_transform_gpu.h"
 
 #include <math.h>
@@ -21,6 +23,7 @@
 static std::string g_background;
 static int g_table_width, g_table_height;
 static int g_robot_diameter;
+static int g_draw_level;
 
 // width and height of generated image
 // also of starting window size in pixels
@@ -28,7 +31,7 @@ static int g_robot_diameter;
 #define HEIGHT 800
 
 // turns on verbose mode
-#define TAB_DEBUG 1
+#define TAB_DEBUG 0
 
 ContourMap *cont; // contour plot pointer
 
@@ -41,9 +44,6 @@ sf::Font comic_sans;
 
 // quad to transform into
 quadrilateral_t g_trap;
-
-// current time value
-static int g_tick = 0;
 
 // summation operator for 2 vectors
 sf::Vector2f operator+(sf::Vector2f a, sf::Vector2f b)
@@ -67,6 +67,14 @@ std::vector<sf::Vector2f> obstacles;
 
 // globals for drawing targets
 std::vector<sf::Vector2f> targets;
+
+// current contour map data
+contour_node::map_levels map;
+
+void updateMap(contour_node::map_levels _map)
+{
+	map = _map;
+}
 
 sf::Vector2f convertCoordinate(sf::Vector2f a)
 {
@@ -197,10 +205,8 @@ void tick()
 {
 	if (strcmp(g_background.c_str(), "Contour") == 0)
 	{
-		cont->tick(g_tick); // telling the contour plot to advance
+		cont->tick(); // telling the contour plot to advance
 	}
-	g_tick++; // stepping time
-	g_tick %= 1000; // 'sawing' time
 }
 
 /**
@@ -326,6 +332,7 @@ int main(int argc, char **argv)
 	n_priv.param<int>("table_width", g_table_width, 200);
 	n_priv.param<int>("table_height", g_table_height, 100);
 	n_priv.param<int>("robot_diameter", g_robot_diameter, 5);
+	n_priv.param<int>("draw_level", g_draw_level, map_ns::COMBINED);
         
         table_origin = sf::Vector2f(g_table_width / 2,
 		g_table_height / 2);

@@ -1,7 +1,7 @@
 #include <contour_node/level_description.h>
 #include <math.h>
 
-double map::calculate(contour_node::map_level ml,
+double map_ns::calculate(contour_node::map_level ml,
 		wvu_swarm_std_msgs::vicon_point loc)
 {
 	double x = loc.x;
@@ -23,8 +23,22 @@ double map::calculate(contour_node::map_level ml,
 		double y_app = r * sin(theta);
 
 		double re = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
-		z += curr_eq.amplitude * pow(M_E, (-x*x) / 2.0);
+		z += curr_eq.amplitude * pow(M_E, (-x * x) / 2.0);
 	}
 
 	return z;
 }
+
+contour_node::map_level map_ns::combineLevels(contour_node::map_level a,
+		contour_node::map_level b)
+{
+	contour_node::map_level n_lev;
+	for (size_t i = 0; i < a.functions.size(); i++)
+		n_lev.functions.push_back(a.functions.at(i));
+
+	for (size_t i = 0; i < b.functions.size(); i++)
+		n_lev.functions.push_back(b.functions.at(i));
+
+	return n_lev;
+}
+
