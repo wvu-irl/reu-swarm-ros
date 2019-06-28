@@ -1,2 +1,0 @@
-float64 radius
-float64 degrees
