@@ -33,7 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
     robot_command.msg
     robot_command_array.msg
     sensor_data.msg
-    obj_mail.msg
+    point_mail.msg
     flow_mail.msg
     flows.msg
     virtual_objects.msg

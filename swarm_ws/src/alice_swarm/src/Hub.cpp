@@ -178,7 +178,7 @@ void Hub::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds tar
 		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
 		if (temp2.dis > -1) //If the target was in VISION range
 		{
-			wvu_swarm_std_msgs::obj_mail temp3;
+			wvu_swarm_std_msgs::point_mail temp3;
 			temp3.radius =temp2.dis;
 			temp3.theta=temp2.dir;
 			_mail.targetMail.push_back(temp3);
@@ -198,7 +198,7 @@ void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds o
 		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
 		if (temp2.dis > -1)
 		{
-			wvu_swarm_std_msgs::obj_mail temp3;
+			wvu_swarm_std_msgs::point_mail temp3;
 			temp3.radius = temp2.dis;
 			temp3.theta =temp2.dir;
 			_mail.obsPointMail.push_back(temp3);
