@@ -67,7 +67,7 @@ ContourMap::~ContourMap()
 }
 
 // setter for the function
-void ContourMap::resemble(contour_node::map_level z)
+void ContourMap::resemble(wvu_swarm_std_msgs::map_level z)
 {
 #if DEBUG_CONT_SRC
     std::cout << "setting funk" << std::endl;

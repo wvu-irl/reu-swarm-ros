@@ -5,7 +5,7 @@
 #include <vector>
 #include "color_map.h"
 
-#include <contour_node/map_level.h>
+#include <wvu_swarm_std_msgs/map_level.h>
 
 #define LINE_CHECK_DIST 1
 
@@ -67,7 +67,7 @@ private:
 	sf::Sprite sprite;
 
 	// the function that the map is following
-	contour_node::map_level zfunc;
+	wvu_swarm_std_msgs::map_level zfunc;
 
 	// the color map that the function is using
 	// can be applied to the background or the lines themselves
@@ -91,7 +91,7 @@ public:
 	void render(sf::RenderTexture *window);
 
 	// sets the function the plot is to resemble
-	void resemble(contour_node::map_level);
+	void resemble(wvu_swarm_std_msgs::map_level);
 
 	// scales the image of the plot by a fractional ammount
 	void scale(float sx, float sy);

@@ -11,7 +11,7 @@
 #include <functional>
 #include <math.h>
 #include <visualization/color_map.h>
-#include <contour_node/map_level.h>
+#include <wvu_swarm_std_msgs/map_level.h>
 
 #define CALC_DEBUG 1
 
@@ -28,7 +28,7 @@ cudaDeviceProp deviceProp;
 // necessary structs to pass data
 typedef struct
 {
-	contour_node::gaussian *eqs;
+	wvu_swarm_std_msgs::gaussian *eqs;
 	size_t num_eqs;
 } map_level_t;
 
@@ -52,7 +52,7 @@ __device__ void zfunc(double *z, double x, double y, map_level_t map)
 
 		for (size_t i = 0;i < map.num_eqs;i++)
 		{
-			contour_node::gaussian curr_eq = map.eqs[i];
+			wvu_swarm_std_msgs::gaussian curr_eq = map.eqs[i];
 			double a = curr_eq.ellipse.x_rad;
 			double b = curr_eq.ellipse.y_rad;
 
@@ -246,13 +246,13 @@ void createDeviceVar(void **var, size_t size, void *h_var)
  */
 void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     size_t height, color colors[], double color_levels[], size_t num_cols,
-		contour_node::map_level funk)
+		wvu_swarm_std_msgs::map_level funk)
 {
     size_t n = width * height;
     size_t size = n * 4;
 
     map_level_t *map = (map_level_t *) malloc(sizeof(map_level_t));
-    map->eqs = (contour_node::gaussian *)malloc(sizeof(contour_node::gaussian) * funk.functions.size());
+    map->eqs = (wvu_swarm_std_msgs::gaussian *)malloc(sizeof(wvu_swarm_std_msgs::gaussian) * funk.functions.size());
     map->num_eqs = funk.functions.size();
 
 #if CALC_DEBUG
@@ -282,7 +282,7 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     createDeviceVar((void **)&d_colors, sizeof(color) * num_cols, colors);
     createDeviceVar((void **)&d_color_levels, sizeof(double) * num_cols, color_levels);
     createDeviceVar((void **)&d_num_colors, sizeof(size_t), &(num_cols));
-    createDeviceVar((void **)&d_funk, sizeof(map_level_t) + sizeof(contour_node::gaussian) * funk.functions.size(), map);
+    createDeviceVar((void **)&d_funk, sizeof(map_level_t) + sizeof(wvu_swarm_std_msgs::gaussian) * funk.functions.size(), map);
 
     dim3 threads(1024, 1);
     dim3 blocks(n / threads.x, 1);

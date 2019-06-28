@@ -20,11 +20,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_message_files(
    FILES
-   ellipse.msg
-   gaussian.msg
-   map_level.msg
-   map_levels.msg
-   obstacle.msg
 )
 
 generate_messages(DEPENDENCIES contour_node std_msgs wvu_swarm_std_msgs visualization_msgs geometry_msgs)

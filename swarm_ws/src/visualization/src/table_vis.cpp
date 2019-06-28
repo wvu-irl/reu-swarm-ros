@@ -7,8 +7,8 @@
 #include <geometry_msgs/Vector3.h>
 
 #include <visualization/contour.h>
-#include <contour_node/map_levels.h>
-#include <contour_node/level_description.h>
+#include <wvu_swarm_std_msgs/map_levels.h>
+#include <wvu_swarm_std_msgs/level_description.h>
 #include "transform/perspective_transform_gpu.h"
 
 #include <math.h>
@@ -69,9 +69,9 @@ std::vector<sf::Vector2f> obstacles;
 std::vector<sf::Vector2f> targets;
 
 // current contour map data
-contour_node::map_levels map;
+wvu_swarm_std_msgs::map_levels map;
 
-void updateMap(contour_node::map_levels _map)
+void updateMap(wvu_swarm_std_msgs::map_levels _map)
 {
 	map = _map;
 }
