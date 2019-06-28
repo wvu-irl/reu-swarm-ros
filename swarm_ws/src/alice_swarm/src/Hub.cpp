@@ -146,6 +146,7 @@ void Hub::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 void Hub::addFlowMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 {
 	int num_pts = flows.flow.size();
+
 	for (int j = 0; j < num_pts; j++)
 	{
 		if (flows.flow.at(j).sid == bots[i].swarm_id || flows.flow.at(j).sid == 0)
@@ -189,6 +190,7 @@ void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds o
 {
 
 	int num_pts = obstacles.point.size();
+
 	for (int j = 0; j < num_pts; j++)
 	{
 		std::pair<float, float> temp =
@@ -201,8 +203,6 @@ void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds o
 			temp3.theta =temp2.dir;
 			_mail.obsPointMail.push_back(temp3);
 		}
-
-	}
 	}
 }
 
@@ -226,17 +226,8 @@ void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds o
 
 wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relative information for a robot into one msg
 {
-<<<<<<< HEAD
-
-	AliceStructs::mail temp;
-	addObsPointMail(i, temp);
-	addNeighborMail(i, temp);
-	addTargetMail(i, temp);
-	addFlowMail(i, temp);
-	temp.name = ridOrder.at(i);
-	temp.sid = bots[i].swarm_id;
-=======
 	wvu_swarm_std_msgs::alice_mail_array to_return;
+	std::cout << ridOrder.size() << std::endl;
 	for (std::vector<int>::iterator it = ridOrder.begin(); it != ridOrder.end(); ++it)
 	{
 		wvu_swarm_std_msgs::alice_mail temp;
@@ -248,7 +239,6 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		temp.sid = bots[*it].swarm_id;
 		to_return.mails.push_back(temp);
 	}
->>>>>>> 5d78f88... needed hub
 #if DEBUG_HUB
 	printAliceMail(temp);
 #endif
@@ -258,6 +248,7 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 
 void Hub::clearHub() //Clears information about the robots
 {
-	//bots.clear(); DO NOT
+	ridOrder.clear();
+	bots.clear();
 	neighbors.clear();
 }

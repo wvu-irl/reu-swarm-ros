@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	ros::Subscriber sub2 = n.subscribe("virtual_targets", 1000, pointCallback);
 	ros::Subscriber sub3 = n.subscribe("virtual_obstacles", 1000, obsCallback);
 	ros::Subscriber sub4 = n.subscribe("virtual_flows", 1000, flowCallback);
-	ros::Rate loopRate(200);
+	ros::Rate loopRate(15);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::alice_mail_array> ("alice_mail_array", 1000);
 	Hub alice_hub(0); // Creates a hub for the conversion of absolute to relative info
 
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
 
-		//std::cout << "Time taken by Alice: " << duration.count() << " microseconds" << std::endl;
+//		std::cout << "Time taken by Alice: " << duration.count() << " microseconds" << std::endl;
 		//is_updated = true;
 		ros::spinOnce();
 		loopRate.sleep();

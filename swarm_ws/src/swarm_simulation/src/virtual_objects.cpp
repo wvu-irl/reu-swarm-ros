@@ -308,7 +308,7 @@ int main(int argc, char **argv) // begin here
 	ros::Subscriber sub1 = n.subscribe("virtual_targets", 1000, pointCallback);
 	ros::Subscriber sub2 = n.subscribe("virtual_obstacles", 1000, obsCallback);
 	//ros::Subscriber	sub2 = n.subscribe("vicon_array",1000,botCallback;
-	ros::Rate loopRate(100);
+	ros::Rate loopRate(15);
 	sleep(2); //waits for sim to be awake
 	int i = 0;
 	while (ros::ok() && i < 10000) // setup loop
