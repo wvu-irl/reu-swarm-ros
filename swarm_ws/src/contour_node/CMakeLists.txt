@@ -57,6 +57,7 @@ add_message_files(
    gaussian.msg
    map_level.msg
    map_levels.msg
+   obstacle.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -110,7 +111,7 @@ add_message_files(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   CATKIN_DEPENDS geometry_msgs message_runtime roscpp 
+   CATKIN_DEPENDS geometry_msgs message_runtime roscpp
 #  LIBRARIES contour_node
 #  DEPENDS system_lib
 )

@@ -1,6 +1,5 @@
 # values in the equation for a gaussuan distribution
 float64 amplitude
-float64 variance
 
 # location and variable informaiton
 float64 offset_x

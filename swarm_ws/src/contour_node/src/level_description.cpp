@@ -23,7 +23,7 @@ double map::calculate(contour_node::map_level ml,
 		double y_app = r * sin(theta);
 
 		double re = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
-		z += curr_eq.amplitude * pow(M_E, (-x*x) / (2 * curr_eq.variance));
+		z += curr_eq.amplitude * pow(M_E, (-x*x) / 2.0);
 	}
 
 	return z;
