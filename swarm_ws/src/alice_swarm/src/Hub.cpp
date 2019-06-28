@@ -237,7 +237,9 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		addFlowMail(*it, temp);
 		temp.name = *it;
 		temp.sid = bots[*it].swarm_id;
+		temp.contourVal = 0;
 		to_return.mails.push_back(temp);
+
 	}
 #if DEBUG_HUB
 	printAliceMail(temp);

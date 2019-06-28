@@ -35,9 +35,35 @@ void AlicePOV::Run(ros::NodeHandle _n)
 
 	while (window.isOpen() && ros::ok()) //main while loop (runs the simulation).
 	{
+		HandleInput();
 		Render();
 		ros::spinOnce();
 		loopRate.sleep();
+	}
+}
+void AlicePOV::HandleInput() //switches the robot viewed depending on what buttons are pressed
+{
+	sf::Event event;
+	while (window.pollEvent(event))
+	{
+		int i = 0; //iterator for dragging while loop
+		float mX = event.mouseButton.x; //mouse x pos
+		float mY = event.mouseButton.y; //mouse y pos
+
+		//---------- Pressing the escape key will close the program
+		if ((event.type == sf::Event::Closed)
+				|| (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
+		{
+			window.close();
+		}
+
+		if (event.type == sf::Event::TextEntered)
+		{
+			if (event.text.unicode < 128)
+				name = (int) (static_cast<char>(event.text.unicode) - '0');
+			std::cout << name << std::endl;
+		}
+
 	}
 }
 
@@ -45,18 +71,50 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 {
 	window.clear();
 
-	sf::CircleShape shape(0);
+	for (int i = 0; i < map.mails.size(); i++)
+	{
 
-	// Changing the Visual Properties of the shape.
-	shape.setPosition(300,300); // Sets position of shape to random location that body was set to.
-	shape.setOrigin(bodiesSize, bodiesSize);
-	shape.setFillColor(sf::Color(0,0,(int) map.contourVal,255));
-	shape.setOutlineColor(sf::Color::White);
-	shape.setOutlineThickness(1);
-	shape.setRadius(bodiesSize);
+		if (map.mails.at(i).name == name)
+		{
+			sf::CircleShape shape(0);
+			// Changing the Visual Properties of the robot
+			shape.setPosition(300, 300); // Sets position of shape to random location that body was set to.
+			shape.setOrigin(bodiesSize, bodiesSize);
+			shape.setFillColor(
+					sf::Color(255 - (int) map.mails.at(name).contourVal, (int) map.mails.at(name).contourVal, 0, 255));
+			shape.setOutlineColor(sf::Color::Green);
+			shape.setOutlineThickness(1);
+			shape.setRadius(bodiesSize);
+			window.draw(shape);
 
+			for (int j = 0; j < map.mails.at(i).neighborMail.size(); j++)
+			{
+				wvu_swarm_std_msgs::neighbor_mail temp = map.mails.at(i).neighborMail.at(j);
+				sf::CircleShape shape(0);
+				// Changing the Visual Properties of the robot
+				shape.setPosition(300+ 3*temp.dis*cos(temp.dir+M_PI_2), 300-3*temp.dis*sin(temp.dir+M_PI_2)); // Sets position of shape to random location that body was set to.
+				shape.setOrigin(bodiesSize, bodiesSize);
+				shape.setFillColor(
+						sf::Color(255 - (int) map.mails.at(temp.name).contourVal,0,  (int) map.mails.at(temp.name	).contourVal, 255));
+				shape.setOutlineColor(sf::Color::White);
+				shape.setOutlineThickness(1);
+				shape.setRadius(bodiesSize);
+				window.draw(shape);
+			}
+			for (int j = 0; j < map.mails.at(i).targetMail.size(); j++)
+						{
+							wvu_swarm_std_msgs::obj_mail temp = map.mails.at(i).targetMail.at(j);
+							sf::CircleShape shape(0);
+							// Changing the Visual Properties of the obstacle
+							shape.setPosition(300+ 3*temp.radius*cos(temp.theta+M_PI_2), 300-3*temp.radius*sin(temp.theta+M_PI_2)); // Sets position of shape to random location that body was set to.
+							shape.setOrigin(bodiesSize, bodiesSize);
+							shape.setFillColor(sf::Color::Green);
+							shape.setRadius(bodiesSize);
+							window.draw(shape);
+						}
+		}
+	}
 
-	window.draw(shape);
 	window.display(); //updates display
 }
 //void Sim::addText() //adds text for the state abbreviations

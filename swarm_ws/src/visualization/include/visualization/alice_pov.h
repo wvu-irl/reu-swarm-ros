@@ -15,7 +15,7 @@ private:
 	int window_height;
 
 	wvu_swarm_std_msgs::alice_mail_array map;
-
+	int name;
 //	vector<sf::CircleShape> neighbors;
 //	vector<sf::CircleShape> neighbors;
 //	vector<sf::RectangleShape> lines; //for flows
@@ -29,9 +29,9 @@ private:
 
 	//subscriber input handleing
 	void mapCallback(const wvu_swarm_std_msgs::alice_mail_array &msg);
-
+	void HandleInput();
 public:
-	AlicePOV(void);
+	AlicePOV();
 	void Run(ros::NodeHandle _n);
 	void Render();
 
