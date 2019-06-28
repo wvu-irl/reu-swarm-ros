@@ -29,8 +29,8 @@ public:
 private:
 
 	Model model;
-	String state;
-	string collision_state
+	std::string state;
+	std::string collision_state
 	AliceStructs::vel final_vel;
 
 	/*

@@ -1,7 +1,10 @@
 #include "alice_swarm/Alice.h"
 #include "alice_swarm/Rules.h"
 #include "alice_swarm/Model.h"
-#include "wvu_swarm_std_msgs"
+#include "wvu_swarm_std_msgs/alice_mail_array.h"
+#include "wvu_swarm_std_msgs/obs_point_mail.h"
+#include "wvu_swarm_std_msgs/neighbor_mail.h"
+
 #include <iostream>
 
 Alice::Alice(AliceStructs::mail _data)
@@ -15,7 +18,7 @@ Alice::Alice(AliceStructs::mail _data)
 AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::mail _data)
 {
 	AliceStructs::mail mail;
-	for (auto& _obstacle : _data.obsMail)
+	for (auto& _obstacle : _data.obs_point_mail)
 	{
 		AliceStructs::obj obstacle;
 		obstacle.x_rad = _obstacle.x_rad;
@@ -23,7 +26,7 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::mail _data)
 		obstacle.theta_offset = _obstacle.theta_offset;
 		mail.obstacles.push_back(obstacle);
 	}
-	for (auto& _neighbor : _data.neighborMail)
+	for (auto& _neighbor : _data.neighbor_mail)
 	{
 		AliceStructs::neighbor neighbor;
 		neighbor.dir = _neighbor.dir;

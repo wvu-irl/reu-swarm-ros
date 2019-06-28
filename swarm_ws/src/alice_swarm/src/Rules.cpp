@@ -11,7 +11,6 @@ Rules::Rules(Model _model)
 
 AliceStructs::vel Rules::stateLoop()
 {
-	AliceStructs::vel final_vel;
 	switch (state)
 	{
 	case "Explore":
@@ -42,8 +41,34 @@ void Rules::avoidCollsions()
 		final_vel.dir = 0;
 		break;
 	case "Recontre":
-
+		//To implement
 	case "Rendevous":
-
+		//To implement
 	}
+
+void Rules::Explore()
+{
+	//To implement
+}
+
+void Rules::avoidCollisions()
+{
+	//To implement
+}
+
+void Rules::Charge()
+{
+	//To implement
+}
+
+void Rules::findFood()
+{
+	//To implement
+}
+
+void findUpdraft()
+{
+	//To implement
+}
+
 }

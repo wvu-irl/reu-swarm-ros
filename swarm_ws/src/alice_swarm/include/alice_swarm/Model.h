@@ -20,7 +20,7 @@ public:
 	 * Information about Alice's immediate environment
 	 */
 	std::vector<AliceStructs::obstacle> current_obstacles;
-	AliceStructs::pnt current_level;
+	AliceStructs::pnt current_pos;
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
 	std::vector<AliceStructs::pnt> targets;
