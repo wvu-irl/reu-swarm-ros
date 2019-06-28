@@ -1,7 +1,7 @@
 #ifndef ARDINO_SERVER_SOURCE
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
-#define DEBUG_CPP 1
+#define DEBUG_CPP 0
 #if DEBUG_CPP
 #include <iostream>
 #endif
