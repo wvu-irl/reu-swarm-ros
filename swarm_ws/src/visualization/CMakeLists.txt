@@ -32,7 +32,7 @@ find_package(SFML 2 REQUIRED  graphics window system)
 find_package(SFML 2 COMPONENTS graphics window system)
 
 ADD_LIBRARY(color_map ${LIB_TYPE} src/color_map.cpp)
-target_link_libraries(color_map ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
+target_link_libraries(color_map ${catkin_LIBRARIES})
 
 
 find_package(CUDA)
@@ -43,7 +43,8 @@ if (CUDA_FOUND)
 	set(LIB_TYPE STATIC)
 	
 	CUDA_ADD_LIBRARY(contour ${LIB_TYPE} src/contour.cu)
-	target_link_libraries(contour ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map)
+	add_dependencies(contour contour_node_generate_messages_cpp)
+	target_link_libraries(contour ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
 	
 	CUDA_ADD_LIBRARY(perspective_tf ${LIB_TYPE} src/transform/perspective_transform_gpu.cu)
 
@@ -64,11 +65,9 @@ if (CUDA_FOUND)
 	
 	
 	
-	if(SFML_FOUND)
-	  include_directories(${SFML_INCLUDE_DIR})
-	  target_link_libraries(table_vis ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map contour perspective_tf)
-	  target_link_libraries(calibrate_tab ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES})
-	endif()
+	include_directories(${SFML_INCLUDE_DIR})
+	target_link_libraries(table_vis ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map contour perspective_tf)
+	target_link_libraries(calibrate_tab ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES})
 	
 	add_dependencies(table_vis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 	add_dependencies(calibrate_tab ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

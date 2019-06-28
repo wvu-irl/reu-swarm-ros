@@ -2,3 +2,4 @@
 /pinger.o
 *.o
 /latency_log(IRL_ROBONET w Internet).csv
+/latency_log(Stessed).csv

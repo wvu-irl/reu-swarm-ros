@@ -1,5 +1,7 @@
 <launch>
 
+	<node pkg="contour_node" type="mapping" name="map" output="screen"/>
+
 	<node pkg="visualization" type="table_vis" name="table"
 		output="screen">
 

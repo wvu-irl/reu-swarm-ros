@@ -4,41 +4,42 @@ project(swarm_simulation)
 set (CMAKE_CXX_STANDARD 11)
 
 ## Find catkin and any catkin packages
-##find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs wvu_swarm_std_msgs geometry_msgs)
 
 ## Declare ROS messages and services
 ##add_message_files(FILES )
 
 ## Generate added messages and services
-##generate_messages(DEPENDENCIES std_msgs wvu_swarm_std_msgs)
 
 ## Declare a catkin package
 catkin_package(
+	INCLUDE_DIRS include
 )
 
 ## Build talker and listener
 
 # Detect and add SFML
 
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs wvu_swarm_std_msgs geometry_msgs)
-
 include_directories(include ${catkin_INCLUDE_DIRS})
 add_library(Body src/Body.cpp)
 add_library(Flock src/Flock.cpp)
 add_library(Sim src/Sim.cpp)
 add_library(Pvector src/Pvector.cpp)
-#add_library(window /Window.hpp)
-#add_library(graphics /Graphics.hpp)
-
 
 add_executable(main src/main.cpp)
 add_executable(virtual_objects src/virtual_objects.cpp)
+
+add_dependencies(Body wvu_swarm_std_msgs_generate_messages_cpp)
+add_dependencies(Flock wvu_swarm_std_msgs_generate_messages_cpp)
+add_dependencies(virtual_objects wvu_swarm_std_msgs_generate_messages_cpp)
+
 
 target_link_libraries(main ${catkin_LIBRARIES} Sim)
 target_link_libraries(Sim ${catkin_LIBRARIES} Flock Body Pvector)
 target_link_libraries(Body ${catkin_LIBRARIES}) 
 target_link_libraries(Flock ${catkin_LIBRARIES})
 target_link_libraries(virtual_objects ${catkin_LIBRARIES})
+
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 #Find any version 2.X of SFML
@@ -50,10 +51,4 @@ if(SFML_FOUND)
   target_link_libraries(main ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
 endif()
 
-
-
-  add_dependencies(main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-
-
-
+add_dependencies(main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

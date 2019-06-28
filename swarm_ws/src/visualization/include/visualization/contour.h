@@ -4,7 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "color_map.h"
-#include <functional>
+
+#include <contour_node/map_level.h>
 
 #define LINE_CHECK_DIST 1
 
@@ -66,7 +67,7 @@ private:
 	sf::Sprite sprite;
 
 	// the function that the map is following
-	std::function<double(double, double)> zfunc;
+	contour_node::map_level zfunc;
 
 	// the color map that the function is using
 	// can be applied to the background or the lines themselves
@@ -86,11 +87,11 @@ public:
 	ContourMap(sf::Rect<int> bounds, ColorMap);
 
 	// calculation and darwing functions
-	void tick(int);
+	void tick();
 	void render(sf::RenderTexture *window);
 
 	// sets the function the plot is to resemble
-	void resemble(std::function<double(double, double)> z);
+	void resemble(contour_node::map_level);
 
 	// scales the image of the plot by a fractional ammount
 	void scale(float sx, float sy);
