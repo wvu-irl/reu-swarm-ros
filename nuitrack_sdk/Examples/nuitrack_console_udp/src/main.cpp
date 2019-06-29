@@ -64,14 +64,51 @@ void onHandUpdate(HandTrackerData::Ptr handData)
         return;
     }
 
-//    std::cout << std::fixed << std::setprecision(3);
-//    std::cout << "Right hand position: "
-//                 "x = " << rightHand->xReal << ", "
-//                 "y = " << rightHand->yReal << ", "
-//                 "z = " << rightHand->zReal << std::endl;
+    std::cout << std::fixed << std::setprecision(3);
+    std::cout << "Right hand position: "
+                 "x = " << rightHand->xReal << ", "
+                 "y = " << rightHand->yReal << ", "
+                 "z = " << rightHand->zReal << std::endl;
     x = rightHand->xReal;
     y = rightHand->yReal;
     z = rightHand->zReal;
+}
+
+void onSkelUpdate(SkeletonData::Ptr skelData)
+{
+    if (!skelData)
+    {
+        // No data received
+        std::cout << "No hand data" << std::endl;
+        return;
+    }
+    
+    auto skeletons = skelData->getSkeletons();
+    if (skeletons.empty())
+    {
+        // No skeletons somehow
+        return;
+    }
+    
+    Joint rightHand;
+    
+    try {
+        rightHand = skeletons.at(0).joints.at(JOINT_RIGHT_HAND);
+    }
+    catch (const Exception& e) {
+        // No right hand
+        std::cout << "Right hand of the first user is not found" << std::endl;
+        return;
+    }
+    
+    std::cout << std::fixed << std::setprecision(3);
+    std::cout << "Right hand position: "
+                 "x = " << rightHand.real.x << ", "
+                 "y = " << rightHand.real.y << ", "
+                 "z = " << rightHand.real.z << std::endl;
+    x = rightHand.real.x;
+    y = rightHand.real.y;
+    z = rightHand.real.z;
 }
 
 void serverResponse(char rec)
@@ -162,9 +199,9 @@ void serverLoop(void)
     std::cout << "Successfully closed server." << std::endl;
 }
 
-void trackerLoop(HandTracker::Ptr handTracker)
+void handTrackerLoop(HandTracker::Ptr handTracker)
 {
-    std::cout << "Entered tracker loop." << std::endl;
+    std::cout << "Entered hand tracker loop." << std::endl;
     while (!sigint_received)
     {
         try
@@ -182,20 +219,28 @@ void trackerLoop(HandTracker::Ptr handTracker)
             std::cerr << "Nuitrack update failed (ExceptionType: " << e.type() << ")" << std::endl;
         }
     }
-    
-    // Release Nuitrack
-    std::cout << "Releasing Nuitrack!" << std::endl;
-    try
+}
+
+void skelTrackerLoop(SkeletonTracker::Ptr skelTracker)
+{
+    std::cout << "Entered skeleton tracker loop." << std::endl;
+    while (!sigint_received)
     {
-        Nuitrack::release();
+        try
+        {
+            // Wait for new hand tracking data
+            Nuitrack::waitUpdate(skelTracker);
+        }
+        catch (LicenseNotAcquiredException& e)
+        {
+            std::cerr << "LicenseNotAcquired exception (ExceptionType: " << e.type() << ")" << std::endl;
+            break;
+        }
+        catch (const Exception& e)
+        {
+            std::cerr << "Nuitrack update failed (ExceptionType: " << e.type() << ")" << std::endl;
+        }
     }
-    catch (const Exception& e)
-    {
-        std::cerr << "Nuitrack release failed (ExceptionType: " << e.type() << ")" << std::endl;
-        return;
-    }
-    
-    std::cout << "Successfully released Nuitrack." << std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -238,9 +283,11 @@ int main(int argc, char* argv[])
     // Create HandTracker module, other required modules will be
     // created automatically
     auto handTracker = HandTracker::create();
+    auto skelTracker = SkeletonTracker::create();
 
     // Connect onHandUpdate callback to receive hand tracking data
     handTracker->connectOnUpdate(onHandUpdate);
+    skelTracker->connectOnUpdate(onSkelUpdate);
 
     // Start Nuitrack
     try
@@ -258,11 +305,26 @@ int main(int argc, char* argv[])
     
     // Start a thread for the server handler and the nuitrack handler
     server = std::thread(serverLoop);
-    tracker = std::thread(trackerLoop, handTracker);
-
+    //tracker = std::thread(handTrackerLoop, handTracker);
+    tracker = std::thread(skelTrackerLoop, skelTracker);
+    
     // Join threads after exiting from sigint
     server.join();
     tracker.join();
+    
+    // Release Nuitrack
+    std::cout << "Releasing Nuitrack!" << std::endl;
+    try
+    {
+        Nuitrack::release();
+    }
+    catch (const Exception& e)
+    {
+        std::cerr << "Nuitrack release failed (ExceptionType: " << e.type() << ")" << std::endl;
+        return -1;
+    }
+    
+    std::cout << "Successfully released Nuitrack." << std::endl;
 
     return 1;
 }
