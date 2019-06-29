@@ -1,12 +1,174 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="air" displayName="air" projectFiles="true">
+      <logicalFolder name="nuitrack_sdk"
+                     displayName="nuitrack_sdk"
+                     projectFiles="true">
+        <logicalFolder name="Nuitrack" displayName="Nuitrack" projectFiles="true">
+          <logicalFolder name="include" displayName="include" projectFiles="true">
+            <logicalFolder name="nuitrack" displayName="nuitrack" projectFiles="true">
+              <logicalFolder name="capi" displayName="capi" projectFiles="true">
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/capi/ColorSensor_CAPI.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/capi/DepthSensor_CAPI.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/capi/GestureRecognizer_CAPI.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/capi/HandTracker_CAPI.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/capi/IssueTracker_CAPI.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/capi/Nuitrack_CAPI.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/capi/Public_Nuitrack_CAPI.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/capi/SkeletonTracker_CAPI.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/capi/UserTracker_CAPI.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="modules" displayName="modules" projectFiles="true">
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/modules/ColorSensor.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/modules/DepthSensor.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/modules/GestureRecognizer.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/modules/HandTracker.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/modules/HeaderOnlyAPI_Module.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/modules/Module.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/modules/NuitrackModule.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/modules/SkeletonTracker.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/modules/UserTracker.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="types" displayName="types" projectFiles="true">
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/BoundingBox.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/Color3.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/DepthFrame.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/Error.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/Export.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/Frame.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/FrameBorderIssue.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/Gesture.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/GestureData.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/Hand.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/HandTrackerData.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/Issue.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/IssuesData.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/ObjectData.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/OcclusionIssue.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/Orientation.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/OutputMode.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/RGBFrame.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/SensorIssue.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/Skeleton.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/SkeletonData.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/User.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/UserFrame.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/types/Vector3.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="utils" displayName="utils" projectFiles="true">
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/utils/CallbackStruct.h</itemPath>
+                <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/utils/ExceptionTranslator.h</itemPath>
+              </logicalFolder>
+              <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/ModuleFunctions.h</itemPath>
+              <itemPath>../../../../nuitrack_sdk/Nuitrack/include/nuitrack/Nuitrack.h</itemPath>
+            </logicalFolder>
+          </logicalFolder>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="reu-swarm-ros"
+                     displayName="reu-swarm-ros"
+                     projectFiles="true">
+        <logicalFolder name="nuitrack_sdk"
+                       displayName="nuitrack_sdk"
+                       projectFiles="true">
+          <logicalFolder name="Nuitrack" displayName="Nuitrack" projectFiles="true">
+            <logicalFolder name="include" displayName="include" projectFiles="true">
+              <logicalFolder name="nuitrack" displayName="nuitrack" projectFiles="true">
+                <logicalFolder name="capi" displayName="capi" projectFiles="true">
+                  <itemPath>../../Nuitrack/include/nuitrack/capi/ColorSensor_CAPI.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/capi/DepthSensor_CAPI.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/capi/GestureRecognizer_CAPI.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/capi/HandTracker_CAPI.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/capi/IssueTracker_CAPI.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/capi/Nuitrack_CAPI.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/capi/Public_Nuitrack_CAPI.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/capi/SkeletonTracker_CAPI.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/capi/UserTracker_CAPI.h</itemPath>
+                </logicalFolder>
+                <logicalFolder name="modules" displayName="modules" projectFiles="true">
+                  <itemPath>../../Nuitrack/include/nuitrack/modules/ColorSensor.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/modules/DepthSensor.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/modules/GestureRecognizer.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/modules/HandTracker.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/modules/HeaderOnlyAPI_Module.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/modules/Module.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/modules/NuitrackModule.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/modules/SkeletonTracker.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/modules/UserTracker.h</itemPath>
+                </logicalFolder>
+                <logicalFolder name="types" displayName="types" projectFiles="true">
+                  <itemPath>../../Nuitrack/include/nuitrack/types/BoundingBox.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/Color3.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/DepthFrame.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/Error.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/Export.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/Frame.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/FrameBorderIssue.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/Gesture.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/GestureData.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/Hand.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/HandTrackerData.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/Issue.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/IssuesData.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/ObjectData.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/OcclusionIssue.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/Orientation.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/OutputMode.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/RGBFrame.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/SensorIssue.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/Skeleton.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/SkeletonData.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/User.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/UserFrame.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/types/Vector3.h</itemPath>
+                </logicalFolder>
+                <logicalFolder name="utils" displayName="utils" projectFiles="true">
+                  <itemPath>../../Nuitrack/include/nuitrack/utils/CallbackStruct.h</itemPath>
+                  <itemPath>../../Nuitrack/include/nuitrack/utils/ExceptionTranslator.h</itemPath>
+                </logicalFolder>
+                <itemPath>../../Nuitrack/include/nuitrack/ModuleFunctions.h</itemPath>
+                <itemPath>../../Nuitrack/include/nuitrack/Nuitrack.h</itemPath>
+              </logicalFolder>
+            </logicalFolder>
+          </logicalFolder>
+        </logicalFolder>
+        <logicalFolder name="swarm_ws" displayName="swarm_ws" projectFiles="true">
+          <logicalFolder name="src" displayName="src" projectFiles="true">
+            <logicalFolder name="nuitrack_bridge"
+                           displayName="nuitrack_bridge"
+                           projectFiles="true">
+              <logicalFolder name="include" displayName="include" projectFiles="true">
+                <logicalFolder name="nuitrack_bridge"
+                               displayName="nuitrack_bridge"
+                               projectFiles="true">
+                  <itemPath>../../../swarm_ws/src/nuitrack_bridge/include/nuitrack_bridge/nuitrack_data.h</itemPath>
+                </logicalFolder>
+              </logicalFolder>
+            </logicalFolder>
+          </logicalFolder>
+        </logicalFolder>
+      </logicalFolder>
+    </logicalFolder>
     <df root="." name="0">
       <df name="src">
         <in>client.cpp</in>
         <in>main.cpp</in>
       </df>
     </df>
+    <df root="." name="1">
+    </df>
+    <logicalFolder name="src" displayName="src" projectFiles="true">
+      <itemPath>../../../../nuitrack_sdk/Examples/nuitrack_console_udp/src/main.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>CMakeLists.txt</itemPath>
+      <itemPath>build/Makefile</itemPath>
+      <itemPath>nbproject/private/launcher.properties</itemPath>
+    </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false"
@@ -18,6 +180,7 @@
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
+    <Elem>.</Elem>
     <Elem>.</Elem>
   </sourceRootList>
   <projectmakefile>build/Makefile</projectmakefile>
@@ -31,7 +194,6 @@
       <flagsDictionary>
         <element flagsID="0"
                  commonFlags="-mtune=generic -march=x86-64 -std=c++11 -fstack-protector-strong"/>
-        <element flagsID="1" commonFlags="-std=c++11"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -41,17 +203,33 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath></executablePath>
-          <ccTool>
-            <preprocessorList>
-              <Elem>_GLIBCXX_USE_CXX11_ABI=0</Elem>
-            </preprocessorList>
-          </ccTool>
         </makeTool>
         <preBuild>
           <preBuildCommandWorkingDir>build</preBuildCommandWorkingDir>
           <preBuildCommand>${CMAKE} -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=${IDE_CC} -DCMAKE_CXX_COMPILER=${IDE_CXX} -DCMAKE_C_FLAGS_DEBUG="-g3 -gdwarf-2" -DCMAKE_CXX_FLAGS_DEBUG="-g3 -gdwarf-2" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..</preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="../../../../nuitrack_sdk/Examples/nuitrack_console_udp/src/main.cpp"
+            ex="false"
+            tool="1"
+            flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
+      <folder path="src">
+        <ccTool>
+          <incDir>
+            <pElem>../../Nuitrack/include/nuitrack/types</pElem>
+            <pElem>../../Nuitrack/include/nuitrack/utils</pElem>
+            <pElem>../../Nuitrack/include/nuitrack/modules</pElem>
+            <pElem>../../Nuitrack/include/nuitrack/capi</pElem>
+            <pElem>../../Nuitrack/include/nuitrack</pElem>
+            <pElem>src</pElem>
+            <pElem>../../Nuitrack/include</pElem>
+            <pElem>../../../../nuitrack_sdk/Examples/nuitrack_console_udp</pElem>
+          </incDir>
+        </ccTool>
+      </folder>
       <item path="src/client.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
           <incDir>
@@ -59,6 +237,7 @@
             <pElem>build</pElem>
           </incDir>
           <preprocessorList>
+            <Elem>_GLIBCXX_USE_CXX11_ABI=0</Elem>
             <Elem>_REENTRANT=1</Elem>
             <Elem>__GNUC_STDC_INLINE__=1</Elem>
             <Elem>__GXX_EXPERIMENTAL_CXX0X__=1</Elem>
@@ -90,11 +269,17 @@
         </ccTool>
       </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="8">
-        <ccTool flags="1">
+        <ccTool flags="0">
           <incDir>
-            <pElem>.</pElem>
-            <pElem>../../Nuitrack/include</pElem>
-            <pElem>../../Nuitrack/include/middleware</pElem>
+            <pElem>../../Nuitrack/include/nuitrack/types</pElem>
+            <pElem>../../Nuitrack/include/nuitrack/utils</pElem>
+            <pElem>../../Nuitrack/include/nuitrack/modules</pElem>
+            <pElem>../../Nuitrack/include/nuitrack/capi</pElem>
+            <pElem>../../Nuitrack/include/nuitrack</pElem>
+            <pElem>../../../../swarm_ws/src/nuitrack_bridge/include/nuitrack_bridge</pElem>
+            <pElem>src</pElem>
+            <pElem>../../../../nuitrack_sdk/Nuitrack/include</pElem>
+            <pElem>../../../../swarm_ws/src/nuitrack_bridge/include</pElem>
             <pElem>build</pElem>
           </incDir>
         </ccTool>

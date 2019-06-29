@@ -1,5 +1,7 @@
 #include <nuitrack/Nuitrack.h>
 
+#include <nuitrack_bridge/nuitrack_data.h>
+
 #include <iomanip>
 #include <iostream>
 
@@ -113,20 +115,24 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
 
 void serverResponse(char rec)
 {
-    double send = 0.0;
-    
-    if(rec == 'x')
-        send = x;
-    else if(rec == 'y')
-        send = y;
-    else if(rec == 'z')
-        send = z;
-    
+    nuiData send;
+//    double send = 0.0;
+//    
+//    if(rec == 'x')
+//        send = x;
+//    else if(rec == 'y')
+//        send = y;
+//    else if(rec == 'z')
+//        send = z;
+//    
     // Send data
-    if(sendto(sockfd, &send, sizeof(send), MSG_CONFIRM,
+    send.leftWristX = x;
+    send.leftWristY = y;
+    send.leftWristZ = z;
+    if(sendto(sockfd, (void*)&send, sizeof(send), MSG_CONFIRM,
             (const struct sockaddr*)&cliaddr, sizeof(cliaddr)) >= 0)
     {
-        std::cout << "Sent " << send << " to client." << std::endl;
+        std::cout << "Sent " /*<< send*/ << "to client." << std::endl;
     }
     else
     {
