@@ -12,4 +12,6 @@
 	</node>
 
 	
+	<!-- Launching server node -->
+	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server" output="screen"/>
 </launch>
