@@ -103,11 +103,11 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         return;
     }
     
-    std::cout << std::fixed << std::setprecision(3);
-    std::cout << "Right hand position: "
-                 "x = " << rightHand.real.x << ", "
-                 "y = " << rightHand.real.y << ", "
-                 "z = " << rightHand.real.z << std::endl;
+//    std::cout << std::fixed << std::setprecision(3);
+//    std::cout << "Right hand position: "
+//                 "x = " << rightHand.real.x << ", "
+//                 "y = " << rightHand.real.y << ", "
+//                 "z = " << rightHand.real.z << std::endl;
     x = rightHand.real.x;
     y = rightHand.real.y;
     z = rightHand.real.z;
@@ -126,9 +126,10 @@ void serverResponse(char rec)
 //        send = z;
 //    
     // Send data
-    send.leftWristX = x;
-    send.leftWristY = y;
-    send.leftWristZ = z;
+    send.rightHand.x = x;
+    send.rightHand.y = y;
+    send.rightHand.z = z;
+    send.rightFound = true;
     if(sendto(sockfd, (void*)&send, sizeof(send), MSG_CONFIRM,
             (const struct sockaddr*)&cliaddr, sizeof(cliaddr)) >= 0)
     {
@@ -288,11 +289,11 @@ int main(int argc, char* argv[])
     
     // Create HandTracker module, other required modules will be
     // created automatically
-    auto handTracker = HandTracker::create();
+//    auto handTracker = HandTracker::create();
     auto skelTracker = SkeletonTracker::create();
 
     // Connect onHandUpdate callback to receive hand tracking data
-    handTracker->connectOnUpdate(onHandUpdate);
+//    handTracker->connectOnUpdate(onHandUpdate);
     skelTracker->connectOnUpdate(onSkelUpdate);
 
     // Start Nuitrack
@@ -311,7 +312,7 @@ int main(int argc, char* argv[])
     
     // Start a thread for the server handler and the nuitrack handler
     server = std::thread(serverLoop);
-    //tracker = std::thread(handTrackerLoop, handTracker);
+//    tracker = std::thread(handTrackerLoop, handTracker);
     tracker = std::thread(skelTrackerLoop, skelTracker);
     
     // Join threads after exiting from sigint
