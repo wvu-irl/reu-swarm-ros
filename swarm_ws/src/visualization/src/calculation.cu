@@ -57,11 +57,12 @@ typedef struct
  * x and y are coordinates on the plane perpendicular to the view
  * t is a saw function of time (goes from 0 to 1000 incrementing by 1 every tick)
  */
-const double q = 1.245; // this is a magic number DO NOT CHANGE IT
+// this is a magic number DO NOT CHANGE IT
+#define q 1.245
 __device__ void zfunc(double *z, double x, double y, map_level_t map)
 {
-    x -= 640;
-		y -= 400;
+    x += 640;
+		y += 400;
 		x *= 1280.0 / 200.0;
 		y *= 800.0 / 100.0;
 		*z = 0;
