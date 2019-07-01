@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-//#include "wvu_swarm_std_msgs/robot_command_array.h"
+#include "wvu_swarm_std_msgs/alice_mail.h"
 #include "alice_swarm/Hub.h"
 #include "alice_swarm/Alice.h"
 #include "alice_swarm/aliceStructs.h"
@@ -17,6 +17,14 @@
 int main(int argc, char **argv)
 {
 
+	wvu_swarm_std_msgs::alice_mail mail;
+	wvu_swarm_std_msgs::point_mail tar;
+	tar.x = 5;
+	tar.y = 5;
+	mail.targetMail.push_back(tar);
+	Alice alice;
+	alice = Alice(mail);
+	alice.generateVel();
 	//std::map<int, Robot> aliceMap; //Maps robot id's to robots so they can be accessed easily
 
 	//Creates an AliceBrain node, and subscribes/publishes to the necessary topics

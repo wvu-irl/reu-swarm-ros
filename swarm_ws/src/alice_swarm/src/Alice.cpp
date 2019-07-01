@@ -9,25 +9,31 @@
 
 #include <iostream>
 
+Alice::Alice()
+{
+	name = 0;
+}
+
 Alice::Alice(wvu_swarm_std_msgs::alice_mail _data)
 {
 	name = _data.name;
 	model = Model(_data.name);
+	updateModel(_data);
 	rules = Rules(model);
 //	(_data);
 }
 
 AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail _data)
 {
-	AliceStructs::mail mail; /*
-	for (auto& _obstacle : _data.obsPointMail)
+	AliceStructs::mail mail;
+	for (auto& _obstacle : _data.obsMail)
 	{
 		AliceStructs::obj obstacle;
 		obstacle.x_rad = _obstacle.x_rad;
 		obstacle.y_rad = _obstacle.y_rad;
 		obstacle.theta_offset = _obstacle.theta_offset;
 		mail.obstacles.push_back(obstacle);
-	} */
+	}
 	for (auto& _neighbor : _data.neighborMail)
 	{
 		AliceStructs::neighbor neighbor;
@@ -66,5 +72,7 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail _data)
 
 AliceStructs::vel Alice::generateVel()
 {
-	return rules.stateLoop();
+	AliceStructs::vel to_return = rules.stateLoop();
+	std::cout << "mag: " << to_return.mag << " - dir: " << to_return.dir << std::endl;
+	return to_return;
 }

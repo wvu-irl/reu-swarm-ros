@@ -5,6 +5,11 @@
 #include "wvu_swarm_std_msgs/neighbor_mail.h"
 #include <iostream>
 
+Model::Model()
+{
+	name = 0;
+}
+
 Model::Model(int _name)
 {
 	name = _name;

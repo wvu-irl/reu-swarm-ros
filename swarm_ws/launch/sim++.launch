@@ -1,11 +1,6 @@
 <launch>
 		
-	<node pkg="swarm_simulation" type="main" name="Simulation" output="screen"/>
-		
-	<!-- Launching virtual obstacle node -->
-	<node pkg="swarm_simulation"  type="virtual_objects" name="virtual_objects" output="screen"/>
-		
-	
+
 	
 	<!-- TODO launch ALICE nodes -->
  	<node pkg="alice_swarm" type="AliceMain" name="alice" output="screen">							

@@ -6,9 +6,19 @@
 #include <math.h>
 #include <iostream>
 
+Rules::Rules()
+{
+	state = "explore";
+}
+
 Rules::Rules(Model _model) : model(_model)
 {
 	state = "explore";
+}
+
+bool Rules::isBlocked()
+{
+	return false;
 }
 
 AliceStructs::vel Rules::stateLoop()
@@ -29,7 +39,7 @@ AliceStructs::vel Rules::stateLoop()
 		break;
 	case blocked:
 		avoidCollisions();
-		break;
+		break; /*
 	case charge:
 		Charge();
 		break;
@@ -38,7 +48,7 @@ AliceStructs::vel Rules::stateLoop()
 		break;
 	case find_updraft:
 		findUpdraft();
-		break;
+		break; */
 	}
 	return final_vel;
 }
@@ -54,7 +64,7 @@ void Rules::avoidCollisions()
 	{
 		blocked, recontre, rendevous
 	};
-	std::map<std::string, StringValue> s_mapStringValues;
+	std::map<std::string, StringValue> s_mapStringValues; /*
 	switch (s_mapStringValues[collision_state])
 	{
 	case blocked:
@@ -67,12 +77,12 @@ void Rules::avoidCollisions()
 	case rendevous:
 		//To implement
 		break;
-	}
+	}*/
 }
 
 void Rules::Explore()
 {
-	float temp = 0;
+	float temp = 10000;
 	for (auto& tar : model.targets)
 	{
 		float check = calcDis(tar.x, tar.y, model.cur_pose.x, model.cur_pose.y);
