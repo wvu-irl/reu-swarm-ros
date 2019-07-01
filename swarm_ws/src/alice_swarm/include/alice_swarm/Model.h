@@ -30,6 +30,8 @@ public:
 	AliceStructs::obj archived_obstacles;
 	std::vector<AliceStructs::pnt> archived_levels;
 
+	Model();
+
 	Model(int _name);
 
 	/*

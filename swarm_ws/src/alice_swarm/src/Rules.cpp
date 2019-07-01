@@ -6,9 +6,8 @@
 #include <math.h>
 #include <iostream>
 
-Rules::Rules(Model _model)
+Rules::Rules(Model _model) : model(_model)
 {
-	model = _model;
 	state = "Explore";
 }
 
