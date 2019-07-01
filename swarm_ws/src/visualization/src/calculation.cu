@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
+#include <stdio.h>
 #include <tuple>
 
 #include <cuda_runtime.h>
@@ -13,7 +14,8 @@
 #include <visualization/color_map.h>
 #include <wvu_swarm_std_msgs/map_level.h>
 
-#define CALC_DEBUG 1
+#define CALC_DEBUG 0
+#define CUDA_DEBUG 1
 
 /**
  * namespace for doing stupid amounts of calculations
@@ -38,13 +40,13 @@ typedef struct
 	double amplitude;
 	double x_off;
 	double y_off;
-	ellipse_t orientation;
+	ellipse_t ellipse;
 } gaussian_t;
 
 
 typedef struct
 {
-	wvu_swarm_std_msgs::gaussian *eqs;
+  gaussian_t *eqs;
 	size_t num_eqs;
 } map_level_t;
 
@@ -68,12 +70,12 @@ __device__ void zfunc(double *z, double x, double y, map_level_t map)
 
 		for (size_t i = 0;i < map.num_eqs;i++)
 		{
-			wvu_swarm_std_msgs::gaussian curr_eq = map.eqs[i];
+			gaussian_t curr_eq = map.eqs[i];
 			double a = curr_eq.ellipse.x_rad;
 			double b = curr_eq.ellipse.y_rad;
 
-			double x_app = r * cos(theta + curr_eq.ellipse.theta_offset);
-			double y_app = r * sin(theta + curr_eq.ellipse.theta_offset);
+			double x_app = r * cos(theta + curr_eq.ellipse.theta_off);
+			double y_app = r * sin(theta + curr_eq.ellipse.theta_off);
 
 			double re = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
 
@@ -184,7 +186,7 @@ __device__ double min(double a, double b)
  */
 __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     size_t *width, size_t *height, color *colors, double *color_levels, size_t *num_cols,
-		wvu_swarm_std_msgs::gaussian *eqs, size_t *num_eqs)
+		gaussian_t *eqs, size_t *num_eqs)
 {
 
 		map_level_t lev = {eqs, *num_eqs};
@@ -195,6 +197,9 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     int i = idx / (*width);
     int j = idx % (*width);
 
+#if CUDA_DEBUG
+    printf("Calculating value: %d[%d] == (%d, %d)", idx, col_id, i, j);
+#endif
     // calculating function
     double zc;
     zfunc(&zc, (double)j, (double)i, lev);
@@ -270,12 +275,34 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     size_t n = width * height;
     size_t size = n * 4;
 
-    wvu_swarm_std_msgs::gaussian *funky = (wvu_swarm_std_msgs::gaussian *)
-    		malloc(sizeof(wvu_swarm_std_msgs::gaussian) * funk.functions.size());
+    gaussian_t *funky = (gaussian_t *)
+    		malloc(sizeof(gaussian_t) * funk.functions.size());
+
+    for (size_t i = 0;i < funk.functions.size();i++)
+    {
+    	wvu_swarm_std_msgs::gaussian gaus = funk.functions[i];
+    	ellipse_t ell = {gaus.ellipse.x_rad, gaus.ellipse.y_rad, gaus.ellipse.theta_offset};
+    	funky[i] = (gaussian_t){gaus.amplitude, gaus.offset_x, gaus.offset_y, ell};
+    }
+
     size_t num_eqs = funk.functions.size();
 
 #if CALC_DEBUG
-    std::cout << "\033[32mGot equation:\033[0m\n" << funk << "\n" << std::endl;
+    std::cout << "\033[32mGot equation:\033[0m\n" << funk << std::endl;
+    std::cout << "Converted to:\nFunctions:\n";
+    for (size_t i = 0;i < funk.functions.size();i++)
+    {
+    	std::cout << " Function[" << i << "]:\n";
+    	std::cout << "  Amp: " << funky[i].amplitude << "\n";
+    	std::cout << "  X: " << funky[i].x_off << "\n";
+    	std::cout << "  Y: " << funky[i].y_off << "\n";
+    	std::cout << "  Ellipse:\n";
+    	std::cout << "   Xrad: " << funky[i].ellipse.x_rad << "\n";
+    	std::cout << "   Yrad: " << funky[i].ellipse.y_rad << "\n";
+    	std::cout << "   ThOff: " << funky[i].ellipse.theta_off << "\n";
+    }
+    std::cout << std::endl;
+
 #endif
 
     // setting up device pointers
@@ -291,7 +318,7 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     size_t *d_num_colors;
     size_t n_levels = levels.size();
 
-    wvu_swarm_std_msgs::gaussian *d_funk;
+    gaussian_t *d_funk;
     size_t *d_num_eqs;
 
     createDeviceVar((void **)&d_cols, size, cols);
@@ -327,6 +354,9 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
         d_num_colors,
 				d_funk,
 				d_num_eqs);
+#if CUDA_DEBUG
+    cudaDeviceSynchronize();
+#endif
     cudaMemcpyAsync(cols, d_cols, size, cudaMemcpyDeviceToHost, 0);
     cudaEventRecord(stop, 0);
 

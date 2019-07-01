@@ -89,7 +89,7 @@ sf::Vector2f convertCoordinate(sf::Vector2f a)
 // Subscription callback for goals
 void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
 {
-        targets.clear();
+	targets.clear();
 	for (size_t i = 0; i < goals.point.size(); i++)
 	{
 		wvu_swarm_std_msgs::vicon_point pnt = goals.point.at(i);
@@ -100,7 +100,7 @@ void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
 // obstacle subscription callback
 void drawObstacles(wvu_swarm_std_msgs::vicon_points points)
 {
-        obstacles.clear();
+	obstacles.clear();
 	for (size_t i = 0; i < points.point.size(); i++)
 	{
 		wvu_swarm_std_msgs::vicon_point pnt = points.point.at(i);
@@ -111,7 +111,7 @@ void drawObstacles(wvu_swarm_std_msgs::vicon_points points)
 // subscription callback to update bot locations
 void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 {
-        bots_pos.clear();
+	bots_pos.clear();
 	for (size_t i = 0; i < bots.poseVect.size(); i++)
 	{
 		// getting pose
@@ -207,16 +207,24 @@ void tick()
 	{
 #if TAB_DEBUG
 		std::cout << "Starting contour calc" << std::endl;
-		std::cout << "\nDrawing level:\n" << map.levels[g_draw_level] << std::endl;
+		if (map.levels.size() > 0 && map.levels[g_draw_level].functions.size() > 0)
+			std::cout << "\033[32m\nDrawing level:\033[0m\n"
+					<< map.levels[g_draw_level] << std::endl;
+		else
+			std::cout << "\033[31m\nDrawing level:\033[0m\n"
+								<< map << std::endl;
 #endif
-		cont->resemble(map.levels[g_draw_level]);
+		if (map.levels.size() > 0 && map.levels[g_draw_level].functions.size() > 0)
+		{
+			cont->resemble(map.levels[g_draw_level]);
 #if TAB_DEBUG
-		std::cout << "Resemble contour calc" << std::endl;
+			std::cout << "Resemble contour calc" << std::endl;
 #endif
-		cont->tick(); // telling the contour plot to advance
+			cont->tick(); // telling the contour plot to advance
 #if TAB_DEBUG
-		std::cout << "Finished contour calc" << std::endl;
+			std::cout << "Finished contour calc" << std::endl;
 #endif
+		}
 	}
 }
 
@@ -237,7 +245,21 @@ void render(sf::RenderWindow *window)
 
 	if (strcmp(g_background.c_str(), "Contour") == 0)
 	{
-		cont->render(&disp); // drawing contour plot
+		if (map.levels.size() > 0 && map.levels[g_draw_level].functions.size() > 0)
+		{
+#if TAB_DEBUG
+			std::cout << "Drawing contour map" << std::endl;
+#endif
+			cont->render(&disp); // drawing contour plot
+		}
+		else
+		{
+
+			sf::RectangleShape rect;
+			rect.setFillColor(sf::Color::Black);
+			rect.setSize(sf::Vector2f(WIDTH, HEIGHT));
+			disp.draw(rect);
+		}
 	}
 	else if (strcmp(g_background.c_str(), "None") == 0)
 	{
@@ -251,8 +273,8 @@ void render(sf::RenderWindow *window)
 		sf::Sprite checker_sprite;
 		checker_sprite.setTexture(checker_texture);
 		checker_sprite.setPosition(sf::Vector2f(0, 0));
-		checker_sprite.scale((double)WIDTH / checker.getSize().x,
-		(double)HEIGHT / checker.getSize().y);
+		checker_sprite.scale((double) WIDTH / checker.getSize().x,
+				(double) HEIGHT / checker.getSize().y);
 		disp.draw(checker_sprite);
 	}
 
@@ -277,7 +299,6 @@ void render(sf::RenderWindow *window)
 		tar.setPosition(targets.at(i) - sf::Vector2f(2, 2));
 		disp.draw(tar);
 	}
-	
 
 	// drawing robots
 	sf::CircleShape bot;
@@ -296,7 +317,6 @@ void render(sf::RenderWindow *window)
 				sf::Vector2f(bots_pos[i].x + radius, bots_pos[i].y - radius));
 		disp.draw(rid_disp);
 	}
-	
 
 	// filling image
 	disp.display();
@@ -330,8 +350,8 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle n_priv("~");
 
-        ros::Rate rate(50);
-        
+	ros::Rate rate(50);
+
 	std::string assets, config;
 
 	n_priv.param < std::string
@@ -344,13 +364,13 @@ int main(int argc, char **argv)
 	n_priv.param<int>("table_height", g_table_height, 100);
 	n_priv.param<int>("robot_diameter", g_robot_diameter, 5);
 	n_priv.param<int>("draw_level", g_draw_level, map_ns::COMBINED);
-        
-        table_origin = sf::Vector2f(g_table_width / 2,
-		g_table_height / 2);
+
+	table_origin = sf::Vector2f(g_table_width / 2, g_table_height / 2);
 
 #if TAB_DEBUG
-	std::cout << "Got params:\n\t" << g_background << "\n\t" << config << "\n\t" << g_table_width
-			<< "\n\t" << g_table_height << "\n\t" << g_robot_diameter << std::endl;
+	std::cout << "Got params:\n\t" << g_background << "\n\t" << config << "\n\t"
+			<< g_table_width << "\n\t" << g_table_height << "\n\t" << g_robot_diameter
+			<< std::endl;
 
 #endif
 
@@ -366,6 +386,8 @@ int main(int argc, char **argv)
 	ros::Subscriber obstacles = n.subscribe("virtual_obstacles", 1000,
 			drawObstacles);
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
+
+	ros::Subscriber mapping_sub = n.subscribe("/map_data", 100, updateMap);
 
 	// calibrating from file
 	calibrateFromFile(config);

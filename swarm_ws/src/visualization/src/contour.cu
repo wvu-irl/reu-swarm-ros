@@ -13,7 +13,7 @@
 
 #include <visualization/contour.h>
 
-#define DEBUG_CONT_SRC 1
+#define DEBUG_CONT_SRC 0
 
 // constructor
 Vector3D::Vector3D(double x, double y, double z) :

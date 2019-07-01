@@ -17,6 +17,7 @@
 			to "Contour" will draw a contour map - setting to a file path will draw the 
 			image in the path -->
 		<param name="background" value="Contour" type="str" />
+		
 	</node>
 
 </launch>

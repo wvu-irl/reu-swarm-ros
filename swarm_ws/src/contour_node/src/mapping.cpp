@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 
 	wvu_swarm_std_msgs::gaussian gaus;
 	gaus.ellipse = el;
-	gaus.offset_x = 10;
+	gaus.offset_x = 0;
 	gaus.offset_y = 0;
 	gaus.amplitude = 20;
 
