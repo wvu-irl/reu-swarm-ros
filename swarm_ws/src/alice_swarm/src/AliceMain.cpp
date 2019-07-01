@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "wvu_swarm_std_msgs/robot_command_array.h"
 #include "alice_swarm/Hub.h"
-#include "alice_swarm/Robot.h"
+#include "alice_swarm/Alice.h"
 #include "alice_swarm/aliceStructs.h"
 #include <sstream>
 #include <map>

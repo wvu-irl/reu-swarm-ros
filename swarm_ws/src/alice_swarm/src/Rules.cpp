@@ -8,7 +8,7 @@
 
 Rules::Rules(Model _model) : model(_model)
 {
-	state = "Explore";
+	state = "explore";
 }
 
 AliceStructs::vel Rules::stateLoop()

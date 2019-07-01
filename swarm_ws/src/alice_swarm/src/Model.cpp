@@ -1,7 +1,7 @@
 #include "alice_swarm/Model.h"
 #include "alice_swarm/aliceStructs.h"
 #include "wvu_swarm_std_msgs/alice_mail_array.h"
-#include "wvu_swarm_std_msgs/obs_point_mail.h"
+#include "wvu_swarm_std_msgs/gaussian.h"
 #include "wvu_swarm_std_msgs/neighbor_mail.h"
 #include <iostream>
 
@@ -10,11 +10,11 @@ Model::Model(int _name)
 	name = _name;
 }
 
-model::sensorUpdate(aliceStructs::mail _toAdd)
+void Model::sensorUpdate(AliceStructs::mail _toAdd)
 {
 	for (auto& obstacle : _toAdd.obstacles)
 	{
-		obstacles.push_back(obstacle);
+		current_obstacles.push_back(obstacle);
 	}
 	for (auto& flow : _toAdd.flows)
 	{
@@ -28,15 +28,15 @@ model::sensorUpdate(aliceStructs::mail _toAdd)
 	{
 		targets.push_back(tar);
 	}
-	current_level.z = _toAdd.level;
+	cur_pose.z = _toAdd.level;
 }
 
-Model::pass()
+void Model::pass()
 {
 	//Dummy for the moment; will be updated at a later date
 }
 
-Model::forget()
+void Model::forget()
 {
 	//See pass
 }
