@@ -39,7 +39,7 @@ find_package(CUDA)
 if (CUDA_FOUND)
 
 	set(CUDA_NVCC_FLAGS "-arch=compute_50 -ccbin g++" CACHE STRING "nvcc flags" FORCE)
-	set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc" FORCE)
+	set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc verbose" FORCE)
 	set(LIB_TYPE STATIC)
 	
 	CUDA_ADD_LIBRARY(contour ${LIB_TYPE} src/contour.cu)

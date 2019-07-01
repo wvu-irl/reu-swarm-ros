@@ -28,6 +28,22 @@ cudaDeviceProp deviceProp;
 // necessary structs to pass data
 typedef struct
 {
+	double x_rad;
+	double y_rad;
+	double theta_off;
+} ellipse_t;
+
+typedef struct
+{
+	double amplitude;
+	double x_off;
+	double y_off;
+	ellipse_t orientation;
+} gaussian_t;
+
+
+typedef struct
+{
 	wvu_swarm_std_msgs::gaussian *eqs;
 	size_t num_eqs;
 } map_level_t;
@@ -168,8 +184,11 @@ __device__ double min(double a, double b)
  */
 __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     size_t *width, size_t *height, color *colors, double *color_levels, size_t *num_cols,
-		map_level_t *lev)
+		wvu_swarm_std_msgs::gaussian *eqs, size_t *num_eqs)
 {
+
+		map_level_t lev = {eqs, *num_eqs};
+
 		// finding where in the image the process is
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int col_id = idx * 4;
@@ -178,7 +197,7 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
 
     // calculating function
     double zc;
-    zfunc(&zc, (double)j, (double)i, *lev);
+    zfunc(&zc, (double)j, (double)i, lev);
 
     // determining gradiant color
     color c = calculateColor(zc, colors, color_levels, *num_cols);
@@ -192,10 +211,10 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     {
     		// calculating neighbors
         double zz[4];
-        zfunc(zz, (double)j, (double)i - 1, *lev);
-        zfunc(zz + 1, (double)j, (double)i + 1, *lev);
-        zfunc(zz + 2, (double)j - 1, (double)i, *lev);
-        zfunc(zz + 3, (double)j + 1, (double)i, *lev);
+        zfunc(zz, (double)j, (double)i - 1, lev);
+        zfunc(zz + 1, (double)j, (double)i + 1, lev);
+        zfunc(zz + 2, (double)j - 1, (double)i, lev);
+        zfunc(zz + 3, (double)j + 1, (double)i, lev);
 
         // checking levels
         for (size_t k = 0;k < *num_levels;k++)
@@ -251,9 +270,9 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     size_t n = width * height;
     size_t size = n * 4;
 
-    map_level_t *map = (map_level_t *) malloc(sizeof(map_level_t));
-    map->eqs = (wvu_swarm_std_msgs::gaussian *)malloc(sizeof(wvu_swarm_std_msgs::gaussian) * funk.functions.size());
-    map->num_eqs = funk.functions.size();
+    wvu_swarm_std_msgs::gaussian *funky = (wvu_swarm_std_msgs::gaussian *)
+    		malloc(sizeof(wvu_swarm_std_msgs::gaussian) * funk.functions.size());
+    size_t num_eqs = funk.functions.size();
 
 #if CALC_DEBUG
     std::cout << "\033[32mGot equation:\033[0m\n" << funk << "\n" << std::endl;
@@ -272,7 +291,8 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     size_t *d_num_colors;
     size_t n_levels = levels.size();
 
-    map_level_t *d_funk;
+    wvu_swarm_std_msgs::gaussian *d_funk;
+    size_t *d_num_eqs;
 
     createDeviceVar((void **)&d_cols, size, cols);
     createDeviceVar((void **)&d_levels, sizeof(double) * levels.size(), levels.data());
@@ -282,7 +302,8 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     createDeviceVar((void **)&d_colors, sizeof(color) * num_cols, colors);
     createDeviceVar((void **)&d_color_levels, sizeof(double) * num_cols, color_levels);
     createDeviceVar((void **)&d_num_colors, sizeof(size_t), &(num_cols));
-    createDeviceVar((void **)&d_funk, sizeof(map_level_t) + sizeof(wvu_swarm_std_msgs::gaussian) * funk.functions.size(), map);
+    createDeviceVar((void **)&d_funk,sizeof(wvu_swarm_std_msgs::gaussian) * funk.functions.size(), &funky);
+    createDeviceVar((void **)&d_num_eqs, sizeof(size_t), &num_eqs);
 
     dim3 threads(1024, 1);
     dim3 blocks(n / threads.x, 1);
@@ -304,7 +325,8 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
         d_colors,
         d_color_levels,
         d_num_colors,
-				d_funk);
+				d_funk,
+				d_num_eqs);
     cudaMemcpyAsync(cols, d_cols, size, cudaMemcpyDeviceToHost, 0);
     cudaEventRecord(stop, 0);
 
@@ -325,10 +347,10 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     checkCudaErrors(cudaFree(d_color_levels));
     checkCudaErrors(cudaFree(d_num_colors));
     checkCudaErrors(cudaFree(d_funk));
+    checkCudaErrors(cudaFree(d_num_eqs));
     std::cout << "\033[0m" << std::flush;
 
-    free(map->eqs);
-    free(map);
+    free(funky);
 }
 
 void init()
