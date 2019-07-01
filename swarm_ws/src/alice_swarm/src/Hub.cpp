@@ -145,7 +145,7 @@ void Hub::addFlowMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 			std::pair<float, float> temp =
 			{ flows.flow.at(j).x, flows.flow.at(j).y };
 			std::pair<float, float> temp2 = getSeparation(bots[i], temp);
-			if (pow(pow(temp2.first, 2) + pow(temp2.second, 2), 0.5) > VISION) //If the flow was in VISION range
+			if (pow(pow(temp2.first, 2) + pow(temp2.second, 2), 0.5) < VISION) //If the flow was in VISION range
 			{
 				wvu_swarm_std_msgs::flow_mail temp3;
 				temp3.x = temp2.first;
@@ -168,7 +168,7 @@ void Hub::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds tar
 		std::pair<float, float> temp =
 		{ targets.point.at(j).x, targets.point.at(j).y };
 		std::pair<float, float> temp2 = getSeparation(bots[i], temp);
-		if (pow(pow(temp2.first, 2) + pow(temp2.second, 2), 0.5) > VISION) //If the target was in VISION range
+		if (pow(pow(temp2.first, 2) + pow(temp2.second, 2), 0.5) < VISION) //If the target was in VISION range
 		{
 			wvu_swarm_std_msgs::point_mail temp3;
 			temp3.x = temp2.first;
@@ -180,20 +180,23 @@ void Hub::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds tar
 
 void Hub::addObsMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds obstacles within a robots vision range
 {
-
-	int num_pts = map.levels.at(map_ns::OBSTACLE).functions.size();
-	for (int j = 0; j < num_pts; j++)
+	if (map.levels.size() > map_ns::OBSTACLE)
 	{
-		wvu_swarm_std_msgs::ellipse temp3 = map.levels.at(map_ns::OBSTACLE).functions.at(j).ellipse;
-		std::pair<float, float> temp =
-		{ temp3.offset_x, temp3.offset_y };
-		std::pair<float, float> temp2 = getSeparation(bots[i], temp);
-		if (pow(pow(temp2.first, 2) + pow(temp2.second, 2), 0.5) > VISION)
+		int num_pts = map.levels.at(map_ns::OBSTACLE).functions.size();
+		for (int j = 0; j < num_pts; j++)
 		{
-			temp3.offset_x = temp2.first;
-			temp3.offset_y = temp2.second;
-			temp3.theta_offset = fmod(temp3.theta_offset - bots[i].heading + 2 * M_PI, 2 * M_PI);
-			_mail.obsMail.push_back(temp3);
+
+			wvu_swarm_std_msgs::ellipse temp3 = map.levels.at(map_ns::OBSTACLE).functions.at(j).ellipse;
+			std::pair<float, float> temp =
+			{ temp3.offset_x, temp3.offset_y };
+			std::pair<float, float> temp2 = getSeparation(bots[i], temp);
+			if (pow(pow(temp2.first, 2) + pow(temp2.second, 2), 0.5) < VISION)
+			{
+				temp3.offset_x = temp2.first;
+				temp3.offset_y = temp2.second;
+				temp3.theta_offset = fmod(temp3.theta_offset - bots[i].heading + 2 * M_PI, 2 * M_PI);
+				_mail.obsMail.push_back(temp3);
+			}
 		}
 	}
 }
@@ -203,7 +206,12 @@ void Hub::addContMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Gives each
 	wvu_swarm_std_msgs::vicon_point loc;
 	loc.x = bots[i].x;
 	loc.y = bots[i].y;
-	float to_return = (float) calculate(map.levels.at(map_ns::OBSTACLE), loc);
+
+	if (map.levels.size() > map_ns::TARGET)
+	{
+		_mail.contourVal = (float) map_ns::calculate(map.levels.at(map_ns::TARGET), loc);
+	} else
+		_mail.contourVal = 0;
 }
 
 //void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail _mail) //Prints mail for debug purposes

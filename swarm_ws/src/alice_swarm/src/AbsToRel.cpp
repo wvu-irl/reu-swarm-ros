@@ -1,8 +1,5 @@
-#include "ros/ros.h"
-#include "wvu_swarm_std_msgs/robot_command_array.h"
+#include <ros/ros.h>
 #include "alice_swarm/Hub.h"
-#include "alice_swarm/Robot.h"
-#include "alice_swarm/aliceStructs.h"
 #include <sstream>
 #include <map>
 #include <chrono>
@@ -35,16 +32,15 @@ void flowCallback(const wvu_swarm_std_msgs::flows &msg)
 int main(int argc, char **argv)
 {
 
-	std::map<int, Robot> aliceMap; //Maps robot id's to robots so they can be accessed easily
 
 	//Creates an alice_hub node, and subscribes/publishes to the necessary topics
 	ros::init(argc, argv, "AbsToRel");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("vicon_array", 1000, botCallback); //Subscribes to the Vicon
 	ros::Subscriber sub2 = n.subscribe("virtual_targets", 1000, pointCallback);
-	ros::Subscriber sub3 = n.subscribe("mapping",1000,mapCallback);
+	ros::Subscriber sub3 = n.subscribe("map_data",1000,mapCallback);
 	ros::Subscriber sub4 = n.subscribe("virtual_flows", 1000, flowCallback);
-	ros::Rate loopRate(15);
+	ros::Rate loopRate(200);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::alice_mail_array> ("alice_mail_array", 1000);
 	Hub alice_hub(0); // Creates a hub for the conversion of absolute to relative info
 
@@ -52,15 +48,15 @@ int main(int argc, char **argv)
 	{
 		auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of hub
 
-		alice_hub.update(temp_bot_array, temp_target, temp_obs_array, temp_flow_array); //puts in absolute data from subscribers
+		alice_hub.update(temp_bot_array, temp_target, temp_map, temp_flow_array); //puts in absolute data from subscribers
 
-		wvu_swarm_std_msgs::alice_mail_array mail = alice_hub.getAliceMail();
+		wvu_swarm_std_msgs::alice_mail_array mail= alice_hub.getAliceMail();
 
 		pub.publish(mail);
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
 
-//		std::cout << "Time taken by Alice: " << duration.count() << " microseconds" << std::endl;
+		//std::cout << "Time taken by Alice: " << duration.count() << " microseconds" << std::endl;
 		//is_updated = true;
 		ros::spinOnce();
 		loopRate.sleep();
