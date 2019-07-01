@@ -259,6 +259,7 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 
 void Hub::clearHub() //Clears information about the robots
 {
+	ridOrder.clear();
 	bots.clear();
 	neighbors.clear();
 }
