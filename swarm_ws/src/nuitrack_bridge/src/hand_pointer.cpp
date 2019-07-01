@@ -18,17 +18,27 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
      * Equation of line: r(t) = v*t+v0
      * Direction vector: v = (xa - xb, ya - yb, za - zb)
      * Offset vector: v0 = (xa, ya, za)
-     * Plug in z to r(t), solve for t, use t to solve for x and y
+     * Plug in z to r(t), solve for t, use t to solve for x and y/
      */
     
-    double t = (_zed - _alpha.z) / (_alpha.z - _beta.z);
-    double x = _alpha.x * (t + 1) - _beta.x * t;
-    double y = _alpha.y * (t + 1) - _beta.y * t;
-    
     geometry_msgs::Point ret;
-    ret.x = x;
-    ret.y = y;
-    ret.z = _zed;
+    
+    // Check if no solution
+    if(_alpha.z == _beta.z) {
+        printf("\033[1;31mhand_pointer:\033[0;31No solution for intercept\033[0m\n");
+        ret.x = 0.0;
+        ret.y = 0.0;
+        ret.z = 0.0;
+    }
+    else {
+        double t = (_zed - _alpha.z) / (_alpha.z - _beta.z);
+        double x = _alpha.x * (t + 1) - _beta.x * t;
+        double y = _alpha.y * (t + 1) - _beta.y * t;
+
+        ret.x = x;
+        ret.y = y;
+        ret.z = _zed;
+    }
     return ret;
 }
 
