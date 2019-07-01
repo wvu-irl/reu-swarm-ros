@@ -14,8 +14,8 @@
 #include <visualization/color_map.h>
 #include <wvu_swarm_std_msgs/map_level.h>
 
-#define CALC_DEBUG 0
-#define CUDA_DEBUG 1
+#define CALC_DEBUG 1
+#define CUDA_DEBUG 0
 
 /**
  * namespace for doing stupid amounts of calculations
@@ -198,7 +198,7 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     int j = idx % (*width);
 
 #if CUDA_DEBUG
-    printf("Calculating value: %d[%d] == (%d, %d)", idx, col_id, i, j);
+    printf("Calculating value: %d[%d] == (%d, %d)\n", idx, col_id, i, j);
 #endif
     // calculating function
     double zc;
@@ -282,7 +282,7 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     {
     	wvu_swarm_std_msgs::gaussian gaus = funk.functions[i];
     	ellipse_t ell = {gaus.ellipse.x_rad, gaus.ellipse.y_rad, gaus.ellipse.theta_offset};
-    	funky[i] = (gaussian_t){gaus.amplitude, gaus.offset_x, gaus.offset_y, ell};
+    	funky[i] = (gaussian_t){gaus.amplitude, gaus.ellipse.offset_x, gaus.ellipse.offset_y, ell};
     }
 
     size_t num_eqs = funk.functions.size();
