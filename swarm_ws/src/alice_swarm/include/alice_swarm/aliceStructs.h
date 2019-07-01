@@ -15,9 +15,9 @@ namespace AliceStructs {
  * A vector for Alice to follow
  */
 	typedef struct {
-		float dir;
+		float x;
 		float spd;
-		float dis;
+		float y;
 		float pri;
 		int t;
 	} flow;
@@ -34,8 +34,8 @@ namespace AliceStructs {
 	 * Another robot near Alice
 	 */
 	typedef struct {
-		float dir;
-		float dis;
+		float x;
+		float y;
 		float ang;
 		int name;
 		int sid;

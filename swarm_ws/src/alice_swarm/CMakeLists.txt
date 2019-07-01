@@ -14,7 +14,6 @@ generate_messages(DEPENDENCIES std_msgs wvu_swarm_std_msgs)
 
 ## Declare a catkin package
 catkin_package(
-INCLUDE_DIRS include
 )
 
 ## Build talker and listener

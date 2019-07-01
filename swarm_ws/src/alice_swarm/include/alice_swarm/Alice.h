@@ -13,25 +13,33 @@
 #include "aliceStructs.h"
 #include "Model.h"
 #include "Rules.h"
+#include "wvu_swarm_std_msgs/alice_mail.h"
 
 class Alice
 {
-private:
+public:
 
 	Rules rules;
 	Model model;
 
-public:
 	int name;
+
+	Alice();
+
 	/*
 	 * Initializes Alice, rules, and the model
 	 */
-	Alice(AliceStructs::mail _data);
+	Alice(wvu_swarm_std_msgs::alice_mail _data);
+
+	/*
+	 * Takes data from messages to structs
+	 */
+	AliceStructs::mail packageData(wvu_swarm_std_msgs::alice_mail _data);
 
 	/*
 	 * Updates the model with new data
 	 */
-	void updateModel(AliceStructs::mail _data);
+	void updateModel(wvu_swarm_std_msgs::alice_mail _data);
 
 	/*
 	 * Generates a velocity vector to be sent to the low-level controllers

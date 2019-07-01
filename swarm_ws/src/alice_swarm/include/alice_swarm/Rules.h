@@ -58,8 +58,11 @@ private:
 	 * Makes Alice seek higher elevations
 	 */
 	void findUpdraft();
+
 public:
 
+
+	Rules();
 	Rules(Model _model);
 
 	/*
