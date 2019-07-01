@@ -1,5 +1,5 @@
 #include "alice_swarm/Alice.h"
-#include "alice_swarm/Rules.h"
+#include <alice_swarm/Rules.h>
 #include "alice_swarm/Model.h"
 #include "wvu_swarm_std_msgs/alice_mail_array.h"
 #include "wvu_swarm_std_msgs/obs_point_mail.h"

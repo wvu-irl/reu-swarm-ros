@@ -10,12 +10,16 @@
 #ifndef ALICE_H
 #define ALICE_H
 
-#include "alice_swarm/aliceStructs.h"
-#include "alice_swarm/Model.h"
-#include "alice_swarm/Rules.h"
+#include "aliceStructs.h"
+#include "Model.h"
+#include "Rules.h"
 
 class Alice
 {
+private:
+
+	Rules rules;
+	Model model;
 
 public:
 	int name;
@@ -34,10 +38,6 @@ public:
 	 */
 	AliceStructs::vel generateVel();
 
-private:
-
-	Rules rules;
-	Model model;
 };
 
 #endif /* ALICE_H */

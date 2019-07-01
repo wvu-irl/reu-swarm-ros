@@ -1,6 +1,8 @@
 #include "alice_swarm/Model.h"
 #include "alice_swarm/aliceStructs.h"
-#include "wvu_swarm_std_msgs"
+#include "wvu_swarm_std_msgs/alice_mail_array.h"
+#include "wvu_swarm_std_msgs/obs_point_mail.h"
+#include "wvu_swarm_std_msgs/neighbor_mail.h"
 #include <iostream>
 
 Model::Model(int _name)

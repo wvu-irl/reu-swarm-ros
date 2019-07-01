@@ -9,34 +9,25 @@
 #ifndef RULES_H
 #define RULES_H
 
-#include "alice_swarm/aliceStructs.h"
-#include "alice_swarm/Model.h"
-#include "alice_swarm/Alice.h"
+#include "aliceStructs.h"
+#include "Model.h"
 
 
 class Rules
 {
-public:
-
-	Rules(Model _model);
-
-	/*
-	 * Determines which state Alice is in
-	 */
-	AliceStructs::vel stateLoop();
 
 
 private:
 
-	Model model;
 	std::string state;
-	std::string collision_state
+	std::string collision_state;
 	AliceStructs::vel final_vel;
+	Model model;
 
 	/*
 	 * Calculates distances
 	 */
-	float calcDis(_x1, _y1, _x2, _y2);
+	float calcDis(float _x1, float _y1, float _x2, float _y2);
 
 	/*
 	 * Checks if Alice needs to go into collision avoidance mode
@@ -67,6 +58,15 @@ private:
 	 * Makes Alice seek higher elevations
 	 */
 	void findUpdraft();
+public:
+
+	Rules(Model _model);
+
+	/*
+	 * Determines which state Alice is in
+	 */
+	AliceStructs::vel stateLoop();
+
 };
 
 #endif /* RULES_H */

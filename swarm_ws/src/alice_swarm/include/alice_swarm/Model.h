@@ -8,9 +8,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include "alice_swarm/aliceStructs.h"
-#include "alice_swarm/Alice.h"
-#include "alice_swarm/Rules.h"
+#include "aliceStructs.h"
 
 class Model
 {
@@ -19,7 +17,7 @@ public:
 	/*
 	 * Information about Alice's immediate environment
 	 */
-	std::vector<AliceStructs::obstacle> current_obstacles;
+	std::vector<AliceStructs::obj> current_obstacles;
 	AliceStructs::pnt cur_pose;
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
@@ -29,7 +27,7 @@ public:
 	/*
 	 * Information Alice is storing about the wider world
 	 */
-	AliceStructs::obstacles archived_obstacles;
+	AliceStructs::obj archived_obstacles;
 	std::vector<AliceStructs::pnt> archived_levels;
 
 	Model(int _name);
@@ -37,7 +35,7 @@ public:
 	/*
 	 * Updates the model from the sensors; called by Alice
 	 */
-	void sensorUpdate(AliceStructs::mail _toAdd)
+	void sensorUpdate(AliceStructs::mail _toAdd);
 
 	/*
 	 * Passes data to neighbors
@@ -48,16 +46,6 @@ public:
 	 * Forgets unneeded data
 	 */
 	void forget();
-
-	/*
-	 * Calculates the collision state, or what the robot needs to do to avoid obstacles
-	 */
-	string getCollisionState();
-
-	/*
-	 * Finds the nearest point on an obstacle
-	 */
-	int findLocalMin(AliceStructs::obstacle);
 
 private:
 

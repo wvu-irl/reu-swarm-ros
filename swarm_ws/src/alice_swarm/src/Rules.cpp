@@ -1,5 +1,8 @@
 #include "alice_swarm/Rules.h"
 #include "alice_swarm/aliceStructs.h"
+#include "alice_swarm/Model.h"
+#include <map>
+#include <string>
 #include <math.h>
 #include <iostream>
 
@@ -11,49 +14,62 @@ Rules::Rules(Model _model)
 
 AliceStructs::vel Rules::stateLoop()
 {
+	enum StringValue
+	{
+		explore, blocked, charge, find_food, find_updraft
+	};
+	std::map<std::string, StringValue> s_mapStringValues;
 	if (isBlocked())
 	{
 		state = "blocked";
 	}
-	switch (state)
+	switch (s_mapStringValues[state])
 	{
-	case "Explore":
+	case explore:
 		Explore();
 		break;
-	case "blocked":
+	case blocked:
 		avoidCollisions();
 		break;
-	case "Charge":
+	case charge:
 		Charge();
 		break;
-	case "findFood":
+	case find_food:
 		findFood();
 		break;
-	case "findUpdraft":
+	case find_updraft:
 		findUpdraft();
 		break;
 	}
 	return final_vel;
 }
 
-float Rules::calcDis(_x1, _y1, _x2, _y2)
+float Rules::calcDis(float _x1, float _y1, float _x2, float _y2)
 {
-	return pow(pow(_x1 - x_2, 2) + pow(_y1 - _y2, 2), 0.5);
+	return pow(pow(_x1 - _x2, 2) + pow(_y1 - _y2, 2), 0.5);
 }
 
-void Rules::avoidCollsions()
+void Rules::avoidCollisions()
 {
-	switch (collision_state)
+	enum StringValue
 	{
-	case "Blocked":
+		blocked, recontre, rendevous
+	};
+	std::map<std::string, StringValue> s_mapStringValues;
+	switch (s_mapStringValues[collision_state])
+	{
+	case blocked:
 		final_vel.mag = 0;
 		final_vel.dir = 0;
 		break;
-	case "Recontre":
+	case recontre:
 		//To implement
-	case "Rendevous":
+		break;
+	case rendevous:
 		//To implement
+		break;
 	}
+}
 
 void Rules::Explore()
 {
@@ -67,14 +83,8 @@ void Rules::Explore()
 			model.goTo = tar;
 		}
 	}
-	final_vel.dir = atan2(goTo.y, goTo.x);
+	final_vel.dir = atan2(model.goTo.y, model.goTo.x);
 	final_vel.mag = 1;
-	return final_vel;
-}
-
-void Rules::avoidCollisions()
-{
-	//To implement
 }
 
 void Rules::Charge()
@@ -90,6 +100,4 @@ void Rules::findFood()
 void findUpdraft()
 {
 	//To implement
-}
-
 }
