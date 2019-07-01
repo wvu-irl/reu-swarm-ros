@@ -33,12 +33,12 @@ Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reas
 }
 
 void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
-		wvu_swarm_std_msgs::obstacle &_o, wvu_swarm_std_msgs::flows &_f)
+		wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f)
 {
 	clearHub();
 	viconBotArray = _b;
 	targets = _t;
-	obstacles = _o;
+	map = _o;
 	flows = _f;
 	processVicon(); //needed cause this data needs to be converted first
 	findNeighbors();
@@ -67,7 +67,8 @@ void Hub::processVicon() //Fills in bots[]
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 		bots.push_back(
 				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1,viconBotArray.poseVect[i].botPose.header.stamp));
+						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1,
+						viconBotArray.poseVect[i].botPose.header.stamp));
 		std::vector<Bot> temp;
 		ridOrder.push_back(numID); //storing the order of insertion
 		neighbors.push_back(temp); //adds an empty vector to neighbors for future use
@@ -177,24 +178,25 @@ void Hub::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds tar
 	}
 }
 
-//void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds obstacles within a robots vision range
-//{
-//
-//	int num_pts = obstacles.point.size();
-//	for (int j = 0; j < num_pts; j++)
-//	{
-//		std::pair<float, float> temp =
-//		{ obstacles.point.at(j).x, obstacles.point.at(j).y };
-//		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
-//		if (temp2.dis > -1)
-//		{
-//			wvu_swarm_std_msgs::point_mail temp3;
-//			temp3.radius = temp2.dis;
-//			temp3.theta = temp2.dir;
-//			_mail.obsPointMail.push_back(temp3);
-//		}
-//	}
-//}
+void Hub::addObsMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds obstacles within a robots vision range
+{
+
+	int num_pts = map.levels.at(map_ns::OBSTACLE).functions.size();
+	for (int j = 0; j < num_pts; j++)
+	{
+		wvu_swarm_std_msgs::ellipse temp3 = map.levels.at(map_ns::OBSTACLE).functions.at(j).ellipse;
+		std::pair<float, float> temp =
+		{ temp3.offset_x, temp3.offset_y };
+		std::pair<float, float> temp2 = getSeparation(bots[i], temp);
+		if (pow(pow(temp2.first, 2) + pow(temp2.second, 2), 0.5) > VISION)
+		{
+			temp3.offset_x = temp2.x;
+			temp3.offset_y = temp2.y;
+
+			_mail.obsMail.push_back(temp3);
+		}
+	}
+}
 
 //void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail _mail) //Prints mail for debug purposes
 //{
@@ -226,13 +228,13 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		addFlowMail(*it, temp);
 		temp.name = *it;
 		temp.sid = bots[*it].swarm_id;
-		temp.time= bots[*it].time;
+		temp.time = bots[*it].time;
 		temp.contourVal = 0;
 		to_return.mails.push_back(temp);
 
 	}
 #if DEBUG_HUB
-	printAliceMail(temp);
+	//printAliceMail(temp);
 #endif
 	return to_return;
 

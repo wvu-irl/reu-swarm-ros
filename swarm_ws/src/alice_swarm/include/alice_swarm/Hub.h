@@ -59,7 +59,7 @@ class Hub
 private:
 	wvu_swarm_std_msgs::vicon_bot_array viconBotArray;
 	wvu_swarm_std_msgs::vicon_points targets;
-	wvu_swarm_std_msgs::obstacle obstacles;
+	wvu_swarm_std_msgs::map_levels map;
 	wvu_swarm_std_msgs::flows flows;
 
 	std::vector<Bot> bots; //holds locations of all of the bots
@@ -74,9 +74,9 @@ public:
 
 	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?
 
-	//Adds the msgs gathere from various topics to the private fields of Hub
+	//Adds the msgs gather from various topics to the private fields of Hub
 	void update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
-			wvu_swarm_std_msgs::obstacle &_o, wvu_swarm_std_msgs::flows &_f);
+			wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f);
 
 
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]

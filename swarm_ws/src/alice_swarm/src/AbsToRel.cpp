@@ -10,7 +10,7 @@
 //made global because i need them for the call back
 //bool is_updated(false);
 wvu_swarm_std_msgs::vicon_bot_array temp_bot_array;
-wvu_swarm_std_msgs::obstacle temp_obs_array;
+wvu_swarm_std_msgs::map_levels temp_map;
 wvu_swarm_std_msgs::vicon_points temp_target;
 wvu_swarm_std_msgs::flows temp_flow_array;
 
@@ -18,9 +18,9 @@ void botCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg)
 {
 		temp_bot_array = msg;
 }
-void obsCallback(const wvu_swarm_std_msgs::obstacle &msg)
+void mapCallback(const wvu_swarm_std_msgs::map_levels &msg)
 {
-		temp_obs_array = msg;
+		temp_map= msg;
 }
 void pointCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("vicon_array", 1000, botCallback); //Subscribes to the Vicon
 	ros::Subscriber sub2 = n.subscribe("virtual_targets", 1000, pointCallback);
-	ros::Subscriber sub3 = n.subscribe("virtual_obstacles", 1000, obsCallback);
+	ros::Subscriber sub3 = n.subscribe("mapping",1000,mapCallback);
 	ros::Subscriber sub4 = n.subscribe("virtual_flows", 1000, flowCallback);
 	ros::Rate loopRate(15);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::alice_mail_array> ("alice_mail_array", 1000);
