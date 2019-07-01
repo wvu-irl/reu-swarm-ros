@@ -34,6 +34,16 @@ private:
 	AliceStructs::vel final_vel;
 
 	/*
+	 * Calculates distances
+	 */
+	float calcDis(_x1, _y1, _x2, _y2);
+
+	/*
+	 * Checks if Alice needs to go into collision avoidance mode
+	 */
+	bool isBlocked();
+
+	/*
 	 * Makes Alice explore new territory
 	 */
 	void Explore();

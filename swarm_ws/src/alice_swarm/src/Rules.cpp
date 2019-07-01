@@ -11,12 +11,16 @@ Rules::Rules(Model _model)
 
 AliceStructs::vel Rules::stateLoop()
 {
+	if (isBlocked())
+	{
+		state = "blocked";
+	}
 	switch (state)
 	{
 	case "Explore":
 		Explore();
 		break;
-	case "avoidCollisions":
+	case "blocked":
 		avoidCollisions();
 		break;
 	case "Charge":
@@ -30,6 +34,11 @@ AliceStructs::vel Rules::stateLoop()
 		break;
 	}
 	return final_vel;
+}
+
+float Rules::calcDis(_x1, _y1, _x2, _y2)
+{
+	return pow(pow(_x1 - x_2, 2) + pow(_y1 - _y2, 2), 0.5);
 }
 
 void Rules::avoidCollsions()
@@ -48,7 +57,19 @@ void Rules::avoidCollsions()
 
 void Rules::Explore()
 {
-	//To implement
+	float temp = 0;
+	for (auto& tar : model.targets)
+	{
+		float check = calcDis(tar.x, tar.y, model.cur_pose.x, model.cur_pose.y);
+		if (check < temp)
+		{
+			temp = check;
+			model.goTo = tar;
+		}
+	}
+	final_vel.dir = atan2(goTo.y, goTo.x);
+	final_vel.mag = 1;
+	return final_vel;
 }
 
 void Rules::avoidCollisions()
