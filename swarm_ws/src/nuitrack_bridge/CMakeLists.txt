@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(nuitrack_bridge)
-
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
@@ -142,6 +141,12 @@ target_link_libraries(nuitrack_bridge
   ${catkin_LIBRARIES}
 )
 add_dependencies(nuitrack_bridge ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(hand_pointer src/hand_pointer.cpp)
+target_link_libraries(hand_pointer
+  ${catkin_LIBRARIES}
+)
+add_dependencies(hand_pointer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

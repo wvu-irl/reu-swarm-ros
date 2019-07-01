@@ -58,18 +58,6 @@ typedef struct nuiData
         leftWrist = xyz();
         rightHand = xyz();
         rightWrist = xyz();
-//        leftWristX = 0.0;
-//        leftWristY = 0.0;
-//        leftWristZ = 0.0;
-//        leftHandX = 0.0;
-//        leftHandY = 0.0;
-//        leftHandZ = 0.0;
-//        rightWristX = 0.0;
-//        rightWristY = 0.0;
-//        rightWristZ = 0.0;
-//        rightHandX = 0.0;
-//        rightHandY = 0.0;
-//        rightHandZ = 0.0;
     }
 
     nuiData(bool _gF, bool _lF, bool _rF, gestureType _gt,
@@ -92,19 +80,6 @@ typedef struct nuiData
         leftWrist = xyz(_lWX, _lWY, _lWZ);
         rightHand = xyz(_rHX, _rHY, _rHZ);
         rightWrist = xyz(_rWX, _rWY, _rWZ);
-        
-//        leftWrist.x = _lWX;
-//        leftWrist.y = _lWY;
-//        leftWrist.z = _lWZ;
-//        leftHand.x = _lHX;
-//        leftHand.y = _lHY;
-//        leftHand.z = _lHZ;
-//        rightWrist.x = _rWX;
-//        rightWrist.y = _rWY;
-//        rightWrist.z = _rWZ;
-//        rightHand.x = _rHX;
-//        rightHand.y = _rHY;
-//        rightHand.z = _rHZ;
     }
 
     // Are gesture data, left hand data, and right hand data valid

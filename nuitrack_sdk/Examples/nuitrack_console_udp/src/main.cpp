@@ -170,11 +170,6 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         nui.rightHand.y = 0;
         nui.rightHand.z = 0;
     }
-    
-    printf("LH: %02.3f, %02.3f, %02.3f\n\r", nui.leftHand.x, nui.leftHand.y, nui.leftHand.z);
-    printf("LW: %02.3f, %02.3f, %02.3f\n\r", nui.leftWrist.x, nui.leftWrist.y, nui.leftWrist.z);
-    printf("RH: %02.3f, %02.3f, %02.3f\n\r", nui.rightHand.x, nui.rightHand.y, nui.rightHand.z);
-    printf("RW: %02.3f, %02.3f, %02.3f\n\r", nui.rightWrist.x, nui.rightWrist.y, nui.rightWrist.z);
 }
 
 void serverResponse(char rec)
@@ -200,6 +195,11 @@ void serverResponse(char rec)
     {
         std::cout << "Error in sending!" << std::endl;
     }
+    
+    printf("LH: %02.3f, %02.3f, %02.3f\n\r", nui.leftHand.x, nui.leftHand.y, nui.leftHand.z);
+    printf("LW: %02.3f, %02.3f, %02.3f\n\r", nui.leftWrist.x, nui.leftWrist.y, nui.leftWrist.z);
+    printf("RH: %02.3f, %02.3f, %02.3f\n\r", nui.rightHand.x, nui.rightHand.y, nui.rightHand.z);
+    printf("RW: %02.3f, %02.3f, %02.3f\n\r", nui.rightWrist.x, nui.rightWrist.y, nui.rightWrist.z);
     
     // Reset client address
     memset(&cliaddr, 0, sizeof(cliaddr)); 

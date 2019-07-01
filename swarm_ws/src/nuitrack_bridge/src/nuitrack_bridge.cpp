@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdio.h>
 #include <nuitrack_bridge/nuitrack_data.h>
 
 // ROS includes
@@ -43,7 +44,7 @@ void initTf(void)
     offsetY = KINECT_TRAN_Y;
     offsetZ = KINECT_TRAN_Z;
     
-    /* ROTATION MATRIX 
+    /* ROTATION MATRIX, HOMOGENOUS QUATERNION
      *     [(w2+x2-y2-z2)   2(xy-wz)      2(wy+xz)   ]
      * R = [  2(xy+wz)    (w2-x2+y2-z2)   2(yz-wx)   ]
      *     [  2(xz+wy)      2(wx+yz)    (w2-x2-y2+z2)]
@@ -59,7 +60,7 @@ void initTf(void)
 //    tfMat[1][2] = 2*(y*z-w*x);
 //    tfMat[2][2] = w*w-x*x-y*y+z*z;
     
-    /* ALTERNATE ROTATION MATRIX
+    /* ROTATION MATRIX, NONHOMOGENOUS QUATERNION
      *     [(1-2y2-2z2)  2(xy-wz)    2(wy+xz)  ]
      * R = [ 2(xy+wz)   (1-2x2-2z2)  2(yz-wx)  ]
      *     [ 2(xz+wy)    2(wx+yz)   (1-2x2-2y2)]
@@ -91,9 +92,9 @@ void initTf(void)
 void xyzTf(xyz &_xyz)
 {
     double xin, yin, zin, xout, yout, zout;
-    xin = _xyz.x / 1000.0;
-    yin = _xyz.y / 1000.0;
-    zin = _xyz.z / 1000.0;
+    xin = _xyz.x / 1000;
+    yin = _xyz.y / 1000;
+    zin = _xyz.z / 1000;
     
     /* MATRIX MULTIPLICATION
      *   [x] [x']
@@ -128,95 +129,42 @@ void nuiTf(nuiData &_nui)
     }
 }
 
+visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g, double _b)
+{
+    visualization_msgs::Marker ret;
+    
+    ret.header.stamp = ros::Time();
+    ret.header.frame_id = "world";
+    ret.ns = "hand";
+    ret.id = 1;
+    ret.type = visualization_msgs::Marker::SPHERE;
+    ret.pose.position.x = _xyz->x;
+    ret.pose.position.y = _xyz->y;
+    ret.pose.position.z = _xyz->z;
+    ret.pose.orientation.x = 0;
+    ret.pose.orientation.y = 0;
+    ret.pose.orientation.z = 0;
+    ret.pose.orientation.w = 1;
+    ret.scale.x = 0.04;
+    ret.scale.y = 0.04;
+    ret.scale.z = 0.04;
+    ret.color.r = _r;
+    ret.color.g = _g;
+    ret.color.b = _b;
+    ret.color.a = 1;
+    
+    return ret;
+}
+
 visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
 {
-    visualization_msgs::Marker lW, lH, rW, rH;
-    
-    lW.header.stamp = ros::Time();
-    lW.header.frame_id = "world";
-    lW.ns = "hand";
-    lW.id = 1;
-    lW.type = visualization_msgs::Marker::SPHERE;
-    lW.pose.position.x = _nui->leftWrist.x;
-    lW.pose.position.y = _nui->leftWrist.y;
-    lW.pose.position.z = _nui->leftWrist.z;
-    lW.pose.orientation.x = 0;
-    lW.pose.orientation.y = 0;
-    lW.pose.orientation.z = 0;
-    lW.pose.orientation.w = 1;
-    lW.scale.x = 0.04;
-    lW.scale.y = 0.04;
-    lW.scale.z = 0.04;
-    lW.color.r = 1;
-    lW.color.g = 0.5;
-    lW.color.b = 0;
-    lW.color.a = 1;
-    
-    lH.header.stamp = ros::Time();
-    lH.header.frame_id = "world";
-    lH.ns = "hand";
-    lH.id = 2;
-    lH.type = visualization_msgs::Marker::SPHERE;
-    lH.pose.position.x = _nui->leftHand.x;
-    lH.pose.position.y = _nui->leftHand.y;
-    lH.pose.position.z = _nui->leftHand.z;
-    lH.pose.orientation.x = 0;
-    lH.pose.orientation.y = 0;
-    lH.pose.orientation.z = 0;
-    lH.pose.orientation.w = 1;
-    lH.scale.x = 0.04;
-    lH.scale.y = 0.04;
-    lH.scale.z = 0.04;
-    lH.color.r = 1;
-    lH.color.g = 0;
-    lH.color.b = 0;
-    lH.color.a = 1;
-    
-    rW.header.stamp = ros::Time();
-    rW.header.frame_id = "world";
-    rW.ns = "hand";
-    rW.id = 3;
-    rW.type = visualization_msgs::Marker::SPHERE;
-    rW.pose.position.x = _nui->rightWrist.x;
-    rW.pose.position.y = _nui->rightWrist.y;
-    rW.pose.position.z = _nui->rightWrist.z;
-    rW.pose.orientation.x = 0;
-    rW.pose.orientation.y = 0;
-    rW.pose.orientation.z = 0;
-    rW.pose.orientation.w = 1;
-    rW.scale.x = 0.04;
-    rW.scale.y = 0.04;
-    rW.scale.z = 0.04;
-    rW.color.r = 0;
-    rW.color.g = 0.5;
-    rW.color.b = 1;
-    rW.color.a = 1;
-    
-    rH.header.stamp = ros::Time();
-    rH.header.frame_id = "world";
-    rH.ns = "hand";
-    rH.id = 4;
-    rH.type = visualization_msgs::Marker::SPHERE;
-    rH.pose.position.x = _nui->rightHand.x;
-    rH.pose.position.y = _nui->rightHand.y;
-    rH.pose.position.z = _nui->rightHand.z;
-    rH.pose.orientation.x = 0;
-    rH.pose.orientation.y = 0;
-    rH.pose.orientation.z = 0;
-    rH.pose.orientation.w = 1;
-    rH.scale.x = 0.04;
-    rH.scale.y = 0.04;
-    rH.scale.z = 0.04;
-    rH.color.r = 0;
-    rH.color.g = 0;
-    rH.color.b = 1;
-    rH.color.a = 1;
-    
     visualization_msgs::MarkerArray ret;
-    ret.markers.push_back(lW);
-    ret.markers.push_back(lH);
-    ret.markers.push_back(rW);
-    ret.markers.push_back(rH);
+    
+    ret.markers.push_back(xyzToMarker(1, &(_nui->leftWrist), 1, 0.5, 0));
+    ret.markers.push_back(xyzToMarker(2, &(_nui->leftHand), 1, 0, 0));
+    ret.markers.push_back(xyzToMarker(3, &(_nui->rightWrist), 0, 0.5, 1));
+    ret.markers.push_back(xyzToMarker(4, &(_nui->rightHand), 0, 0, 1));
+    
     return ret;
 }
 
@@ -230,13 +178,9 @@ int main(int argc, char** argv) {
     // Generates nodehandles, publisher
     ros::NodeHandle n;
     ros::NodeHandle n_priv("~"); // private handle
-    ros::Rate rate(15);
+    ros::Rate rate(1);
     ros::Publisher pub;
-    ros::Publisher pub_v;
-    pub = n.advertise<geometry_msgs::Point>("hand", 1000);
-    pub_v = n.advertise<visualization_msgs::MarkerArray>("hand_vis", 1000);
-    
-    tf::TransformListener listener;
+    pub = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge", 1000);
     
     // Set up signal handler
     signal(SIGINT, flagger);
@@ -259,13 +203,11 @@ int main(int argc, char** argv) {
     
     char send = '\0';
     
-    nuiData nui;
+    nuiData nui = nuiData();
     
     while(!g_sigint_received && ros::ok())
     {
         /* Send to server */
-//        std::cout << "Char to send: ";
-//        std::cin >> send;
         send = 'a';
         if(sendto(sockfd, &send, sizeof(send), MSG_CONFIRM,
                 (const struct sockaddr*)&servaddr, sizeof(servaddr)) >= 0)
@@ -312,21 +254,25 @@ int main(int argc, char** argv) {
                 
                 int len, n;
                 
-                nuiData rec;
+                nuiData rec = nuiData();
                 n = recvfrom(sockfd, &rec, sizeof(rec), MSG_WAITALL,
                         (struct sockaddr*)&cliaddr, (socklen_t*)&len);
                 
                 // Transform the data
-                nuiTf(rec);
-                
                 nui = rec;
+    printf("LH: %02.3f, %02.3f, %02.3f\n\r", nui.leftHand.x, nui.leftHand.y, nui.leftHand.z);
+    printf("LW: %02.3f, %02.3f, %02.3f\n\r", nui.leftWrist.x, nui.leftWrist.y, nui.leftWrist.z);
+    printf("RH: %02.3f, %02.3f, %02.3f\n\r", nui.rightHand.x, nui.rightHand.y, nui.rightHand.z);
+    printf("RW: %02.3f, %02.3f, %02.3f\n\r", nui.rightWrist.x, nui.rightWrist.y, nui.rightWrist.z);
+                nuiTf(nui);
                 
                 break;
             }
         }
         /* End wait for response */
         
-        pub_v.publish(nuiToMarkers(&nui));
+        visualization_msgs::MarkerArray vis = nuiToMarkers(&nui);
+        pub.publish(vis);
         
         ros::spinOnce();
         rate.sleep();
