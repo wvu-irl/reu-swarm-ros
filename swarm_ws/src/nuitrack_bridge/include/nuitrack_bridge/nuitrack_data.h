@@ -6,13 +6,13 @@
 using std::string;
 
 // Physical transform of the Kinect's lens against global frame
-#define KINECT_TRAN_X -45.0
-#define KINECT_TRAN_Y -10.7
-#define KINECT_TRAN_Z 58.5
-#define KINECT_QUAT_X 0.543
-#define KINECT_QUAT_Y 0.550
-#define KINECT_QUAT_Z 0.444
-#define KINECT_QUAT_W 0.450
+#define KINECT_TRAN_X 0.113 //-45.0
+#define KINECT_TRAN_Y -0.483 //-10.7
+#define KINECT_TRAN_Z 0.557 //58.5
+#define KINECT_QUAT_X 0.544 //0.543
+#define KINECT_QUAT_Y 0.551 //0.550
+#define KINECT_QUAT_Z 0.445 //0.444
+#define KINECT_QUAT_W -0.451 //0.450
 
 enum class gestureType : char 
 {

@@ -6,6 +6,7 @@
 #include <geometry_msgs/Point.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <tf/transform_listener.h>
 
 // UDP includes
 #include <stdlib.h> 
@@ -58,7 +59,7 @@ void initTf(void)
 //    tfMat[1][2] = 2*(y*z-w*x);
 //    tfMat[2][2] = w*w-x*x-y*y+z*z;
     
-    /* ROTATION MATRIX
+    /* ALTERNATE ROTATION MATRIX
      *     [(1-2y2-2z2)  2(xy-wz)    2(wy+xz)  ]
      * R = [ 2(xy+wz)   (1-2x2-2z2)  2(yz-wx)  ]
      *     [ 2(xz+wy)    2(wx+yz)   (1-2x2-2y2)]
@@ -90,9 +91,9 @@ void initTf(void)
 void xyzTf(xyz &_xyz)
 {
     double xin, yin, zin, xout, yout, zout;
-    xin = _xyz.x;
-    yin = _xyz.y;
-    zin = _xyz.z;
+    xin = _xyz.x / 1000.0;
+    yin = _xyz.y / 1000.0;
+    zin = _xyz.z / 1000.0;
     
     /* MATRIX MULTIPLICATION
      *   [x] [x']
@@ -103,6 +104,9 @@ void xyzTf(xyz &_xyz)
     xout = tfMat[0][0]*xin + tfMat[0][1]*yin + tfMat[0][2]*zin + tfMat[0][3];
     yout = tfMat[1][0]*xin + tfMat[1][1]*yin + tfMat[1][2]*zin + tfMat[1][3];
     zout = tfMat[2][0]*xin + tfMat[2][1]*yin + tfMat[2][2]*zin + tfMat[2][3];
+//    xout = xin;
+//    yout = yin;
+//    zout = zin;
     
     // Apply the transform
     _xyz.x = xout;
@@ -120,8 +124,100 @@ void nuiTf(nuiData &_nui)
     }
     if(_nui.rightFound) {
         xyzTf(_nui.rightHand);
-        xyzTf(_nui.leftWrist);
+        xyzTf(_nui.rightWrist);
     }
+}
+
+visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
+{
+    visualization_msgs::Marker lW, lH, rW, rH;
+    
+    lW.header.stamp = ros::Time();
+    lW.header.frame_id = "world";
+    lW.ns = "hand";
+    lW.id = 1;
+    lW.type = visualization_msgs::Marker::SPHERE;
+    lW.pose.position.x = _nui->leftWrist.x;
+    lW.pose.position.y = _nui->leftWrist.y;
+    lW.pose.position.z = _nui->leftWrist.z;
+    lW.pose.orientation.x = 0;
+    lW.pose.orientation.y = 0;
+    lW.pose.orientation.z = 0;
+    lW.pose.orientation.w = 1;
+    lW.scale.x = 0.04;
+    lW.scale.y = 0.04;
+    lW.scale.z = 0.04;
+    lW.color.r = 1;
+    lW.color.g = 0.5;
+    lW.color.b = 0;
+    lW.color.a = 1;
+    
+    lH.header.stamp = ros::Time();
+    lH.header.frame_id = "world";
+    lH.ns = "hand";
+    lH.id = 2;
+    lH.type = visualization_msgs::Marker::SPHERE;
+    lH.pose.position.x = _nui->leftHand.x;
+    lH.pose.position.y = _nui->leftHand.y;
+    lH.pose.position.z = _nui->leftHand.z;
+    lH.pose.orientation.x = 0;
+    lH.pose.orientation.y = 0;
+    lH.pose.orientation.z = 0;
+    lH.pose.orientation.w = 1;
+    lH.scale.x = 0.04;
+    lH.scale.y = 0.04;
+    lH.scale.z = 0.04;
+    lH.color.r = 1;
+    lH.color.g = 0;
+    lH.color.b = 0;
+    lH.color.a = 1;
+    
+    rW.header.stamp = ros::Time();
+    rW.header.frame_id = "world";
+    rW.ns = "hand";
+    rW.id = 3;
+    rW.type = visualization_msgs::Marker::SPHERE;
+    rW.pose.position.x = _nui->rightWrist.x;
+    rW.pose.position.y = _nui->rightWrist.y;
+    rW.pose.position.z = _nui->rightWrist.z;
+    rW.pose.orientation.x = 0;
+    rW.pose.orientation.y = 0;
+    rW.pose.orientation.z = 0;
+    rW.pose.orientation.w = 1;
+    rW.scale.x = 0.04;
+    rW.scale.y = 0.04;
+    rW.scale.z = 0.04;
+    rW.color.r = 0;
+    rW.color.g = 0.5;
+    rW.color.b = 1;
+    rW.color.a = 1;
+    
+    rH.header.stamp = ros::Time();
+    rH.header.frame_id = "world";
+    rH.ns = "hand";
+    rH.id = 4;
+    rH.type = visualization_msgs::Marker::SPHERE;
+    rH.pose.position.x = _nui->rightHand.x;
+    rH.pose.position.y = _nui->rightHand.y;
+    rH.pose.position.z = _nui->rightHand.z;
+    rH.pose.orientation.x = 0;
+    rH.pose.orientation.y = 0;
+    rH.pose.orientation.z = 0;
+    rH.pose.orientation.w = 1;
+    rH.scale.x = 0.04;
+    rH.scale.y = 0.04;
+    rH.scale.z = 0.04;
+    rH.color.r = 0;
+    rH.color.g = 0;
+    rH.color.b = 1;
+    rH.color.a = 1;
+    
+    visualization_msgs::MarkerArray ret;
+    ret.markers.push_back(lW);
+    ret.markers.push_back(lH);
+    ret.markers.push_back(rW);
+    ret.markers.push_back(rH);
+    return ret;
 }
 
 int main(int argc, char** argv) {
@@ -139,6 +235,8 @@ int main(int argc, char** argv) {
     ros::Publisher pub_v;
     pub = n.advertise<geometry_msgs::Point>("hand", 1000);
     pub_v = n.advertise<visualization_msgs::MarkerArray>("hand_vis", 1000);
+    
+    tf::TransformListener listener;
     
     // Set up signal handler
     signal(SIGINT, flagger);
@@ -161,8 +259,7 @@ int main(int argc, char** argv) {
     
     char send = '\0';
     
-    double x = 0.0, y = 0.0, z = 0.0;
-    double a = 0.0, b = 0.0, c = 0.0;
+    nuiData nui;
     
     while(!g_sigint_received && ros::ok())
     {
@@ -219,80 +316,17 @@ int main(int argc, char** argv) {
                 n = recvfrom(sockfd, &rec, sizeof(rec), MSG_WAITALL,
                         (struct sockaddr*)&cliaddr, (socklen_t*)&len);
                 
-                rec.rightHand.x /= 100;
-                rec.rightHand.y /= 100;
-                rec.rightHand.z /= 100;
-                
-                a = rec.rightHand.x;
-                b = rec.rightHand.y;
-                c = rec.rightHand.z;
-                
                 // Transform the data
                 nuiTf(rec);
                 
-                x = rec.rightHand.x;
-                y = rec.rightHand.y;
-                z = rec.rightHand.z;
+                nui = rec;
                 
                 break;
             }
         }
         /* End wait for response */
         
-        // Create object to publish
-        geometry_msgs::Point output;
-        output.x = x;
-        output.y = y;
-        output.z = z;
-        
-        pub.publish(output);
-        
-        // Build some Markers for visualization
-        visualization_msgs::Marker rawMark, tfMark;
-        
-        rawMark.header.stamp = ros::Time();
-        rawMark.header.frame_id = "map";
-        rawMark.ns = "hand";
-        rawMark.id = 1;
-        rawMark.type = visualization_msgs::Marker::SPHERE;
-        rawMark.pose.position.x = a;
-        rawMark.pose.position.y = b;
-        rawMark.pose.position.z = c;
-        rawMark.pose.orientation.x = 0;
-        rawMark.pose.orientation.y = 0;
-        rawMark.pose.orientation.z = 0;
-        rawMark.pose.orientation.w = 1;
-        rawMark.scale.x = 1; //0.04;
-        rawMark.scale.y = 1; //0.04;
-        rawMark.scale.z = 1; //0.04;
-        rawMark.color.r = 1;
-        rawMark.color.g = 0;
-        rawMark.color.b = 0;
-        rawMark.color.a = 1;
-        
-        tfMark.header.stamp = ros::Time();
-        tfMark.header.frame_id = "map";
-        tfMark.ns = "hand";
-        tfMark.id = 2;
-        tfMark.type = visualization_msgs::Marker::SPHERE;
-        tfMark.pose.position.x = x;
-        tfMark.pose.position.y = y;
-        tfMark.pose.position.z = z;
-        tfMark.pose.orientation.x = 0;
-        tfMark.pose.orientation.y = 0;
-        tfMark.pose.orientation.z = 0;
-        tfMark.pose.orientation.w = 1;
-        tfMark.scale.x = 1; //0.04;
-        tfMark.scale.y = 1; //0.04;
-        tfMark.scale.z = 1; //0.04;
-        tfMark.color.r = 0;
-        tfMark.color.g = 1;
-        tfMark.color.b = 0;
-        tfMark.color.a = 1;
-        
-        visualization_msgs::MarkerArray visOutput;
-        visOutput.markers = {rawMark, tfMark};
-        pub_v.publish(visOutput);
+        pub_v.publish(nuiToMarkers(&nui));
         
         ros::spinOnce();
         rate.sleep();
@@ -303,4 +337,3 @@ int main(int argc, char** argv) {
     
     return 0;
 }
-

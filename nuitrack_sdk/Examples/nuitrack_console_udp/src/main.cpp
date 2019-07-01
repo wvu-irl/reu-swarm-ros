@@ -4,6 +4,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <stdio.h>
 
 // UDP includes
 #include <stdlib.h> 
@@ -28,8 +29,8 @@ using namespace tdv::nuitrack;
 int sockfd;
 struct sockaddr_in servaddr, cliaddr; // netinet/in.h objects
 
-// Global variables for hand data
-double x, y, z;
+// Global variable for hand data
+nuiData nui;
 
 // Global variables for threads
 std::thread server, tracker;
@@ -71,9 +72,9 @@ void onHandUpdate(HandTrackerData::Ptr handData)
                  "x = " << rightHand->xReal << ", "
                  "y = " << rightHand->yReal << ", "
                  "z = " << rightHand->zReal << std::endl;
-    x = rightHand->xReal;
-    y = rightHand->yReal;
-    z = rightHand->zReal;
+    nui.rightHand.x = rightHand->xReal;
+    nui.rightHand.y = rightHand->yReal;
+    nui.rightHand.z = rightHand->zReal;
 }
 
 void onSkelUpdate(SkeletonData::Ptr skelData)
@@ -92,7 +93,36 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         return;
     }
     
-    Joint rightHand;
+    Joint leftWrist, leftHand, rightWrist, rightHand;
+    nui.leftFound = true;
+    nui.rightFound = true; //assume both found
+    
+    try {
+        leftWrist = skeletons.at(0).joints.at(JOINT_LEFT_WRIST);
+    }
+    catch (const Exception& e) {
+        // No right hand
+        std::cout << "Left wrist of the first user is not found" << std::endl;
+        nui.leftFound = false;
+    }
+    
+    try {
+        leftHand = skeletons.at(0).joints.at(JOINT_LEFT_HAND);
+    }
+    catch (const Exception& e) {
+        // No right hand
+        std::cout << "Left hand of the first user is not found" << std::endl;
+        nui.leftFound = false;
+    }
+    
+    try {
+        rightWrist = skeletons.at(0).joints.at(JOINT_RIGHT_WRIST);
+    }
+    catch (const Exception& e) {
+        // No right hand
+        std::cout << "Right wrist of the first user is not found" << std::endl;
+        nui.rightFound = false;
+    }
     
     try {
         rightHand = skeletons.at(0).joints.at(JOINT_RIGHT_HAND);
@@ -100,17 +130,51 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
     catch (const Exception& e) {
         // No right hand
         std::cout << "Right hand of the first user is not found" << std::endl;
-        return;
+        nui.rightFound = false;
     }
     
-//    std::cout << std::fixed << std::setprecision(3);
-//    std::cout << "Right hand position: "
-//                 "x = " << rightHand.real.x << ", "
-//                 "y = " << rightHand.real.y << ", "
-//                 "z = " << rightHand.real.z << std::endl;
-    x = rightHand.real.x;
-    y = rightHand.real.y;
-    z = rightHand.real.z;
+    //Pull data into struct
+    if(nui.leftFound)
+    {
+        nui.leftWrist.x = leftWrist.real.x;
+        nui.leftWrist.y = leftWrist.real.y;
+        nui.leftWrist.z = leftWrist.real.z;
+        nui.leftHand.x = leftHand.real.x;
+        nui.leftHand.y = leftHand.real.y;
+        nui.leftHand.z = leftHand.real.z;
+    }
+    else
+    {
+        nui.leftWrist.x = 0;
+        nui.leftWrist.y = 0;
+        nui.leftWrist.z = 0;
+        nui.leftHand.x = 0;
+        nui.leftHand.y = 0;
+        nui.leftHand.z = 0;
+    }
+    if(nui.rightFound)
+    {
+        nui.rightWrist.x = rightWrist.real.x;
+        nui.rightWrist.y = rightWrist.real.y;
+        nui.rightWrist.z = rightWrist.real.z;
+        nui.rightHand.x = rightHand.real.x;
+        nui.rightHand.y = rightHand.real.y;
+        nui.rightHand.z = rightHand.real.z;
+    }
+    else
+    {
+        nui.rightWrist.x = 0;
+        nui.rightWrist.y = 0;
+        nui.rightWrist.z = 0;
+        nui.rightHand.x = 0;
+        nui.rightHand.y = 0;
+        nui.rightHand.z = 0;
+    }
+    
+    printf("LH: %02.3f, %02.3f, %02.3f\n\r", nui.leftHand.x, nui.leftHand.y, nui.leftHand.z);
+    printf("LW: %02.3f, %02.3f, %02.3f\n\r", nui.leftWrist.x, nui.leftWrist.y, nui.leftWrist.z);
+    printf("RH: %02.3f, %02.3f, %02.3f\n\r", nui.rightHand.x, nui.rightHand.y, nui.rightHand.z);
+    printf("RW: %02.3f, %02.3f, %02.3f\n\r", nui.rightWrist.x, nui.rightWrist.y, nui.rightWrist.z);
 }
 
 void serverResponse(char rec)
@@ -126,10 +190,7 @@ void serverResponse(char rec)
 //        send = z;
 //    
     // Send data
-    send.rightHand.x = x;
-    send.rightHand.y = y;
-    send.rightHand.z = z;
-    send.rightFound = true;
+    send = nui;
     if(sendto(sockfd, (void*)&send, sizeof(send), MSG_CONFIRM,
             (const struct sockaddr*)&cliaddr, sizeof(cliaddr)) >= 0)
     {
