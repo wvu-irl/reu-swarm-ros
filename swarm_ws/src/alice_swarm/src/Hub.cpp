@@ -67,7 +67,7 @@ void Hub::processVicon() //Fills in bots[]
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 		bots.push_back(
 				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1));
+						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1,viconBotArray.poseVect[i].botPose.header.stamp));
 		std::vector<Bot> temp;
 		ridOrder.push_back(numID); //storing the order of insertion
 		neighbors.push_back(temp); //adds an empty vector to neighbors for future use
@@ -226,6 +226,7 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		addFlowMail(*it, temp);
 		temp.name = *it;
 		temp.sid = bots[*it].swarm_id;
+		temp.time= bots[*it].time;
 		temp.contourVal = 0;
 		to_return.mails.push_back(temp);
 

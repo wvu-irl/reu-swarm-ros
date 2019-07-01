@@ -5,4 +5,5 @@ wvu_swarm_std_msgs/flow_mail[] flowMail
 float32 contourVal #for the heat map
 int32 name
 int32 sid
+time time
 		

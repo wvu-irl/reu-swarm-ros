@@ -22,7 +22,7 @@ typedef struct Bot //The Bot struct holds the pose of a robot, along with its di
 		swarm_id = -1;
 	}
 
-	Bot(int _id, float _x, float _y, float _heading, float _distance,int _sid) //Alternate Constructor
+	Bot(int _id, float _x, float _y, float _heading, float _distance,int _sid, ros::Time _time) //Alternate Constructor
 	{
 		id = _id;
 
@@ -31,6 +31,7 @@ typedef struct Bot //The Bot struct holds the pose of a robot, along with its di
 		heading = _heading;
 		distance = _distance;
 		swarm_id=_sid;
+		time=_time;
 	}
 
 	int id; //the id's are the 50 states, from 0 to 49
@@ -39,6 +40,7 @@ typedef struct Bot //The Bot struct holds the pose of a robot, along with its di
 	float y; //position
 	float heading; //in radians
 	float distance;
+	ros::Time time;
 } Bot;
 
 bool compareTwoBots(Bot &a, Bot &b) // Reverses the > operator to sort smallest first instead
