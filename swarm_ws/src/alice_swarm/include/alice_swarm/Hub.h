@@ -64,7 +64,7 @@ private:
 	std::vector<std::vector<Bot>> neighbors; //holds locations of all of the closests bots relative to each other
 
 	//Finds the distance between a bot and some object
-	AliceStructs::obj getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
+	std::pair<float,float> getSeparation(Bot _bot, std::pair<float, float> _obs);
 	void processVicon(); //Fills in bots[], converst vicon to just the pose data needed
 public:
 
@@ -83,7 +83,7 @@ public:
 
 	void addFlowMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the flows within a robot's VISION range
 
-	void addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the obstacles within a robot's VISION range
+	//void addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the obstacles within a robot's VISION range
 
 	void addTargetMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the targets within a robot's VISION range
 

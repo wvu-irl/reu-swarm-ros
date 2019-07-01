@@ -11,32 +11,21 @@
 #include <swarm_server/robot_id.h>
 #define DEBUG_HUB 0
 
-AliceStructs::obj Hub::getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance) //helper function for finding obstacle points.
+std::pair<float, float> Hub::getSeparation(Bot _bot, std::pair<float, float> _obs) //helper function for finding obstacle points.
 { // takes current bot and looks at distance to each obs point. If it "sees"[[ it, converts that obs to polar and pushes to its vector stored in polar_obs.
 	float loc_r; //|distance| b/w bot and current obstacle point.
 	float theta; //in radians
 	float dx; //x separation.
 	float dy; //y separation.
-	AliceStructs::obj polar_point;
+	std::pair<float, float> to_return;
 
 	dx = _obs.first - _bot.x;
 	dy = _obs.second - _bot.y;
 	loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
-	//std::cout<<"test_tolerance: loc_r = "<<loc_r<<"\n";
-	if (loc_r <= _tolerance)
-	{
-		theta = fmod(atan2(dy, dx) - _bot.heading + 4 * M_PI, 2 * M_PI);
-		polar_point.dis = loc_r;
-		polar_point.dir = theta;
-//		polar_point.radius = 2;
-//		polar_point.theta = 2;
-		return polar_point;
-	} else
-	{
-		polar_point.dis = -1;
-		polar_point.dir = 0;
-		return polar_point;
-	}
+	theta = fmod(atan2(dy, dx) - _bot.heading, 2 * M_PI);
+	to_return.first = loc_r * cos(theta);
+	to_return.second = loc_r * sin(theta);
+	return to_return;
 }
 
 Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reasons?
@@ -132,10 +121,12 @@ void Hub::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 	for (std::vector<Bot>::iterator it = neighbors.at(i).begin(); it != neighbors.at(i).end(); it++)
 	{
 		wvu_swarm_std_msgs::neighbor_mail temp;
-		temp.name= it->id;
+		temp.name = it->id;
 		//Makes the direction of the neighbor relative to the robot's heading
-		temp.dir = fmod(atan2(it->y - bots[i].y, it->x - bots[i].x) - bots[i].heading + 4 * M_PI, 2 * M_PI);
-		temp.dis = it->distance;
+		float loc_r = it->distance; //magnitude of separation
+		float theta = fmod(atan2(it->y - bots[i].y, it->x - bots[i].x) - bots[i].heading + 4 * M_PI, 2 * M_PI);
+		temp.x = loc_r * cos(theta);
+		temp.y = loc_r * sin(theta);
 		//Makes the heading of the neighbor relative to the robot's heading
 		temp.ang = fmod(it->heading - bots[i].heading + 2 * M_PI, 2 * M_PI);
 		temp.sid = it->swarm_id;
@@ -146,18 +137,18 @@ void Hub::addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 void Hub::addFlowMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 {
 	int num_pts = flows.flow.size();
-
 	for (int j = 0; j < num_pts; j++)
 	{
 		if (flows.flow.at(j).sid == bots[i].swarm_id || flows.flow.at(j).sid == 0)
 		{
 			std::pair<float, float> temp =
 			{ flows.flow.at(j).x, flows.flow.at(j).y };
-			AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
-			if (temp2.dis > -1) //If the flow was in VISION range
+			std::pair<float, float> temp2 = getSeparation(bots[i], temp);
+			if (pow(pow(temp2.first, 2) + pow(temp2.second, 2), 0.5) > VISION) //If the flow was in VISION range
 			{
 				wvu_swarm_std_msgs::flow_mail temp3;
-				temp3.dis = temp2.dis;
+				temp3.x = temp2.first;
+				temp3.y = temp2.second;
 				//Makes the direction of the flow relative to the robot's heading
 				temp3.dir = fmod(flows.flow.at(j).theta - bots[i].heading + 2 * M_PI, 2 * M_PI);
 				temp3.spd = flows.flow.at(j).r;
@@ -175,36 +166,35 @@ void Hub::addTargetMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds tar
 	{
 		std::pair<float, float> temp =
 		{ targets.point.at(j).x, targets.point.at(j).y };
-		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
-		if (temp2.dis > -1) //If the target was in VISION range
+		std::pair<float, float> temp2 = getSeparation(bots[i], temp);
+		if (pow(pow(temp2.first, 2) + pow(temp2.second, 2), 0.5) > VISION) //If the target was in VISION range
 		{
 			wvu_swarm_std_msgs::point_mail temp3;
-			temp3.radius =temp2.dis;
-			temp3.theta=temp2.dir;
+			temp3.x = temp2.first;
+			temp3.y = temp2.second;
 			_mail.targetMail.push_back(temp3);
 		}
 	}
 }
 
-void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds obstacles within a robots vision range
-{
-
-	int num_pts = obstacles.point.size();
-
-	for (int j = 0; j < num_pts; j++)
-	{
-		std::pair<float, float> temp =
-		{ obstacles.point.at(j).x, obstacles.point.at(j).y };
-		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
-		if (temp2.dis > -1)
-		{
-			wvu_swarm_std_msgs::point_mail temp3;
-			temp3.radius = temp2.dis;
-			temp3.theta =temp2.dir;
-			_mail.obsPointMail.push_back(temp3);
-		}
-	}
-}
+//void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds obstacles within a robots vision range
+//{
+//
+//	int num_pts = obstacles.point.size();
+//	for (int j = 0; j < num_pts; j++)
+//	{
+//		std::pair<float, float> temp =
+//		{ obstacles.point.at(j).x, obstacles.point.at(j).y };
+//		AliceStructs::obj temp2 = getSeparation(bots[i], temp, VISION);
+//		if (temp2.dis > -1)
+//		{
+//			wvu_swarm_std_msgs::point_mail temp3;
+//			temp3.radius = temp2.dis;
+//			temp3.theta = temp2.dir;
+//			_mail.obsPointMail.push_back(temp3);
+//		}
+//	}
+//}
 
 //void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail _mail) //Prints mail for debug purposes
 //{
@@ -227,11 +217,10 @@ void Hub::addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds o
 wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relative information for a robot into one msg
 {
 	wvu_swarm_std_msgs::alice_mail_array to_return;
-	std::cout << ridOrder.size() << std::endl;
 	for (std::vector<int>::iterator it = ridOrder.begin(); it != ridOrder.end(); ++it)
 	{
 		wvu_swarm_std_msgs::alice_mail temp;
-		addObsPointMail(*it, temp);
+		//	addObsPointMail(*it, temp);
 		addNeighborMail(*it, temp);
 		addTargetMail(*it, temp);
 		addFlowMail(*it, temp);
@@ -250,7 +239,6 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 
 void Hub::clearHub() //Clears information about the robots
 {
-	ridOrder.clear();
 	bots.clear();
 	neighbors.clear();
 }

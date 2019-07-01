@@ -1,5 +1,5 @@
 wvu_swarm_std_msgs/neighbor_mail[] neighborMail
-wvu_swarm_std_msgs/point_mail[] obsPointMail
+# deprecated - wvu_swarm_std_msgs/point_mail[] obsPointMail 
 wvu_swarm_std_msgs/point_mail[] targetMail
 wvu_swarm_std_msgs/flow_mail[] flowMail
 float32 contourVal #for the heat map
