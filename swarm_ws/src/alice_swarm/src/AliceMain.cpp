@@ -6,24 +6,26 @@
 #include <sstream>
 #include <map>
 #include <chrono>
-/*
-wvu_swarm_std_msgs::alice_mail_array temp_mail;
 
-void aliceCallback(const wvu_swarm_std_msgs::alice_mail_array &msg)
-{
-	temp_mail=msg;
-}
+//wvu_swarm_std_msgs::alice_mail_array temp_mail;
+//
+//void aliceCallback(const wvu_swarm_std_msgs::alice_mail_array &msg)
+//{
+//	temp_mail=msg;
+//}
+
 int main(int argc, char **argv)
 {
 
-	std::map<int, Robot> aliceMap; //Maps robot id's to robots so they can be accessed easily
+	//std::map<int, Robot> aliceMap; //Maps robot id's to robots so they can be accessed easily
 
 	//Creates an AliceBrain node, and subscribes/publishes to the necessary topics
-	ros::init(argc, argv, "AliceBrain");
-	ros::NodeHandle n;
-	ros::Subscriber sub = n.subscribe("alice_mail_array", 1000, aliceCallback);
-	ros::Rate loopRate(200);
-	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array > ("final_execute", 1000);
+//	ros::init(argc, argv, "AliceBrain");
+//	ros::NodeHandle n;
+//	ros::Subscriber sub = n.subscribe("alice_mail_array", 1000, aliceCallback);
+//	ros::Rate loopRate(200);
+//	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array > ("final_execute", 1000);
+	/*
 	while (ros::ok())
 	{
 		auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of Alice
@@ -63,6 +65,6 @@ int main(int argc, char **argv)
 		ros::spinOnce();
 		loopRate.sleep();
 
-	}
+	} */
 	return 0;
-}*/
+}
