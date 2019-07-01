@@ -8,7 +8,9 @@
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
 #include <wvu_swarm_std_msgs/vicon_points.h>
 #include <wvu_swarm_std_msgs/flows.h>
+#include <wvu_swarm_std_msgs/map_levels.h>
 #include "alice_swarm/aliceStructs.h"
+#include <contour_node/level_description.h>
 
 typedef struct Bot //The Bot struct holds the pose of a robot, along with its distance from another.
 {
@@ -85,11 +87,13 @@ public:
 
 	void addFlowMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the flows within a robot's VISION range
 
-	//void addObsPointMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the obstacles within a robot's VISION range
+	void addObsMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the obstacles within a robot's VISION range
 
 	void addTargetMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the targets within a robot's VISION range
 
 	void addNeighborMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the neighbors determined by its closest x
+
+	void addContMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Gives each robot it's value on the contour map
 
 
 	wvu_swarm_std_msgs::alice_mail_array getAliceMail(); //Gathers all the relative information for a robot into one msg

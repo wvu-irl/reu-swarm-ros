@@ -4,7 +4,7 @@ project(alice_swarm)
 set (CMAKE_CXX_STANDARD 11)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg message_generation wvu_swarm_std_msgs swarm_server geometry_msgs visualization_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg message_generation wvu_swarm_std_msgs swarm_server  contour_node geometry_msgs visualization_msgs)
 
 ## Declare ROS messages and services
 ##add_message_files(FILES )

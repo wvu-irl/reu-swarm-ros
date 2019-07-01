@@ -190,12 +190,20 @@ void Hub::addObsMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds obstac
 		std::pair<float, float> temp2 = getSeparation(bots[i], temp);
 		if (pow(pow(temp2.first, 2) + pow(temp2.second, 2), 0.5) > VISION)
 		{
-			temp3.offset_x = temp2.x;
-			temp3.offset_y = temp2.y;
-
+			temp3.offset_x = temp2.first;
+			temp3.offset_y = temp2.second;
+			temp3.theta_offset = fmod(temp3.theta_offset - bots[i].heading + 2 * M_PI, 2 * M_PI);
 			_mail.obsMail.push_back(temp3);
 		}
 	}
+}
+
+void Hub::addContMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Gives each robot it's value on the contour map
+{
+	wvu_swarm_std_msgs::vicon_point loc;
+	loc.x = bots[i].x;
+	loc.y = bots[i].y;
+	float to_return = (float) calculate(map.levels.at(map_ns::OBSTACLE), loc);
 }
 
 //void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail _mail) //Prints mail for debug purposes
@@ -222,14 +230,15 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 	for (std::vector<int>::iterator it = ridOrder.begin(); it != ridOrder.end(); ++it)
 	{
 		wvu_swarm_std_msgs::alice_mail temp;
-		//	addObsPointMail(*it, temp);
+		addObsMail(*it, temp);
 		addNeighborMail(*it, temp);
 		addTargetMail(*it, temp);
 		addFlowMail(*it, temp);
+		addContMail(*it, temp);
 		temp.name = *it;
 		temp.sid = bots[*it].swarm_id;
 		temp.time = bots[*it].time;
-		temp.contourVal = 0;
+
 		to_return.mails.push_back(temp);
 
 	}
