@@ -33,7 +33,7 @@ Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reas
 }
 
 void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
-		wvu_swarm_std_msgs::vicon_points &_o, wvu_swarm_std_msgs::flows &_f)
+		wvu_swarm_std_msgs::obstacle &_o, wvu_swarm_std_msgs::flows &_f)
 {
 	clearHub();
 	viconBotArray = _b;

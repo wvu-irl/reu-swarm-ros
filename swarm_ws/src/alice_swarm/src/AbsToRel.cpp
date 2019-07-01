@@ -10,7 +10,7 @@
 //made global because i need them for the call back
 //bool is_updated(false);
 wvu_swarm_std_msgs::vicon_bot_array temp_bot_array;
-wvu_swarm_std_msgs::vicon_points temp_obs_array;
+wvu_swarm_std_msgs::obstacle temp_obs_array;
 wvu_swarm_std_msgs::vicon_points temp_target;
 wvu_swarm_std_msgs::flows temp_flow_array;
 
@@ -18,7 +18,7 @@ void botCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg)
 {
 		temp_bot_array = msg;
 }
-void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
+void obsCallback(const wvu_swarm_std_msgs::obstacle &msg)
 {
 		temp_obs_array = msg;
 }

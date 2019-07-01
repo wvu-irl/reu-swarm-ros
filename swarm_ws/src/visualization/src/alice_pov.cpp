@@ -78,7 +78,7 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 		{
 			sf::CircleShape shape(0);
 			// Changing the Visual Properties of the robot
-			shape.setPosition(300, 300); // Sets position of shape to random location that body was set to.
+			shape.setPosition(300, 300); // Sets position of shape to the middle
 			shape.setOrigin(bodiesSize, bodiesSize);
 			shape.setFillColor(
 					sf::Color(255 - (int) map.mails.at(name).contourVal, (int) map.mails.at(name).contourVal, 0, 255));
@@ -91,8 +91,8 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 			{
 				wvu_swarm_std_msgs::neighbor_mail temp = map.mails.at(i).neighborMail.at(j);
 				sf::CircleShape shape(0);
-				// Changing the Visual Properties of the robot
-				shape.setPosition(300+ 3*temp.x, 300-3*temp.y); // Sets position of shape to random location that body was set to.
+				// Changing the Visual Properties of the (neighboring) robot
+				shape.setPosition(300+ 3*temp.x, 300-3*temp.y);
 				shape.setOrigin(bodiesSize, bodiesSize);
 				shape.setFillColor(
 						sf::Color(255 - (int) map.mails.at(temp.name).contourVal,0,  (int) map.mails.at(temp.name	).contourVal, 255));
@@ -106,7 +106,7 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 							wvu_swarm_std_msgs::obj_mail temp = map.mails.at(i).targetMail.at(j);
 							sf::CircleShape shape(0);
 							// Changing the Visual Properties of the obstacle
-							shape.setPosition(300+ 3*temp.x, 300-3*temp.y); // Sets position of shape to random location that body was set to.
+							shape.setPosition(300+ 3*temp.x, 300-3*temp.y);
 							shape.setOrigin(bodiesSize, bodiesSize);
 							shape.setFillColor(sf::Color::Green);
 							shape.setRadius(bodiesSize);
