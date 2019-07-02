@@ -246,7 +246,9 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		temp.name = *it;
 		temp.sid = bots[*it].swarm_id;
 		temp.time = bots[*it].time;
-
+		temp.x= bots[*it].x;
+		temp.y=bots[*it].y;
+		temp.heading=bots[*it].heading;
 		to_return.mails.push_back(temp);
 
 	}

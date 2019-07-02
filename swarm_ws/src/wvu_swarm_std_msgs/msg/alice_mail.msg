@@ -4,6 +4,9 @@ wvu_swarm_std_msgs/ellipse[] obsMail
 wvu_swarm_std_msgs/point_mail[] targetMail
 wvu_swarm_std_msgs/flow_mail[] flowMail
 float32 contourVal #for the heat map
+float32 x
+float32 y
+float32 heading
 int32 name
 int32 sid
 time time

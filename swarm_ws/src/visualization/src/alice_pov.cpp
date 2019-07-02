@@ -80,39 +80,75 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 			// Changing the Visual Properties of the robot
 			shape.setPosition(300, 300); // Sets position of shape to the middle
 			shape.setOrigin(bodiesSize, bodiesSize);
-			float inten = 1000*map.mails.at(name).contourVal;
-							if (inten >255) inten=255;
-							shape.setFillColor(sf::Color(255 - (int) inten,0,  (int) inten, 255));
+			float inten = 1000 * map.mails.at(name).contourVal;
+			if (inten > 255)
+				inten = 255;
+			shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
 			shape.setOutlineColor(sf::Color::Green);
 			shape.setOutlineThickness(1);
 			shape.setRadius(bodiesSize);
 			window.draw(shape);
+
+			sf::RectangleShape line(sf::Vector2f(5, 2));
+			line.setFillColor(sf::Color::Black);
+			line.setPosition(300, 300);
+			line.setOrigin(-2, 1);
+			line.setRotation(0);
+			window.draw(line);
 
 			for (int j = 0; j < map.mails.at(i).neighborMail.size(); j++)
 			{
 				wvu_swarm_std_msgs::neighbor_mail temp = map.mails.at(i).neighborMail.at(j);
 				sf::CircleShape shape(0);
 				// Changing the Visual Properties of the (neighboring) robot
-				shape.setPosition(300+ 3*temp.x, 300-3*temp.y);
+				shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
 				shape.setOrigin(bodiesSize, bodiesSize);
-				float inten = 1000*map.mails.at(temp.name).contourVal;
-				if (inten >255) inten=255;
-				shape.setFillColor(sf::Color(255 - (int) inten,0,  (int) inten, 255));
+				float inten = 1000 * map.mails.at(temp.name).contourVal;
+				if (inten > 255)
+					inten = 255;
+				shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
 				shape.setOutlineColor(sf::Color::White);
 				shape.setOutlineThickness(1);
 				shape.setRadius(bodiesSize);
 				window.draw(shape);
+
+				sf::RectangleShape line(sf::Vector2f(5, 2));
+				line.setFillColor(sf::Color::Black);
+				line.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
+				line.setOrigin(-2, 1);
+				line.setRotation(180.0 / M_PI * (-temp.ang));
+				window.draw(line);
 			}
 			for (int j = 0; j < map.mails.at(i).targetMail.size(); j++)
+			{
+				wvu_swarm_std_msgs::point_mail temp = map.mails.at(i).targetMail.at(j);
+				sf::CircleShape shape(0);
+				// Changing the Visual Properties of the obstacle
+				shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
+				shape.setOrigin(bodiesSize, bodiesSize);
+				shape.setFillColor(sf::Color::Green);
+				shape.setRadius(bodiesSize);
+				window.draw(shape);
+			}
+			for (int j = 0; j < map.mails.at(i).flowMail.size(); j++)
+			{
+				wvu_swarm_std_msgs::flow_mail temp = map.mails.at(i).flowMail.at(j);
+
+				sf::RectangleShape line(sf::Vector2f(temp.pri*10, 1));
+				line.setFillColor(sf::Color::Cyan);
+				line.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
+				line.setRotation(180.0 / M_PI * (-temp.dir));
+				window.draw(line);
+			}
+			for (int j = 0; j < map.mails.at(i).flowMail.size(); j++)
 						{
-							wvu_swarm_std_msgs::obj_mail temp = map.mails.at(i).targetMail.at(j);
-							sf::CircleShape shape(0);
-							// Changing the Visual Properties of the obstacle
-							shape.setPosition(300+ 3*temp.x, 300-3*temp.y);
-							shape.setOrigin(bodiesSize, bodiesSize);
-							shape.setFillColor(sf::Color::Green);
-							shape.setRadius(bodiesSize);
-							window.draw(shape);
+							wvu_swarm_std_msgs::flow_mail temp = map.mails.at(i).flowMail.at(j);
+
+							sf::RectangleShape line(sf::Vector2f(temp.pri*10, 1));
+							line.setFillColor(sf::Color::Cyan);
+							line.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
+							line.setRotation(180.0 / M_PI * (-temp.dir));
+							window.draw(line);
 						}
 		}
 	}
