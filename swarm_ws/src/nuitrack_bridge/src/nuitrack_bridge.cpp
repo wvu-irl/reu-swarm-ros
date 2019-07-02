@@ -90,25 +90,32 @@ void initTf(void)
 // Function to transform a single xyz
 void xyzTf(xyz &_xyz)
 {
-    double xin, yin, zin, xout, yout, zout;
-    xin = _xyz.x;
-    yin = _xyz.y;
-    zin = _xyz.z;
+    // Get the transform
+    tf::TransformListener tfLis;
     
-    /* MATRIX MULTIPLICATION
-     *   [x] [x']
-     * T*[y]=[y']
-     *   [z] [z']
-     *   [1] [1 ]
-     */
-    xout = tfMat[0][0]*xin + tfMat[0][1]*yin + tfMat[0][2]*zin + tfMat[0][3];
-    yout = tfMat[1][0]*xin + tfMat[1][1]*yin + tfMat[1][2]*zin + tfMat[1][3];
-    zout = tfMat[2][0]*xin + tfMat[2][1]*yin + tfMat[2][2]*zin + tfMat[2][3];
+    // Create a geometry message point because tf needs it
+    geometry_msgs::PointStamped pt;
+    pt.header.frame_id = "kinect";
+    pt.header.stamp = ros::Time();
+    pt.point.x = _xyz.x / 1000; // mm to m
+    pt.point.y = _xyz.y / 1000;
+    pt.point.z = _xyz.z / 1000;
     
-    // Apply the transform
-    _xyz.x = xout;
-    _xyz.y = yout;
-    _xyz.z = zout;
+    try {
+        // Another placeholder point to transform into
+        geometry_msgs::PointStamped ptTf;
+        
+        // Transform it into world frame
+        tfLis.transformPoint("world", pt, ptTf);
+        
+        // Apply to input
+        _xyz.x = ptTf.point.x;
+        _xyz.y = ptTf.point.y;
+        _xyz.z = ptTf.point.z;
+    }
+    catch (tf::TransformException &ex) {
+        ROS_ERROR("Transform error! %s", ex.what());
+    }
 }
 
 // Function to transform an nuiData struct from Kinect to global frame
