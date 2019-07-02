@@ -1,5 +1,4 @@
 #include <iostream>
-#include <stdio.h>
 #include <nuitrack_bridge/nuitrack_data.h>
 
 // ROS includes
@@ -44,37 +43,37 @@ void initTf(void)
     offsetY = KINECT_TRAN_Y;
     offsetZ = KINECT_TRAN_Z;
     
-    /* ROTATION MATRIX, HOMOGENOUS QUATERNION
+    /* ROTATION MATRIX 
      *     [(w2+x2-y2-z2)   2(xy-wz)      2(wy+xz)   ]
      * R = [  2(xy+wz)    (w2-x2+y2-z2)   2(yz-wx)   ]
      *     [  2(xz+wy)      2(wx+yz)    (w2-x2-y2+z2)]
      */
     
-    tfMat[0][0] = w*w+x*x-y*y-z*z;
-    tfMat[1][0] = 2*(x*y+w*z);
-    tfMat[2][0] = 2*(x*z+w*y);
-    tfMat[0][1] = 2*(x*y-w*z);
-    tfMat[1][1] = w*w-x*x+y*y-z*z;
-    tfMat[2][1] = 2*(w*x+y*z);
-    tfMat[0][2] = 2*(w*y+x*z);
-    tfMat[1][2] = 2*(y*z-w*x);
-    tfMat[2][2] = w*w-x*x-y*y+z*z;
-    
-    /* ROTATION MATRIX, NONHOMOGENOUS QUATERNION
-     *     [(1-2sy2-2sz2)  2s(xy-wz)    2(swy+xz)  ]
-     * R = [ 2s(xy+wz)   (1-2sx2-2sz2)  2s(yz-wx)  ]
-     *     [ 2s(xz+wy)    2s(wx+yz)   (1-2sx2-2sy2)]
-     */
-    
-//    tfMat[0][0] = 1-2*y*y-2*z*z;
+//    tfMat[0][0] = w*w+x*x-y*y-z*z;
 //    tfMat[1][0] = 2*(x*y+w*z);
 //    tfMat[2][0] = 2*(x*z+w*y);
 //    tfMat[0][1] = 2*(x*y-w*z);
-//    tfMat[1][1] = 1-2*x*x-2*z*z;
+//    tfMat[1][1] = w*w-x*x+y*y-z*z;
 //    tfMat[2][1] = 2*(w*x+y*z);
 //    tfMat[0][2] = 2*(w*y+x*z);
 //    tfMat[1][2] = 2*(y*z-w*x);
-//    tfMat[2][2] = 1-2*x*x-2*y*y;
+//    tfMat[2][2] = w*w-x*x-y*y+z*z;
+    
+    /* ALTERNATE ROTATION MATRIX
+     *     [(1-2y2-2z2)  2(xy-wz)    2(wy+xz)  ]
+     * R = [ 2(xy+wz)   (1-2x2-2z2)  2(yz-wx)  ]
+     *     [ 2(xz+wy)    2(wx+yz)   (1-2x2-2y2)]
+     */
+    
+    tfMat[0][0] = 1-2*y*y-2*z*z;
+    tfMat[1][0] = 2*(x*y+w*z);
+    tfMat[2][0] = 2*(x*z+w*y);
+    tfMat[0][1] = 2*(x*y-w*z);
+    tfMat[1][1] = 1-2*x*x-2*z*z;
+    tfMat[2][1] = 2*(w*x+y*z);
+    tfMat[0][2] = 2*(w*y+x*z);
+    tfMat[1][2] = 2*(y*z-w*x);
+    tfMat[2][2] = 1-2*x*x-2*y*y;
     
     // Fill in translation
     tfMat[0][3] = offsetX;
@@ -92,9 +91,9 @@ void initTf(void)
 void xyzTf(xyz &_xyz)
 {
     double xin, yin, zin, xout, yout, zout;
-    xin = _xyz.x / 1000;
-    yin = _xyz.y / 1000;
-    zin = _xyz.z / 1000;
+    xin = _xyz.x;
+    yin = _xyz.y;
+    zin = _xyz.z;
     
     /* MATRIX MULTIPLICATION
      *   [x] [x']
@@ -105,9 +104,6 @@ void xyzTf(xyz &_xyz)
     xout = tfMat[0][0]*xin + tfMat[0][1]*yin + tfMat[0][2]*zin + tfMat[0][3];
     yout = tfMat[1][0]*xin + tfMat[1][1]*yin + tfMat[1][2]*zin + tfMat[1][3];
     zout = tfMat[2][0]*xin + tfMat[2][1]*yin + tfMat[2][2]*zin + tfMat[2][3];
-//    xout = xin;
-//    yout = yin;
-//    zout = zin;
     
     // Apply the transform
     _xyz.x = xout;
@@ -125,47 +121,8 @@ void nuiTf(nuiData &_nui)
     }
     if(_nui.rightFound) {
         xyzTf(_nui.rightHand);
-        xyzTf(_nui.rightWrist);
+        xyzTf(_nui.leftWrist);
     }
-}
-
-visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g, double _b)
-{
-    visualization_msgs::Marker ret;
-    
-    ret.header.stamp = ros::Time();
-    ret.header.frame_id = "world";
-    ret.ns = "hand";
-    ret.id = _id;
-    ret.type = visualization_msgs::Marker::SPHERE;
-    ret.pose.position.x = _xyz->x;
-    ret.pose.position.y = _xyz->y;
-    ret.pose.position.z = _xyz->z;
-    ret.pose.orientation.x = 0;
-    ret.pose.orientation.y = 0;
-    ret.pose.orientation.z = 0;
-    ret.pose.orientation.w = 1;
-    ret.scale.x = 0.04;
-    ret.scale.y = 0.04;
-    ret.scale.z = 0.04;
-    ret.color.r = _r;
-    ret.color.g = _g;
-    ret.color.b = _b;
-    ret.color.a = 1;
-    
-    return ret;
-}
-
-visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
-{
-    visualization_msgs::MarkerArray ret;
-    
-    ret.markers.push_back(xyzToMarker(1, &(_nui->leftWrist), 1, 0.5, 0));
-    ret.markers.push_back(xyzToMarker(2, &(_nui->leftHand), 1, 0, 0));
-    ret.markers.push_back(xyzToMarker(3, &(_nui->rightWrist), 0, 0.5, 1));
-    ret.markers.push_back(xyzToMarker(4, &(_nui->rightHand), 0, 0, 1));
-    
-    return ret;
 }
 
 int main(int argc, char** argv) {
@@ -180,7 +137,11 @@ int main(int argc, char** argv) {
     ros::NodeHandle n_priv("~"); // private handle
     ros::Rate rate(15);
     ros::Publisher pub;
-    pub = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge", 1000);
+    ros::Publisher pub_v;
+    pub = n.advertise<geometry_msgs::Point>("hand", 1000);
+    pub_v = n.advertise<visualization_msgs::MarkerArray>("hand_vis", 1000);
+    
+    tf::TransformListener listener;
     
     // Set up signal handler
     signal(SIGINT, flagger);
@@ -203,11 +164,14 @@ int main(int argc, char** argv) {
     
     char send = '\0';
     
-    nuiData nui = nuiData();
+    double x = 0.0, y = 0.0, z = 0.0;
+    double a = 0.0, b = 0.0, c = 0.0;
     
     while(!g_sigint_received && ros::ok())
     {
         /* Send to server */
+//        std::cout << "Char to send: ";
+//        std::cin >> send;
         send = 'a';
         if(sendto(sockfd, &send, sizeof(send), MSG_CONFIRM,
                 (const struct sockaddr*)&servaddr, sizeof(servaddr)) >= 0)
@@ -254,25 +218,84 @@ int main(int argc, char** argv) {
                 
                 int len, n;
                 
-                nuiData rec = nuiData();
+                nuiData rec;
                 n = recvfrom(sockfd, &rec, sizeof(rec), MSG_WAITALL,
                         (struct sockaddr*)&cliaddr, (socklen_t*)&len);
                 
+                rec.rightHand.x /= 1000;
+                rec.rightHand.y /= 1000;
+                rec.rightHand.z /= 1000;
+                
+                a = rec.rightHand.x;
+                b = rec.rightHand.y;
+                c = rec.rightHand.z;
+                
                 // Transform the data
-                nui = rec;
-    printf("LH: %02.3f, %02.3f, %02.3f\n\r", nui.leftHand.x, nui.leftHand.y, nui.leftHand.z);
-    printf("LW: %02.3f, %02.3f, %02.3f\n\r", nui.leftWrist.x, nui.leftWrist.y, nui.leftWrist.z);
-    printf("RH: %02.3f, %02.3f, %02.3f\n\r", nui.rightHand.x, nui.rightHand.y, nui.rightHand.z);
-    printf("RW: %02.3f, %02.3f, %02.3f\n\r", nui.rightWrist.x, nui.rightWrist.y, nui.rightWrist.z);
-                nuiTf(nui);
+//                nuiTf(rec);
+                
+                x = rec.rightHand.x;
+                y = rec.rightHand.y;
+                z = rec.rightHand.z;
                 
                 break;
             }
         }
         /* End wait for response */
         
-        visualization_msgs::MarkerArray vis = nuiToMarkers(&nui);
-        pub.publish(vis);
+        // Create object to publish
+        geometry_msgs::Point output;
+        output.x = x;
+        output.y = y;
+        output.z = z;
+        
+        pub.publish(output);
+        
+        // Build some Markers for visualization
+        visualization_msgs::Marker rawMark, tfMark;
+        
+        rawMark.header.stamp = ros::Time();
+        rawMark.header.frame_id = "world";
+        rawMark.ns = "hand";
+        rawMark.id = 1;
+        rawMark.type = visualization_msgs::Marker::SPHERE;
+        rawMark.pose.position.x = a;
+        rawMark.pose.position.y = b;
+        rawMark.pose.position.z = c;
+        rawMark.pose.orientation.x = 0;
+        rawMark.pose.orientation.y = 0;
+        rawMark.pose.orientation.z = 0;
+        rawMark.pose.orientation.w = 1;
+        rawMark.scale.x = 0.04;
+        rawMark.scale.y = 0.04;
+        rawMark.scale.z = 0.04;
+        rawMark.color.r = 1;
+        rawMark.color.g = 0;
+        rawMark.color.b = 0;
+        rawMark.color.a = 1;
+        
+        tfMark.header.stamp = ros::Time();
+        tfMark.header.frame_id = "kinect";
+        tfMark.ns = "hand";
+        tfMark.id = 2;
+        tfMark.type = visualization_msgs::Marker::SPHERE;
+        tfMark.pose.position.x = x;
+        tfMark.pose.position.y = y;
+        tfMark.pose.position.z = z;
+        tfMark.pose.orientation.x = 0;
+        tfMark.pose.orientation.y = 0;
+        tfMark.pose.orientation.z = 0;
+        tfMark.pose.orientation.w = 1;
+        tfMark.scale.x = 0.04;
+        tfMark.scale.y = 0.04;
+        tfMark.scale.z = 0.04;
+        tfMark.color.r = 0;
+        tfMark.color.g = 1;
+        tfMark.color.b = 0;
+        tfMark.color.a = 1;
+        
+        visualization_msgs::MarkerArray visOutput;
+        visOutput.markers = {rawMark, tfMark};
+        pub_v.publish(visOutput);
         
         ros::spinOnce();
         rate.sleep();
@@ -283,3 +306,4 @@ int main(int argc, char** argv) {
     
     return 0;
 }
+

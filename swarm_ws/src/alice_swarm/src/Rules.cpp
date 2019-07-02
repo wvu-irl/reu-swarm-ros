@@ -196,7 +196,7 @@ AliceStructs::ideal Rules::avoidObstacles(std::list<AliceStructs::obj> obstacles
 	to_return.spd = 1;
 	for (auto &obs : obstacles)
 	{
-		if (obs.dis < 2 * ROBOT_SIZE)
+		if (obs.dis < 3 * ROBOT_SIZE)
 		{
 			AliceStructs::ideal temp;
 			temp.pri = strength / pow(2, obs.dis - 3 / 2 * ROBOT_SIZE);

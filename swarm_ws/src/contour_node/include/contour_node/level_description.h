@@ -13,7 +13,7 @@ namespace map_ns
 enum LEVEL
 {
 	TARGET,
-	OBSTACLE,
+	OBJECT,
 	COMBINED
 };
 

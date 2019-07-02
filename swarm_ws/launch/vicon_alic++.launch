@@ -19,7 +19,7 @@
 	</node>
 
 	<!-- A placeholder virtual obstacle -->
-	<node pkg="swarm_simulation"  type="virtual_obstacle" name="virtual_obstacle" output="screen"/>
+	<node pkg="swarm_simulation"  type="virtual_objects" name="virtual_obstacle" output="screen"/>
 		
 	<!-- Launch ALICE node -->
  	<node pkg="alice_swarm" type="AliceMain" name="alice" output="screen">							

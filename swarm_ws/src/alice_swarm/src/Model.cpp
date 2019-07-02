@@ -36,9 +36,9 @@ AliceStructs::ideal Model::generateIdeal()
 			rules.followFlow(flows, 16),
 			rules.goToTarget(targets, 0.5),
 			rules.avoidObstacles(obstacles, 16),
-			rules.magnetAvoid(robots, 16),
+			//rules.magnetAvoid(robots, 16),
 			//rules.birdAvoid(robots, 16),
-			rules.maintainSpacing(robots, 16, 50)
+			//rules.maintainSpacing(robots, 16, 50)
 	    };
 	for (int i = 0; i < ideal_list.size(); i++)
 	{

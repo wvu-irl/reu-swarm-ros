@@ -5,10 +5,10 @@
 		<param name="tf_ref_frame_id" value="/world" type="str" />
 		
 		<!-- Don't publish individual points or transforms -->
-		<param name="publish_markers" value="false" type="bool" />
-		<param name="publish_transform" value="false" type="bool" />
+		<param name="publish_markers" value="true" type="bool" />
+		<param name="publish_transform" value="true" type="bool" />
 
-        <param name="swarmbot_prefix" value="cardbot_" type="str" />
+        <param name="swarmbot_prefix" value="wand_" type="str" />
 		
 		</node>
 </launch>
