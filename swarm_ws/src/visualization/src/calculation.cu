@@ -14,8 +14,8 @@
 #include <visualization/color_map.h>
 #include <wvu_swarm_std_msgs/map_level.h>
 
-#define CALC_DEBUG 1
-#define CUDA_DEBUG 1
+#define CALC_DEBUG 0
+#define CUDA_DEBUG 0
 
 /**
  * namespace for doing stupid amounts of calculations
