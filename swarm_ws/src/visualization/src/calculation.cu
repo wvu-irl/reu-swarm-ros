@@ -15,7 +15,7 @@
 #include <wvu_swarm_std_msgs/map_level.h>
 
 #define CALC_DEBUG 1
-#define CUDA_DEBUG 0
+#define CUDA_DEBUG 1
 
 /**
  * namespace for doing stupid amounts of calculations
@@ -199,7 +199,13 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     int j = idx % (*width);
 
 #if CUDA_DEBUG
-    printf("Calculating value: %d[%d] == (%d, %d)\n", idx, col_id, i, j);
+//    printf("Calculating value: %d[%d] == (%d, %d)\n", idx, col_id, i, j);
+    printf("Equations:\n");
+    for (size_t i = 0;i < *num_eqs;i++)
+    {
+    	printf(" Function[%d]:\n  AMP:%lf\n  X: %lf\n  Y: %lf\n  Ellipse:\n    xrad: %lf\n    yrad: %lf\n",
+    			i, lev.eqs[i].amplitude, lev.eqs[i].x_off, lev.eqs[i].y_off, lev.eqs[i].ellipse.x_rad);
+    }
 #endif
     // calculating function
     double zc;
@@ -257,6 +263,14 @@ void createDeviceVar(void **var, size_t size, void *h_var)
     std::cout << "\033[0m" << std::flush;
 
     cudaMemcpyAsync(*var, h_var, size, cudaMemcpyHostToDevice, 0);
+}
+
+void createDeviceVar(void **var, size_t size)
+{
+    std::cout << "\033[31;1m" << std::flush;
+    checkCudaErrors(cudaMalloc(var, size));
+    checkCudaErrors(cudaMemset(*var, 0, size));
+    std::cout << "\033[0m" << std::flush;
 }
 
 /**
