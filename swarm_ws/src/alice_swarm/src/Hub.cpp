@@ -206,7 +206,7 @@ void Hub::addContMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Gives each
 	wvu_swarm_std_msgs::vicon_point loc;
 	loc.x = bots[i].x;
 	loc.y = bots[i].y;
-
+	std::cout << loc.x << " "<< loc.y << std::endl;
 	if (map.levels.size() > map_ns::TARGET)
 	{
 		_mail.contourVal = (float) map_ns::calculate(map.levels.at(map_ns::TARGET), loc);

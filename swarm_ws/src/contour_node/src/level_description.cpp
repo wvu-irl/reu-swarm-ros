@@ -24,7 +24,7 @@ double map_ns::calculate(wvu_swarm_std_msgs::map_level ml,
 
 		double re = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
 
-		z += curr_eq.amplitude * pow(M_E, (-x * x) / 2.0);
+		z += curr_eq.amplitude * pow(M_E, (-re*re) / 2.0);
 	}
 
 	return z;

@@ -74,13 +74,34 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 	for (int i = 0; i < map.mails.size(); i++)
 	{
 
+
 		if (map.mails.at(i).name == name)
 		{
+			for (int j = 0; j < map.mails.at(i).obsMail.size(); j++)
+								{
+									wvu_swarm_std_msgs::ellipse temp = map.mails.at(i).obsMail.at(j);
+									unsigned short quality = 70;
+									sf::ConvexShape ellipse;
+									ellipse.setPointCount(quality);
+									for (unsigned short i = 0; i < quality; ++i)
+									{
+										float rad = (360 / quality * i) / (360 / M_PI / 2);
+										float x = 3*cos(rad) * temp.x_rad;
+										float y = 3*sin(rad) * temp.y_rad;
+										float newx = x * cos(-temp.theta_offset) - y * sin(-temp.theta_offset);
+										float newy = x * sin(-temp.theta_offset) + y * cos(-temp.theta_offset);
+										ellipse.setPoint(i, sf::Vector2f(newx, newy));
+									}
+
+									ellipse.setPosition(300 + 3 * temp.offset_x, 300 - 3 * temp.offset_y);
+									ellipse.setFillColor(sf::Color::Yellow);
+									window.draw(ellipse);
+								}
 			sf::CircleShape shape(0);
 			// Changing the Visual Properties of the robot
 			shape.setPosition(300, 300); // Sets position of shape to the middle
 			shape.setOrigin(bodiesSize, bodiesSize);
-			float inten = 1000 * map.mails.at(name).contourVal;
+			float inten = 10 * map.mails.at(name).contourVal;
 			if (inten > 255)
 				inten = 255;
 			shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
@@ -103,7 +124,7 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 				// Changing the Visual Properties of the (neighboring) robot
 				shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
 				shape.setOrigin(bodiesSize, bodiesSize);
-				float inten = 1000 * map.mails.at(temp.name).contourVal;
+				float inten = 10 * map.mails.at(temp.name).contourVal;
 				if (inten > 255)
 					inten = 255;
 				shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
@@ -140,27 +161,7 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 				line.setRotation(180.0 / M_PI * (-temp.dir));
 				window.draw(line);
 			}
-			for (int j = 0; j < map.mails.at(i).obsMail.size(); j++)
-			{
-				wvu_swarm_std_msgs::ellipse temp = map.mails.at(i).obsMail.at(j);
-				std::cout <<temp.offset_x <<" "<<temp.y_rad  <<std::endl;
-				unsigned short quality = 70;
-				sf::ConvexShape ellipse;
-				ellipse.setPointCount(quality);
-				for (unsigned short i = 0; i < quality; ++i)
-				{
-					float rad = (360 / quality * i) / (360 / M_PI / 2);
-					float x = 3*cos(rad) * temp.x_rad;
-					float y = 3*sin(rad) * temp.y_rad;
-					float newx = x * cos(-temp.theta_offset) - y * sin(-temp.theta_offset);
-					float newy = x * sin(-temp.theta_offset) + y * cos(-temp.theta_offset);
-					ellipse.setPoint(i, sf::Vector2f(newx, newy));
-				}
 
-				ellipse.setPosition(300 + 3 * temp.offset_x, 300 - 3 * temp.offset_y);
-				ellipse.setFillColor(sf::Color::Yellow);
-				window.draw(ellipse);
-			}
 		}
 	}
 
