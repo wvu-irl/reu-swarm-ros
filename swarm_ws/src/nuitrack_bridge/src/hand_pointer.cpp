@@ -44,7 +44,7 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 
 int main(int argc, char** argv) {
     // ROS setup
-    ros::init(argc, argv, "nuitrack_bridge");
+    ros::init(argc, argv, "hand_pointer");
     
     // Generates nodehandles, publishers, subscriber
     ros::NodeHandle n;
