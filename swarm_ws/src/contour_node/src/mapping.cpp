@@ -64,10 +64,13 @@ int main(int argc, char **argv)
 
 	wvu_swarm_std_msgs::obstacle obs;
 	obs.characteristic = gaus;
-	obs.level = map_ns::OBSTACLE;
+	obs.level = map_ns::TARGET;
 
 	newObs(obs);
-	obs.level = map_ns::TARGET;
+	wvu_swarm_std_msgs::obstacle obs2(obs);
+	obs.characteristic.ellipse.x_rad=20;
+	obs.characteristic.ellipse.y_rad=5;
+	obs.level = map_ns::OBSTACLE;
 	newObs(obs);
 #endif
 #if DEBUG
