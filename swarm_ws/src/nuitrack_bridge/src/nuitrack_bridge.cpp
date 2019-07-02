@@ -32,65 +32,6 @@ void flagger(int sig)
     g_sigint_received = true;
 }
 
-// Function to set up transformation matrix
-void initTf(void)
-{
-    double w, x, y, z, offsetX, offsetY, offsetZ;
-    w = KINECT_QUAT_W;
-    x = KINECT_QUAT_X;
-    y = KINECT_QUAT_Y;
-    z = KINECT_QUAT_Z;
-    offsetX = KINECT_TRAN_X;
-    offsetY = KINECT_TRAN_Y;
-    offsetZ = KINECT_TRAN_Z;
-    
-    /* ROTATION MATRIX, HOMOGENOUS QUATERNION
-     *     [(w2+x2-y2-z2)   2(xy-wz)      2(wy+xz)   ]
-     * R = [  2(xy+wz)    (w2-x2+y2-z2)   2(yz-wx)   ]
-     *     [  2(xz+wy)      2(wx+yz)    (w2-x2-y2+z2)]
-     */
-    
-//    tfMat[0][0] = w*w+x*x-y*y-z*z;
-//    tfMat[1][0] = 2*(x*y+w*z);
-//    tfMat[2][0] = 2*(x*z+w*y);
-//    tfMat[0][1] = 2*(x*y-w*z);
-//    tfMat[1][1] = w*w-x*x+y*y-z*z;
-//    tfMat[2][1] = 2*(w*x+y*z);
-//    tfMat[0][2] = 2*(w*y+x*z);
-//    tfMat[1][2] = 2*(y*z-w*x);
-//    tfMat[2][2] = w*w-x*x-y*y+z*z;
-    
-    /* ROTATION MATRIX, NONHOMOGENOUS QUATERNION
-     *     [(1-2sy2-2sz2)  2s(xy-wz)    2(swy+xz)  ]
-     * R = [ 2s(xy+wz)   (1-2sx2-2sz2)  2s(yz-wx)  ]
-     *     [ 2s(xz+wy)    2s(wx+yz)   (1-2sx2-2sy2)]
-     */
-    
-    // Variable needed for normalization (our matrix may be slightly off)
-    double s = 1.0 / ((w*w + x*x + y*y + z*z)*(w*w + x*x + y*y + z*z));
-    
-    tfMat[0][0] = 1-2*s*y*y-2*s*z*z;
-    tfMat[1][0] = 2*s*(x*y+w*z);
-    tfMat[2][0] = 2*s*(x*z+w*y);
-    tfMat[0][1] = 2*s*(x*y-w*z);
-    tfMat[1][1] = 1-2*s*x*x-2*s*z*z;
-    tfMat[2][1] = 2*s*(w*x+y*z);
-    tfMat[0][2] = 2*s*(w*y+x*z);
-    tfMat[1][2] = 2*s*(y*z-w*x);
-    tfMat[2][2] = 1-2*s*x*x-2*s*y*y;
-    
-    // Fill in translation
-    tfMat[0][3] = offsetX;
-    tfMat[1][3] = offsetY;
-    tfMat[2][3] = offsetZ;
-    
-    // Fill in constants
-    tfMat[3][0] = 0;
-    tfMat[3][1] = 0;
-    tfMat[3][2] = 0;
-    tfMat[3][3] = 1;
-}
-
 // Function to transform a single xyz
 void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
 {
@@ -111,15 +52,14 @@ void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
         tfLis.transformPoint("world", pt, ptTf);
         
         // Apply to input
-        _xyz.x = ptTf.point.x;
-        _xyz.y = ptTf.point.y;
-        _xyz.z = ptTf.point.z;
+        _xyz.x = ptTf.point.x * 100; // m to cm
+        _xyz.y = ptTf.point.y * 100;
+        _xyz.z = ptTf.point.z * 100;
     }
     catch (tf::TransformException &ex) {
         ROS_ERROR("Transform error! %s", ex.what());
     }
 }
-
 
 // Function to transform an nuiData struct from Kinect to global frame
 void nuiTf(nuiData &_nui, tf::TransformListener &tfLis)
@@ -175,9 +115,6 @@ visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
 }
 
 int main(int argc, char** argv) {
-    // Set up transformation matrix
-    initTf();
-    
     // ROS setup
     ros::init(argc, argv, "nuitrack_bridge");
     
