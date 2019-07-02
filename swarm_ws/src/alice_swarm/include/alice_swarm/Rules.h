@@ -29,10 +29,8 @@ private:
 	 */
 	float calcDis(float _x1, float _y1, float _x2, float _y2);
 
-	/*
-	 * Checks if Alice needs to go into collision avoidance mode
-	 */
-	bool isBlocked();
+
+//===================================================================================================================\\
 
 	/*
 	 * Makes Alice explore new territory
@@ -61,8 +59,8 @@ private:
 
 public:
 
-
 	Rules();
+
 	Rules(Model _model);
 
 	/*

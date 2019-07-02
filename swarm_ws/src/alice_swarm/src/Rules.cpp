@@ -16,10 +16,14 @@ Rules::Rules(Model _model) : model(_model)
 	state = "explore";
 }
 
-bool Rules::isBlocked()
+//===================================================================================================================\\
+
+float Rules::calcDis(float _x1, float _y1, float _x2, float _y2)
 {
-	return false;
+	return pow(pow(_x1 - _x2, 2) + pow(_y1 - _y2, 2), 0.5);
 }
+
+//===================================================================================================================\\
 
 AliceStructs::vel Rules::stateLoop()
 {
@@ -28,10 +32,6 @@ AliceStructs::vel Rules::stateLoop()
 		explore, blocked, charge, find_food, find_updraft
 	};
 	std::map<std::string, StringValue> s_mapStringValues;
-	if (isBlocked())
-	{
-		state = "blocked";
-	}
 	switch (s_mapStringValues[state])
 	{
 	case explore:
@@ -53,31 +53,17 @@ AliceStructs::vel Rules::stateLoop()
 	return final_vel;
 }
 
-float Rules::calcDis(float _x1, float _y1, float _x2, float _y2)
-{
-	return pow(pow(_x1 - _x2, 2) + pow(_y1 - _y2, 2), 0.5);
-}
 
 void Rules::avoidCollisions()
 {
-	enum StringValue
+	while (true)
 	{
-		blocked, recontre, rendevous
-	};
-	std::map<std::string, StringValue> s_mapStringValues; /*
-	switch (s_mapStringValues[collision_state])
-	{
-	case blocked:
-		final_vel.mag = 0;
-		final_vel.dir = 0;
-		break;
-	case recontre:
-		//To implement
-		break;
-	case rendevous:
-		//To implement
-		break;
-	}*/
+		float tf = 0;
+		for (auto& obs : model.current_obstacles)
+		{
+
+		}
+	}
 }
 
 void Rules::Explore()

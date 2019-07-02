@@ -29,6 +29,8 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail _data)
 	for (auto& _obstacle : _data.obsMail)
 	{
 		AliceStructs::obj obstacle;
+		obstacle.x_off = _obstacle.x_offset;
+		obstacle.y_off = _obstacle.y_offset;
 		obstacle.x_rad = _obstacle.x_rad;
 		obstacle.y_rad = _obstacle.y_rad;
 		obstacle.theta_offset = _obstacle.theta_offset;

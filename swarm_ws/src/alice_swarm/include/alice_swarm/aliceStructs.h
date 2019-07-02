@@ -47,6 +47,8 @@ namespace AliceStructs {
 	typedef struct {
 		float x_rad;
 		float y_rad;
+		float x_off;
+		float y_off;
 		float theta_offset;
 		int t;
 	} obj;
