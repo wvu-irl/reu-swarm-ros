@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	ros::Subscriber sub2 = n.subscribe("virtual_targets", 1000, pointCallback);
 	ros::Subscriber sub3 = n.subscribe("virtual_obstacles", 1000, obsCallback);
 	ros::Subscriber sub4 = n.subscribe("virtual_flows", 1000, flowCallback);
-	ros::Rate loopRate(200);
+	ros::Rate loopRate(10);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array > ("final_execute", 1000);
 	Hub aliceBrain(0); // Creates a hub for the conversion of absolute to relative info
 

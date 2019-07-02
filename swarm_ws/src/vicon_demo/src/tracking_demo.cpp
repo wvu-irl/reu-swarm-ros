@@ -134,8 +134,8 @@ int main(int argc, char **argv)
             prevCharge = true;
             
             geometry_msgs::Point pt;
-            pt.x = 0;
-            pt.y = 50;
+            pt.x = -50;
+            pt.y = 0;
             pt.z = 0;
             currentPoint = pt;
         
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
             ROS_INFO("Point moved to %f, %f\n", currentPoint.x, currentPoint.y);
         }
         // Move the point if any bot has come too close
-        else if(minimumPointDistance < cutoffRadius) {
+        else if(!g_charging && minimumPointDistance < cutoffRadius) {
             // Rotate through vector if needed
             if(currentIndex + 1 >= path.size())
                 currentIndex = 0;

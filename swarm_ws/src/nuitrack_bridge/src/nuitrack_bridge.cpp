@@ -1,8 +1,13 @@
 #include <iostream>
+#include <stdio.h>
+#include <nuitrack_bridge/nuitrack_data.h>
 
 // ROS includes
 #include <ros/ros.h>
 #include <geometry_msgs/Point.h>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <tf/transform_listener.h>
 
 // UDP includes
 #include <stdlib.h> 
@@ -17,11 +22,96 @@
 
 #define PORT 8080 
 
+// Matrix for transformation from Kinect to global frame
+double tfMat[4][4];
+
 bool g_sigint_received = false;
 
 void flagger(int sig)
 {
     g_sigint_received = true;
+}
+
+// Function to transform a single xyz
+void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
+{
+    // Create a geometry message point because tf needs it
+    geometry_msgs::PointStamped pt;
+    pt.header.frame_id = "kinect";
+    pt.header.stamp = ros::Time();
+    pt.point.x = _xyz.x / 1000; // mm to m
+    pt.point.y = _xyz.y / 1000;
+    pt.point.z = _xyz.z / 1000;
+    
+    try {
+        // Another placeholder point to transform into
+        geometry_msgs::PointStamped ptTf;
+        
+        // Transform it into world frame
+        tfLis.waitForTransform("kinect", "world", ros::Time(), ros::Duration(0.01));
+        tfLis.transformPoint("world", pt, ptTf);
+        
+        // Apply to input
+        _xyz.x = ptTf.point.x * 100; // m to cm
+        _xyz.y = ptTf.point.y * 100;
+        _xyz.z = ptTf.point.z * 100;
+    }
+    catch (tf::TransformException &ex) {
+        ROS_ERROR("Transform error! %s", ex.what());
+    }
+}
+
+// Function to transform an nuiData struct from Kinect to global frame
+void nuiTf(nuiData &_nui, tf::TransformListener &tfLis)
+{
+    // Transform each xyz point
+    if(_nui.leftFound) {
+        xyzTf(_nui.leftHand, tfLis);
+        xyzTf(_nui.leftWrist, tfLis);
+    }
+    if(_nui.rightFound) {
+        xyzTf(_nui.rightHand, tfLis);
+        xyzTf(_nui.rightWrist, tfLis);
+    }
+}
+
+visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g, double _b)
+{
+    visualization_msgs::Marker ret;
+    
+    ret.header.stamp = ros::Time();
+    ret.header.frame_id = "world";
+    ret.ns = "hand";
+    ret.id = _id;
+    ret.type = visualization_msgs::Marker::SPHERE;
+    ret.pose.position.x = _xyz->x;
+    ret.pose.position.y = _xyz->y;
+    ret.pose.position.z = _xyz->z;
+    ret.pose.orientation.x = 0;
+    ret.pose.orientation.y = 0;
+    ret.pose.orientation.z = 0;
+    ret.pose.orientation.w = 1;
+    ret.scale.x = 0.04;
+    ret.scale.y = 0.04;
+    ret.scale.z = 0.04;
+    ret.color.r = _r;
+    ret.color.g = _g;
+    ret.color.b = _b;
+    ret.color.a = 1;
+    
+    return ret;
+}
+
+visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
+{
+    visualization_msgs::MarkerArray ret;
+    
+    ret.markers.push_back(xyzToMarker(1, &(_nui->leftWrist), 1, 0.5, 0));
+    ret.markers.push_back(xyzToMarker(2, &(_nui->leftHand), 1, 0, 0));
+    ret.markers.push_back(xyzToMarker(3, &(_nui->rightWrist), 0, 0.5, 1));
+    ret.markers.push_back(xyzToMarker(4, &(_nui->rightHand), 0, 0, 1));
+    
+    return ret;
 }
 
 int main(int argc, char** argv) {
@@ -31,8 +121,12 @@ int main(int argc, char** argv) {
     // Generates nodehandles, publisher
     ros::NodeHandle n;
     ros::NodeHandle n_priv("~"); // private handle
+    ros::Rate rate(15);
     ros::Publisher pub;
-    pub = n.advertise<geometry_msgs::Point>("hand", 1000);
+    pub = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge", 1000);
+    
+    // Transform listener
+    tf::TransformListener tfLis;
     
     // Set up signal handler
     signal(SIGINT, flagger);
@@ -55,13 +149,12 @@ int main(int argc, char** argv) {
     
     char send = '\0';
     
-    double x = 0.0, y = 0.0, z = 0.0;
+    nuiData nui = nuiData();
     
     while(!g_sigint_received && ros::ok())
     {
         /* Send to server */
-        std::cout << "Char to send: ";
-        std::cin >> send;
+        send = 'a';
         if(sendto(sockfd, &send, sizeof(send), MSG_CONFIRM,
                 (const struct sockaddr*)&servaddr, sizeof(servaddr)) >= 0)
         {
@@ -106,35 +199,29 @@ int main(int argc, char** argv) {
                 std::cout << "Socket is available." << std::endl;
                 
                 int len, n;
-                double rec;
                 
-                // Read into rec
+                nuiData rec = nuiData();
                 n = recvfrom(sockfd, &rec, sizeof(rec), MSG_WAITALL,
                         (struct sockaddr*)&cliaddr, (socklen_t*)&len);
-
-                std::cout << "Client sent " << rec << std::endl;
                 
-                // Handle this request
-                if(send == 'x')
-                    x = rec;
-                else if(send == 'y')
-                    y = rec;
-                else if(send == 'z')
-                    z = rec;
+                // Transform the data
+                nui = rec;
+    printf("LH: %02.3f, %02.3f, %02.3f\n\r", nui.leftHand.x, nui.leftHand.y, nui.leftHand.z);
+    printf("LW: %02.3f, %02.3f, %02.3f\n\r", nui.leftWrist.x, nui.leftWrist.y, nui.leftWrist.z);
+    printf("RH: %02.3f, %02.3f, %02.3f\n\r", nui.rightHand.x, nui.rightHand.y, nui.rightHand.z);
+    printf("RW: %02.3f, %02.3f, %02.3f\n\r", nui.rightWrist.x, nui.rightWrist.y, nui.rightWrist.z);
+                nuiTf(nui, tfLis);
                 
                 break;
             }
         }
         /* End wait for response */
         
-        // Create object to publish
-        geometry_msgs::Point output;
-        output.x = x;
-        output.y = y;
-        output.z = z;
+        visualization_msgs::MarkerArray vis = nuiToMarkers(&nui);
+        pub.publish(vis);
         
-        pub.publish(output);
         ros::spinOnce();
+        rate.sleep();
     }
     
     close(sockfd);
@@ -142,4 +229,3 @@ int main(int argc, char** argv) {
     
     return 0;
 }
-

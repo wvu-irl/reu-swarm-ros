@@ -5,6 +5,7 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Point.h>
 
 #include <visualization/contour.h>
 #include <wvu_swarm_std_msgs/map_levels.h>

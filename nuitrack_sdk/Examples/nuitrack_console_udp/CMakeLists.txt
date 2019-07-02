@@ -28,6 +28,7 @@ set(NUITRACK_LIBRARY_PATH ${CMAKE_CURRENT_LIST_DIR}/../../Nuitrack/lib/${PLATFOR
 include_directories(
 	.
 	${NUITRACK_INCLUDE_PATH}
+        ${CMAKE_CURRENT_LIST_DIR}/../../../swarm_ws/src/nuitrack_bridge/include
 )
 
 link_directories(${NUITRACK_LIBRARY_PATH})

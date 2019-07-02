@@ -286,7 +286,7 @@ int main(int argc, char **argv) // begin here
 	while (ros::ok() && i < 10000) // setup loop
 	{
 		makeObstacles(pub1); // creating obstacles
-		makeTargets(pub2); // creating targets
+		
 		makeFlows(pub3); // creating flows
 		ros::spinOnce(); // spinning callbacks
 //		loopRate.sleep();
