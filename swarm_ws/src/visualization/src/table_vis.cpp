@@ -5,6 +5,7 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Point.h>
 
 #include <visualization/contour.h>
 #include <contour_node/map_levels.h>
@@ -71,10 +72,8 @@ std::vector<sf::Vector2f> targets;
 // current contour map data
 contour_node::map_levels map;
 
-void updateMap(contour_node::map_levels _map)
-{
-	map = _map;
-}
+// Human interaction points
+std::vector<sf::Vector2f> nui_points;
 
 sf::Vector2f convertCoordinate(sf::Vector2f a)
 {
@@ -86,10 +85,22 @@ sf::Vector2f convertCoordinate(sf::Vector2f a)
 	return tab_vect;
 }
 
+void nuiUpdate(geometry_msgs::Point msg)
+{
+	nui_points.clear();
+	nui_points.push_back(convertCoordinate(sf::Vector2f(msg.x, msg.y)));
+}
+
+void updateMap(contour_node::map_levels _map)
+{
+	map = _map;
+}
+
+
 // Subscription callback for goals
 void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
 {
-        targets.clear();
+	targets.clear();
 	for (size_t i = 0; i < goals.point.size(); i++)
 	{
 		wvu_swarm_std_msgs::vicon_point pnt = goals.point.at(i);
@@ -100,7 +111,7 @@ void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
 // obstacle subscription callback
 void drawObstacles(wvu_swarm_std_msgs::vicon_points points)
 {
-        obstacles.clear();
+	obstacles.clear();
 	for (size_t i = 0; i < points.point.size(); i++)
 	{
 		wvu_swarm_std_msgs::vicon_point pnt = points.point.at(i);
@@ -111,7 +122,7 @@ void drawObstacles(wvu_swarm_std_msgs::vicon_points points)
 // subscription callback to update bot locations
 void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 {
-        bots_pos.clear();
+	bots_pos.clear();
 	for (size_t i = 0; i < bots.poseVect.size(); i++)
 	{
 		// getting pose
@@ -143,10 +154,10 @@ void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 vector2f_t readVector(std::string vect)
 {
 	// allocating memory for getting individual strings
-	char *vectr = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
+	char *vectr = (char*) malloc(sizeof(char) * strlen(vect.c_str()));
 	strcpy(vectr, vect.c_str());
-	char *x = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
-	char *y = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
+	char *x = (char*) malloc(sizeof(char) * strlen(vect.c_str()));
+	char *y = (char*) malloc(sizeof(char) * strlen(vect.c_str()));
 
 	// separating by commas
 	strcpy(x, strtok(vectr, ","));
@@ -251,8 +262,8 @@ void render(sf::RenderWindow *window)
 		sf::Sprite checker_sprite;
 		checker_sprite.setTexture(checker_texture);
 		checker_sprite.setPosition(sf::Vector2f(0, 0));
-		checker_sprite.scale((double)WIDTH / checker.getSize().x,
-		(double)HEIGHT / checker.getSize().y);
+		checker_sprite.scale((double) WIDTH / checker.getSize().x,
+				(double) HEIGHT / checker.getSize().y);
 		disp.draw(checker_sprite);
 	}
 
@@ -277,7 +288,19 @@ void render(sf::RenderWindow *window)
 		tar.setPosition(targets.at(i) - sf::Vector2f(2, 2));
 		disp.draw(tar);
 	}
-	
+
+	// drawing NUI points
+	sf::CircleShape nui_circ;
+	nui_circ.setRadius(2);
+	nui_circ.scale(1, 1.25);
+	nui_circ.setFillColor(sf::Color::Cyan);
+	nui_circ.setOutlineColor(sf::Color::Black);
+	nui_circ.setOutlineThickness(1);
+	for (size_t i = 0; i < targets.size(); i++)
+	{
+		nui_circ.setPosition(targets.at(i) - sf::Vector2f(1, 1));
+		disp.draw(nui_circ);
+	}
 
 	// drawing robots
 	sf::CircleShape bot;
@@ -296,14 +319,13 @@ void render(sf::RenderWindow *window)
 				sf::Vector2f(bots_pos[i].x + radius, bots_pos[i].y - radius));
 		disp.draw(rid_disp);
 	}
-	
 
 	// filling image
 	disp.display();
 
 	// converting to an image to transform
 	sf::Image img = disp.getTexture().copyToImage();
-	sf::Uint8 *tf_cols = (sf::Uint8 *) malloc(4 * WIDTH * HEIGHT);
+	sf::Uint8 *tf_cols = (sf::Uint8*) malloc(4 * WIDTH * HEIGHT);
 
 	// transforming to calibration value
 	perspectiveTransform(g_trap, &disp, tf_cols);
@@ -330,8 +352,8 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle n_priv("~");
 
-        ros::Rate rate(50);
-        
+	ros::Rate rate(50);
+
 	std::string assets, config;
 
 	n_priv.param < std::string
@@ -344,9 +366,8 @@ int main(int argc, char **argv)
 	n_priv.param<int>("table_height", g_table_height, 100);
 	n_priv.param<int>("robot_diameter", g_robot_diameter, 5);
 	n_priv.param<int>("draw_level", g_draw_level, map_ns::COMBINED);
-        
-        table_origin = sf::Vector2f(g_table_width / 2,
-		g_table_height / 2);
+
+	table_origin = sf::Vector2f(g_table_width / 2, g_table_height / 2);
 
 #if TAB_DEBUG
 	std::cout << "Got params:\n\t" << g_background << "\n\t" << config << "\n\t" << g_table_width
@@ -366,6 +387,8 @@ int main(int argc, char **argv)
 	ros::Subscriber obstacles = n.subscribe("virtual_obstacles", 1000,
 			drawObstacles);
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
+
+	ros::Subscriber nui_tracking = n.subscribe("/nui_bridge/hand_1", 1000, nuiUpdate);
 
 	// calibrating from file
 	calibrateFromFile(config);
