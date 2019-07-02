@@ -90,11 +90,12 @@ void ContourMap::tick()
 		levels,
 		bounds.width, bounds.height,
 		colors, c_levels, color_mapping.colors.size(), zfunc);
-
-	// for (size_t i = 0;i < bounds.width * bounds.height * 4;i++)
-	// {
-	// 	std::cout << "COL[" << i << "]: R=" << (int)cols[i] << ", G=" << (int)cols[i + 1] << ", B=" << (int)cols[i + 2] << std::endl;
-	// }
+#if DEBUG_CONT_SRC
+	 for (size_t i = 0;i < bounds.width * bounds.height * 4;i++)
+	 {
+	 	std::cout << "COL[" << i << "]: R=" << (int)cols[i] << ", G=" << (int)cols[i + 1] << ", B=" << (int)cols[i + 2] << std::endl;
+	 }
+#endif
 
 	img.create(bounds.width, bounds.height, cols);
 

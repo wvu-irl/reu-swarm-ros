@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(visualization)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -O1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -37,9 +37,14 @@ target_link_libraries(color_map ${catkin_LIBRARIES})
 
 find_package(CUDA)
 if (CUDA_FOUND)
+	
+	list(APPEND sms 30 35 37 50 52 60 61 70)
+	foreach(sm IN LISTS sms)
+		set(ARCH_SMS "${ARCH_SMS} -gencode arch=compute_${sm},code=sm_${sm}")
+	endforeach(sm)
 
-	set(CUDA_NVCC_FLAGS "-arch=compute_50 -ccbin g++" CACHE STRING "nvcc flags" FORCE)
-	set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc verbose" FORCE)
+	set(CUDA_NVCC_FLAGS "${ARCH_SMS} -ccbin g++" CACHE STRING "nvcc flags" FORCE)
+	set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc" FORCE)
 	set(LIB_TYPE STATIC)
 	
 	CUDA_ADD_LIBRARY(contour ${LIB_TYPE} src/contour.cu)

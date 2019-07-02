@@ -52,8 +52,8 @@ int main(int argc, char **argv)
 
 #if TEST_EQU
 	wvu_swarm_std_msgs::ellipse el;
-	el.x_rad = 50;
-	el.y_rad = 22;
+	el.x_rad = 5;
+	el.y_rad = 2;
 	el.theta_offset = M_PI_4;
 
 	wvu_swarm_std_msgs::gaussian gaus;
