@@ -82,7 +82,7 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
     if (!skelData)
     {
         // No data received
-        std::cout << "No hand data" << std::endl;
+        std::cout << "No skeleton data" << std::endl;
         return;
     }
     
@@ -145,12 +145,8 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
     }
     else
     {
-        nui.leftWrist.x = 0;
-        nui.leftWrist.y = 0;
-        nui.leftWrist.z = 0;
-        nui.leftHand.x = 0;
-        nui.leftHand.y = 0;
-        nui.leftHand.z = 0;
+        nui.leftWrist = xyz();
+        nui.leftHand = xyz();
     }
     if(nui.rightFound)
     {
@@ -163,27 +159,15 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
     }
     else
     {
-        nui.rightWrist.x = 0;
-        nui.rightWrist.y = 0;
-        nui.rightWrist.z = 0;
-        nui.rightHand.x = 0;
-        nui.rightHand.y = 0;
-        nui.rightHand.z = 0;
+        nui.rightWrist = xyz();
+        nui.rightHand = xyz();
     }
 }
 
 void serverResponse(char rec)
 {
     nuiData send;
-//    double send = 0.0;
-//    
-//    if(rec == 'x')
-//        send = x;
-//    else if(rec == 'y')
-//        send = y;
-//    else if(rec == 'z')
-//        send = z;
-//    
+    
     // Send data
     send = nui;
     if(sendto(sockfd, (void*)&send, sizeof(send), MSG_CONFIRM,

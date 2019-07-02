@@ -50,31 +50,31 @@ void initTf(void)
      *     [  2(xz+wy)      2(wx+yz)    (w2-x2-y2+z2)]
      */
     
-//    tfMat[0][0] = w*w+x*x-y*y-z*z;
-//    tfMat[1][0] = 2*(x*y+w*z);
-//    tfMat[2][0] = 2*(x*z+w*y);
-//    tfMat[0][1] = 2*(x*y-w*z);
-//    tfMat[1][1] = w*w-x*x+y*y-z*z;
-//    tfMat[2][1] = 2*(w*x+y*z);
-//    tfMat[0][2] = 2*(w*y+x*z);
-//    tfMat[1][2] = 2*(y*z-w*x);
-//    tfMat[2][2] = w*w-x*x-y*y+z*z;
-    
-    /* ROTATION MATRIX, NONHOMOGENOUS QUATERNION
-     *     [(1-2y2-2z2)  2(xy-wz)    2(wy+xz)  ]
-     * R = [ 2(xy+wz)   (1-2x2-2z2)  2(yz-wx)  ]
-     *     [ 2(xz+wy)    2(wx+yz)   (1-2x2-2y2)]
-     */
-    
-    tfMat[0][0] = 1-2*y*y-2*z*z;
+    tfMat[0][0] = w*w+x*x-y*y-z*z;
     tfMat[1][0] = 2*(x*y+w*z);
     tfMat[2][0] = 2*(x*z+w*y);
     tfMat[0][1] = 2*(x*y-w*z);
-    tfMat[1][1] = 1-2*x*x-2*z*z;
+    tfMat[1][1] = w*w-x*x+y*y-z*z;
     tfMat[2][1] = 2*(w*x+y*z);
     tfMat[0][2] = 2*(w*y+x*z);
     tfMat[1][2] = 2*(y*z-w*x);
-    tfMat[2][2] = 1-2*x*x-2*y*y;
+    tfMat[2][2] = w*w-x*x-y*y+z*z;
+    
+    /* ROTATION MATRIX, NONHOMOGENOUS QUATERNION
+     *     [(1-2sy2-2sz2)  2s(xy-wz)    2(swy+xz)  ]
+     * R = [ 2s(xy+wz)   (1-2sx2-2sz2)  2s(yz-wx)  ]
+     *     [ 2s(xz+wy)    2s(wx+yz)   (1-2sx2-2sy2)]
+     */
+    
+//    tfMat[0][0] = 1-2*y*y-2*z*z;
+//    tfMat[1][0] = 2*(x*y+w*z);
+//    tfMat[2][0] = 2*(x*z+w*y);
+//    tfMat[0][1] = 2*(x*y-w*z);
+//    tfMat[1][1] = 1-2*x*x-2*z*z;
+//    tfMat[2][1] = 2*(w*x+y*z);
+//    tfMat[0][2] = 2*(w*y+x*z);
+//    tfMat[1][2] = 2*(y*z-w*x);
+//    tfMat[2][2] = 1-2*x*x-2*y*y;
     
     // Fill in translation
     tfMat[0][3] = offsetX;
@@ -136,7 +136,7 @@ visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g,
     ret.header.stamp = ros::Time();
     ret.header.frame_id = "world";
     ret.ns = "hand";
-    ret.id = 1;
+    ret.id = _id;
     ret.type = visualization_msgs::Marker::SPHERE;
     ret.pose.position.x = _xyz->x;
     ret.pose.position.y = _xyz->y;
@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
     // Generates nodehandles, publisher
     ros::NodeHandle n;
     ros::NodeHandle n_priv("~"); // private handle
-    ros::Rate rate(1);
+    ros::Rate rate(15);
     ros::Publisher pub;
     pub = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge", 1000);
     
