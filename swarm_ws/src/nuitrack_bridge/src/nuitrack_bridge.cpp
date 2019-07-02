@@ -92,11 +92,8 @@ void initTf(void)
 }
 
 // Function to transform a single xyz
-void xyzTf(xyz &_xyz)
+void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
 {
-    // Get the transform
-    tf::TransformListener tfLis;
-    
     // Create a geometry message point because tf needs it
     geometry_msgs::PointStamped pt;
     pt.header.frame_id = "kinect";
@@ -110,6 +107,7 @@ void xyzTf(xyz &_xyz)
         geometry_msgs::PointStamped ptTf;
         
         // Transform it into world frame
+        tfLis.waitForTransform("kinect", "world", ros::Time(), ros::Duration(0.01));
         tfLis.transformPoint("world", pt, ptTf);
         
         // Apply to input
@@ -124,16 +122,16 @@ void xyzTf(xyz &_xyz)
 
 
 // Function to transform an nuiData struct from Kinect to global frame
-void nuiTf(nuiData &_nui)
+void nuiTf(nuiData &_nui, tf::TransformListener &tfLis)
 {
     // Transform each xyz point
     if(_nui.leftFound) {
-        xyzTf(_nui.leftHand);
-        xyzTf(_nui.leftWrist);
+        xyzTf(_nui.leftHand, tfLis);
+        xyzTf(_nui.leftWrist, tfLis);
     }
     if(_nui.rightFound) {
-        xyzTf(_nui.rightHand);
-        xyzTf(_nui.rightWrist);
+        xyzTf(_nui.rightHand, tfLis);
+        xyzTf(_nui.rightWrist, tfLis);
     }
 }
 
@@ -189,6 +187,9 @@ int main(int argc, char** argv) {
     ros::Rate rate(15);
     ros::Publisher pub;
     pub = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge", 1000);
+    
+    // Transform listener
+    tf::TransformListener tfLis;
     
     // Set up signal handler
     signal(SIGINT, flagger);
@@ -272,7 +273,7 @@ int main(int argc, char** argv) {
     printf("LW: %02.3f, %02.3f, %02.3f\n\r", nui.leftWrist.x, nui.leftWrist.y, nui.leftWrist.z);
     printf("RH: %02.3f, %02.3f, %02.3f\n\r", nui.rightHand.x, nui.rightHand.y, nui.rightHand.z);
     printf("RW: %02.3f, %02.3f, %02.3f\n\r", nui.rightWrist.x, nui.rightWrist.y, nui.rightWrist.z);
-                nuiTf(nui);
+                nuiTf(nui, tfLis);
                 
                 break;
             }
