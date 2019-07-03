@@ -157,10 +157,12 @@ std::vector<std::pair<float, float>> Rules::findDeadZones()
 		float temp_a_y = model.cur_pose.y - obs.y_off;
 		std::pair<float, float> aoe;
 		float plus = (2*temp_a_x*temp_a_y + //This is the quadratic formula. It's just awful
-				pow(pow(-2*temp_a_x*temp_a_y, 2) - 4*(pow(temp_a_x, 2) - pow(obs.x_rad, 2))*(pow(temp_a_y, 2) + pow(obs.y_rad, 2))), 0.5)
+				pow(pow(-2*temp_a_x*temp_a_y, 2) - 4*(pow(temp_a_x, 2) -
+						pow(obs.x_rad, 2))*(pow(temp_a_y, 2) + pow(obs.y_rad, 2)), 0.5))
 						/ (2*(pow(temp_a_x, 2) + pow(obs.x_rad, 2)));
 		float neg = (2*temp_a_x*temp_a_y - //This is the quadratic formula again, this time the minus half
-				pow(pow(-2*temp_a_x*temp_a_y, 2) - 4*(pow(temp_a_x, 2) - pow(obs.x_rad, 2))*(pow(temp_a_y, 2) + pow(obs.y_rad, 2))), 0.5)
+				pow(pow(-2*temp_a_x*temp_a_y, 2) - 4*(pow(temp_a_x, 2) -
+						pow(obs.x_rad, 2))*(pow(temp_a_y, 2) + pow(obs.y_rad, 2)), 0.5))
 						/ (2*(pow(temp_a_x, 2) + pow(obs.x_rad, 2)));
 		aoe.first = atan(plus) - atan2(temp_a_y, temp_a_x) + atan2(obs.x_off, obs.y_off);
 		aoe.second = atan(neg) - atan2(temp_a_y, temp_a_x) + atan2(obs.x_off, obs.y_off);
