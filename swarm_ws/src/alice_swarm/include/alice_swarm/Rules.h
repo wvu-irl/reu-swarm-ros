@@ -17,18 +17,21 @@ class Rules
 {
 
 
-private:
+public:
 
 	std::string state;
 	std::string collision_state;
 	AliceStructs::vel final_vel;
+	std::vector<float> testers;
 	Model model;
 
-	/*
-	 * Calculates distances
-	 */
 	float calcDis(float _x1, float _y1, float _x2, float _y2);
 
+	bool checkBlocked();
+
+	void findAngle(float tf, std::vector<std::pair<float, float>> dead_zones);
+
+	std::vector<std::pair<float, float>> findDeadZones();
 
 //===================================================================================================================\\
 
@@ -56,8 +59,6 @@ private:
 	 * Makes Alice seek higher elevations
 	 */
 	void findUpdraft();
-
-public:
 
 	Rules();
 
