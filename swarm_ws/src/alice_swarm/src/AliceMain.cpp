@@ -19,8 +19,15 @@ int main(int argc, char **argv)
 
 	wvu_swarm_std_msgs::alice_mail mail;
 	wvu_swarm_std_msgs::point_mail tar;
-	tar.x = 5;
-	tar.y = 5;
+	tar.x = 20;
+	tar.y = 0;
+	wvu_swarm_std_msgs::ellipse obj;
+	obj.x_rad = 5;
+	obj.y_rad = 5;
+	obj.theta_offset = 0;
+	obj.offset_x = 10;
+	obj.offset_y = 10;
+	mail.obsMail.push_back(obj);
 	mail.targetMail.push_back(tar);
 	Alice alice;
 	alice = Alice(mail);
