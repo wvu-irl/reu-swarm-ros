@@ -15,11 +15,36 @@ Model::Model(int _name)
 	name = _name;
 }
 
-void Model::sensorUpdate(AliceStructs::mail _toAdd)
+void Model::clear()
 {
+	obstacles.clear();
+	flows.clear();
+	neighbors.clear();
+	targets.clear();
+}
+void Model::archiveAdd(AliceStructs::mail &_toAdd)
+{
+	float vision = _toAdd.vision - 0; // make number larger if we want to account for moving things, will be buggy tho
+
+	for (auto& obstacle : obstacles)
+	{
+		if(pow(pow(obstacle.x_off-_toAdd.xpos,2)+pow(obstacle.y_off-_toAdd.ypos,2),0.5) > vision) archived_obstacles.push_back(obstacle);
+	}
+	for (auto& tar : targets)
+	{
+		if(pow(pow(tar.x-_toAdd.xpos,2)+pow(tar.y-_toAdd.ypos,2),0.5) > vision) archived_targets.push_back(tar);
+	}
+}
+
+void Model::sensorUpdate(AliceStructs::mail &_toAdd)
+{
+
+	clear();
+	cur_pose.z = _toAdd.level;
+
 	for (auto& obstacle : _toAdd.obstacles)
 	{
-		current_obstacles.push_back(obstacle);
+		obstacles.push_back(obstacle);
 	}
 	for (auto& flow : _toAdd.flows)
 	{
@@ -33,7 +58,6 @@ void Model::sensorUpdate(AliceStructs::mail _toAdd)
 	{
 		targets.push_back(tar);
 	}
-	cur_pose.z = _toAdd.level;
 }
 
 void Model::pass()

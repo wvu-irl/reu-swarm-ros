@@ -9,5 +9,6 @@ float32 y
 float32 heading
 int32 name
 int32 sid
+int32 vision
 time time
 		

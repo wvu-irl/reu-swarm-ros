@@ -14,7 +14,7 @@ Alice::Alice()
 	name = 0;
 }
 
-Alice::Alice(wvu_swarm_std_msgs::alice_mail _data)
+Alice::Alice(wvu_swarm_std_msgs::alice_mail &_data)
 {
 	name = _data.name;
 	model = Model(_data.name);
@@ -23,14 +23,14 @@ Alice::Alice(wvu_swarm_std_msgs::alice_mail _data)
 //	(_data);
 }
 
-AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail _data)
+AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 {
 	AliceStructs::mail mail;
 	for (auto& _obstacle : _data.obsMail)
 	{
 		AliceStructs::obj obstacle;
-		obstacle.x_off = _obstacle.x_offset;
-		obstacle.y_off = _obstacle.y_offset;
+		obstacle.x_off = _obstacle.offset_x;
+		obstacle.y_off = _obstacle.offset_y;
 		obstacle.x_rad = _obstacle.x_rad;
 		obstacle.y_rad = _obstacle.y_rad;
 		obstacle.theta_offset = _obstacle.theta_offset;
@@ -66,7 +66,7 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail _data)
 	return mail;
 }
 
-void Alice::updateModel(wvu_swarm_std_msgs::alice_mail _data)
+void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data)
 {
 	AliceStructs::mail mail = packageData(_data);
 	model.sensorUpdate(mail);

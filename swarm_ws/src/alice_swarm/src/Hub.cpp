@@ -250,7 +250,7 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		temp.y=bots[*it].y;
 		temp.heading=bots[*it].heading;
 		to_return.mails.push_back(temp);
-
+		temp.vision=VISION;
 	}
 #if DEBUG_HUB
 	//printAliceMail(temp);

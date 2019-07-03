@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <ros/ros.h>
 namespace AliceStructs {
 
 /*
@@ -19,7 +20,8 @@ namespace AliceStructs {
 		float spd;
 		float y;
 		float pri;
-		int t;
+		ros::Time time;
+		int observer_name;
 	} flow;
 
 	/*
@@ -50,7 +52,8 @@ namespace AliceStructs {
 		float x_off;
 		float y_off;
 		float theta_offset;
-		int t;
+		ros::Time time;
+		int observer_name;
 	} obj;
 
 	/*
@@ -60,7 +63,8 @@ namespace AliceStructs {
 		float x;
 		float y;
 		float z;
-		int t;
+		ros::Time time;
+		int observer_name;
 	} pnt;
 
 	/*
@@ -72,7 +76,11 @@ namespace AliceStructs {
 		std::vector<pnt> targets;
 		std::vector<flow> flows;
 		int name;
+		float xpos;
+		float ypos;
 		float level;
+		ros::Time time;
+		float vision;
 	} mail;
 };
 
