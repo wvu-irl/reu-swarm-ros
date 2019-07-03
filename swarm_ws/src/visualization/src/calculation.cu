@@ -57,16 +57,14 @@ typedef struct
  * x and y are coordinates on the plane perpendicular to the view
  * t is a saw function of time (goes from 0 to 1000 incrementing by 1 every tick)
  */
-// this is a magic number DO NOT CHANGE IT
-#define q 1.245
 __device__ void zfunc(double *z, double x, double y, map_level_t map)
 {
-    x += 640;
-		y += 400;
-		x *= 1280.0 / 200.0;
-		y *= 800.0 / 100.0;
+    x -= 640;
+		y -= 400;
+		x *= 200.0 / 1280.0;
+		y *= 100.0 / 800.0;
 		*z = 0;
-		double theta = x == 0 ? (y > 0 ? M_PI_2 : -M_PI_2) : (atan(y/x) + (x < 0 ? M_PI : 0));
+		double theta = x == 0 ? (y > 0 ? M_PI_2 : -M_PI_2) : (atan(y/x) + (y < 0 ? M_PI : 0));
 		double r = sqrt(x*x + y*y);
 
 		for (size_t i = 0;i < map.num_eqs;i++)
@@ -78,12 +76,12 @@ __device__ void zfunc(double *z, double x, double y, map_level_t map)
 			double x_app = r * cos(theta + curr_eq.ellipse.theta_off);
 			double y_app = r * sin(theta + curr_eq.ellipse.theta_off);
 
-			double re = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
+			double re = a != 0 && b != 0 ? sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b) : 0;
 
-			if (re < M_PI / q)
+			if (re < M_PI / 1.245)
 			{
 				double amp = curr_eq.amplitude / 2.0;
-				*z += amp * cos(q * re) + amp;
+				*z += amp * cos(1.245 * re) + amp;
 			}
 		}
 }
@@ -187,10 +185,10 @@ __device__ double min(double a, double b)
  */
 __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     size_t *width, size_t *height, color *colors, double *color_levels, size_t *num_cols,
-		gaussian_t *eqs, size_t *num_eqs)
+		const gaussian_t *eqs, const size_t *num_eqs)
 {
 
-		map_level_t lev = {eqs, *num_eqs};
+		map_level_t lev = {(gaussian_t *)eqs, *((size_t *)(num_eqs))};
 
 		// finding where in the image the process is
     int idx = blockIdx.x * blockDim.x + threadIdx.x;

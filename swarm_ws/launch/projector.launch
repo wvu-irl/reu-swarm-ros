@@ -16,7 +16,7 @@
 		<!-- Background - setting to "None" will not draw a background - setting 
 			to "Contour" will draw a contour map - setting to a file path will draw the 
 			image in the path -->
-		<param name="background" value="/home/the_pun_king/git/reu-swarm-ros/swarm_ws/src/visualization/assets/HockeyRink.png" type="str" />
+		<param name="background" value="Contour" type="str" />
 		
 	</node>
 
