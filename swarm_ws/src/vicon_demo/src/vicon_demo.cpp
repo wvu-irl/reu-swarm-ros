@@ -12,7 +12,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <wvu_swarm_std_msgs/rtheta.h>
+#include <vicon_demo/rtheta.h>
 #include <wvu_swarm_std_msgs/vicon_bot.h>
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
 
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
     
     // Subscribe to tracker's vicon topic, publish result vector
     sub = n.subscribe("/viconArray", 10, &msgCallback);
-    pub = n.advertise<wvu_swarm_std_msgs::rtheta>("vicon_demo", 1000);
+    pub = n.advertise<vicon_demo::rtheta>("vicon_demo", 1000);
     visPub = n.advertise<visualization_msgs::MarkerArray>("demo_vis", 1000);
     //pub = n.advertise<geometry_msgs::Point>("vicon_demo", 1000);
     
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
         if(degrees < 0) degrees += 360;
         
         // Put into data structure
-        wvu_swarm_std_msgs::rtheta output;
+        vicon_demo::rtheta output;
         output.radius = radius;
         output.degrees = degrees;
         
