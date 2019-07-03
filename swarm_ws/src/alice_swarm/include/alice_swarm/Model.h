@@ -18,7 +18,8 @@ public:
 	 * Information about Alice's immediate environment
 	 */
 	std::vector<AliceStructs::obj> obstacles;
-	AliceStructs::pnt cur_pose;
+	AliceStructs::pose cur_pose;
+	ros::Time time;
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
 	std::vector<AliceStructs::pnt> targets;
@@ -30,6 +31,7 @@ public:
 
 	std::vector<AliceStructs::obj> archived_obstacles;
 	std::vector<AliceStructs::pnt> archived_targets;
+	std::vector<AliceStructs::pose> archived_contour;
 
 	Model();
 

@@ -50,7 +50,7 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 		AliceStructs::pnt tar;
 		tar.x = _tar.x;
 		tar.y = _tar.y;
-		//tar.z = _tar.z;
+		tar.z = 1;//targets don't have this value?
 		mail.targets.push_back(tar);
 	}
 	for (auto& _flow : _data.flowMail)
@@ -62,14 +62,23 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 		flow.spd = _flow.spd;
 		mail.flows.push_back(flow);
 	}
+	mail.xpos=_data.x;
+	mail.ypos=_data.y;
+	mail.level=_data.contourVal;
+	mail.heading=_data.heading;
 	mail.name = _data.name;
+	mail.vision=_data.vision;
+	mail.time=_data.time;
 	return mail;
 }
 
 void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data)
 {
 	AliceStructs::mail mail = packageData(_data);
+	model.archiveAdd(mail);
 	model.sensorUpdate(mail);
+	model.forget();
+	model.pass();
 }
 
 AliceStructs::vel Alice::generateVel()
