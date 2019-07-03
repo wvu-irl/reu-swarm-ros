@@ -15,7 +15,7 @@
 #include <wvu_swarm_std_msgs/map_level.h>
 
 #define CALC_DEBUG 0
-#define CUDA_DEBUG 0
+#define CUDA_DEBUG 1
 
 /**
  * namespace for doing stupid amounts of calculations
@@ -43,13 +43,6 @@ typedef struct
 	ellipse_t ellipse;
 } gaussian_t;
 
-
-typedef struct
-{
-  gaussian_t *eqs;
-	size_t num_eqs;
-} map_level_t;
-
 /**
  * 4d surface function to be calculated
  *
@@ -57,26 +50,29 @@ typedef struct
  * x and y are coordinates on the plane perpendicular to the view
  * t is a saw function of time (goes from 0 to 1000 incrementing by 1 every tick)
  */
-__device__ void zfunc(double *z, double x, double y, map_level_t map)
+__device__ void zfunc(double *z, double x, double y, gaussian_t *map, size_t num_eqs)
 {
     x -= 640;
 		y -= 400;
 		x *= 200.0 / 1280.0;
 		y *= 100.0 / 800.0;
-		*z = 0;
 		double theta = x == 0 ? (y > 0 ? M_PI_2 : -M_PI_2) : (atan(y/x) + (y < 0 ? M_PI : 0));
 		double r = sqrt(x*x + y*y);
+		*z = 0;
 
-		for (size_t i = 0;i < map.num_eqs;i++)
+		for (size_t i = 0;i < num_eqs;i++)
 		{
-			gaussian_t curr_eq = map.eqs[i];
+			gaussian_t curr_eq = map[i];
 			double a = curr_eq.ellipse.x_rad;
 			double b = curr_eq.ellipse.y_rad;
 
-			double x_app = r * cos(theta + curr_eq.ellipse.theta_off);
-			double y_app = r * sin(theta + curr_eq.ellipse.theta_off);
+//			double x_app = r * cos(theta + curr_eq.ellipse.theta_off);
+//			double y_app = r * sin(theta + curr_eq.ellipse.theta_off);
 
-			double re = a != 0 && b != 0 ? sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b) : 0;
+			double x_app = r * cos(theta + curr_eq.ellipse.theta_off) - curr_eq.x_off;
+			double y_app = r * sin(theta + curr_eq.ellipse.theta_off) - curr_eq.y_off;
+
+			double re = a != 0 && b != 0 ? sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b) : 10000;
 
 			if (re < M_PI / 1.245)
 			{
@@ -185,11 +181,8 @@ __device__ double min(double a, double b)
  */
 __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     size_t *width, size_t *height, color *colors, double *color_levels, size_t *num_cols,
-		const gaussian_t *eqs, const size_t *num_eqs)
+		gaussian_t *eqs, size_t *num_eqs)
 {
-
-		map_level_t lev = {(gaussian_t *)eqs, *((size_t *)(num_eqs))};
-
 		// finding where in the image the process is
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int col_id = idx * 4;
@@ -197,17 +190,21 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     int j = idx % (*width);
 
 #if CUDA_DEBUG
-//    printf("Calculating value: %d[%d] == (%d, %d)\n", idx, col_id, i, j);
-    printf("Equations:\n");
+    printf("Calculating value: %d[%d] == (%d, %d)\n", idx, col_id, i, j);
+    printf("\033[0mEquations:\n");
     for (size_t i = 0;i < *num_eqs;i++)
     {
-    	printf(" Function[%d]:\n  AMP:%lf\n  X: %lf\n  Y: %lf\n  Ellipse:\n    xrad: %lf\n    yrad: %lf\n",
-    			i, lev.eqs[i].amplitude, lev.eqs[i].x_off, lev.eqs[i].y_off, lev.eqs[i].ellipse.x_rad);
+//    	eqs[i].amplitude = 20;
+//    	eqs[i].ellipse.x_rad = 5;
+//    	eqs[i].ellipse.y_rad = 2;
+//    	eqs[i].ellipse.theta_off = 0.2;
+			printf(" Function[%d]:\n  AMP:%lf\n  X: %lf\n  Y: %lf\n  Ellipse:\n    xrad: %lf\n    yrad: %lf\n    toff: %lf\n",
+					i, eqs[i].amplitude, eqs[i].x_off, eqs[i].y_off, eqs[i].ellipse.x_rad, eqs[i].ellipse.y_rad, eqs[i].ellipse.theta_off);
     }
 #endif
     // calculating function
     double zc;
-    zfunc(&zc, (double)j, (double)i, lev);
+    zfunc(&zc, (double)j, (double)i, (gaussian_t *)eqs, *num_eqs);
 
     // determining gradiant color
     color c = calculateColor(zc, colors, color_levels, *num_cols);
@@ -221,10 +218,10 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     {
     		// calculating neighbors
         double zz[4];
-        zfunc(zz, (double)j, (double)i - 1, lev);
-        zfunc(zz + 1, (double)j, (double)i + 1, lev);
-        zfunc(zz + 2, (double)j - 1, (double)i, lev);
-        zfunc(zz + 3, (double)j + 1, (double)i, lev);
+        zfunc(zz, (double)j, (double)i - 1, (gaussian_t *)eqs, *num_eqs);
+        zfunc(zz + 1, (double)j, (double)i + 1, (gaussian_t *)eqs, *num_eqs);
+        zfunc(zz + 2, (double)j - 1, (double)i, (gaussian_t *)eqs, *num_eqs);
+        zfunc(zz + 3, (double)j + 1, (double)i, (gaussian_t *)eqs, *num_eqs);
 
         // checking levels
         for (size_t k = 0;k < *num_levels;k++)
@@ -257,10 +254,10 @@ void createDeviceVar(void **var, size_t size, void *h_var)
 {
     std::cout << "\033[31;1m" << std::flush;
     checkCudaErrors(cudaMalloc(var, size));
-    checkCudaErrors(cudaMemset(*var, 0, size));
+//    checkCudaErrors(cudaMemset(*var, 0, size));
     std::cout << "\033[0m" << std::flush;
 
-    cudaMemcpyAsync(*var, h_var, size, cudaMemcpyHostToDevice, 0);
+    cudaMemcpyAsync(*var, h_var, size, cudaMemcpyHostToDevice);
 }
 
 void createDeviceVar(void **var, size_t size)
@@ -342,7 +339,7 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     createDeviceVar((void **)&d_colors, sizeof(color) * num_cols, colors);
     createDeviceVar((void **)&d_color_levels, sizeof(double) * num_cols, color_levels);
     createDeviceVar((void **)&d_num_colors, sizeof(size_t), &(num_cols));
-    createDeviceVar((void **)&d_funk,sizeof(wvu_swarm_std_msgs::gaussian) * funk.functions.size(), &funky);
+    createDeviceVar((void **)&d_funk,sizeof(gaussian_t) * funk.functions.size(), &funky);
     createDeviceVar((void **)&d_num_eqs, sizeof(size_t), &num_eqs);
 
     dim3 threads(1024, 1);
@@ -367,14 +364,14 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
         d_num_colors,
 				d_funk,
 				d_num_eqs);
-#if CUDA_DEBUG
-    cudaDeviceSynchronize();
-#endif
-    cudaMemcpyAsync(cols, d_cols, size, cudaMemcpyDeviceToHost, 0);
+    cudaMemcpyAsync(cols, d_cols, size, cudaMemcpyDeviceToHost);
     cudaEventRecord(stop, 0);
 
     while (cudaEventQuery(stop) == cudaErrorNotReady)
     {
+#if CUDA_DEBUG
+    		cudaDeviceSynchronize();
+#endif
         usleep(100);
     }
 

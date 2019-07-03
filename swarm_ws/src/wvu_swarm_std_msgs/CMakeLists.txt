@@ -38,6 +38,7 @@ find_package(catkin REQUIRED COMPONENTS
 	map_level.msg
 	map_levels.msg
 	obstacle.msg
+	sensor_data.msg
   )
 
 ## Generate added messages and services with any dependencies listed here

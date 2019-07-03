@@ -140,8 +140,8 @@ void ContourMap::tick()
 			double a = curr_eq.ellipse.x_rad;
 			double b = curr_eq.ellipse.y_rad;
 
-			double x_app = r * cos(theta + curr_eq.ellipse.theta_offset);
-			double y_app = r * sin(theta + curr_eq.ellipse.theta_offset);
+			double x_app = r * cos(theta + curr_eq.ellipse.theta_offset) - zfunc.functions[i].ellipse.offset_x;
+			double y_app = r * sin(theta + curr_eq.ellipse.theta_offset) - zfunc.functions[i].ellipse.offset_y;
 
 			double re = a != 0 && b != 0 ? sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b) : 0;
 #if DEBUG_CONT_SRC
