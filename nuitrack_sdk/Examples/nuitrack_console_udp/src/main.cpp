@@ -25,7 +25,7 @@
 
 // When 1, use handTracker for hand location. When 0,
 //   use skeletonTracker's hand joint for hand location.
-#define USEHAND 1
+#define USEHAND 0
 
 using namespace tdv::nuitrack;
 
@@ -63,7 +63,6 @@ void onHandUpdate(HandTrackerData::Ptr handData)
         return;
     }
 
-#if USEHAND
     auto rightHand = userHands[0].rightHand;
     if (!rightHand)
     {
@@ -73,10 +72,13 @@ void onHandUpdate(HandTrackerData::Ptr handData)
     }
     else
     {
-        // handTracker left/right is opposite of skelTracker
-        nui.leftHand.x = rightHand->xReal;
-        nui.leftHand.y = rightHand->yReal;
-        nui.leftHand.z = rightHand->zReal;
+        nui.rightClick = rightHand->click;
+#if USEHAND
+        nui.rightHand.x = rightHand->xReal;
+        nui.rightHand.y = rightHand->yReal;
+        nui.rightHand.z = rightHand->zReal;
+        nui.confLH = 1.0;
+#endif
     }
     
     auto leftHand = userHands[0].leftHand;
@@ -88,12 +90,16 @@ void onHandUpdate(HandTrackerData::Ptr handData)
     }
     else
     {
-        // handTracker left/right is opposite of skelTracker
-        nui.rightHand.x = leftHand->xReal;
-        nui.rightHand.y = leftHand->yReal;
-        nui.rightHand.z = leftHand->zReal;
-    }
+        nui.leftClick = leftHand->click;
+#if USEHAND
+        nui.leftHand.x = leftHand->xReal;
+        nui.leftHand.y = leftHand->yReal;
+        nui.leftHand.z = leftHand->zReal;
+        nui.confRH = 1.0;
 #endif
+        
+        
+    }
 }
 
 void onSkelUpdate(SkeletonData::Ptr skelData)
@@ -160,10 +166,12 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         nui.leftWrist.x = leftWrist.real.x;
         nui.leftWrist.y = leftWrist.real.y;
         nui.leftWrist.z = leftWrist.real.z;
+        nui.confLW = leftWrist.confidence;
 #if !USEHAND
         nui.leftHand.x = leftHand.real.x;
         nui.leftHand.y = leftHand.real.y;
         nui.leftHand.z = leftHand.real.z;
+        nui.confLH = leftHand.confidence;
 #endif
     }
     else
@@ -178,10 +186,12 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         nui.rightWrist.x = rightWrist.real.x;
         nui.rightWrist.y = rightWrist.real.y;
         nui.rightWrist.z = rightWrist.real.z;
+        nui.confRW = rightWrist.confidence;
 #if !USEHAND
         nui.rightHand.x = rightHand.real.x;
         nui.rightHand.y = rightHand.real.y;
         nui.rightHand.z = rightHand.real.z;
+        nui.confRH = rightHand.confidence;
 #endif
     }
     else
@@ -208,11 +218,6 @@ void serverResponse(char rec)
     {
         std::cout << "Error in sending!" << std::endl;
     }
-    
-    printf("LH: %02.3f, %02.3f, %02.3f\n\r", nui.leftHand.x, nui.leftHand.y, nui.leftHand.z);
-    printf("LW: %02.3f, %02.3f, %02.3f\n\r", nui.leftWrist.x, nui.leftWrist.y, nui.leftWrist.z);
-    printf("RH: %02.3f, %02.3f, %02.3f\n\r", nui.rightHand.x, nui.rightHand.y, nui.rightHand.z);
-    printf("RW: %02.3f, %02.3f, %02.3f\n\r", nui.rightWrist.x, nui.rightWrist.y, nui.rightWrist.z);
     
     // Reset client address
     memset(&cliaddr, 0, sizeof(cliaddr)); 
