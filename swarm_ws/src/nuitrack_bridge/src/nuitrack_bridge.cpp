@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
     // Generates nodehandles, publisher
     ros::NodeHandle n;
     ros::NodeHandle n_priv("~"); // private handle
-    ros::Rate rate(15);
+    ros::Rate rate(50);
     ros::Publisher pub;
     pub = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge", 1000);
     

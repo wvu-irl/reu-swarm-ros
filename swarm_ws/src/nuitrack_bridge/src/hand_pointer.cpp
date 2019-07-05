@@ -107,9 +107,6 @@ int main(int argc, char** argv) {
             handTwo = findZIntercept(rH, rW, 0);
         }
         
-        geometry_msgs::Point testOrigin, testResult;
-        testOrigin.x = 0; testOrigin.y = 0; testOrigin.z = 0;
-        
         // Publish hands
         pub1.publish(handOne);
         pub2.publish(handTwo);
