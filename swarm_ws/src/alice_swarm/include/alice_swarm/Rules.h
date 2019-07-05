@@ -31,6 +31,10 @@ public:
 
 	void findAngle(float tf, std::vector<std::pair<float, float>> dead_zones);
 
+	void findRightAngle(float tf, std::vector<std::pair<float, float>> dead_zones);
+
+	void findLeftAngle(float tf, std::vector<std::pair<float, float>> dead_zones);
+
 	std::vector<std::pair<float, float>> findDeadZones();
 
 //===================================================================================================================\\

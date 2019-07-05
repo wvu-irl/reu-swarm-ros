@@ -124,17 +124,16 @@ void Rules::findAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
 		{
 			if (zone.first > tf || tf > zone.second)
 			{
-				std::cout << "yes" << std::endl;
-				right.push_back(fmod(zone.first + tf, M_PI));
-				left.push_back(fmod(zone.second - tf, M_PI));
+				right.push_back(fmod(zone.first, 2*M_PI));
+				left.push_back(fmod(zone.second, 2*M_PI));
 			}
 		}
 		else
 		{
 			if (zone.first < tf && tf < zone.second)
 			{
-				right.push_back(fmod(zone.first + tf, M_PI));
-				left.push_back(fmod(zone.second - tf, M_PI));
+				right.push_back(fmod(zone.first, 2*M_PI));
+				left.push_back(fmod(zone.second, 2*M_PI));
 			}
 		}
 	}
@@ -146,8 +145,72 @@ void Rules::findAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
 	{
 		sort(right.begin(), right.end());
 		sort(left.begin(), left.end());
-		findAngle(right.front(), dead_zones);
-		findAngle(left.front(), dead_zones);
+		findRightAngle(right.front(), dead_zones);
+		findLeftAngle(left.front(), dead_zones);
+	}
+}
+
+void Rules::findRightAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
+{
+	std::vector<float> right;
+	for (auto& zone : dead_zones)
+	{
+		std::cout << "Right: " << zone.first << " - " << tf << " - " << zone.second << std::endl;
+		if (zone.second - zone.first > M_PI/2)
+		{
+			if (zone.first > tf || tf > zone.second)
+			{
+				right.push_back(fmod(zone.first, 2*M_PI));
+			}
+		}
+		else
+		{
+			if (zone.first < tf && tf < zone.second)
+			{
+				right.push_back(fmod(zone.first, 2*M_PI));
+			}
+		}
+	}
+	if (right.size() == 0)
+	{
+		testers.push_back(tf);
+	}
+	else
+	{
+		sort(right.begin(), right.end());
+		findRightAngle(right.front(), dead_zones);
+	}
+}
+
+void Rules::findLeftAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
+{
+	std::vector<float> left;
+	for (auto& zone : dead_zones)
+	{
+		std::cout << "Left: " << zone.first << " - " << tf << " - " << zone.second << std::endl;
+		if (zone.second - zone.first > M_PI/2)
+		{
+			if (zone.first > tf || tf > zone.second)
+			{
+				left.push_back(fmod(zone.second, 2*M_PI));
+			}
+		}
+		else
+		{
+			if (zone.first < tf && tf < zone.second)
+			{
+				left.push_back(fmod(zone.second, 2*M_PI));
+			}
+		}
+	}
+	if (left.size() == 0)
+	{
+		testers.push_back(tf);
+	}
+	else
+	{
+		sort(left.begin(), left.end());
+		findLeftAngle(left.front(), dead_zones);
 	}
 }
 
@@ -171,7 +234,6 @@ std::vector<std::pair<float, float>> Rules::findDeadZones()
 						/ (2*(pow(temp_a_x, 2) - pow(obs.y_rad, 2))); */
 		aoe.first = atan(plus) - atan(temp_a_y/temp_a_x) + atan(obs.y_off/obs.x_off);
 		aoe.second = -atan(plus) - atan(temp_a_y/temp_a_x) + atan(obs.y_off/obs.x_off);
-		std::cout << aoe.first << " " << aoe.second << std::endl;
 		dead_zones.push_back(aoe);
 	}
 	return dead_zones;
