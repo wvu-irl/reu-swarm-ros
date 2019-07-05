@@ -53,10 +53,9 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-  add_message_files(
-    FILES
-    rtheta.msg
-  )
+#  add_message_files(
+#    FILES
+#  )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -111,7 +110,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES vicon_demo
-   CATKIN_DEPENDS message_runtime
+#   CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 
@@ -140,11 +139,6 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/vicon_demo_node.cpp)
-  add_executable(vicon_demo src/vicon_demo.cpp)
-  target_link_libraries(vicon_demo
-    ${catkin_LIBRARIES}
-  )
-  add_dependencies(vicon_demo ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
   
   add_executable(tracking_demo src/tracking_demo.cpp)
   target_link_libraries(tracking_demo

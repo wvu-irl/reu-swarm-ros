@@ -52,9 +52,9 @@ void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
         tfLis.transformPoint("world", pt, ptTf);
         
         // Apply to input
-        _xyz.x = ptTf.point.x * 100; // m to cm
-        _xyz.y = ptTf.point.y * 100;
-        _xyz.z = ptTf.point.z * 100;
+        _xyz.x = ptTf.point.x; // m to cm
+        _xyz.y = ptTf.point.y;
+        _xyz.z = ptTf.point.z;
     }
     catch (tf::TransformException &ex) {
         ROS_ERROR("Transform error! %s", ex.what());
@@ -75,7 +75,7 @@ void nuiTf(nuiData &_nui, tf::TransformListener &tfLis)
     }
 }
 
-visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g, double _b)
+visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g, double _b, double _a = 1.0, double _size = 0.04)
 {
     visualization_msgs::Marker ret;
     
@@ -91,13 +91,13 @@ visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g,
     ret.pose.orientation.y = 0;
     ret.pose.orientation.z = 0;
     ret.pose.orientation.w = 1;
-    ret.scale.x = 0.04;
-    ret.scale.y = 0.04;
-    ret.scale.z = 0.04;
+    ret.scale.x = _size;
+    ret.scale.y = _size;
+    ret.scale.z = _size;
     ret.color.r = _r;
     ret.color.g = _g;
     ret.color.b = _b;
-    ret.color.a = 1;
+    ret.color.a = _a;
     
     return ret;
 }
@@ -106,10 +106,16 @@ visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
 {
     visualization_msgs::MarkerArray ret;
     
-    ret.markers.push_back(xyzToMarker(1, &(_nui->leftWrist), 1, 0.5, 0));
-    ret.markers.push_back(xyzToMarker(2, &(_nui->leftHand), 1, 0, 0));
-    ret.markers.push_back(xyzToMarker(3, &(_nui->rightWrist), 0, 0.5, 1));
-    ret.markers.push_back(xyzToMarker(4, &(_nui->rightHand), 0, 0, 1));
+    // Use confidence values as alpha-- less certain joints will be more transparent
+    double leftHandAlpha = _nui->confLH;
+    double leftWristAlpha = _nui->confLW;
+    double rightHandAlpha = _nui->confRH;
+    double rightWristAlpha = _nui->confRW;
+    
+    ret.markers.push_back(xyzToMarker(1, &(_nui->leftWrist), 1, 0.5, 0, leftWristAlpha));
+    ret.markers.push_back(xyzToMarker(2, &(_nui->leftHand), 1, 0, 0, leftHandAlpha, _nui->leftClick ? 0.06 : 0.04));
+    ret.markers.push_back(xyzToMarker(3, &(_nui->rightWrist), 0, 0.5, 1, rightWristAlpha));
+    ret.markers.push_back(xyzToMarker(4, &(_nui->rightHand), 0, 0, 1, rightHandAlpha, _nui->rightClick ? 0.06 : 0.04));
     
     return ret;
 }
@@ -121,7 +127,7 @@ int main(int argc, char** argv) {
     // Generates nodehandles, publisher
     ros::NodeHandle n;
     ros::NodeHandle n_priv("~"); // private handle
-    ros::Rate rate(15);
+    ros::Rate rate(50);
     ros::Publisher pub;
     pub = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge", 1000);
     
@@ -206,10 +212,6 @@ int main(int argc, char** argv) {
                 
                 // Transform the data
                 nui = rec;
-    printf("LH: %02.3f, %02.3f, %02.3f\n\r", nui.leftHand.x, nui.leftHand.y, nui.leftHand.z);
-    printf("LW: %02.3f, %02.3f, %02.3f\n\r", nui.leftWrist.x, nui.leftWrist.y, nui.leftWrist.z);
-    printf("RH: %02.3f, %02.3f, %02.3f\n\r", nui.rightHand.x, nui.rightHand.y, nui.rightHand.z);
-    printf("RW: %02.3f, %02.3f, %02.3f\n\r", nui.rightWrist.x, nui.rightWrist.y, nui.rightWrist.z);
                 nuiTf(nui, tfLis);
                 
                 break;

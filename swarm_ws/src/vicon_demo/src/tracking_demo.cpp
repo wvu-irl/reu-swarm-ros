@@ -12,7 +12,6 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <vicon_demo/rtheta.h>
 #include <wvu_swarm_std_msgs/vicon_bot.h>
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
 #include <wvu_swarm_std_msgs/robot_command.h>

@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <wvu_swarm_std_msgs/robot_command.h>
 #include <wvu_swarm_std_msgs/robot_command_array.h>
-#include <wvu_swarm_std_msgs/sensor_data.h>
 
 #include "arduino_server.h"
 #include <swarm_server/robot_id.h>
@@ -39,18 +38,18 @@ void flagger(int sig)
 void commandCallback(command cmd, int rid)
 {
 	ROS_INFO("\033[34mCommand: \033[30;44m%s\033[0m", cmd.str); // displaying recieved data
-	wvu_swarm_std_msgs::sensor_data inf; // conversion container
-	for (size_t i = 0; i < 32; i++)
-	{
-		inf.data[i] = cmd.str[i];
-	}
-	if (&g_from_ard != NULL)
-		g_from_ard.publish(inf); // publishing
-
-	std::ofstream file;
-	file.open("/home/air/sensor_log.csv", std::ios::out | std::ios::app);
-	file << rid_indexing[rid] << "," << cmd.str << std::endl;
-	file.close();
+//	wvu_swarm_std_msgs::sensor_data inf; // conversion container
+//	for (size_t i = 0; i < 32; i++)
+//	{
+//		inf.data[i] = cmd.str[i];
+//	}
+//	if (&g_from_ard != NULL)
+//		g_from_ard.publish(inf); // publishing
+//
+//	std::ofstream file;
+//	file.open("/home/air/sensor_log.csv", std::ios::out | std::ios::app);
+//	file << rid_indexing[rid] << "," << cmd.str << std::endl;
+//	file.close();
 }
 
 /**
@@ -107,8 +106,6 @@ void *controlThread(void *arg0)
 	ros::NodeHandle *n = (ros::NodeHandle *) arg0; // passed node handle
 	ros::Subscriber to_ard = n->subscribe("final_execute", 1000,
 			sendToRobotCallback); // subscribing to movment datastream
-	g_from_ard = n->advertise < wvu_swarm_std_msgs::sensor_data
-			> ("from_arduino", 1000); // advertising arduino data
 
 	while (true)
 	{

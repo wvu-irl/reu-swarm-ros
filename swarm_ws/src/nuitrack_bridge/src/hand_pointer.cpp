@@ -25,7 +25,7 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
     
     // Check if no solution
     if(_alpha.z == _beta.z) {
-        printf("\033[1;31mhand_pointer:\033[0;31No solution for intercept\033[0m\n");
+        printf("\033[1;31mhand_pointer: \033[0;31mNo solution for intercept\033[0m\n");
         ret.x = 0.0;
         ret.y = 0.0;
         ret.z = 0.0;
@@ -39,6 +39,7 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
         ret.y = y;
         ret.z = _zed;
     }
+    
     return ret;
 }
 
@@ -49,7 +50,7 @@ int main(int argc, char** argv) {
     // Generates nodehandles, publishers, subscriber
     ros::NodeHandle n;
     ros::NodeHandle n_priv("~"); // private handle
-    ros::Publisher pub1, pub2;
+    ros::Publisher pub1, pub2, pub3;
     ros::Subscriber sub;
     pub1 = n.advertise<geometry_msgs::Point>("nuitrack_bridge/hand_1", 1000);
     pub2 = n.advertise<geometry_msgs::Point>("nuitrack_bridge/hand_2", 1000);

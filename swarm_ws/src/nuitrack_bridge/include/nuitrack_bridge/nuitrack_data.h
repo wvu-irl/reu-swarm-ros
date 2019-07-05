@@ -58,10 +58,18 @@ typedef struct nuiData
         leftWrist = xyz();
         rightHand = xyz();
         rightWrist = xyz();
+        confLH = 0.0;
+        confLW = 0.0;
+        confRH = 0.0;
+        confRW = 0.0;
+        leftClick = false;
+        rightClick = false;
     }
 
     nuiData(bool _gF, bool _lF, bool _rF, gestureType _gT,
-            xyz _lH, xyz _lW, xyz _rH, xyz _rW) //Alternate Constructor
+            xyz _lH, xyz _lW, xyz _rH, xyz _rW,
+            double _cLH, double _cLW, double _cRH, double _cRW,
+            bool _lC, bool _rC) //Alternate Constructor
     {
         gestureFound = _gF;
         leftFound = _lF;
@@ -71,13 +79,21 @@ typedef struct nuiData
         leftWrist = _lW;
         rightHand = _rH;
         rightWrist = _rW;
+        confLH = _cLH;
+        confLW = _cLW;
+        confRH = _cRH;
+        confRW = _cRW;
+        leftClick = _lC;
+        rightClick = _rC;
     }
     
     nuiData(bool _gF, bool _lF, bool _rF, gestureType _gT,
             double _lHX, double _lHY, double _lHZ,
             double _lWX, double _lWY, double _lWZ,
             double _rHX, double _rHY, double _rHZ,
-            double _rWX, double _rWY, double _rWZ) //Alternate Constructor
+            double _rWX, double _rWY, double _rWZ,
+            double _cLH, double _cLW, double _cRH, double _cRW,
+            bool _lC, bool _rC) //Alternate Constructor
     {
         gestureFound = _gF;
         leftFound = _lF;
@@ -87,6 +103,12 @@ typedef struct nuiData
         leftWrist = xyz(_lWX, _lWY, _lWZ);
         rightHand = xyz(_rHX, _rHY, _rHZ);
         rightWrist = xyz(_rWX, _rWY, _rWZ);
+        confLH = _cLH;
+        confLW = _cLW;
+        confRH = _cRH;
+        confRW = _cRW;
+        leftClick = _lC;
+        rightClick = _rC;
     }
 
     // Are gesture data, left hand data, and right hand data valid
@@ -97,6 +119,12 @@ typedef struct nuiData
 
     // Data for each point
     xyz leftHand, rightHand, leftWrist, rightWrist;
+    
+    // Confidence for each point
+    double confLH, confRH, confLW, confRW;
+    
+    // Rates of hand closure, clicks
+    bool leftClick, rightClick;
 } nuiData;
 
 #endif /* NUITRACK_DATA_H */

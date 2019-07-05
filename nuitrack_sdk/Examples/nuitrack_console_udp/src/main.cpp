@@ -23,6 +23,10 @@
 #define DEBUG 1
 #define PORT 8080 
 
+// When 1, use handTracker for hand location. When 0,
+//   use skeletonTracker's hand joint for hand location.
+#define USEHAND 0
+
 using namespace tdv::nuitrack;
 
 // Global variables for UDP
@@ -33,13 +37,13 @@ struct sockaddr_in servaddr, cliaddr; // netinet/in.h objects
 nuiData nui;
 
 // Global variables for threads
-std::thread server, tracker;
-bool sigint_received = false;
+std::thread g_server, g_hTracker, g_sTracker;
+bool g_sigint_received = false;
 
 
 void flagger(int sig)
 {
-    sigint_received = true;
+    g_sigint_received = true;
 }
 
 // Callback for the hand data update event
@@ -66,15 +70,36 @@ void onHandUpdate(HandTrackerData::Ptr handData)
         std::cout << "Right hand of the first user is not found" << std::endl;
         return;
     }
-
-    std::cout << std::fixed << std::setprecision(3);
-    std::cout << "Right hand position: "
-                 "x = " << rightHand->xReal << ", "
-                 "y = " << rightHand->yReal << ", "
-                 "z = " << rightHand->zReal << std::endl;
-    nui.rightHand.x = rightHand->xReal;
-    nui.rightHand.y = rightHand->yReal;
-    nui.rightHand.z = rightHand->zReal;
+    else
+    {
+        nui.rightClick = rightHand->click;
+#if USEHAND
+        nui.rightHand.x = rightHand->xReal;
+        nui.rightHand.y = rightHand->yReal;
+        nui.rightHand.z = rightHand->zReal;
+        nui.confLH = 1.0;
+#endif
+    }
+    
+    auto leftHand = userHands[0].leftHand;
+    if (!leftHand)
+    {
+        // No right hand
+        std::cout << "Left hand of the first user is not found" << std::endl;
+        return;
+    }
+    else
+    {
+        nui.leftClick = leftHand->click;
+#if USEHAND
+        nui.leftHand.x = leftHand->xReal;
+        nui.leftHand.y = leftHand->yReal;
+        nui.leftHand.z = leftHand->zReal;
+        nui.confRH = 1.0;
+#endif
+        
+        
+    }
 }
 
 void onSkelUpdate(SkeletonData::Ptr skelData)
@@ -107,21 +132,22 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
     }
     
     try {
-        leftHand = skeletons.at(0).joints.at(JOINT_LEFT_HAND);
-    }
-    catch (const Exception& e) {
-        // No right hand
-        std::cout << "Left hand of the first user is not found" << std::endl;
-        nui.leftFound = false;
-    }
-    
-    try {
         rightWrist = skeletons.at(0).joints.at(JOINT_RIGHT_WRIST);
     }
     catch (const Exception& e) {
         // No right hand
         std::cout << "Right wrist of the first user is not found" << std::endl;
         nui.rightFound = false;
+    }
+    
+#if !USEHAND
+    try {
+        leftHand = skeletons.at(0).joints.at(JOINT_LEFT_HAND);
+    }
+    catch (const Exception& e) {
+        // No right hand
+        std::cout << "Left hand of the first user is not found" << std::endl;
+        nui.leftFound = false;
     }
     
     try {
@@ -132,6 +158,7 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         std::cout << "Right hand of the first user is not found" << std::endl;
         nui.rightFound = false;
     }
+#endif
     
     //Pull data into struct
     if(nui.leftFound)
@@ -139,28 +166,40 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         nui.leftWrist.x = leftWrist.real.x;
         nui.leftWrist.y = leftWrist.real.y;
         nui.leftWrist.z = leftWrist.real.z;
+        nui.confLW = leftWrist.confidence;
+#if !USEHAND
         nui.leftHand.x = leftHand.real.x;
         nui.leftHand.y = leftHand.real.y;
         nui.leftHand.z = leftHand.real.z;
+        nui.confLH = leftHand.confidence;
+#endif
     }
     else
     {
         nui.leftWrist = xyz();
+#if !USEHAND
         nui.leftHand = xyz();
+#endif
     }
     if(nui.rightFound)
     {
         nui.rightWrist.x = rightWrist.real.x;
         nui.rightWrist.y = rightWrist.real.y;
         nui.rightWrist.z = rightWrist.real.z;
+        nui.confRW = rightWrist.confidence;
+#if !USEHAND
         nui.rightHand.x = rightHand.real.x;
         nui.rightHand.y = rightHand.real.y;
         nui.rightHand.z = rightHand.real.z;
+        nui.confRH = rightHand.confidence;
+#endif
     }
     else
     {
         nui.rightWrist = xyz();
+#if !USEHAND
         nui.rightHand = xyz();
+#endif
     }
 }
 
@@ -180,11 +219,6 @@ void serverResponse(char rec)
         std::cout << "Error in sending!" << std::endl;
     }
     
-    printf("LH: %02.3f, %02.3f, %02.3f\n\r", nui.leftHand.x, nui.leftHand.y, nui.leftHand.z);
-    printf("LW: %02.3f, %02.3f, %02.3f\n\r", nui.leftWrist.x, nui.leftWrist.y, nui.leftWrist.z);
-    printf("RH: %02.3f, %02.3f, %02.3f\n\r", nui.rightHand.x, nui.rightHand.y, nui.rightHand.z);
-    printf("RW: %02.3f, %02.3f, %02.3f\n\r", nui.rightWrist.x, nui.rightWrist.y, nui.rightWrist.z);
-    
     // Reset client address
     memset(&cliaddr, 0, sizeof(cliaddr)); 
 }
@@ -196,7 +230,7 @@ void serverLoop(void)
     fd_set rfds;
 
     
-    while(!sigint_received)
+    while(!g_sigint_received)
     {
         // Set up socket to watch in select()
         FD_ZERO(&rfds);
@@ -254,7 +288,7 @@ void serverLoop(void)
 void handTrackerLoop(HandTracker::Ptr handTracker)
 {
     std::cout << "Entered hand tracker loop." << std::endl;
-    while (!sigint_received)
+    while (!g_sigint_received)
     {
         try
         {
@@ -276,7 +310,7 @@ void handTrackerLoop(HandTracker::Ptr handTracker)
 void skelTrackerLoop(SkeletonTracker::Ptr skelTracker)
 {
     std::cout << "Entered skeleton tracker loop." << std::endl;
-    while (!sigint_received)
+    while (!g_sigint_received)
     {
         try
         {
@@ -334,11 +368,11 @@ int main(int argc, char* argv[])
     
     // Create HandTracker module, other required modules will be
     // created automatically
-//    auto handTracker = HandTracker::create();
+    auto handTracker = HandTracker::create();
     auto skelTracker = SkeletonTracker::create();
 
     // Connect onHandUpdate callback to receive hand tracking data
-//    handTracker->connectOnUpdate(onHandUpdate);
+    handTracker->connectOnUpdate(onHandUpdate);
     skelTracker->connectOnUpdate(onSkelUpdate);
 
     // Start Nuitrack
@@ -356,13 +390,14 @@ int main(int argc, char* argv[])
     signal(SIGINT, flagger);
     
     // Start a thread for the server handler and the nuitrack handler
-    server = std::thread(serverLoop);
-//    tracker = std::thread(handTrackerLoop, handTracker);
-    tracker = std::thread(skelTrackerLoop, skelTracker);
+    g_server = std::thread(serverLoop);
+    g_hTracker = std::thread(handTrackerLoop, handTracker);
+    g_sTracker = std::thread(skelTrackerLoop, skelTracker);
     
     // Join threads after exiting from sigint
-    server.join();
-    tracker.join();
+    g_server.join();
+    g_hTracker.join();
+    g_sTracker.join();
     
     // Release Nuitrack
     std::cout << "Releasing Nuitrack!" << std::endl;
