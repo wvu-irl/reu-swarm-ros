@@ -22,6 +22,7 @@ void Model::clear()
 	neighbors.clear();
 	targets.clear();
 }
+
 void Model::archiveAdd(AliceStructs::mail &_toAdd)
 {
 	float vision = _toAdd.vision - 0; // make number larger if we want to account for moving things, will be buggy tho
@@ -60,7 +61,7 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 	clear();
 	cur_pose.x = _toAdd.xpos;
 	cur_pose.y = _toAdd.ypos;
-	cur_pose.z = _toAdd.level;
+	cur_pose.z = _toAdd.contVal;
 	cur_pose.heading = _toAdd.heading;
 	name = _toAdd.name;
 	time = _toAdd.time;

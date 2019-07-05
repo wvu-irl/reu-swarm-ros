@@ -64,7 +64,7 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 	}
 	mail.xpos=_data.x;
 	mail.ypos=_data.y;
-	mail.level=_data.contourVal;
+	mail.contVal=_data.contVal;
 	mail.heading=_data.heading;
 	mail.name = _data.name;
 	mail.vision=_data.vision;

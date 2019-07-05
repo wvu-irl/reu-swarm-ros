@@ -97,7 +97,7 @@ typedef struct
 	std::vector<flow> flows;
 	float xpos;
 	float ypos;
-	float level;
+	float contVal;
 	float heading;
 	int name;
 	float vision;

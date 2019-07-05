@@ -101,7 +101,7 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 			// Changing the Visual Properties of the robot
 			shape.setPosition(300, 300); // Sets position of shape to the middle
 			shape.setOrigin(bodiesSize, bodiesSize);
-			float inten = 10 * map.mails.at(name).contourVal;
+			float inten = 10 * map.mails.at(name).contVal;
 			if (inten > 255)
 				inten = 255;
 			shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
@@ -124,7 +124,7 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 				// Changing the Visual Properties of the (neighboring) robot
 				shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
 				shape.setOrigin(bodiesSize, bodiesSize);
-				float inten = 10 * map.mails.at(temp.name).contourVal;
+				float inten = 10 * map.mails.at(temp.name).contVal;
 				if (inten > 255)
 					inten = 255;
 				shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
