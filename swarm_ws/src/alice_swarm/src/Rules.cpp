@@ -50,8 +50,6 @@ void Rules::avoidCollisions()
 	float tf = atan2(model.goTo.y, model.goTo.x);
 	std::vector<std::pair<float, float>> dead_zones = findDeadZones();
 	findAngle(tf, dead_zones);
-	sort(testers.begin(), testers.end());
-	final_vel.dir = testers.front();
 	final_vel.mag = 1;
 	if (final_vel.dir == atan2(model.goTo.y, model.goTo.x))
 	{
@@ -100,7 +98,6 @@ float Rules::calcDis(float _x1, float _y1, float _x2, float _y2)
 
 bool Rules::checkBlocked()
 {
-	std::vector<std::pair<float, float>> dead_zones = findDeadZones();
 	for (auto& zone : findDeadZones())
 	{
 		if (zone.first < atan2(model.goTo.y, model.goTo.x) < zone.second ||
@@ -119,121 +116,77 @@ void Rules::findAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
 	std::vector<float> left;
 	for (auto& zone : dead_zones)
 	{
-		std::cout << zone.first << " - " << tf << " - " << zone.second << std::endl;
-		if (zone.second - zone.first > M_PI/2)
+		std::cout << pow(pow(model.cur_pose.x, 2) + pow(model.cur_pose.y, 2), 0.5) << " - " << pow(pow(model.cur_pose.x - model.goTo.x, 2) + pow(model.cur_pose.y - model.goTo.x, 2), 0.5) << std::endl;
+		if (pow(pow(model.cur_pose.x, 2) + pow(model.cur_pose.y, 2), 0.5) <=
+				pow(pow(model.cur_pose.x - model.goTo.x, 2) + pow(model.cur_pose.y - model.goTo.x, 2), 0.5))
 		{
-			if (zone.first > tf || tf > zone.second)
+			std::cout << zone.first << " - " << tf << " - " << zone.second << std::endl;
+			if (tf < 0)
 			{
-				right.push_back(fmod(zone.first, 2*M_PI));
-				left.push_back(fmod(zone.second, 2*M_PI));
+				if (zone.first > tf)
+				{
+					right.push_back(zone.first);
+				}
 			}
-		}
-		else
-		{
-			if (zone.first < tf && tf < zone.second)
+			else
 			{
-				right.push_back(fmod(zone.first, 2*M_PI));
-				left.push_back(fmod(zone.second, 2*M_PI));
+				if (zone.second < tf)
+				{
+					left.push_back(zone.second);
+				}
+
 			}
 		}
 	}
-	if (right.size() + left.size() == 0)
-	{
-		testers.push_back(tf);
-	}
-	else
+	if (right.size() > 0 && left.size() > 0)
 	{
 		sort(right.begin(), right.end());
 		sort(left.begin(), left.end());
-		findRightAngle(right.front(), dead_zones);
-		findLeftAngle(left.front(), dead_zones);
-	}
-}
-
-void Rules::findRightAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
-{
-	std::vector<float> right;
-	for (auto& zone : dead_zones)
-	{
-		std::cout << "Right: " << zone.first << " - " << tf << " - " << zone.second << std::endl;
-		if (zone.second - zone.first > M_PI/2)
+		std::cout << left.front() << std::endl;
+		if (right.front() > left.front())
 		{
-			if (zone.first > tf || tf > zone.second)
-			{
-				right.push_back(fmod(zone.first, 2*M_PI));
-			}
+			final_vel.dir = left.front();
 		}
 		else
 		{
-			if (zone.first < tf && tf < zone.second)
-			{
-				right.push_back(fmod(zone.first, 2*M_PI));
-			}
+			final_vel.dir = right.front();
 		}
 	}
-	if (right.size() == 0)
-	{
-		testers.push_back(tf);
-	}
-	else
+	else if (right.size() > 0)
 	{
 		sort(right.begin(), right.end());
-		findRightAngle(right.front(), dead_zones);
+		final_vel.dir = right.front();
 	}
-}
-
-void Rules::findLeftAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
-{
-	std::vector<float> left;
-	for (auto& zone : dead_zones)
+	else if (left.size() > 0)
 	{
-		std::cout << "Left: " << zone.first << " - " << tf << " - " << zone.second << std::endl;
-		if (zone.second - zone.first > M_PI/2)
-		{
-			if (zone.first > tf || tf > zone.second)
-			{
-				left.push_back(fmod(zone.second, 2*M_PI));
-			}
-		}
-		else
-		{
-			if (zone.first < tf && tf < zone.second)
-			{
-				left.push_back(fmod(zone.second, 2*M_PI));
-			}
-		}
-	}
-	if (left.size() == 0)
-	{
-		testers.push_back(tf);
+		sort(left.begin(), left.end());
+		std::cout << left.front() << std::endl;
+		final_vel.dir = left.front();
 	}
 	else
 	{
-		sort(left.begin(), left.end());
-		findLeftAngle(left.front(), dead_zones);
+		final_vel.dir = tf;
 	}
 }
 
 std::vector<std::pair<float, float>> Rules::findDeadZones()
 {
-	float tf = atan2(model.goTo.y, model.goTo.x);
 	std::vector<std::pair<float, float>> dead_zones;
-	int i = 0;
 	for (auto& obs : model.obstacles)
 	{
-		float temp_a_y = model.cur_pose.x - obs.x_off;
-		float temp_a_x = model.cur_pose.y - obs.y_off;
+		float temp_a_x = model.cur_pose.x - obs.x_off;
+		float temp_a_y = model.cur_pose.y - obs.y_off;
 		std::pair<float, float> aoe;
 		float	plus = (2*temp_a_x*temp_a_y + //This is the quadratic formula. It's just awful
-				pow(pow(-2*temp_a_x*temp_a_y, 2) - 4*(pow(temp_a_x, 2) -
-						pow(obs.y_rad, 2))*(pow(temp_a_y, 2) - pow(obs.x_rad, 2)), 0.5))
+				pow(pow(-2*temp_a_x*temp_a_y, 2) - 4*(pow(temp_a_y, 2) -
+						pow(obs.y_rad, 2))*(pow(temp_a_x, 2) - pow(obs.x_rad, 2)), 0.5))
 						/ (2*(pow(temp_a_x, 2) - pow(obs.y_rad, 2)));
-		/*float neg = (2*temp_a_x*temp_a_y - //This is the quadratic formula again, this time the minus half
-				pow(pow(-2*temp_a_x*temp_a_y, 2) - 4*(pow(temp_a_x, 2) -
-						pow(obs.y_rad, 2))*(pow(temp_a_y, 2) - pow(obs.x_rad, 2)), 0.5))
-						/ (2*(pow(temp_a_x, 2) - pow(obs.y_rad, 2))); */
-		aoe.first = atan(plus) - atan(temp_a_y/temp_a_x) + atan(obs.y_off/obs.x_off);
-		aoe.second = -atan(plus) - atan(temp_a_y/temp_a_x) + atan(obs.y_off/obs.x_off);
+		float neg = (2*temp_a_x*temp_a_y - //This is the quadratic formula again, this time the minus half
+				pow(pow(-2*temp_a_x*temp_a_y, 2) - 4*(pow(temp_a_y, 2) -
+						pow(obs.y_rad, 2))*(pow(temp_a_x, 2) - pow(obs.x_rad, 2)), 0.5))
+						/ (2*(pow(temp_a_x, 2) - pow(obs.y_rad, 2)));
+		aoe.first = atan(plus);
+		aoe.second = atan(neg);
 		dead_zones.push_back(aoe);
 	}
 	return dead_zones;

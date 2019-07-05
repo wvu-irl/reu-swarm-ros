@@ -10,6 +10,8 @@ Model::Model()
 {
 	first = true;
 	name = 0;
+	goTo.x = 20;
+	goTo.y = 0;
 }
 
 Model::Model(int _name)

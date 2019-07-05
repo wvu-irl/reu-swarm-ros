@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 	obj2.theta_offset = 0;
 	obj2.offset_x = 10;
 	obj2.offset_y = 3;
-	//mail.obsMail.push_back(obj2);
+	mail.obsMail.push_back(obj2);
 	mail.targetMail.push_back(tar);
 	Alice alice;
 	alice = Alice(mail);
