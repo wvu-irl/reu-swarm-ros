@@ -116,12 +116,10 @@ void Rules::findAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
 	std::vector<float> left;
 	for (auto& zone : dead_zones)
 	{
-		std::cout << pow(pow(model.cur_pose.x, 2) + pow(model.cur_pose.y, 2), 0.5) << " - " << pow(pow(model.cur_pose.x - model.goTo.x, 2) + pow(model.cur_pose.y - model.goTo.x, 2), 0.5) << std::endl;
-		if (pow(pow(model.cur_pose.x, 2) + pow(model.cur_pose.y, 2), 0.5) <=
+		if (pow(pow(model.cur_pose.x, 2) + pow(model.cur_pose.y, 2), 0.5) <= // Checks that the obstacle is on the correct side of the bot
 				pow(pow(model.cur_pose.x - model.goTo.x, 2) + pow(model.cur_pose.y - model.goTo.x, 2), 0.5))
 		{
-			std::cout << zone.first << " - " << tf << " - " << zone.second << std::endl;
-			if (tf < 0)
+			if (tf < 0) // Checks which side of the bot the obstacle is on
 			{
 				if (zone.first > tf)
 				{
