@@ -23,8 +23,7 @@ AlicePOV::AlicePOV(void)
 	window_width = 600;
 	this->window.create(sf::VideoMode(window_width, window_height, desktop.bitsPerPixel), "Alice POV",
 			sf::Style::Titlebar);
-	this->window2.create(sf::VideoMode(300, window_height, desktop.bitsPerPixel), "Alice POV",
-				sf::Style::Titlebar);
+	this->window2.create(sf::VideoMode(300, window_height, desktop.bitsPerPixel), "Alice POV", sf::Style::Titlebar);
 }
 
 // Run the simulation. Run creates the bodies that we'll display, checks for user
@@ -177,48 +176,51 @@ void AlicePOV::drawMsg(ros::ServiceClient _client)
 	_client.call(srv);
 	wvu_swarm_std_msgs::map map = srv.response.map;
 
-//	for (int j = 0; j < map.obsMsg.size(); j++)
-//	{
-//		wvu_swarm_std_msgs::ellipse temp = map.obsMsg.at(j).ellipse;
-//		unsigned short quality = 70;
-//		sf::ConvexShape ellipse;
-//		ellipse.setPointCount(quality);
-//		for (unsigned short i = 0; i < quality; ++i)
-//		{
-//			float rad = (360 / quality * i) / (360 / M_PI / 2);
-//			float x = 3 * cos(rad) * temp.x_rad;
-//			float y = 3 * sin(rad) * temp.y_rad;
-//			float newx = x * cos(-temp.theta_offset) - y * sin(-temp.theta_offset);
-//			float newy = x * sin(-temp.theta_offset) + y * cos(-temp.theta_offset);
-//			ellipse.setPoint(i, sf::Vector2f(newx, newy));
-//		}
-//
-//		ellipse.setPosition(300 + 3 * (temp.offset_x+(map.x-map.ox)), 300 - 3 * (temp.offset_y+(map.y-map.oy)));
-//		ellipse.setFillColor(sf::Color::Yellow);
-//		ellipse.setOutlineColor(gray);
-//		ellipse.setOutlineThickness(1);
-//		window.draw(ellipse);
-//	}
+	for (int j = 0; j < map.obsMsg.size(); j++)
+	{
+		wvu_swarm_std_msgs::ellipse temp = map.obsMsg.at(j).ellipse;
+		unsigned short quality = 70;
+		sf::ConvexShape ellipse;
+		ellipse.setPointCount(quality);
+		for (unsigned short i = 0; i < quality; ++i)
+		{
+			float rad = (360 / quality * i) / (360 / M_PI / 2);
+			float x = 3 * cos(rad) * temp.x_rad;
+			float y = 3 * sin(rad) * temp.y_rad;
+			float newx = x * cos(-map.oheading-temp.theta_offset) - y * sin(-map.oheading-temp.theta_offset);
+			float newy = x * sin(-map.oheading-temp.theta_offset) + y * cos(-map.oheading-temp.theta_offset);
+			ellipse.setPoint(i, sf::Vector2f(newx, newy));
+		}
 
-//	for (int j = 0; j < map.tarMsg.size(); j++)
-//	{
-//		wvu_swarm_std_msgs::point_mail temp = map.tarMsg.at(j).pointMail;
-//		sf::CircleShape shape(0);
-//		// Changing the Visual Properties of the target
-//		shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
-//		shape.setOrigin(bodiesSize, bodiesSize);
-//		shape.setFillColor(sf::Color::Green);
-//		shape.setRadius(bodiesSize);
-//		shape.setOutlineColor(gray);
-//		shape.setOutlineThickness(1);
-//		window.draw(shape);
-//	}
+		ellipse.setPosition(150 + 3 * (map.ox + cos(map.oheading) * temp.offset_x - sin(map.oheading) * temp.offset_y),
+				300 - 3 * (map.oy + sin(map.oheading) * temp.offset_x + cos(map.oheading) * temp.offset_y));
+		ellipse.setFillColor(sf::Color::Yellow);
+		ellipse.setOutlineColor(gray);
+		ellipse.setOutlineThickness(1);
+		window2.draw(ellipse);
+	}
+
+	for (int j = 0; j < map.tarMsg.size(); j++)
+	{
+		wvu_swarm_std_msgs::point_mail temp = map.tarMsg.at(j).pointMail;
+		sf::CircleShape shape(0);
+		// Changing the Visual Properties of the target
+		shape.setPosition(150 + 3 * (map.ox + cos(map.oheading) * temp.x - sin(map.oheading) * temp.y),
+				300 - 3 * (map.oy + sin(map.oheading) * temp.x + cos(map.oheading) * temp.y));
+		shape.setOrigin(bodiesSize, bodiesSize);
+		shape.setFillColor(sf::Color::Green);
+		shape.setRadius(bodiesSize);
+		shape.setOutlineColor(gray);
+		shape.setOutlineThickness(1);
+		window2.draw(shape);
+	}
 	for (int j = 0; j < map.contMsg.size(); j++)
 	{
 		wvu_swarm_std_msgs::point_mail temp = map.contMsg.at(j).pointMail;
 		sf::CircleShape shape(0);
 		// Changing the Visual Properties of the contour point
-		shape.setPosition(150+3 * (map.x+temp.x), 300 - 3 * (map.y+temp.y));
+		shape.setPosition(150 + 3 * (map.ox + cos(map.oheading) * temp.x - sin(map.oheading) * temp.y),
+				300 - 3 * (map.oy + sin(map.oheading) * temp.x + cos(map.oheading) * temp.y));
 		shape.setOrigin(1, 1);
 		shape.setRadius(1);
 		float inten = 10 * map.contMsg.at(j).contVal;

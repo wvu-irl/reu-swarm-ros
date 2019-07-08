@@ -25,16 +25,43 @@ void Model::clear()
 	neighbors.clear();
 	targets.clear();
 }
+std::pair<float, float> Model::transformCur(float _x, float _y)
+{
+	//will handle heading after i get this debugged
+	std::pair<float, float> to_return;
+	float abs_x=_x*cos(cur_pose.heading)+_y*-sin(cur_pose.heading);
+	float abs_y=_x*sin(cur_pose.heading)+_y*cos(cur_pose.heading);
+	abs_x= abs_x + cur_pose.x - first_pose.x;
+	abs_y= abs_y + cur_pose.y - first_pose.y;
+	to_return.first = abs_x*cos(-first_pose.heading)+abs_y*-sin(-first_pose.heading);
+	to_return.second = abs_x*sin(-first_pose.heading)+abs_y*cos(-first_pose.heading);
+	return to_return;
+}
+
+std::pair<float, float> Model::transformFir(float _x, float _y)
+{
+	//will handle heading after i get this debugged
+	std::pair<float, float> to_return;
+	float abs_x=_x*cos(first_pose.heading)+_y*-sin(first_pose.heading);
+	float abs_y=_x*sin(first_pose.heading)+_y*cos(first_pose.heading);
+	abs_x= abs_x - cur_pose.x + first_pose.x;
+	abs_y= abs_y - cur_pose.y + first_pose.y;
+	to_return.first = abs_x*cos(-cur_pose.heading)+abs_y*-sin(-cur_pose.heading);
+		to_return.second = abs_x*sin(-cur_pose.heading)+abs_y*cos(-cur_pose.heading);
+	return to_return;
+}
 
 void Model::archiveAdd(AliceStructs::mail &_toAdd)
 {
-	float vision = _toAdd.vision - 0; // make number larger if we want to account for moving things, will be buggy tho
-
+	vision = _toAdd.vision - 0; // make number larger if we want to account for moving things, will be buggy tho
 	//placing objects that exited fov
 	for (auto& obstacle : obstacles)
 	{
 		if (pow(pow(obstacle.x_off - _toAdd.xpos, 2) + pow(obstacle.y_off - _toAdd.ypos, 2), 0.5) > vision)
 		{
+			std::pair<float, float> temp = transformCur(obstacle.x_off, obstacle.y_off);
+			obstacle.x_off = temp.first;
+			obstacle.y_off = temp.second;
 			obstacle.time = time;
 			obstacle.observer_name = name;
 			archived_obstacles.push_back(obstacle);
@@ -47,13 +74,19 @@ void Model::archiveAdd(AliceStructs::mail &_toAdd)
 		{
 			tar.time = time;
 			tar.observer_name = name;
+			std::pair<float, float> temp = transformCur(tar.x, tar.y);
+			tar.x = temp.first;
+			tar.y = temp.second;
 			archived_targets.push_back(tar);
 		}
 	}
 
-	if (time.nsec % 10 == 0) //so we don't record literally every time step
+	if (time.nsec % 1 == 0) //so we don't record literally every time step
 	{
 		AliceStructs::pose temp(cur_pose);
+		std::pair<float, float> temp2 = transformCur(0, 0);
+		temp.x = temp2.first;
+		temp.y = temp2.second;
 		temp.observer_name = name;
 		temp.time = time;
 		archived_contour.push_back(temp);
@@ -112,8 +145,9 @@ void Model::pass(ros::Publisher _pub)
 		obs_msg.ellipse.x_rad = obstacle.x_rad;
 		obs_msg.ellipse.y_rad = obstacle.y_rad;
 		obs_msg.ellipse.theta_offset = obstacle.theta_offset - (cur_pose.heading - first_pose.heading);
-		obs_msg.ellipse.offset_x = obstacle.x_off + (cur_pose.x - first_pose.x);
-		obs_msg.ellipse.offset_y = obstacle.y_off + (cur_pose.y - first_pose.y);
+		std::pair<float, float> temp = transformCur(obstacle.x_off, obstacle.y_off);
+		obs_msg.ellipse.offset_x = temp.first;
+		obs_msg.ellipse.offset_y = temp.second;
 		obs_msg.time = time;
 		obs_msg.observer = name;
 		map.obsMsg.push_back(obs_msg);
@@ -137,8 +171,9 @@ void Model::pass(ros::Publisher _pub)
 	for (auto& tar : targets)
 	{
 		wvu_swarm_std_msgs::tar_msg tar_msg;
-		tar_msg.pointMail.x = tar.x;
-		tar_msg.pointMail.y = tar.y;
+		std::pair<float, float> temp = transformCur(tar.x, tar.y);
+		tar_msg.pointMail.x = temp.first;
+		tar_msg.pointMail.y = temp.second;
 		tar_msg.time = time;
 		tar_msg.observer = name;
 		map.tarMsg.push_back(tar_msg);
@@ -152,17 +187,6 @@ void Model::pass(ros::Publisher _pub)
 		tar_msg.pointMail.y = tar.y;
 		tar_msg.time = tar.time;
 		tar_msg.observer = tar.observer_name;
-		map.tarMsg.push_back(tar_msg);
-	}
-
-	//inserts targets from its own vision
-	for (auto& tar : targets)
-	{
-		wvu_swarm_std_msgs::tar_msg tar_msg;
-		tar_msg.pointMail.x = tar.x;
-		tar_msg.pointMail.y = tar.y;
-		tar_msg.time = time;
-		tar_msg.observer = name;
 		map.tarMsg.push_back(tar_msg);
 	}
 
@@ -183,25 +207,39 @@ void Model::pass(ros::Publisher _pub)
 
 void Model::forget()
 {
-//	for (std::vector<AliceStructs::obj>::iterator it = archived_obstacles.begin(); it != archived_obstacles.end(); ++it)
-//	{
-//		if (it->time.sec - time.sec > 10)
-//			archived_obstacles.erase(it);
-//	}
-//	for (std::vector<AliceStructs::pnt>::iterator it = archived_targets.begin(); it != archived_targets.end(); ++it)
-//	{
-//		if (it->time.sec - time.sec > 10)
-//			archived_targets.erase(it);
-//	}
-	std::vector<AliceStructs::pose>::iterator it = archived_contour.begin();
-	while (it != archived_contour.end())
+	std::vector<AliceStructs::obj>::iterator it = archived_obstacles.begin();
+	while (it != archived_obstacles.end())
 	{
+		std::pair<float, float> temp = transformFir(it->x_off, it->y_off);
 		if (time.sec - it->time.sec > 10)
 		{
-			std::cout << time.sec - it->time.sec << std::endl;
-			it = archived_contour.erase(it);
-		}
-		else it++;
+			it = archived_obstacles.erase(it);
+		} else if (pow(pow(temp.first, 2) + pow(temp.second, 2), 0.5) < vision)
+		{
+			it = archived_obstacles.erase(it);
+		} else
+			it++;
 	}
-	std::cout << "oy" << std::endl;
+	std::vector<AliceStructs::pnt>::iterator it2 = archived_targets.begin();
+	while (it2 != archived_targets.end())
+	{
+		std::pair<float, float> temp = transformFir(it2->x, it2->y);
+		if (time.sec - it2->time.sec > 10)
+		{
+			it2 = archived_targets.erase(it2);
+		} else if (pow(pow(temp.first, 2) + pow(temp.second, 2), 0.5) < vision)
+		{
+			it2 = archived_targets.erase(it2);
+		} else
+			it2++;
+	}
+	std::vector<AliceStructs::pose>::iterator it3 = archived_contour.begin();
+	while (it3 != archived_contour.end())
+	{
+		if (time.sec - it3->time.sec > 10)
+		{
+			it3 = archived_contour.erase(it3);
+		} else
+			it3++;
+	}
 }

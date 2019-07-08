@@ -95,7 +95,7 @@ void Hub::findNeighbors()
 			//Finds the distance between two bots
 			temp.distance = sqrt(
 					pow((bots.at(curIndex).x - bots.at(botIndex).x), 2) + pow((bots.at(curIndex).y - bots.at(botIndex).y), 2));
-
+			if (temp.distance>VISION) continue; //if the robot is outside of comm range
 			bool done = false; //keeps track of whether or not the bot has been inserted as a neighbor
 			for (std::vector<Bot>::iterator it = neighbors.at(botIndex).begin(); it != neighbors.at(botIndex).end(); it++)
 			{
@@ -248,8 +248,10 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		temp.x= bots[*it].x;
 		temp.y=bots[*it].y;
 		temp.heading=bots[*it].heading;
-		to_return.mails.push_back(temp);
 		temp.vision=VISION;
+		to_return.mails.push_back(temp);
+
+
 	}
 #if DEBUG_HUB
 	//printAliceMail(temp);
