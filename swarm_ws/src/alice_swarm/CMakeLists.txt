@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg message_gen
 add_service_files(
   FILES
   get_map.srv
+  get_maps.srv
 )
 
 ## Generate added messages and services
@@ -38,7 +39,7 @@ target_link_libraries(Rules ${catkin_LIBRARIES})
 target_link_libraries(Alice ${catkin_LIBRARIES} Model Rules)
 target_link_libraries(Model ${catkin_LIBRARIES})
 target_link_libraries(MapHub ${catkin_LIBRARIES})
- add_dependencies(MapHub alice_swarm)
+ add_dependencies(MapHub alice_swarm_generate_messages_cpp)
 target_link_libraries(AbsToRel ${catkin_LIBRARIES} Hub)
 target_link_libraries(AliceMain ${catkin_LIBRARIES} Alice Hub)
   add_dependencies(AliceMain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

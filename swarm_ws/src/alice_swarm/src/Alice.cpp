@@ -5,6 +5,8 @@
 #include "wvu_swarm_std_msgs/alice_mail.h"
 #include "wvu_swarm_std_msgs/gaussian.h"
 #include "wvu_swarm_std_msgs/neighbor_mail.h"
+#include "wvu_swarm_std_msgs/map.h"
+
 #include "alice_swarm/aliceStructs.h"
 
 #include <iostream>
@@ -14,11 +16,10 @@ Alice::Alice()
 	name = 0;
 }
 
-Alice::Alice(wvu_swarm_std_msgs::alice_mail &_data,ros::ServiceClient &_client )
+Alice::Alice(wvu_swarm_std_msgs::alice_mail &_data)
 {
 	name = _data.name;
 	model = Model(_data.name);
-	updateModel(_data,_client);
 	rules = Rules(model);
 //	(_data);
 }
@@ -72,12 +73,12 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 	return mail;
 }
 
-void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data,ros::ServiceClient &_client )
+void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_swarm_std_msgs::map> &_maps,  std::vector<int> &_ids)
 {
 	AliceStructs::mail mail = packageData(_data);
 	model.archiveAdd(mail);
 	model.sensorUpdate(mail);
-	//model.receiveMap(_client);
+	model.receiveMap(_maps,_ids);
 	model.forget();
 }
 

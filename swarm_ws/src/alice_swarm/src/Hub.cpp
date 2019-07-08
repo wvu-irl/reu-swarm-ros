@@ -95,8 +95,9 @@ void Hub::findNeighbors()
 			//Finds the distance between two bots
 			temp.distance = sqrt(
 					pow((bots.at(curIndex).x - bots.at(botIndex).x), 2) + pow((bots.at(curIndex).y - bots.at(botIndex).y), 2));
-
+			if (temp.distance>VISION)continue;
 			bool done = false; //keeps track of whether or not the bot has been inserted as a neighbor
+
 			for (std::vector<Bot>::iterator it = neighbors.at(botIndex).begin(); it != neighbors.at(botIndex).end(); it++)
 			{
 				if (temp.distance < it->distance) //Checks if the current bot is closer than the bot stored as a neighbor

@@ -1,0 +1,4 @@
+
+---
+int32[] ids
+wvu_swarm_std_msgs/map[] maps

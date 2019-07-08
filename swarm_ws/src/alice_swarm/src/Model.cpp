@@ -3,11 +3,10 @@
 #include "wvu_swarm_std_msgs/alice_mail_array.h"
 #include "wvu_swarm_std_msgs/map.h"
 #include "wvu_swarm_std_msgs/gaussian.h"
-#include <alice_swarm/get_map.h>
-
+#include <alice_swarm/get_maps.h>
 #include "wvu_swarm_std_msgs/neighbor_mail.h"
 #include <iostream>
-
+#include <chrono>
 Model::Model()
 {
 	first = true;
@@ -50,18 +49,17 @@ std::pair<float, float> Model::transformFir(float _x, float _y)
 	to_return.second = abs_x * sin(-cur_pose.heading) + abs_y * cos(-cur_pose.heading);
 	return to_return;
 }
-std::pair<float, float> Model::transformFtF(float _x, float _y,float _ox, float _oy, float _oheading)
+std::pair<float, float> Model::transformFtF(float _x, float _y, float _ox, float _oy, float _oheading)
 {
 	std::pair<float, float> to_return;
 	float abs_x = _x * cos(_oheading) + _y * -sin(_oheading);
 	float abs_y = _x * sin(_oheading) + _y * cos(_oheading);
-	abs_x = abs_x - cur_pose.x + _ox;
-	abs_y = abs_y - cur_pose.y + _oy;
-	to_return.first = abs_x * cos(-cur_pose.heading) + abs_y * -sin(-cur_pose.heading);
-	to_return.second = abs_x * sin(-cur_pose.heading) + abs_y * cos(-cur_pose.heading);
+	abs_x = abs_x - first_pose.x + _ox;
+	abs_y = abs_y - first_pose.y + _oy;
+	to_return.first = abs_x * cos(-first_pose.heading) + abs_y * -sin(-first_pose.heading);
+	to_return.second = abs_x * sin(-first_pose.heading) + abs_y * cos(-first_pose.heading);
 	return to_return;
 }
-
 
 void Model::archiveAdd(AliceStructs::mail &_toAdd)
 {
@@ -217,29 +215,76 @@ void Model::pass(ros::Publisher _pub)
 	_pub.publish(map);
 }
 
-void Model::receiveMap(ros::ServiceClient _client)
+void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<int> &_ids)
 {
-	alice_swarm::get_map srv;
+	auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of map
+
 	for (int i = 0; i < neighbors.size(); i++)
 	{
-		srv.request.name = neighbors.at(i).name;
-		_client.call(srv);
-		wvu_swarm_std_msgs::map map = srv.response.map;
-		for (int j = 0; j < map.obsMsg.size(); j++)
+		for (int j = 0; j < _ids.size(); j++)
 		{
-			wvu_swarm_std_msgs::obs_msg temp = map.obsMsg.at(j);
-			if (temp.observer != name)
+			if (_ids.at(j) == neighbors.at(i).name)
 			{
-				AliceStructs::obj obstacle;
-				std::pair<float, float> temp2 = transformFtF(temp.ellipse.offset_x, temp.ellipse.offset_y, map.ox,map.oy,map.oheading);
-				obstacle.x_off = temp2.first;
-				obstacle.y_off = temp2.second;
-				obstacle.time = temp.time;
-				obstacle.observer_name = temp.observer;
-				archived_obstacles.push_back(obstacle);
+				for (int k = 0; k < _maps.at(j).obsMsg.size(); k++)
+				{
+					//std::cout << yo << std::endl;
+					wvu_swarm_std_msgs::obs_msg temp = _maps.at(j).obsMsg.at(k);
+					if (temp.observer != name)
+					{
+						AliceStructs::obj obstacle;
+						std::pair<float, float> temp2 = transformFtF(temp.ellipse.offset_x, temp.ellipse.offset_y, _maps.at(j).ox,
+								_maps.at(j).oy, _maps.at(j).oheading);
+						obstacle.x_off = temp2.first;
+						obstacle.y_off = temp2.second;
+						obstacle.x_rad = temp.ellipse.x_rad;
+						obstacle.y_rad = temp.ellipse.y_rad;
+						obstacle.theta_offset = temp.ellipse.theta_offset;
+						obstacle.time = temp.time;
+						obstacle.observer_name = temp.observer;
+						archived_obstacles.push_back(obstacle);
+					}
+				}
+				for (int k = 0; k < _maps.at(j).tarMsg.size(); k++)
+				{
+					//std::cout << yo << std::endl;
+					wvu_swarm_std_msgs::tar_msg temp = _maps.at(j).tarMsg.at(k);
+					if (temp.observer != name)
+					{
+						AliceStructs::pnt target;
+						std::pair<float, float> temp2 = transformFtF(temp.pointMail.x, temp.pointMail.y, _maps.at(j).ox,
+								_maps.at(j).oy, _maps.at(j).oheading);
+						target.x = temp2.first;
+						target.y = temp2.second;
+						target.time = temp.time;
+						target.observer_name = temp.observer;
+						archived_targets.push_back(target);
+					}
+				}
+				for (int k = 0; k < _maps.at(j).contMsg.size(); k++)
+				{
+					//std::cout << yo << std::endl;
+					wvu_swarm_std_msgs::cont_msg temp = _maps.at(j).contMsg.at(k);
+					if (temp.observer != name)
+					{
+						AliceStructs::pose cont;
+						std::pair<float, float> temp2 = transformFtF(temp.pointMail.x, temp.pointMail.y, _maps.at(j).ox,
+								_maps.at(j).oy, _maps.at(j).oheading);
+						cont.x = temp2.first;
+						cont.y = temp2.second;
+						cont.z = temp.contVal;
+						cont.time = temp.time;
+						cont.observer_name = temp.observer;
+						archived_contour.push_back(cont);
+					}
+				}
 			}
 		}
+
 	}
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
+
+	std::cout << "Time taken by srv: " << duration.count() << " microseconds" << std::endl;
 }
 void Model::forget()
 {

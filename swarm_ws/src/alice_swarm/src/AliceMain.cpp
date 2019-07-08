@@ -5,7 +5,7 @@
 #include "alice_swarm/Hub.h"
 #include "alice_swarm/Alice.h"
 #include "alice_swarm/aliceStructs.h"
-#include <alice_swarm/get_map.h>
+#include <alice_swarm/get_maps.h>
 
 #include <sstream>
 #include <map>
@@ -27,18 +27,28 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("alice_mail_array", 1000, aliceCallback);
 
-	ros::Rate loopRate(10);
+	ros::Rate loopRate(50);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array > ("final_execute", 1000);
 	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::map > ("info_map", 1000);
-	ros::ServiceClient client = n.serviceClient < alice_swarm::get_map > ("get_map");
+	ros::ServiceClient client = n.serviceClient < alice_swarm::get_maps > ("get_maps");
 
 	while (ros::ok())
 	{
 		// it!=mymap.end(); ++it)
 		auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of Alice
+		alice_swarm::get_maps srv;
+		client.call(srv);
+
+		std::vector<wvu_swarm_std_msgs::map> maps;
+	 for (int i=0; i<srv.response.maps.size(); i++) maps.push_back(srv.response.maps.at(i));
+
+	  std::vector<int> ids;
+	  for (int i=0; i<srv.response.ids.size();i++) ids.push_back(srv.response.ids.at(i));
+
 		for (int i = 0; i < temp_mail.mails.size(); i++)
 		{
-			alice_map[temp_mail.mails.at(i).name].updateModel(temp_mail.mails.at(i),client); //gives each robot the relative data it needs, whilst also creating the alice's
+
+			alice_map[temp_mail.mails.at(i).name].updateModel(temp_mail.mails.at(i),maps,ids); //gives each robot the relative data it needs, whilst also creating the alice's
 		}
 
 		//One alice is selected to send her map out to the rest of them; less robots means a particular robot's map is sent more often
@@ -55,6 +65,7 @@ int main(int argc, char **argv)
 				map_it++;
 			}
 		}
+
 		wvu_swarm_std_msgs::robot_command_array execute;
 		for (std::map<int, Alice>::iterator it = alice_map.begin(); it != alice_map.end(); ++it) //eventually run this part asynchronously
 		{

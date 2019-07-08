@@ -9,6 +9,7 @@
 #define MODEL_H
 
 #include "aliceStructs.h"
+#include "wvu_swarm_std_msgs/map.h"
 
 class Model
 {
@@ -79,7 +80,7 @@ public:
 	/*
 	 * Takes neighbors' maps and places their data into the archives
 	 */
-	void receiveMap(ros::ServiceClient _client);
+	void receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps,  std::vector<int> &_ids);
 	/*
 	 * Forgets unneeded data
 	 */
