@@ -57,6 +57,11 @@ public:
 	 */
 	std::vector<std::pair<float, float>> findDeadZones();
 
+	/*
+	 * Avoids other robots dynamically
+	 */
+	void avoidNeighbors(float tf);
+
 //===================================================================================================================\\
 
 	/*
@@ -76,6 +81,11 @@ public:
 
 	/*
 	 * Makes Alice find food
+	 */
+	void findFood();
+
+	/*
+	 * Makes Alice go to a target
 	 */
 	void goToTar();
 

@@ -79,6 +79,26 @@ void Rules::Charge()
 	//To implement
 }
 
+void Rules::findFood()
+{
+	/*
+	AliceStructs::pnt best;
+	float max_dis = 10; //to implement once model has the support
+	for (auto& contour : model.archived_contour)
+	{
+		if (calcDis(model.cur_pose.x, model.cur_pose.y, contour.x, contour.y) < max_dis && contour.z > best.z)
+		{
+			best.x = contour.x;
+			best.y = contour.y;
+			best.z = contour.z;
+		}
+	}
+	final_vel.dir = atan2(best.y - model.cur_pose.y, model.cur_pose.x - best.x);
+	final_vel.mag = 1;
+	model.goTo.x = best.x;
+	model.goTo.y = best.y; */
+}
+
 void Rules::goToTar()
 {
 	float temp = 10000;
@@ -214,4 +234,13 @@ std::vector<std::pair<float, float>> Rules::findDeadZones()
 		dead_zones.push_back(aoe);
 	}
 	return dead_zones;
+}
+
+void Rules::avoidNeighbors()
+{
+	/*
+	for (auto& bot : model.neighbors)
+	{
+
+	} */
 }
