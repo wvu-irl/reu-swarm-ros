@@ -97,12 +97,21 @@ void Rules::goToTar()
 }
 
 void findUpdraft()
-{ /*
+{
 	std::vector<AliceStructs::pose> reachable;
+	float max_dis = 10; //to implement once model has the support
 	for (auto& contour : model.archived_contour)
 	{
-		if ()
-	} */
+		if (calcDis(model.cur_pose.x, model.cur_pose.y, contour.x, contour.y) < max_dis)
+		{
+			reachable.push_back(contour);
+		}
+	}
+	sort(reachable.begin(), reachable.end());
+	final_vel.dir = atan2(reachable.front().y, reachable.front().x);
+	final_vel.mag = 1;
+	model.goTo.x = reachable.front().x;
+	model.goTo.y = reachable.front().y;
 }
 
 //===================================================================================================================\\
