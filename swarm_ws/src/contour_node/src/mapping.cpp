@@ -28,7 +28,8 @@ void newObs(wvu_swarm_std_msgs::obstacle obs)
 	}
 	bool found = false;
 
-	for (size_t i = 0; i < overall_map.levels.at(obs.level).functions.size() && !found; i++)
+	for (size_t i = 0;
+			i < overall_map.levels.at(obs.level).functions.size() && !found; i++)
 	{
 		if (overall_map.levels.at(obs.level).functions.at(i).name.compare(
 				obs.characteristic.name) == 0)
@@ -97,7 +98,7 @@ int main(int argc, char **argv)
 	gaus.name = "Jeff";
 
 	obs.characteristic = gaus;
-	obs.level = map_ns::OBSTACLE;
+	obs.level = map_ns::TARGET;
 
 	newObs(obs);
 #endif
@@ -108,9 +109,48 @@ int main(int argc, char **argv)
 	///////////////////////////////////////////////////////////////////
 
 	ros::Rate rate(60);
+#if TEST_EQU
+	int tick = 0;
+#endif
 
 	while (ros::ok())
 	{
+#if TEST_EQU
+		tick++;
+		tick %= 1000;
+
+		el.x_rad = 7;
+		el.y_rad = 4;
+		el.theta_offset = tick * M_PI / 100;
+
+		gaus.ellipse = el;
+		gaus.ellipse.offset_x = 5;
+		gaus.ellipse.offset_y = 0;
+		gaus.amplitude = 10;
+		gaus.name = "Jeff";
+
+		obs.characteristic = gaus;
+		obs.level = map_ns::TARGET;
+
+		newObs(obs);
+
+		el.x_rad = 5 * cos(tick * M_PI / 100) + 6;
+		el.y_rad = 2;
+		el.theta_offset = tick * -M_PI / 100;
+
+		gaus.ellipse = el;
+		gaus.ellipse.offset_x = 0;
+		gaus.ellipse.offset_y = 0;
+		gaus.amplitude = 20;
+		gaus.name = "Bob";
+
+		obs.characteristic = gaus;
+		obs.level = map_ns::TARGET;
+
+		newObs(obs);
+
+#endif
+
 		map_pub.publish(overall_map);
 
 		ros::spinOnce();

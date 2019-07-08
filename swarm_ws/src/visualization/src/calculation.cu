@@ -51,10 +51,10 @@ typedef struct
  */
 __device__ void zfunc(double *z, double rx, double ry, gaussian_t *map, size_t num_eqs)
 {
-    rx -= 640;
-		ry -= 400;
 		rx *= 200.0 / 1280.0;
 		ry *= 100.0 / 800.0;
+		rx -= 100.0;
+		ry -= 50.0;
 		*z = 0;
 
 		for (size_t i = 0;i < num_eqs;i++)
