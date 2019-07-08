@@ -19,7 +19,8 @@ void newObs(wvu_swarm_std_msgs::obstacle obs)
 	while (overall_map.levels.size() <= obs.level)
 	{
 #if DEBUG
-		std::cout << "\033[30;43mAdded level: " << overall_map.levels.size() << "\033[0m" << std::endl;
+		std::cout << "\033[30;43mAdded level: " << overall_map.levels.size()
+				<< "\033[0m" << std::endl;
 #endif
 		overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
 	}
@@ -54,7 +55,7 @@ int main(int argc, char **argv)
 	wvu_swarm_std_msgs::ellipse el;
 	el.x_rad = 5;
 	el.y_rad = 2;
-	el.theta_offset = M_PI_2;
+	el.theta_offset = M_PI_4;
 
 	wvu_swarm_std_msgs::gaussian gaus;
 	gaus.ellipse = el;
@@ -63,6 +64,20 @@ int main(int argc, char **argv)
 	gaus.amplitude = 20;
 
 	wvu_swarm_std_msgs::obstacle obs;
+	obs.characteristic = gaus;
+	obs.level = map_ns::TARGET;
+
+	newObs(obs);
+
+	el.x_rad = 7;
+	el.y_rad = 4;
+	el.theta_offset = 0;
+
+	gaus.ellipse = el;
+	gaus.ellipse.offset_x = 5;
+	gaus.ellipse.offset_y = 0;
+	gaus.amplitude = 10;
+
 	obs.characteristic = gaus;
 	obs.level = map_ns::TARGET;
 

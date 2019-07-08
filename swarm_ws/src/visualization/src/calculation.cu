@@ -49,27 +49,28 @@ typedef struct
  * x and y are coordinates on the plane perpendicular to the view
  * t is a saw function of time (goes from 0 to 1000 incrementing by 1 every tick)
  */
-__device__ void zfunc(double *z, double x, double y, gaussian_t *map, size_t num_eqs)
+__device__ void zfunc(double *z, double rx, double ry, gaussian_t *map, size_t num_eqs)
 {
-    x -= 640;
-		y -= 400;
-		x *= 200.0 / 1280.0;
-		y *= 100.0 / 800.0;
-		double theta = x == 0 ? (y > 0 ? M_PI_2 : -M_PI_2) : (atan(y/x) + (y < 0 ? M_PI : 0));
-		double r = sqrt(x*x + y*y);
+    rx -= 640;
+		ry -= 400;
+		rx *= 200.0 / 1280.0;
+		ry *= 100.0 / 800.0;
 		*z = 0;
 
 		for (size_t i = 0;i < num_eqs;i++)
 		{
 			gaussian_t curr_eq = map[i];
+			double x = rx - curr_eq.y_off;
+			double y = ry - curr_eq.x_off;
+
+			double theta = x == 0 ? (y > 0 ? M_PI_2 : -M_PI_2) : (atan(y/x) + (y < 0 ? M_PI : 0));
+			double r = sqrt(x*x + y*y);
+
 			double a = curr_eq.ellipse.x_rad;
 			double b = curr_eq.ellipse.y_rad;
 
-//			double x_app = r * cos(theta + curr_eq.ellipse.theta_off);
-//			double y_app = r * sin(theta + curr_eq.ellipse.theta_off);
-
-			double x_app = r * cos(theta + curr_eq.ellipse.theta_off) - curr_eq.x_off;
-			double y_app = r * sin(theta + curr_eq.ellipse.theta_off) - curr_eq.y_off;
+			double x_app = r * cos(theta + curr_eq.ellipse.theta_off);
+			double y_app = r * sin(theta + curr_eq.ellipse.theta_off);
 
 			double re = a != 0 && b != 0 ? sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b) : 10000;
 
