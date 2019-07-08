@@ -72,10 +72,8 @@ std::vector<sf::Vector2f> targets;
 // current contour map data
 wvu_swarm_std_msgs::map_levels map;
 
-void updateMap(wvu_swarm_std_msgs::map_levels _map)
-{
-	map = _map;
-}
+// Human interaction points
+std::vector<sf::Vector2f> nui_points;
 
 sf::Vector2f convertCoordinate(sf::Vector2f a)
 {
@@ -86,6 +84,18 @@ sf::Vector2f convertCoordinate(sf::Vector2f a)
 	tab_vect.y *= (double) HEIGHT / g_table_height;
 	return tab_vect;
 }
+
+void nuiUpdate(geometry_msgs::Point msg)
+{
+	nui_points.clear();
+	nui_points.push_back(convertCoordinate(sf::Vector2f(msg.x, msg.y)));
+}
+
+void updateMap(wvu_swarm_std_msgs::map_levels _map)
+{
+	map = _map;
+}
+
 
 // Subscription callback for goals
 void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
@@ -144,10 +154,10 @@ void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 vector2f_t readVector(std::string vect)
 {
 	// allocating memory for getting individual strings
-	char *vectr = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
+	char *vectr = (char*) malloc(sizeof(char) * strlen(vect.c_str()));
 	strcpy(vectr, vect.c_str());
-	char *x = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
-	char *y = (char *) malloc(sizeof(char) * strlen(vect.c_str()));
+	char *x = (char*) malloc(sizeof(char) * strlen(vect.c_str()));
+	char *y = (char*) malloc(sizeof(char) * strlen(vect.c_str()));
 
 	// separating by commas
 	strcpy(x, strtok(vectr, ","));
@@ -208,24 +218,16 @@ void tick()
 	{
 #if TAB_DEBUG
 		std::cout << "Starting contour calc" << std::endl;
-		if (map.levels.size() > 0 && map.levels[g_draw_level].functions.size() > 0)
-			std::cout << "\033[32m\nDrawing level:\033[0m\n"
-					<< map.levels[g_draw_level] << std::endl;
-		else
-			std::cout << "\033[31m\nDrawing level:\033[0m\n"
-								<< map << std::endl;
+		std::cout << "\nDrawing level:\n" << map.levels[g_draw_level] << std::endl;
 #endif
-		if (map.levels.size() > 0 && map.levels[g_draw_level].functions.size() > 0)
-		{
-			cont->resemble(map.levels[g_draw_level]);
+		cont->resemble(map.levels[g_draw_level]);
 #if TAB_DEBUG
-			std::cout << "Resemble contour calc" << std::endl;
+		std::cout << "Resemble contour calc" << std::endl;
 #endif
-			cont->tick(); // telling the contour plot to advance
+		cont->tick(); // telling the contour plot to advance
 #if TAB_DEBUG
-			std::cout << "Finished contour calc" << std::endl;
+		std::cout << "Finished contour calc" << std::endl;
 #endif
-		}
 	}
 }
 
@@ -246,21 +248,7 @@ void render(sf::RenderWindow *window)
 
 	if (strcmp(g_background.c_str(), "Contour") == 0)
 	{
-		if (map.levels.size() > 0 && map.levels[g_draw_level].functions.size() > 0)
-		{
-#if TAB_DEBUG
-			std::cout << "Drawing contour map" << std::endl;
-#endif
-			cont->render(&disp); // drawing contour plot
-		}
-		else
-		{
-
-			sf::RectangleShape rect;
-			rect.setFillColor(sf::Color::Black);
-			rect.setSize(sf::Vector2f(WIDTH, HEIGHT));
-			disp.draw(rect);
-		}
+		cont->render(&disp); // drawing contour plot
 	}
 	else if (strcmp(g_background.c_str(), "None") == 0)
 	{
@@ -301,6 +289,19 @@ void render(sf::RenderWindow *window)
 		disp.draw(tar);
 	}
 
+	// drawing NUI points
+	sf::CircleShape nui_circ;
+	nui_circ.setRadius(2);
+	nui_circ.scale(1, 1.25);
+	nui_circ.setFillColor(sf::Color::Cyan);
+	nui_circ.setOutlineColor(sf::Color::Black);
+	nui_circ.setOutlineThickness(1);
+	for (size_t i = 0; i < targets.size(); i++)
+	{
+		nui_circ.setPosition(targets.at(i) - sf::Vector2f(1, 1));
+		disp.draw(nui_circ);
+	}
+
 	// drawing robots
 	sf::CircleShape bot;
 	float radius = g_robot_diameter * 4.0f; // 4 is effectively '/ 2.0 * 800 / 100
@@ -324,7 +325,7 @@ void render(sf::RenderWindow *window)
 
 	// converting to an image to transform
 	sf::Image img = disp.getTexture().copyToImage();
-	sf::Uint8 *tf_cols = (sf::Uint8 *) malloc(4 * WIDTH * HEIGHT);
+	sf::Uint8 *tf_cols = (sf::Uint8*) malloc(4 * WIDTH * HEIGHT);
 
 	// transforming to calibration value
 	perspectiveTransform(g_trap, &disp, tf_cols);
@@ -369,9 +370,8 @@ int main(int argc, char **argv)
 	table_origin = sf::Vector2f(g_table_width / 2, g_table_height / 2);
 
 #if TAB_DEBUG
-	std::cout << "Got params:\n\t" << g_background << "\n\t" << config << "\n\t"
-			<< g_table_width << "\n\t" << g_table_height << "\n\t" << g_robot_diameter
-			<< std::endl;
+	std::cout << "Got params:\n\t" << g_background << "\n\t" << config << "\n\t" << g_table_width
+			<< "\n\t" << g_table_height << "\n\t" << g_robot_diameter << std::endl;
 
 #endif
 
@@ -388,7 +388,7 @@ int main(int argc, char **argv)
 			drawObstacles);
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
 
-	ros::Subscriber mapping_sub = n.subscribe("/map_data", 100, updateMap);
+	ros::Subscriber nui_tracking = n.subscribe("/nui_bridge/hand_1", 1000, nuiUpdate);
 
 	// calibrating from file
 	calibrateFromFile(config);
