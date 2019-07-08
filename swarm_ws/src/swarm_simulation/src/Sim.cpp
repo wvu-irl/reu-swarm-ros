@@ -220,8 +220,7 @@ void Sim::Run(ros::NodeHandle _n)
 			pI = HandleInput(pI);
 			Render();
 			wvu_swarm_std_msgs::vicon_bot_array vb_array = flock.createMessages();
-			//publishing vicon_bot_array
-			pub.publish(vb_array);
+			pub.publish(vb_array); //publishing vicon_bot_array
 		//		if (targets.point.size() > 0)
 		//		{
 		//			targets.point.at(0).x = vb_array.poseVect.at(0).botPose.transform.translation.x;
@@ -286,8 +285,16 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handles input to the graphi
 				event);
 
 		clickNdragBots(&_pI, mX, mY, event);      //runs click and drag for bots
+
+		std::cout<<"Worked for Bots"<<std::endl;
+
 		clickNdragTarget(&_pI, mX, mY, event);    //runs click and drag for targets.
+
+		std::cout<<"Worked for Targets"<<std::endl;
+
 		clickNdragObstacles(&_pI, mX, mY, event); //allows for click and drag on obstacles
+
+		std::cout<<"Worked for Obstacles"<<std::endl;
 
 	}
 	return _pI; //tracks state of dragging (see sim.h)
@@ -413,7 +420,7 @@ void Sim::clickNdragObstacles(PrevIteration *_pI, float _mX, float _mY, sf::Even
 	} else if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
 			&& _pI->prevClick == false && _pI->obs == false && _pI->bot == false && _pI->target == false)
 	{
-		while (found != true)
+		while (found != true && i < obstacles.point.size())
 		{
 			x_pos = 150 + obstacles.point.at(i).x * 3;
 			y_pos = 300 - obstacles.point.at(i).y * 3;
@@ -426,10 +433,12 @@ void Sim::clickNdragObstacles(PrevIteration *_pI, float _mX, float _mY, sf::Even
 				_pI->prevClick = true;
 				_pI->obs = true;
 
-			} else if (i == obstacles.point.size() - 1)
-			{
-				found = true;
 			}
+//			else if (i == obstacles.point.size() - 1) //FOR SOME REASON SIZE IS SOMETIMES ZERO
+//			{
+//				std::cout<<"Loops failed successfully!\n";
+//				found = true;
+//			}
 			i++;
 		}
 	}
@@ -466,7 +475,7 @@ void Sim::clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _ev
 				_pI->dragging = true;
 				_pI->prevClick = true;
 				_pI->bot = true;
-			} else if (i == flock.flock.size() - 1)
+			}else if (i == flock.flock.size() - 1)
 			{
 				found = true;
 			}
