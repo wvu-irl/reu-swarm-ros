@@ -29,7 +29,6 @@ void Model::clear()
 }
 std::pair<float, float> Model::transformCur(float _x, float _y)
 {
-	//will handle heading after i get this debugged
 	std::pair<float, float> to_return;
 	float abs_x = _x * cos(cur_pose.heading) + _y * -sin(cur_pose.heading);
 	float abs_y = _x * sin(cur_pose.heading) + _y * cos(cur_pose.heading);
@@ -42,7 +41,6 @@ std::pair<float, float> Model::transformCur(float _x, float _y)
 
 std::pair<float, float> Model::transformFir(float _x, float _y)
 {
-	//will handle heading after i get this debugged
 	std::pair<float, float> to_return;
 	float abs_x = _x * cos(first_pose.heading) + _y * -sin(first_pose.heading);
 	float abs_y = _x * sin(first_pose.heading) + _y * cos(first_pose.heading);
@@ -52,6 +50,18 @@ std::pair<float, float> Model::transformFir(float _x, float _y)
 	to_return.second = abs_x * sin(-cur_pose.heading) + abs_y * cos(-cur_pose.heading);
 	return to_return;
 }
+std::pair<float, float> Model::transformFtF(float _x, float _y,float _ox, float _oy, float _oheading)
+{
+	std::pair<float, float> to_return;
+	float abs_x = _x * cos(_oheading) + _y * -sin(_oheading);
+	float abs_y = _x * sin(_oheading) + _y * cos(_oheading);
+	abs_x = abs_x - cur_pose.x + _ox;
+	abs_y = abs_y - cur_pose.y + _oy;
+	to_return.first = abs_x * cos(-cur_pose.heading) + abs_y * -sin(-cur_pose.heading);
+	to_return.second = abs_x * sin(-cur_pose.heading) + abs_y * cos(-cur_pose.heading);
+	return to_return;
+}
+
 
 void Model::archiveAdd(AliceStructs::mail &_toAdd)
 {
@@ -217,9 +227,16 @@ void Model::receiveMap(ros::ServiceClient _client)
 		wvu_swarm_std_msgs::map map = srv.response.map;
 		for (int j = 0; j < map.obsMsg.size(); j++)
 		{
-
-			if (map.obsMsg.at(j).observer != name)
+			wvu_swarm_std_msgs::obs_msg temp = map.obsMsg.at(j);
+			if (temp.observer != name)
 			{
+				AliceStructs::obj obstacle;
+				std::pair<float, float> temp2 = transformFtF(temp.ellipse.offset_x, temp.ellipse.offset_y, map.ox,map.oy,map.oheading);
+				obstacle.x_off = temp2.first;
+				obstacle.y_off = temp2.second;
+				obstacle.time = temp.time;
+				obstacle.observer_name = temp.observer;
+				archived_obstacles.push_back(obstacle);
 			}
 		}
 	}
@@ -260,6 +277,7 @@ void Model::forget()
 	while (it2 != archived_targets.end())
 	{
 		std::pair<float, float> temp = transformFir(it2->x, it2->y);
+
 		if (time.sec - it2->time.sec > 10)
 		{
 			it2 = archived_targets.erase(it2);

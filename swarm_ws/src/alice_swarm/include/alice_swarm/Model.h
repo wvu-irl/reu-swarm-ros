@@ -53,10 +53,12 @@ public:
 	void clear();
 
 	/*
-	 * This pair of functions transforms vectors to and from the current and original frame
+	 * This pair of functions transforms vectors to and from the current and original frame,
+	 * and the last one transforms any given frame to the given robot's original frame.
 	 */
 	std::pair<float, float> transformCur(float _x, float _y);
 	std::pair<float, float> transformFir(float _x, float _y);
+	std::pair<float, float> transformFtF(float _x, float _y,float _ox, float _oy, float _oheading);
 
 	/*
 	 * Stores items that the robot has seen but have gone out of range
