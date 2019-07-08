@@ -16,6 +16,12 @@ class Model
 public:
 
 	/*
+	 * Constant values used mostly for path planning
+	 */
+	float MAX_LV;
+	float MAX_AV;
+
+	/*
 	 * Information about Alice's immediate environment
 	 */
 	std::vector<AliceStructs::obj> obstacles;

@@ -238,9 +238,8 @@ std::vector<std::pair<float, float>> Rules::findDeadZones()
 
 void Rules::avoidNeighbors()
 {
-	/*
 	for (auto& bot : model.neighbors)
 	{
 
-	} */
+	}
 }
