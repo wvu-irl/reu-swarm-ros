@@ -4,11 +4,13 @@
 #include <contour_node/level_description.h>
 #include <wvu_swarm_std_msgs/nuitrack_data.h>
 #include <nuitrack_bridge/nuitrack_data.h>
+#include <contour_node/gaussian_object.h>
 
 #include <math.h>
 
 #define DEBUG 0
-#define TEST_EQU 1
+#define TEST_EQU 0
+#define TEST_NUI 1
 
 #if DEBUG
 #include <iostream>
@@ -103,6 +105,22 @@ void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 	rightProjected = findZIntercept(g_nui.rightWrist, g_nui.rightHand, 0.0);
 }
 
+wvu_swarm_std_msgs::gaussian gausToRos(gaussianObject* _gaus)
+{
+    wvu_swarm_std_msgs::gaussian ret;
+    
+    ret.amplitude = _gaus->getAmplitude();
+    ret.name = _gaus->getName();
+    ret.selected = _gaus->isSelected();
+    ret.ellipse.offset_x = _gaus->getOrigin().first;
+    ret.ellipse.offset_y = _gaus->getOrigin().second;
+    ret.ellipse.theta_offset = _gaus->getTheta();
+    ret.ellipse.x_rad = _gaus->getRadii().first;
+    ret.ellipse.y_rad = _gaus->getRadii().second;
+    
+    return ret;
+}
+
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "mapping");
@@ -121,15 +139,15 @@ int main(int argc, char **argv)
 
 #if TEST_EQU
 	wvu_swarm_std_msgs::ellipse el;
-	el.x_rad = 10;
-	el.y_rad = 6;
+	el.x_rad = 5;
+	el.y_rad = 2;
 	el.theta_offset = M_PI_4;
 
 	wvu_swarm_std_msgs::gaussian gaus;
 	gaus.ellipse = el;
 	gaus.ellipse.offset_x = 0;
 	gaus.ellipse.offset_y = 0;
-	gaus.amplitude = 40;
+	gaus.amplitude = 20;
 	gaus.name = "Bob";
 
 	wvu_swarm_std_msgs::obstacle obs;
@@ -138,21 +156,34 @@ int main(int argc, char **argv)
 
 	newObs(obs);
 
-	el.x_rad = 15;
-	el.y_rad = 15;
+	el.x_rad = 4;
+	el.y_rad = 7;
 	el.theta_offset = 0;
 
 	gaus.ellipse = el;
-	gaus.ellipse.offset_x = 0;
+	gaus.ellipse.offset_x = 10;
 	gaus.ellipse.offset_y = 0;
-	gaus.amplitude = 20;
+	gaus.amplitude = 10;
 	gaus.name = "Jeff";
 
 	obs.characteristic = gaus;
-	obs.level = map_ns::OBSTACLE;
+	obs.level = map_ns::TARGET;
 
 	newObs(obs);
 #endif
+        
+#if TEST_NUI
+        std::vector<levelObject*> worldMap;
+        
+        levelObject* ptr;
+        
+        ptr = new gaussianObject(0, 0, "Gary", 10, 20, M_PI / 4.0, 10, map_ns::NONE);
+        worldMap.push_back(ptr);
+        
+        ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::NONE);
+        worldMap.push_back(ptr);
+#endif 
+        
 #if DEBUG
 	std::cout << "\033[30;42mdone adding equation\033[0m" << std::endl;
 #endif
@@ -171,19 +202,29 @@ int main(int argc, char **argv)
 		tick++;
 		tick %= 1000;
 
-		el.x_rad = 10;
-		el.y_rad = 6;
+		el.x_rad = 5;
+		el.y_rad = 2;
 		el.theta_offset = tick * M_PI / 100;
 
 		gaus.ellipse = el;
 		gaus.ellipse.offset_x = 0;
 		gaus.ellipse.offset_y = 0;
-		gaus.amplitude = 40;
+		gaus.amplitude = 20;
 		gaus.name = "Bob";
 
 		obs.characteristic = gaus;
 		obs.level = map_ns::TARGET;
 		newObs(obs);
+#endif
+                
+#if TEST_NUI
+                // Populate ros map from our map
+                wvu_swarm_std_msgs::map_level m;
+                for(levelObject* i : worldMap) {
+                    m.functions.push_back(gausToRos((gaussianObject*)i));
+                }
+                overall_map.levels.clear();
+                overall_map.levels.push_back(m);
 #endif
 
 		map_pub.publish(overall_map);
