@@ -239,16 +239,18 @@ void Model::forget()
 			it = archived_obstacles.erase(it);
 		} else
 		{
-			std::vector<AliceStructs::obj>::iterator iit = it + 1;
+			std::vector<AliceStructs::obj>::iterator iit = it;
+			iit++;
 			while (iit != archived_obstacles.end()) //checks for repeat elements
 			{
 				if (iit->x_off - it->x_off < TOLERANCE && iit->y_off - it->y_off < TOLERANCE)
 				{
-					if (iit->time > it->time) {
+					if (iit->time > it->time)
 						std::swap(*iit, *it);
+					iit = archived_obstacles.erase(iit);
 
-					}
-				}
+				} else
+					iit++;
 			}
 			it++;
 		}
@@ -265,7 +267,22 @@ void Model::forget()
 		{
 			it2 = archived_targets.erase(it2);
 		} else
+		{
+			std::vector<AliceStructs::pnt>::iterator iit2 = it2;
+			iit2++;
+			while (iit2 != archived_targets.end()) //checks for repeat elements
+			{
+				if (iit2->x - it2->x < TOLERANCE && iit2->y - it2->y < TOLERANCE)
+				{
+					if (iit2->time > it2->time)
+						std::swap(*iit2, *it2);
+					iit2 = archived_targets.erase(iit2);
+
+				} else
+					iit2++;
+			}
 			it2++;
+		}
 	}
 	std::vector<AliceStructs::pose>::iterator it3 = archived_contour.begin();
 	while (it3 != archived_contour.end())
@@ -274,6 +291,22 @@ void Model::forget()
 		{
 			it3 = archived_contour.erase(it3);
 		} else
+		{
+			std::vector<AliceStructs::pose>::iterator iit3 = it3;
+			iit3++;
+			while (iit3 != archived_contour.end()) //checks for repeat elements
+			{
+				if (iit3->x - it3->x < TOLERANCE && iit3->y - it3->y < TOLERANCE)
+				{
+					if (iit3->time > it3->time)
+						std::swap(*iit3, *it3);
+					iit3 = archived_contour.erase(iit3);
+
+				} else
+					iit3++;
+			}
 			it3++;
+		}
 	}
 }
+

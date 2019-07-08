@@ -77,7 +77,7 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data,ros::ServiceClient
 	AliceStructs::mail mail = packageData(_data);
 	model.archiveAdd(mail);
 	model.sensorUpdate(mail);
-	model.receiveMap(_client);
+	//model.receiveMap(_client);
 	model.forget();
 }
 
