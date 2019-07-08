@@ -9,9 +9,6 @@
 	
 	<!-- Launches node to connect to udp and perform transforms -->
 	<node pkg="nuitrack_bridge" type="nuitrack_bridge" name="nui_bridge" output="screen" />
-
-	<!-- Launches node to connect to udp and perform transforms -->
-	<node pkg="nuitrack_bridge" type="hand_pointer" name="hands" output="screen" />
 	
 </launch>
 

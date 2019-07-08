@@ -8,6 +8,7 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
+#include <wvu_swarm_std_msgs/nuitrack_data.h>
 
 // UDP includes
 #include <stdlib.h> 
@@ -102,6 +103,17 @@ visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g,
     return ret;
 }
 
+geometry_msgs::Point xyzToPoint(xyz *_xyz)
+{
+    geometry_msgs::Point ret;
+    
+    ret.x = _xyz->x;
+    ret.y = _xyz->y;
+    ret.z = _xyz->z;
+    
+    return ret;
+}
+
 visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
 {
     visualization_msgs::MarkerArray ret;
@@ -120,6 +132,22 @@ visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
     return ret;
 }
 
+wvu_swarm_std_msgs::nuitrack_data nuiToRos(nuiData *_nui)
+{
+    wvu_swarm_std_msgs::nuitrack_data ret;
+    
+    ret.leftWrist = xyzToPoint(&(_nui->leftWrist));
+    ret.leftHand = xyzToPoint(&(_nui->leftHand));
+    ret.rightWrist = xyzToPoint(&(_nui->rightWrist));
+    ret.rightHand = xyzToPoint(&(_nui->rightHand));
+    ret.gestureFound = _nui->gestureFound;
+    ret.gestureData = (char)(_nui->gestureData);
+    ret.leftClick = _nui->leftClick;
+    ret.rightClick = _nui->rightClick;
+    
+    return ret;
+}
+
 int main(int argc, char** argv) {
     // ROS setup
     ros::init(argc, argv, "nuitrack_bridge");
@@ -128,8 +156,9 @@ int main(int argc, char** argv) {
     ros::NodeHandle n;
     ros::NodeHandle n_priv("~"); // private handle
     ros::Rate rate(50);
-    ros::Publisher pub;
-    pub = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge", 1000);
+    ros::Publisher pubVis, pubNui;
+    pubVis = n.advertise<visualization_msgs::MarkerArray>("nuitrack_visualization", 1000);
+    pubNui = n.advertise<wvu_swarm_std_msgs::nuitrack_data>("nuitrack_bridge", 1000);
     
     // Transform listener
     tf::TransformListener tfLis;
@@ -219,8 +248,11 @@ int main(int argc, char** argv) {
         }
         /* End wait for response */
         
-        visualization_msgs::MarkerArray vis = nuiToMarkers(&nui);
-        pub.publish(vis);
+        visualization_msgs::MarkerArray visOut = nuiToMarkers(&nui);
+        pubVis.publish(visOut);
+        
+        wvu_swarm_std_msgs::nuitrack_data nuiOut = nuiToRos(&nui);
+        pubNui.publish(nuiOut);
         
         ros::spinOnce();
         rate.sleep();

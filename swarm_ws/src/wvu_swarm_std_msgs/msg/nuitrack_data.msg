@@ -10,4 +10,4 @@ bool rightClick
 bool gestureFound
 
 # Include nuitrack_bridge/nuitrack_data.h to use the enum for this char
-char gestureType
+char gestureData
