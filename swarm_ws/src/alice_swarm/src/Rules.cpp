@@ -96,22 +96,23 @@ void Rules::goToTar()
 	final_vel.mag = 1;
 }
 
-void findUpdraft()
+void Rules::findUpdraft()
 {
-	std::vector<AliceStructs::pose> reachable;
+	AliceStructs::pnt best;
 	float max_dis = 10; //to implement once model has the support
 	for (auto& contour : model.archived_contour)
 	{
-		if (calcDis(model.cur_pose.x, model.cur_pose.y, contour.x, contour.y) < max_dis)
+		if (calcDis(model.cur_pose.x, model.cur_pose.y, contour.x, contour.y) < max_dis && contour.z > best.z)
 		{
-			reachable.push_back(contour);
+			best.x = contour.x;
+			best.y = contour.y;
+			best.z = contour.z;
 		}
 	}
-	sort(reachable.begin(), reachable.end());
-	final_vel.dir = atan2(reachable.front().y, reachable.front().x);
+	final_vel.dir = atan2(best.y - model.cur_pose.y, model.cur_pose.x - best.x);
 	final_vel.mag = 1;
-	model.goTo.x = reachable.front().x;
-	model.goTo.y = reachable.front().y;
+	model.goTo.x = best.x;
+	model.goTo.y = best.y;
 }
 
 //===================================================================================================================\\
