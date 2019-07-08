@@ -73,6 +73,11 @@ public:
 	 */
 	void pass(ros::Publisher _pub); //Exact implementation TBD
 
+
+	/*
+	 * Takes neighbors' maps and places their data into the archives
+	 */
+	void receiveMap(ros::ServiceClient _client);
 	/*
 	 * Forgets unneeded data
 	 */

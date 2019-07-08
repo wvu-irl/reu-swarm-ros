@@ -29,7 +29,7 @@ public:
 	/*
 	 * Initializes Alice, rules, and the model
 	 */
-	Alice(wvu_swarm_std_msgs::alice_mail &_data);
+	Alice(wvu_swarm_std_msgs::alice_mail &_data,ros::ServiceClient &_client );
 
 	/*
 	 * Takes data from messages to structs
@@ -39,7 +39,7 @@ public:
 	/*
 	 * Updates the model with new data
 	 */
-	void updateModel(wvu_swarm_std_msgs::alice_mail &_data);
+	void updateModel(wvu_swarm_std_msgs::alice_mail &_data,ros::ServiceClient &_client );
 
 	/*
 	 * Generates a velocity vector to be sent to the low-level controllers

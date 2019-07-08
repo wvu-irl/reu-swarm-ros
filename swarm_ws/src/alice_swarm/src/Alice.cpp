@@ -14,11 +14,11 @@ Alice::Alice()
 	name = 0;
 }
 
-Alice::Alice(wvu_swarm_std_msgs::alice_mail &_data)
+Alice::Alice(wvu_swarm_std_msgs::alice_mail &_data,ros::ServiceClient &_client )
 {
 	name = _data.name;
 	model = Model(_data.name);
-	updateModel(_data);
+	updateModel(_data,_client);
 	rules = Rules(model);
 //	(_data);
 }
@@ -72,11 +72,12 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 	return mail;
 }
 
-void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data)
+void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data,ros::ServiceClient &_client )
 {
 	AliceStructs::mail mail = packageData(_data);
 	model.archiveAdd(mail);
 	model.sensorUpdate(mail);
+	model.receiveMap(_client);
 	model.forget();
 }
 
