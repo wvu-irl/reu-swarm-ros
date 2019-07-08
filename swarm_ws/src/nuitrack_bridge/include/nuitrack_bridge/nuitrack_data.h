@@ -15,9 +15,9 @@
 using std::string;
 
 // Physical transform of the Kinect's lens against global frame
-#define KINECT_TRAN_X 0.113 //-0.450
-#define KINECT_TRAN_Y -0.483 //-0.107
-#define KINECT_TRAN_Z 0.557 //0.585
+#define KINECT_TRAN_X 0.226 //-0.450
+#define KINECT_TRAN_Y -0.966 //-0.107
+#define KINECT_TRAN_Z 1.114 //0.585
 #define KINECT_QUAT_X 0.54374 //0.543
 #define KINECT_QUAT_Y 0.55073 //0.550
 #define KINECT_QUAT_Z 0.44479 //0.444

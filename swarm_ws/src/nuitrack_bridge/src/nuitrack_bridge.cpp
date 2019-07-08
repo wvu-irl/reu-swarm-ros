@@ -40,9 +40,9 @@ void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
     geometry_msgs::PointStamped pt;
     pt.header.frame_id = "kinect";
     pt.header.stamp = ros::Time();
-    pt.point.x = _xyz.x / 1000; // mm to m
-    pt.point.y = _xyz.y / 1000;
-    pt.point.z = _xyz.z / 1000;
+    pt.point.x = _xyz.x / 10; // mm to cm
+    pt.point.y = _xyz.y / 10;
+    pt.point.z = _xyz.z / 10;
     
     try {
         // Another placeholder point to transform into
@@ -53,7 +53,7 @@ void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
         tfLis.transformPoint("world", pt, ptTf);
         
         // Apply to input
-        _xyz.x = ptTf.point.x; // m to cm
+        _xyz.x = ptTf.point.x;
         _xyz.y = ptTf.point.y;
         _xyz.z = ptTf.point.z;
     }
@@ -76,7 +76,7 @@ void nuiTf(nuiData &_nui, tf::TransformListener &tfLis)
     }
 }
 
-visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g, double _b, double _a = 1.0, double _size = 0.04)
+visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g, double _b, double _a = 1.0, double _size = 4)
 {
     visualization_msgs::Marker ret;
     
@@ -125,9 +125,9 @@ visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
     double rightWristAlpha = _nui->confRW;
     
     ret.markers.push_back(xyzToMarker(1, &(_nui->leftWrist), 1, 0.5, 0, leftWristAlpha));
-    ret.markers.push_back(xyzToMarker(2, &(_nui->leftHand), 1, 0, 0, leftHandAlpha, _nui->leftClick ? 0.06 : 0.04));
+    ret.markers.push_back(xyzToMarker(2, &(_nui->leftHand), 1, 0, 0, leftHandAlpha, _nui->leftClick ? 6 : 4));
     ret.markers.push_back(xyzToMarker(3, &(_nui->rightWrist), 0, 0.5, 1, rightWristAlpha));
-    ret.markers.push_back(xyzToMarker(4, &(_nui->rightHand), 0, 0, 1, rightHandAlpha, _nui->rightClick ? 0.06 : 0.04));
+    ret.markers.push_back(xyzToMarker(4, &(_nui->rightHand), 0, 0, 1, rightHandAlpha, _nui->rightClick ? 6 : 4));
     
     return ret;
 }
