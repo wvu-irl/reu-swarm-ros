@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "wvu_swarm_std_msgs/alice_mail_array.h"
 #include "wvu_swarm_std_msgs/robot_command_array.h"
+#include "wvu_swarm_std_msgs/map.h"
 #include "alice_swarm/Hub.h"
 #include "alice_swarm/Alice.h"
 #include "alice_swarm/aliceStructs.h"
@@ -12,29 +13,47 @@ wvu_swarm_std_msgs::alice_mail_array temp_mail;
 
 void aliceCallback(const wvu_swarm_std_msgs::alice_mail_array &msg)
 {
-	temp_mail=msg;
+	temp_mail = msg;
 }
 
 int main(int argc, char **argv)
 {
-	std::map<int, Alice> aliceMap; //Maps robot id's to robots so they can be accessed easily
-
+	std::map<int, Alice> alice_map; //Maps robot id's to robots so they can be accessed easily
+	std::map<int, Alice>::iterator map_it = alice_map.begin();
 	//Creates an AliceBrain node, and subscribes/publishes to the necessary topics
 	ros::init(argc, argv, "AliceBrain");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("alice_mail_array", 1000, aliceCallback);
+
 	ros::Rate loopRate(10);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array > ("final_execute", 1000);
+	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::map > ("info_map", 1000);
 
 	while (ros::ok())
 	{
+		// it!=mymap.end(); ++it)
 		auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of Alice
 		for (int i = 0; i < temp_mail.mails.size(); i++)
 		{
-			aliceMap[temp_mail.mails.at(i).name].updateModel(temp_mail.mails.at(i)); //gives each robot the relative data it needs
+			alice_map[temp_mail.mails.at(i).name].updateModel(temp_mail.mails.at(i)); //gives each robot the relative data it needs, whilst also creating the alice's
+		}
+
+		//One alice is selected to send her map out to the rest of them; less robots means a particular robot's map is sent more often
+		if (alice_map.size() != 0)
+		{
+			if (map_it == alice_map.end() )
+			{
+				map_it = alice_map.begin();
+				map_it->second.model.pass(pub2);
+				map_it++;
+			} else
+			{
+				map_it->second.model.pass(pub2);
+				map_it++;
+			}
 		}
 		wvu_swarm_std_msgs::robot_command_array execute;
-		for (std::map<int, Alice>::iterator it = aliceMap.begin(); it != aliceMap.end(); ++it) //eventually run this part asynchronously
+		for (std::map<int, Alice>::iterator it = alice_map.begin(); it != alice_map.end(); ++it) //eventually run this part asynchronously
 		{
 			wvu_swarm_std_msgs::robot_command temp;
 			AliceStructs::vel tempVel = it->second.generateVel(); //Uses all of the ideals to generate compromises

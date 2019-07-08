@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   contour_node
   swarm_simulation
+  alice_swarm
 )
 
 catkin_package(

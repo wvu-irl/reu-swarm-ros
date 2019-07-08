@@ -4,3 +4,7 @@ wvu_swarm_std_msgs/cont_msg[] contMsg
 float32 x
 float32 y
 float32 heading
+float32 ox
+float32 oy
+float32 oheading
+int32 name

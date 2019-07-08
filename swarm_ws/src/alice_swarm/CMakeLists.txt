@@ -9,6 +9,11 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg message_gen
 ## Declare ROS messages and services
 ##add_message_files(FILES )
 
+add_service_files(
+  FILES
+  get_map.srv
+)
+
 ## Generate added messages and services
 generate_messages(DEPENDENCIES std_msgs wvu_swarm_std_msgs)
 
@@ -27,10 +32,13 @@ add_dependencies(Hub wvu_swarm_std_msgs_generate_messages_cpp)
 
 add_executable(AliceMain src/AliceMain.cpp)
 add_executable(AbsToRel src/AbsToRel.cpp)
+add_executable(MapHub src/MapHub.cpp)
 target_link_libraries(Hub ${catkin_LIBRARIES} level_descriptor)
 target_link_libraries(Rules ${catkin_LIBRARIES})
 target_link_libraries(Alice ${catkin_LIBRARIES} Model Rules)
 target_link_libraries(Model ${catkin_LIBRARIES})
+target_link_libraries(MapHub ${catkin_LIBRARIES})
+ add_dependencies(MapHub alice_swarm)
 target_link_libraries(AbsToRel ${catkin_LIBRARIES} Hub)
 target_link_libraries(AliceMain ${catkin_LIBRARIES} Alice Hub)
   add_dependencies(AliceMain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

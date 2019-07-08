@@ -5,11 +5,13 @@
 #include <wvu_swarm_std_msgs/alice_mail_array.h>
 #include <swarm_simulation/Font.h>
 #include <visualization/alice_pov.h>
+#include <alice_swarm/get_map.h>
+bool overlap = true;
 
 //#include "ros/ros.h"
-void AlicePOV::mapCallback(const wvu_swarm_std_msgs::alice_mail_array &msg)
+void AlicePOV::mailCallback(const wvu_swarm_std_msgs::alice_mail_array &msg)
 {
-	map = msg;
+	mail = msg;
 }
 
 // Construct window using SFML
@@ -21,6 +23,8 @@ AlicePOV::AlicePOV(void)
 	window_width = 600;
 	this->window.create(sf::VideoMode(window_width, window_height, desktop.bitsPerPixel), "Alice POV",
 			sf::Style::Titlebar);
+	this->window2.create(sf::VideoMode(300, window_height, desktop.bitsPerPixel), "Alice POV",
+				sf::Style::Titlebar);
 }
 
 // Run the simulation. Run creates the bodies that we'll display, checks for user
@@ -29,14 +33,14 @@ void AlicePOV::Run(ros::NodeHandle _n)
 {
 	//Initializes all publishers and subscribers
 
-	ros::Subscriber sub = _n.subscribe("alice_mail_array", 1000, &AlicePOV::mapCallback, this); //subscribes to funnel
-
+	ros::Subscriber sub = _n.subscribe("alice_mail_array", 1000, &AlicePOV::mailCallback, this);
+	ros::ServiceClient client = _n.serviceClient < alice_swarm::get_map > ("get_map");
 	ros::Rate loopRate(15);
 
 	while (window.isOpen() && ros::ok()) //main while loop (runs the simulation).
 	{
 		HandleInput();
-		Render();
+		Render(client);
 		ros::spinOnce();
 		loopRate.sleep();
 	}
@@ -44,7 +48,7 @@ void AlicePOV::Run(ros::NodeHandle _n)
 void AlicePOV::HandleInput() //switches the robot viewed depending on what buttons are pressed
 {
 	sf::Event event;
-	while (window.pollEvent(event))
+	while (window.pollEvent(event) || window2.pollEvent(event))
 	{
 		int i = 0; //iterator for dragging while loop
 		float mX = event.mouseButton.x; //mouse x pos
@@ -66,65 +70,43 @@ void AlicePOV::HandleInput() //switches the robot viewed depending on what butto
 
 	}
 }
-
-void AlicePOV::Render() //draws changes in simulation states to the window.
+void AlicePOV::drawMail()
 {
-	window.clear();
-
-	for (int i = 0; i < map.mails.size(); i++)
+	for (int i = 0; i < mail.mails.size(); i++)
 	{
-
-
-		if (map.mails.at(i).name == name)
+		if (mail.mails.at(i).name == name)
 		{
-			for (int j = 0; j < map.mails.at(i).obsMail.size(); j++)
-								{
-									wvu_swarm_std_msgs::ellipse temp = map.mails.at(i).obsMail.at(j);
-									unsigned short quality = 70;
-									sf::ConvexShape ellipse;
-									ellipse.setPointCount(quality);
-									for (unsigned short i = 0; i < quality; ++i)
-									{
-										float rad = (360 / quality * i) / (360 / M_PI / 2);
-										float x = 3*cos(rad) * temp.x_rad;
-										float y = 3*sin(rad) * temp.y_rad;
-										float newx = x * cos(-temp.theta_offset) - y * sin(-temp.theta_offset);
-										float newy = x * sin(-temp.theta_offset) + y * cos(-temp.theta_offset);
-										ellipse.setPoint(i, sf::Vector2f(newx, newy));
-									}
-
-									ellipse.setPosition(300 + 3 * temp.offset_x, 300 - 3 * temp.offset_y);
-									ellipse.setFillColor(sf::Color::Yellow);
-									window.draw(ellipse);
-								}
-			sf::CircleShape shape(0);
-			// Changing the Visual Properties of the robot
-			shape.setPosition(300, 300); // Sets position of shape to the middle
-			shape.setOrigin(bodiesSize, bodiesSize);
-			float inten = 10 * map.mails.at(name).contVal;
-			if (inten > 255)
-				inten = 255;
-			shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
-			shape.setOutlineColor(sf::Color::Green);
-			shape.setOutlineThickness(1);
-			shape.setRadius(bodiesSize);
-			window.draw(shape);
-
-			sf::RectangleShape line(sf::Vector2f(5, 2));
-			line.setFillColor(sf::Color::Black);
-			line.setPosition(300, 300);
-			line.setOrigin(-2, 1);
-			line.setRotation(0);
-			window.draw(line);
-
-			for (int j = 0; j < map.mails.at(i).neighborMail.size(); j++)
+			for (int j = 0; j < mail.mails.at(i).obsMail.size(); j++)
 			{
-				wvu_swarm_std_msgs::neighbor_mail temp = map.mails.at(i).neighborMail.at(j);
+				wvu_swarm_std_msgs::ellipse temp = mail.mails.at(i).obsMail.at(j);
+				unsigned short quality = 70;
+				sf::ConvexShape ellipse;
+				ellipse.setPointCount(quality);
+				for (unsigned short i = 0; i < quality; ++i)
+				{
+					float rad = (360 / quality * i) / (360 / M_PI / 2);
+					float x = 3 * cos(rad) * temp.x_rad;
+					float y = 3 * sin(rad) * temp.y_rad;
+					float newx = x * cos(-temp.theta_offset) - y * sin(-temp.theta_offset);
+					float newy = x * sin(-temp.theta_offset) + y * cos(-temp.theta_offset);
+					ellipse.setPoint(i, sf::Vector2f(newx, newy));
+				}
+
+				ellipse.setPosition(300 + 3 * temp.offset_x, 300 - 3 * temp.offset_y);
+				ellipse.setFillColor(sf::Color::Yellow);
+				ellipse.setOutlineColor(sf::Color::White);
+				ellipse.setOutlineThickness(1);
+				window.draw(ellipse);
+			}
+
+			for (int j = 0; j < mail.mails.at(i).neighborMail.size(); j++)
+			{
+				wvu_swarm_std_msgs::neighbor_mail temp = mail.mails.at(i).neighborMail.at(j);
 				sf::CircleShape shape(0);
 				// Changing the Visual Properties of the (neighboring) robot
 				shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
 				shape.setOrigin(bodiesSize, bodiesSize);
-				float inten = 10 * map.mails.at(temp.name).contVal;
+				float inten = 10 * mail.mails.at(temp.name).contVal;
 				if (inten > 255)
 					inten = 255;
 				shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
@@ -140,32 +122,126 @@ void AlicePOV::Render() //draws changes in simulation states to the window.
 				line.setRotation(180.0 / M_PI * (-temp.ang));
 				window.draw(line);
 			}
-			for (int j = 0; j < map.mails.at(i).targetMail.size(); j++)
+			for (int j = 0; j < mail.mails.at(i).targetMail.size(); j++)
 			{
-				wvu_swarm_std_msgs::point_mail temp = map.mails.at(i).targetMail.at(j);
+				wvu_swarm_std_msgs::point_mail temp = mail.mails.at(i).targetMail.at(j);
 				sf::CircleShape shape(0);
 				// Changing the Visual Properties of the obstacle
 				shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
 				shape.setOrigin(bodiesSize, bodiesSize);
 				shape.setFillColor(sf::Color::Green);
 				shape.setRadius(bodiesSize);
+				shape.setOutlineColor(sf::Color::White);
+				shape.setOutlineThickness(1);
 				window.draw(shape);
 			}
-			for (int j = 0; j < map.mails.at(i).flowMail.size(); j++)
+			for (int j = 0; j < mail.mails.at(i).flowMail.size(); j++)
 			{
-				wvu_swarm_std_msgs::flow_mail temp = map.mails.at(i).flowMail.at(j);
+				wvu_swarm_std_msgs::flow_mail temp = mail.mails.at(i).flowMail.at(j);
 
 				sf::RectangleShape line(sf::Vector2f(temp.pri * 10, 1));
 				line.setFillColor(sf::Color::Cyan);
 				line.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
 				line.setRotation(180.0 / M_PI * (-temp.dir));
 				window.draw(line);
+				line.setOutlineColor(sf::Color::White);
+				line.setOutlineThickness(1);
 			}
+			sf::CircleShape shape(0);
+			// Changing the Visual Properties of the robot
+			shape.setPosition(300, 300); // Sets position of shape to the middle
+			shape.setOrigin(bodiesSize, bodiesSize);
+			float inten = 10 * mail.mails.at(name).contVal;
+			if (inten > 255)
+				inten = 255;
+			shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
+			shape.setOutlineColor(sf::Color::White);
+			shape.setOutlineThickness(1);
+			shape.setRadius(bodiesSize);
+			window.draw(shape);
 
+			sf::RectangleShape line(sf::Vector2f(5, 2));
+			line.setFillColor(sf::Color::Black);
+			line.setPosition(300, 300);
+			line.setOrigin(-2, 1);
+			line.setRotation(0);
+			window.draw(line);
 		}
 	}
+}
+void AlicePOV::drawMsg(ros::ServiceClient _client)
+{
+	sf::Color gray(100, 100, 100); //the border color for objects found on the map
+	alice_swarm::get_map srv;
+	srv.request.name = name;
+	_client.call(srv);
+	wvu_swarm_std_msgs::map map = srv.response.map;
 
+//	for (int j = 0; j < map.obsMsg.size(); j++)
+//	{
+//		wvu_swarm_std_msgs::ellipse temp = map.obsMsg.at(j).ellipse;
+//		unsigned short quality = 70;
+//		sf::ConvexShape ellipse;
+//		ellipse.setPointCount(quality);
+//		for (unsigned short i = 0; i < quality; ++i)
+//		{
+//			float rad = (360 / quality * i) / (360 / M_PI / 2);
+//			float x = 3 * cos(rad) * temp.x_rad;
+//			float y = 3 * sin(rad) * temp.y_rad;
+//			float newx = x * cos(-temp.theta_offset) - y * sin(-temp.theta_offset);
+//			float newy = x * sin(-temp.theta_offset) + y * cos(-temp.theta_offset);
+//			ellipse.setPoint(i, sf::Vector2f(newx, newy));
+//		}
+//
+//		ellipse.setPosition(300 + 3 * (temp.offset_x+(map.x-map.ox)), 300 - 3 * (temp.offset_y+(map.y-map.oy)));
+//		ellipse.setFillColor(sf::Color::Yellow);
+//		ellipse.setOutlineColor(gray);
+//		ellipse.setOutlineThickness(1);
+//		window.draw(ellipse);
+//	}
+
+//	for (int j = 0; j < map.tarMsg.size(); j++)
+//	{
+//		wvu_swarm_std_msgs::point_mail temp = map.tarMsg.at(j).pointMail;
+//		sf::CircleShape shape(0);
+//		// Changing the Visual Properties of the target
+//		shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
+//		shape.setOrigin(bodiesSize, bodiesSize);
+//		shape.setFillColor(sf::Color::Green);
+//		shape.setRadius(bodiesSize);
+//		shape.setOutlineColor(gray);
+//		shape.setOutlineThickness(1);
+//		window.draw(shape);
+//	}
+	for (int j = 0; j < map.contMsg.size(); j++)
+	{
+		wvu_swarm_std_msgs::point_mail temp = map.contMsg.at(j).pointMail;
+		sf::CircleShape shape(0);
+		// Changing the Visual Properties of the contour point
+		shape.setPosition(150+3 * (map.x+temp.x), 300 - 3 * (map.y+temp.y));
+		shape.setOrigin(1, 1);
+		shape.setRadius(1);
+		float inten = 10 * map.contMsg.at(j).contVal;
+		if (inten > 255)
+			inten = 255;
+		shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
+		//no outline cause the point is tiny...
+//		shape.setOutlineColor(gray);
+//		shape.setOutlineThickness(1);
+		window2.draw(shape);
+	}
+
+}
+
+void AlicePOV::Render(ros::ServiceClient _client) //draws changes in simulation states to the window.
+{
+
+	window.clear();
+	window2.clear();
+	drawMail();
+	drawMsg(_client);
 	window.display(); //updates display
+	window2.display();
 }
 //void Sim::addText() //adds text for the state abbreviations
 //{

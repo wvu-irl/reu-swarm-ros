@@ -3,6 +3,7 @@
 #include "SFML/Graphics.hpp"
 #include <ros/ros.h>
 #include <wvu_swarm_std_msgs/alice_mail_array.h>
+#include <wvu_swarm_std_msgs/map.h>
 #include <swarm_simulation/Font.h>
 #ifndef POV_H
 #define POV_H
@@ -11,10 +12,12 @@ class AlicePOV
 {
 private:
 	sf::RenderWindow window;
+	sf::RenderWindow window2;
 	int window_width;
 	int window_height;
 
-	wvu_swarm_std_msgs::alice_mail_array map;
+	wvu_swarm_std_msgs::alice_mail_array mail;
+	wvu_swarm_std_msgs::map map;
 	int name;
 //	vector<sf::CircleShape> neighbors;
 //	vector<sf::CircleShape> neighbors;
@@ -28,12 +31,15 @@ private:
 	float bodiesSize;
 
 	//subscriber input handleing
-	void mapCallback(const wvu_swarm_std_msgs::alice_mail_array &msg);
+	void mailCallback(const wvu_swarm_std_msgs::alice_mail_array &msg);
+	void mapCallback(const wvu_swarm_std_msgs::map &msg);
 	void HandleInput();
+	void drawMail();
+	void drawMsg(ros::ServiceClient _client);
 public:
 	AlicePOV();
 	void Run(ros::NodeHandle _n);
-	void Render();
+	void Render(ros::ServiceClient _client);
 
 };
 

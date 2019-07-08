@@ -78,12 +78,10 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data)
 	model.archiveAdd(mail);
 	model.sensorUpdate(mail);
 	model.forget();
-	model.pass();
 }
 
 AliceStructs::vel Alice::generateVel()
 {
 	AliceStructs::vel to_return = rules.stateLoop();
-	std::cout << "mag: " << to_return.mag << " - dir: " << to_return.dir << std::endl;
 	return to_return;
 }

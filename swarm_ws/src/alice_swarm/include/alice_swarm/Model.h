@@ -19,6 +19,8 @@ public:
 	 */
 	std::vector<AliceStructs::obj> obstacles;
 	AliceStructs::pose cur_pose;
+	AliceStructs::pose first_pose;
+	bool first;
 	ros::Time time;
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
@@ -56,7 +58,7 @@ public:
 	/*
 	 * Passes data to neighbors
 	 */
-	void pass(); //Exact implementation TBD
+	void pass(ros::Publisher _pub); //Exact implementation TBD
 
 	/*
 	 * Forgets unneeded data

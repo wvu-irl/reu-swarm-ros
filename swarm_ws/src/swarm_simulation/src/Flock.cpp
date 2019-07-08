@@ -49,7 +49,7 @@ wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages() //generates an array
 		//header information (dummy values)
 		this_bot_msg.header.seq = 0;
 		this_bot_msg.header.frame_id = "0";
-
+		this_bot_msg.header.stamp = ros::Time::now();
 		//set child frame dummy val.
 		this_bot_msg.child_frame_id = "0";
 
