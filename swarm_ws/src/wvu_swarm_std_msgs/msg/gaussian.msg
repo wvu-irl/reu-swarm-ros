@@ -3,3 +3,7 @@ float64 amplitude
 
 # ellipsis information
 wvu_swarm_std_msgs/ellipse ellipse
+
+# identifiers
+string name
+bool selected

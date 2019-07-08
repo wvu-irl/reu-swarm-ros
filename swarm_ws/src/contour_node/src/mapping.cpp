@@ -5,7 +5,7 @@
 
 #include <math.h>
 
-#define DEBUG 1
+#define DEBUG 0
 #define TEST_EQU 1
 
 #if DEBUG
@@ -24,11 +24,25 @@ void newObs(wvu_swarm_std_msgs::obstacle obs)
 #endif
 		overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
 	}
-	overall_map.levels[obs.level].functions.push_back(obs.characteristic);
+	bool found = false;
+
+	for (size_t i = 0; i < overall_map.levels.at(obs.level).functions.size() && !found; i++)
+	{
+		if (overall_map.levels.at(obs.level).functions.at(i).name.compare(
+				obs.characteristic.name) == 0)
+		{
+			overall_map.levels.at(obs.level).functions[i] = obs.characteristic;
+			found = true;
+		}
+	}
+
+	if (!found)
+		overall_map.levels[obs.level].functions.push_back(obs.characteristic);
 
 	if (obs.level != map_ns::COMBINED)
 	{
 		wvu_swarm_std_msgs::obstacle comb;
+		obs.characteristic.amplitude *= 1 - ((obs.level % 2) * 2);
 		comb.characteristic = obs.characteristic;
 		comb.level = map_ns::COMBINED;
 
@@ -62,6 +76,7 @@ int main(int argc, char **argv)
 	gaus.ellipse.offset_x = 0;
 	gaus.ellipse.offset_y = 0;
 	gaus.amplitude = 20;
+	gaus.name = "Bob";
 
 	wvu_swarm_std_msgs::obstacle obs;
 	obs.characteristic = gaus;
@@ -77,9 +92,10 @@ int main(int argc, char **argv)
 	gaus.ellipse.offset_x = 5;
 	gaus.ellipse.offset_y = 0;
 	gaus.amplitude = 10;
+	gaus.name = "Jeff";
 
 	obs.characteristic = gaus;
-	obs.level = map_ns::TARGET;
+	obs.level = map_ns::OBSTACLE;
 
 	newObs(obs);
 #endif
