@@ -7,6 +7,7 @@
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Point.h>
 
+#include <boost/array.hpp>
 #include <visualization/contour.h>
 #include <wvu_swarm_std_msgs/map_levels.h>
 #include <contour_node/level_description.h>
@@ -399,22 +400,89 @@ int main(int argc, char **argv)
 	// calibrating from file
 	calibrateFromFile(config);
 
-	// setting up contour plotdrawObstacles
-
 	// color map setup
-	ColorMap cmap(std::pair<double, sf::Color>(0, sf::Color::Red),
-			std::pair<double, sf::Color>(20, sf::Color::Magenta));
-	// cmap.addColor(std::tuple<double, sf::Color>(0, sf::Color::White));
-	cmap.addColor(std::tuple<double, sf::Color>(4, sf::Color::Yellow));
-	cmap.addColor(std::tuple<double, sf::Color>(8, sf::Color::Green));
-	cmap.addColor(std::tuple<double, sf::Color>(12, sf::Color::Cyan));
-	cmap.addColor(std::tuple<double, sf::Color>(16, sf::Color::Blue));
+	std::vector<double> c_levs;
+	c_levs.push_back(0);
+	c_levs.push_back(4);
+	c_levs.push_back(8);
+	c_levs.push_back(12);
+	c_levs.push_back(16);
+	c_levs.push_back(20);
+
+	std::vector<int> c_reds;
+	c_reds.push_back(255);
+	c_reds.push_back(255);
+	c_reds.push_back(0);
+	c_reds.push_back(0);
+	c_reds.push_back(0);
+	c_reds.push_back(255);
+
+	std::vector<int> c_greens;
+	c_greens.push_back(0);
+	c_greens.push_back(255);
+	c_greens.push_back(255);
+	c_greens.push_back(255);
+	c_greens.push_back(0);
+	c_greens.push_back(0);
+
+	std::vector<int> c_blues;
+	c_blues.push_back(0);
+	c_blues.push_back(0);
+	c_blues.push_back(0);
+	c_blues.push_back(255);
+	c_blues.push_back(255);
+	c_blues.push_back(255);
+
+	std::vector<double> pc_levs;
+	n_priv.getParam("color_levels", pc_levs);
+
+	std::vector<int> pc_reds;
+	n_priv.getParam("color_reds", pc_reds);
+
+	std::vector<int> pc_greens;
+	n_priv.getParam("color_greens", pc_greens);
+
+	std::vector<int> pc_blues;
+	n_priv.getParam("color_blues", pc_blues);
+
+
+	size_t num_colors = pc_levs.size();
+	if (pc_reds.size() != num_colors || pc_greens.size() != num_colors || pc_blues.size() != num_colors)
+	{
+		ROS_ERROR("Number of colors mismatch in launch file");
+		throw "MISMATCH";
+	}
+
+	if (num_colors >= 2)
+	{
+		c_levs = pc_levs;
+		c_reds = pc_reds;
+		c_greens = pc_greens;
+		c_blues = pc_blues;
+	}
+
+	num_colors = c_levs.size();
+
+
+	ColorMap cmap(std::pair<double, sf::Color>(c_levs[0], sf::Color(c_reds[0], c_greens[0], c_blues[0])),
+			std::pair<double, sf::Color>(c_levs[1], sf::Color(c_reds[1], c_greens[1], c_blues[1])));
+	for (size_t i = 2;i < num_colors;i++)
+	{
+		cmap.addColor(std::tuple<double, sf::Color>(c_levs[i], sf::Color(c_reds[i], c_greens[i], c_blues[i])));
+#if TAB_DEBUG
+		std::cout << "Adding color: [Lev: " << c_levs[i] << ", Col: " << c_reds[i] << "," << c_greens[i] << "," << c_blues[i] << "]" << std::endl;
+#endif
+	}
 	cont = new ContourMap(sf::Rect<int>(0, 0, 1280, 800), cmap);
 
 	// adding levels
-	const double num_levels = 10.0; // number of levels to draw
-	const double range = 25.0;
-	for (double i = range / num_levels; i <= range; i += range / num_levels)
+	int num_levels;
+	double range_min, range_max;
+	n_priv.param<int>("num_levels", num_levels, 9);
+	n_priv.param<double>("range_top", range_max, 20);
+	n_priv.param<double>("range_bottom", range_min, -20);
+	double incr = (range_max - range_min) / (double)num_levels;
+	for (double i = range_min; i <= range_max; i += incr)
 	{
 		cont->levels.push_back(i);
 	}

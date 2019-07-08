@@ -121,15 +121,15 @@ int main(int argc, char **argv)
 
 #if TEST_EQU
 	wvu_swarm_std_msgs::ellipse el;
-	el.x_rad = 5;
-	el.y_rad = 2;
+	el.x_rad = 10;
+	el.y_rad = 6;
 	el.theta_offset = M_PI_4;
 
 	wvu_swarm_std_msgs::gaussian gaus;
 	gaus.ellipse = el;
 	gaus.ellipse.offset_x = 0;
 	gaus.ellipse.offset_y = 0;
-	gaus.amplitude = 20;
+	gaus.amplitude = 40;
 	gaus.name = "Bob";
 
 	wvu_swarm_std_msgs::obstacle obs;
@@ -138,18 +138,18 @@ int main(int argc, char **argv)
 
 	newObs(obs);
 
-	el.x_rad = 4;
-	el.y_rad = 7;
+	el.x_rad = 15;
+	el.y_rad = 15;
 	el.theta_offset = 0;
 
 	gaus.ellipse = el;
-	gaus.ellipse.offset_x = 10;
+	gaus.ellipse.offset_x = 0;
 	gaus.ellipse.offset_y = 0;
-	gaus.amplitude = 10;
+	gaus.amplitude = 20;
 	gaus.name = "Jeff";
 
 	obs.characteristic = gaus;
-	obs.level = map_ns::TARGET;
+	obs.level = map_ns::OBSTACLE;
 
 	newObs(obs);
 #endif
@@ -171,14 +171,14 @@ int main(int argc, char **argv)
 		tick++;
 		tick %= 1000;
 
-		el.x_rad = 5;
-		el.y_rad = 2;
+		el.x_rad = 10;
+		el.y_rad = 6;
 		el.theta_offset = tick * M_PI / 100;
 
 		gaus.ellipse = el;
 		gaus.ellipse.offset_x = 0;
 		gaus.ellipse.offset_y = 0;
-		gaus.amplitude = 20;
+		gaus.amplitude = 40;
 		gaus.name = "Bob";
 
 		obs.characteristic = gaus;

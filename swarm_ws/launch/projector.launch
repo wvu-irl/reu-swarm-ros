@@ -18,6 +18,15 @@
 			image in the path -->
 		<param name="background" value="Contour" type="str" />
 		
+		<param name="num_levels" value="9" type="int"/>
+		<param name="range_top" value="20.0" type="double"/>
+		<param name="range_bottom" value="-20.0" type="double"/>
+		
+		<rosparam param="color_levels">[-20, -16, -12,  -8,  -4,  0,   4,   8,  12,  16,  20]</rosparam>
+		<rosparam param="color_reds"  >[  0,   0,   0, 200, 200,  0, 255, 255,   0,   0,   0]</rosparam>
+		<rosparam param="color_greens">[  0, 200, 200, 200,   0,  0,   0, 255, 255, 255,   0]</rosparam>
+		<rosparam param="color_blues" >[200, 200,   0,   0,   0,  0,   0,   0,   0, 255, 255]</rosparam>
+		
 	</node>
 
 </launch>
