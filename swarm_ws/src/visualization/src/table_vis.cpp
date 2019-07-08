@@ -96,7 +96,6 @@ void updateMap(wvu_swarm_std_msgs::map_levels _map)
 	map = _map;
 }
 
-
 // Subscription callback for goals
 void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
 {
@@ -216,18 +215,21 @@ void tick()
 {
 	if (strcmp(g_background.c_str(), "Contour") == 0)
 	{
+		if (map.levels.size() > g_draw_level)
+		{
 #if TAB_DEBUG
 		std::cout << "Starting contour calc" << std::endl;
 		std::cout << "\nDrawing level:\n" << map.levels[g_draw_level] << std::endl;
 #endif
-		cont->resemble(map.levels[g_draw_level]);
+			cont->resemble(map.levels[g_draw_level]);
 #if TAB_DEBUG
 		std::cout << "Resemble contour calc" << std::endl;
 #endif
-		cont->tick(); // telling the contour plot to advance
+			cont->tick(); // telling the contour plot to advance
 #if TAB_DEBUG
 		std::cout << "Finished contour calc" << std::endl;
 #endif
+		}
 	}
 }
 
@@ -248,7 +250,8 @@ void render(sf::RenderWindow *window)
 
 	if (strcmp(g_background.c_str(), "Contour") == 0)
 	{
-		cont->render(&disp); // drawing contour plot
+		if (map.levels.size() > g_draw_level)
+			cont->render(&disp); // drawing contour plot
 	}
 	else if (strcmp(g_background.c_str(), "None") == 0)
 	{
@@ -388,7 +391,10 @@ int main(int argc, char **argv)
 			drawObstacles);
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
 
-	ros::Subscriber nui_tracking = n.subscribe("/nui_bridge/hand_1", 1000, nuiUpdate);
+	ros::Subscriber nui_tracking = n.subscribe("/nui_bridge/hand_1", 1000,
+			nuiUpdate);
+
+	ros::Subscriber map = n.subscribe("/map_data", 1000, updateMap);
 
 	// calibrating from file
 	calibrateFromFile(config);
