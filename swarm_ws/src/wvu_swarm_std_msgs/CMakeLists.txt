@@ -34,11 +34,12 @@ find_package(catkin REQUIRED COMPONENTS
     flow.msg
     flows.msg
     ellipse.msg
-	gaussian.msg
-	map_level.msg
-	map_levels.msg
-	obstacle.msg
-	sensor_data.msg
+    gaussian.msg
+    map_level.msg
+    map_levels.msg
+    obstacle.msg
+    sensor_data.msg
+    nuitrack_data.msg
   )
 
 ## Generate added messages and services with any dependencies listed here
