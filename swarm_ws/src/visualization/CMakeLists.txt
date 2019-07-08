@@ -51,6 +51,10 @@ if (CUDA_FOUND)
 	add_dependencies(contour wvu_swarm_std_msgs_generate_messages_cpp)
 	target_link_libraries(contour ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
 	
+	CUDA_ADD_LIBRARY(calc_surf ${LIB_TYPE} src/surface_calc.cu)
+	add_dependencies(calc_surf wvu_swarm_std_msgs_generate_messages_cpp)
+	target_link_libraries(calc_surf ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
+	
 	CUDA_ADD_LIBRARY(perspective_tf ${LIB_TYPE} src/transform/perspective_transform_gpu.cu)
 
 	###################################

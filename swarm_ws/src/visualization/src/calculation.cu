@@ -9,13 +9,12 @@
 #include "inc/helper_functions.h"
 
 #include <SFML/Graphics.hpp>
-#include <functional>
 #include <math.h>
 #include <visualization/color_map.h>
 #include <wvu_swarm_std_msgs/map_level.h>
 
-#define CALC_DEBUG 0
-#define CUDA_DEBUG 1
+#define CALC_DEBUG 1
+#define CUDA_DEBUG 0
 
 /**
  * namespace for doing stupid amounts of calculations
@@ -189,19 +188,6 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     int i = idx / (*width);
     int j = idx % (*width);
 
-#if CUDA_DEBUG
-    printf("Calculating value: %d[%d] == (%d, %d)\n", idx, col_id, i, j);
-    printf("\033[0mEquations:\n");
-    for (size_t i = 0;i < *num_eqs;i++)
-    {
-//    	eqs[i].amplitude = 20;
-//    	eqs[i].ellipse.x_rad = 5;
-//    	eqs[i].ellipse.y_rad = 2;
-//    	eqs[i].ellipse.theta_off = 0.2;
-			printf(" Function[%d]:\n  AMP:%lf\n  X: %lf\n  Y: %lf\n  Ellipse:\n    xrad: %lf\n    yrad: %lf\n    toff: %lf\n",
-					i, eqs[i].amplitude, eqs[i].x_off, eqs[i].y_off, eqs[i].ellipse.x_rad, eqs[i].ellipse.y_rad, eqs[i].ellipse.theta_off);
-    }
-#endif
     // calculating function
     double zc;
     zfunc(&zc, (double)j, (double)i, (gaussian_t *)eqs, *num_eqs);
@@ -339,7 +325,9 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     createDeviceVar((void **)&d_colors, sizeof(color) * num_cols, colors);
     createDeviceVar((void **)&d_color_levels, sizeof(double) * num_cols, color_levels);
     createDeviceVar((void **)&d_num_colors, sizeof(size_t), &(num_cols));
-    createDeviceVar((void **)&d_funk,sizeof(gaussian_t) * funk.functions.size(), &funky);
+    createDeviceVar((void **)&d_funk,sizeof(gaussian_t) * funk.functions.size());
+    cudaMemcpy(d_funk, funky, sizeof(gaussian_t) * funk.functions.size(), cudaMemcpyHostToDevice);
+
     createDeviceVar((void **)&d_num_eqs, sizeof(size_t), &num_eqs);
 
     dim3 threads(1024, 1);
@@ -369,9 +357,6 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
 
     while (cudaEventQuery(stop) == cudaErrorNotReady)
     {
-#if CUDA_DEBUG
-    		cudaDeviceSynchronize();
-#endif
         usleep(100);
     }
 
