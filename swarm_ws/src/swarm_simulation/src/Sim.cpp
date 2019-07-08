@@ -285,17 +285,8 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handles input to the graphi
 				event);
 
 		clickNdragBots(&_pI, mX, mY, event);      //runs click and drag for bots
-
-		std::cout<<"Worked for Bots"<<std::endl;
-
 		clickNdragTarget(&_pI, mX, mY, event);    //runs click and drag for targets.
-
-		std::cout<<"Worked for Targets"<<std::endl;
-
 		clickNdragObstacles(&_pI, mX, mY, event); //allows for click and drag on obstacles
-
-		std::cout<<"Worked for Obstacles"<<std::endl;
-
 	}
 	return _pI; //tracks state of dragging (see sim.h)
 
