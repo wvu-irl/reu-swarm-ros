@@ -23,9 +23,9 @@ AliceStructs::vel Rules::stateLoop()
 {
 //	checkBattery();
 	checkBlocked();
-	if (state == "explore")
+	if (state == "goToTar")
 	{
-		Explore();
+		goToTar();
 	}
 	else if (state == "blocked")
 	{
@@ -71,6 +71,16 @@ void Rules::avoidCollisions()
 
 void Rules::Explore()
 {
+ // To implement
+}
+
+void Rules::Charge()
+{
+	//To implement
+}
+
+void Rules::goToTar()
+{
 	float temp = 10000;
 	for (auto& tar : model.targets)
 	{
@@ -86,19 +96,13 @@ void Rules::Explore()
 	final_vel.mag = 1;
 }
 
-void Rules::Charge()
-{
-	//To implement
-}
-
-void Rules::findFood()
-{
-	//To implement
-}
-
 void findUpdraft()
-{
-	//To implement
+{ /*
+	std::vector<AliceStructs::pose> reachable;
+	for (auto& contour : model.archived_contour)
+	{
+		if ()
+	} */
 }
 
 //===================================================================================================================\\

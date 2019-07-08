@@ -77,7 +77,7 @@ public:
 	/*
 	 * Makes Alice find food
 	 */
-	void findFood();
+	void goToTar();
 
 	/*
 	 * Makes Alice seek higher elevations
