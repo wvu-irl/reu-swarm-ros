@@ -2,6 +2,8 @@
 #include <wvu_swarm_std_msgs/obstacle.h>
 #include <wvu_swarm_std_msgs/map_levels.h>
 #include <contour_node/level_description.h>
+#include <wvu_swarm_std_msgs/nuitrack_data.h>
+#include <nuitrack_bridge/nuitrack_data.h>
 
 #include <math.h>
 

@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  nuitrack_bridge
   wvu_swarm_std_msgs
 )
 
