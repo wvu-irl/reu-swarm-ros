@@ -96,6 +96,15 @@ void errorCallBack(const char *msg)
 }
 
 /**
+ * Function for keeping all loops and threads alive
+ * Based on ros ok and the interrupt flag
+ */
+bool keepAlive()
+{
+	return !g_flag && ros::ok();
+}
+
+/**
  *  Runs a loop separate from the server
  *
  *  This is nessessary because the server contains a closed loop
@@ -107,13 +116,8 @@ void *controlThread(void *arg0)
 	ros::Subscriber to_ard = n->subscribe("final_execute", 1000,
 			sendToRobotCallback); // subscribing to movment datastream
 
-	while (true)
+	while (keepAlive())
 	{
-		if (g_flag || !ros::ok())
-		{
-			exit(0); // exiting program when it is supposed to
-		}
-
 		ros::spinOnce();
 	}
 
@@ -121,14 +125,6 @@ void *controlThread(void *arg0)
 									 // this is probably unreachable
 }
 
-/**
- * Function for keeping all loops and threads alive
- * Based on ros ok and the interrupt flag
- */
-bool keepAlive()
-{
-	return !g_flag;
-}
 
 void warnInfo(const char *str)
 {
