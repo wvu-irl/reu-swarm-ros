@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
+#include <stdio.h>
 #include <tuple>
 
 #include <cuda_runtime.h>
@@ -8,12 +9,13 @@
 #include "inc/helper_functions.h"
 
 #include <SFML/Graphics.hpp>
-#include <functional>
 #include <math.h>
 #include <visualization/color_map.h>
-#include <contour_node/map_level.h>
+#include <wvu_swarm_std_msgs/map_level.h>
+#include <visualization/visualization_settings.h>
 
-#define CALC_DEBUG 1
+#define CALC_DEBUG 0
+#define CUDA_DEBUG 0
 
 /**
  * namespace for doing stupid amounts of calculations
@@ -28,9 +30,18 @@ cudaDeviceProp deviceProp;
 // necessary structs to pass data
 typedef struct
 {
-	contour_node::gaussian *eqs;
-	size_t num_eqs;
-} map_level_t;
+	double x_rad;
+	double y_rad;
+	double theta_off;
+} ellipse_t;
+
+typedef struct
+{
+	double amplitude;
+	double x_off;
+	double y_off;
+	ellipse_t ellipse;
+} gaussian_t;
 
 /**
  * 4d surface function to be calculated
@@ -39,32 +50,35 @@ typedef struct
  * x and y are coordinates on the plane perpendicular to the view
  * t is a saw function of time (goes from 0 to 1000 incrementing by 1 every tick)
  */
-const double q = 1.245; // this is a magic number DO NOT CHANGE IT
-__device__ void zfunc(double *z, double x, double y, map_level_t map)
+__device__ void zfunc(double *z, double rx, double ry, gaussian_t *map, size_t num_eqs)
 {
-    x -= 640;
-		y -= 400;
-		x *= 1280.0 / 200.0;
-		y *= 800.0 / 100.0;
+    rx -= (double)WIDTH / 2;
+		ry -= (double)HEIGHT / 2;
+		rx *= 200.0 / (double)WIDTH;
+		ry *= 100.0 / (double)HEIGHT;
 		*z = 0;
-		double theta = x == 0 ? (y > 0 ? M_PI_2 : -M_PI_2) : (atan(y/x) + (x < 0 ? M_PI : 0));
-		double r = sqrt(x*x + y*y);
 
-		for (size_t i = 0;i < map.num_eqs;i++)
+		for (size_t i = 0;i < num_eqs;i++)
 		{
-			contour_node::gaussian curr_eq = map.eqs[i];
+			gaussian_t curr_eq = map[i];
+			double x = rx - curr_eq.y_off;
+			double y = ry - curr_eq.x_off;
+
+			double theta = x == 0 ? (y > 0 ? M_PI_2 : -M_PI_2) : (atan(y/x) + (y < 0 ? M_PI : 0));
+			double r = sqrt(x*x + y*y);
+
 			double a = curr_eq.ellipse.x_rad;
 			double b = curr_eq.ellipse.y_rad;
 
-			double x_app = r * cos(theta + curr_eq.ellipse.theta_offset);
-			double y_app = r * sin(theta + curr_eq.ellipse.theta_offset);
+			double x_app = r * cos(theta + curr_eq.ellipse.theta_off);
+			double y_app = r * sin(theta + curr_eq.ellipse.theta_off);
 
-			double re = sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b);
+			double re = a != 0 && b != 0 ? sqrt(a * a * x_app * x_app + y_app * y_app * b * b) / (a * b) : 10000;
 
-			if (re < M_PI / q)
+			if (re < M_PI / 1.245)
 			{
 				double amp = curr_eq.amplitude / 2.0;
-				*z += amp * cos(q * re) + amp;
+				*z += amp * cos(1.245 * re) + amp;
 			}
 		}
 }
@@ -168,7 +182,7 @@ __device__ double min(double a, double b)
  */
 __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     size_t *width, size_t *height, color *colors, double *color_levels, size_t *num_cols,
-		map_level_t *lev)
+		gaussian_t *eqs, size_t *num_eqs)
 {
 		// finding where in the image the process is
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -178,7 +192,7 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
 
     // calculating function
     double zc;
-    zfunc(&zc, (double)j, (double)i, *lev);
+    zfunc(&zc, (double)j, (double)i, (gaussian_t *)eqs, *num_eqs);
 
     // determining gradiant color
     color c = calculateColor(zc, colors, color_levels, *num_cols);
@@ -192,10 +206,10 @@ __global__ void gpuThread(double *levels, size_t *num_levels, sf::Uint8 *cols,
     {
     		// calculating neighbors
         double zz[4];
-        zfunc(zz, (double)j, (double)i - 1, *lev);
-        zfunc(zz + 1, (double)j, (double)i + 1, *lev);
-        zfunc(zz + 2, (double)j - 1, (double)i, *lev);
-        zfunc(zz + 3, (double)j + 1, (double)i, *lev);
+        zfunc(zz, (double)j, (double)i - 1, (gaussian_t *)eqs, *num_eqs);
+        zfunc(zz + 1, (double)j, (double)i + 1, (gaussian_t *)eqs, *num_eqs);
+        zfunc(zz + 2, (double)j - 1, (double)i, (gaussian_t *)eqs, *num_eqs);
+        zfunc(zz + 3, (double)j + 1, (double)i, (gaussian_t *)eqs, *num_eqs);
 
         // checking levels
         for (size_t k = 0;k < *num_levels;k++)
@@ -228,10 +242,18 @@ void createDeviceVar(void **var, size_t size, void *h_var)
 {
     std::cout << "\033[31;1m" << std::flush;
     checkCudaErrors(cudaMalloc(var, size));
-    checkCudaErrors(cudaMemset(*var, 0, size));
+//    checkCudaErrors(cudaMemset(*var, 0, size));
     std::cout << "\033[0m" << std::flush;
 
-    cudaMemcpyAsync(*var, h_var, size, cudaMemcpyHostToDevice, 0);
+    cudaMemcpyAsync(*var, h_var, size, cudaMemcpyHostToDevice);
+}
+
+void createDeviceVar(void **var, size_t size)
+{
+    std::cout << "\033[31;1m" << std::flush;
+    checkCudaErrors(cudaMalloc(var, size));
+    checkCudaErrors(cudaMemset(*var, 0, size));
+    std::cout << "\033[0m" << std::flush;
 }
 
 /**
@@ -246,17 +268,39 @@ void createDeviceVar(void **var, size_t size, void *h_var)
  */
 void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     size_t height, color colors[], double color_levels[], size_t num_cols,
-		contour_node::map_level funk)
+		wvu_swarm_std_msgs::map_level funk)
 {
     size_t n = width * height;
     size_t size = n * 4;
 
-    map_level_t *map = (map_level_t *) malloc(sizeof(map_level_t));
-    map->eqs = (contour_node::gaussian *)malloc(sizeof(contour_node::gaussian) * funk.functions.size());
-    map->num_eqs = funk.functions.size();
+    gaussian_t *funky = (gaussian_t *)
+    		malloc(sizeof(gaussian_t) * funk.functions.size());
+
+    for (size_t i = 0;i < funk.functions.size();i++)
+    {
+    	wvu_swarm_std_msgs::gaussian gaus = funk.functions[i];
+    	ellipse_t ell = {gaus.ellipse.x_rad, gaus.ellipse.y_rad, gaus.ellipse.theta_offset};
+    	funky[i] = (gaussian_t){gaus.amplitude, gaus.ellipse.offset_x, gaus.ellipse.offset_y, ell};
+    }
+
+    size_t num_eqs = funk.functions.size();
 
 #if CALC_DEBUG
-    std::cout << "\033[32mGot equation:\033[0m\n" << funk << "\n" << std::endl;
+    std::cout << "\033[32mGot equation:\033[0m\n" << funk << std::endl;
+    std::cout << "Converted to:\nFunctions:\n";
+    for (size_t i = 0;i < funk.functions.size();i++)
+    {
+    	std::cout << " Function[" << i << "]:\n";
+    	std::cout << "  Amp: " << funky[i].amplitude << "\n";
+    	std::cout << "  X: " << funky[i].x_off << "\n";
+    	std::cout << "  Y: " << funky[i].y_off << "\n";
+    	std::cout << "  Ellipse:\n";
+    	std::cout << "   Xrad: " << funky[i].ellipse.x_rad << "\n";
+    	std::cout << "   Yrad: " << funky[i].ellipse.y_rad << "\n";
+    	std::cout << "   ThOff: " << funky[i].ellipse.theta_off << "\n";
+    }
+    std::cout << std::endl;
+
 #endif
 
     // setting up device pointers
@@ -272,7 +316,8 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     size_t *d_num_colors;
     size_t n_levels = levels.size();
 
-    map_level_t *d_funk;
+    gaussian_t *d_funk;
+    size_t *d_num_eqs;
 
     createDeviceVar((void **)&d_cols, size, cols);
     createDeviceVar((void **)&d_levels, sizeof(double) * levels.size(), levels.data());
@@ -282,7 +327,10 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     createDeviceVar((void **)&d_colors, sizeof(color) * num_cols, colors);
     createDeviceVar((void **)&d_color_levels, sizeof(double) * num_cols, color_levels);
     createDeviceVar((void **)&d_num_colors, sizeof(size_t), &(num_cols));
-    createDeviceVar((void **)&d_funk, sizeof(map_level_t) + sizeof(contour_node::gaussian) * funk.functions.size(), map);
+    createDeviceVar((void **)&d_funk,sizeof(gaussian_t) * funk.functions.size());
+    cudaMemcpy(d_funk, funky, sizeof(gaussian_t) * funk.functions.size(), cudaMemcpyHostToDevice);
+
+    createDeviceVar((void **)&d_num_eqs, sizeof(size_t), &num_eqs);
 
     dim3 threads(1024, 1);
     dim3 blocks(n / threads.x, 1);
@@ -304,8 +352,9 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
         d_colors,
         d_color_levels,
         d_num_colors,
-				d_funk);
-    cudaMemcpyAsync(cols, d_cols, size, cudaMemcpyDeviceToHost, 0);
+				d_funk,
+				d_num_eqs);
+    cudaMemcpyAsync(cols, d_cols, size, cudaMemcpyDeviceToHost);
     cudaEventRecord(stop, 0);
 
     while (cudaEventQuery(stop) == cudaErrorNotReady)
@@ -325,10 +374,10 @@ void calc(sf::Uint8 *cols, std::vector<double> levels, size_t width,
     checkCudaErrors(cudaFree(d_color_levels));
     checkCudaErrors(cudaFree(d_num_colors));
     checkCudaErrors(cudaFree(d_funk));
+    checkCudaErrors(cudaFree(d_num_eqs));
     std::cout << "\033[0m" << std::flush;
 
-    free(map->eqs);
-    free(map);
+    free(funky);
 }
 
 void init()

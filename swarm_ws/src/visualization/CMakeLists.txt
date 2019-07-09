@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(visualization)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -O1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -37,14 +37,23 @@ target_link_libraries(color_map ${catkin_LIBRARIES})
 
 find_package(CUDA)
 if (CUDA_FOUND)
+	
+	list(APPEND sms 30 35 37 50 52 60 61 70)
+	foreach(sm IN LISTS sms)
+		set(ARCH_SMS "${ARCH_SMS} -gencode arch=compute_${sm},code=sm_${sm}")
+	endforeach(sm)
 
-	set(CUDA_NVCC_FLAGS "-arch=compute_50 -ccbin g++" CACHE STRING "nvcc flags" FORCE)
+	set(CUDA_NVCC_FLAGS "${ARCH_SMS} -ccbin g++" CACHE STRING "nvcc flags" FORCE)
 	set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc" FORCE)
 	set(LIB_TYPE STATIC)
 	
 	CUDA_ADD_LIBRARY(contour ${LIB_TYPE} src/contour.cu)
-	add_dependencies(contour contour_node_generate_messages_cpp)
+	add_dependencies(contour wvu_swarm_std_msgs_generate_messages_cpp)
 	target_link_libraries(contour ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
+	
+#	CUDA_ADD_LIBRARY(calc_surf ${LIB_TYPE} src/surface_calc.cu)
+#	add_dependencies(calc_surf wvu_swarm_std_msgs_generate_messages_cpp)
+#	target_link_libraries(calc_surf ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
 	
 	CUDA_ADD_LIBRARY(perspective_tf ${LIB_TYPE} src/transform/perspective_transform_gpu.cu)
 
@@ -69,7 +78,7 @@ if (CUDA_FOUND)
 	target_link_libraries(table_vis ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES} ${CUDA_LIBRARIES} color_map contour perspective_tf)
 	target_link_libraries(calibrate_tab ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES})
 	
-	add_dependencies(table_vis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+	add_dependencies(table_vis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} wvu_swarm_std_msgs_generate_messages_cpp)
 	add_dependencies(calibrate_tab ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 endif()

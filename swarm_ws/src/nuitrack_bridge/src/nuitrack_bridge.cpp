@@ -8,6 +8,7 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
+#include <wvu_swarm_std_msgs/nuitrack_data.h>
 
 // UDP includes
 #include <stdlib.h> 
@@ -39,9 +40,9 @@ void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
     geometry_msgs::PointStamped pt;
     pt.header.frame_id = "kinect";
     pt.header.stamp = ros::Time();
-    pt.point.x = _xyz.x / 10; // mm to cm
-    pt.point.y = _xyz.y / 10;
-    pt.point.z = _xyz.z / 10;
+    pt.point.x = _xyz.x / 1000; // mm to half meters
+    pt.point.y = _xyz.y / 1000;
+    pt.point.z = _xyz.z / 1000;
     
     try {
         // Another placeholder point to transform into
@@ -52,9 +53,9 @@ void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
         tfLis.transformPoint("world", pt, ptTf);
         
         // Apply to input
-        _xyz.x = ptTf.point.x;
-        _xyz.y = ptTf.point.y;
-        _xyz.z = ptTf.point.z;
+        _xyz.x = ptTf.point.x * 100; // half meters to cm
+        _xyz.y = ptTf.point.y * 100;
+        _xyz.z = ptTf.point.z * 100;
     }
     catch (tf::TransformException &ex) {
         ROS_ERROR("Transform error! %s", ex.what());
@@ -102,6 +103,17 @@ visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g,
     return ret;
 }
 
+geometry_msgs::Point xyzToPoint(xyz *_xyz)
+{
+    geometry_msgs::Point ret;
+    
+    ret.x = _xyz->x;
+    ret.y = _xyz->y;
+    ret.z = _xyz->z;
+    
+    return ret;
+}
+
 visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
 {
     visualization_msgs::MarkerArray ret;
@@ -120,6 +132,22 @@ visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
     return ret;
 }
 
+wvu_swarm_std_msgs::nuitrack_data nuiToRos(nuiData *_nui)
+{
+    wvu_swarm_std_msgs::nuitrack_data ret;
+    
+    ret.leftWrist = xyzToPoint(&(_nui->leftWrist));
+    ret.leftHand = xyzToPoint(&(_nui->leftHand));
+    ret.rightWrist = xyzToPoint(&(_nui->rightWrist));
+    ret.rightHand = xyzToPoint(&(_nui->rightHand));
+    ret.gestureFound = _nui->gestureFound;
+    ret.gestureData = (char)(_nui->gestureData);
+    ret.leftClick = _nui->leftClick;
+    ret.rightClick = _nui->rightClick;
+    
+    return ret;
+}
+
 int main(int argc, char** argv) {
     // ROS setup
     ros::init(argc, argv, "nuitrack_bridge");
@@ -128,8 +156,9 @@ int main(int argc, char** argv) {
     ros::NodeHandle n;
     ros::NodeHandle n_priv("~"); // private handle
     ros::Rate rate(50);
-    ros::Publisher pub;
-    pub = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge", 1000);
+    ros::Publisher pubVis, pubNui;
+    pubVis = n.advertise<visualization_msgs::MarkerArray>("nuitrack_visualization", 1000);
+    pubNui = n.advertise<wvu_swarm_std_msgs::nuitrack_data>("nuitrack_bridge", 1000);
     
     // Transform listener
     tf::TransformListener tfLis;
@@ -164,7 +193,7 @@ int main(int argc, char** argv) {
         if(sendto(sockfd, &send, sizeof(send), MSG_CONFIRM,
                 (const struct sockaddr*)&servaddr, sizeof(servaddr)) >= 0)
         {
-            std::cout << "Sent " << send << " to server." << std::endl;
+//            std::cout << "Sent " << send << " to server." << std::endl;
         }
         else
         {
@@ -202,7 +231,7 @@ int main(int argc, char** argv) {
             default:
             {
                 // Data is available!
-                std::cout << "Socket is available." << std::endl;
+//                std::cout << "Socket is available." << std::endl;
                 
                 int len, n;
                 
@@ -219,8 +248,11 @@ int main(int argc, char** argv) {
         }
         /* End wait for response */
         
-        visualization_msgs::MarkerArray vis = nuiToMarkers(&nui);
-        pub.publish(vis);
+        visualization_msgs::MarkerArray visOut = nuiToMarkers(&nui);
+        pubVis.publish(visOut);
+        
+        wvu_swarm_std_msgs::nuitrack_data nuiOut = nuiToRos(&nui);
+        pubNui.publish(nuiOut);
         
         ros::spinOnce();
         rate.sleep();

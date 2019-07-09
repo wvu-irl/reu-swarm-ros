@@ -7,8 +7,9 @@
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Point.h>
 
+#include <boost/array.hpp>
 #include <visualization/contour.h>
-#include <contour_node/map_levels.h>
+#include <wvu_swarm_std_msgs/map_levels.h>
 #include <contour_node/level_description.h>
 #include "transform/perspective_transform_gpu.h"
 
@@ -26,10 +27,8 @@ static int g_table_width, g_table_height;
 static int g_robot_diameter;
 static int g_draw_level;
 
-// width and height of generated image
-// also of starting window size in pixels
-#define WIDTH 1280
-#define HEIGHT 800
+#include <visualization/visualization_settings.h>
+
 
 // turns on verbose mode
 #define TAB_DEBUG 0
@@ -70,7 +69,7 @@ std::vector<sf::Vector2f> obstacles;
 std::vector<sf::Vector2f> targets;
 
 // current contour map data
-contour_node::map_levels map;
+wvu_swarm_std_msgs::map_levels map;
 
 // Human interaction points
 std::vector<sf::Vector2f> nui_points;
@@ -91,11 +90,10 @@ void nuiUpdate(geometry_msgs::Point msg)
 	nui_points.push_back(convertCoordinate(sf::Vector2f(msg.x, msg.y)));
 }
 
-void updateMap(contour_node::map_levels _map)
+void updateMap(wvu_swarm_std_msgs::map_levels _map)
 {
 	map = _map;
 }
-
 
 // Subscription callback for goals
 void drawGoals(wvu_swarm_std_msgs::vicon_points goals)
@@ -216,18 +214,21 @@ void tick()
 {
 	if (strcmp(g_background.c_str(), "Contour") == 0)
 	{
+		if (map.levels.size() > g_draw_level)
+		{
 #if TAB_DEBUG
 		std::cout << "Starting contour calc" << std::endl;
 		std::cout << "\nDrawing level:\n" << map.levels[g_draw_level] << std::endl;
 #endif
-		cont->resemble(map.levels[g_draw_level]);
+			cont->resemble(map.levels[g_draw_level]);
 #if TAB_DEBUG
 		std::cout << "Resemble contour calc" << std::endl;
 #endif
-		cont->tick(); // telling the contour plot to advance
+			cont->tick(); // telling the contour plot to advance
 #if TAB_DEBUG
 		std::cout << "Finished contour calc" << std::endl;
 #endif
+		}
 	}
 }
 
@@ -248,7 +249,8 @@ void render(sf::RenderWindow *window)
 
 	if (strcmp(g_background.c_str(), "Contour") == 0)
 	{
-		cont->render(&disp); // drawing contour plot
+		if (map.levels.size() > g_draw_level)
+			cont->render(&disp); // drawing contour plot
 	}
 	else if (strcmp(g_background.c_str(), "None") == 0)
 	{
@@ -291,20 +293,20 @@ void render(sf::RenderWindow *window)
 
 	// drawing NUI points
 	sf::CircleShape nui_circ;
-	nui_circ.setRadius(2);
+	nui_circ.setRadius(5);
 	nui_circ.scale(1, 1.25);
 	nui_circ.setFillColor(sf::Color::Cyan);
 	nui_circ.setOutlineColor(sf::Color::Black);
 	nui_circ.setOutlineThickness(1);
-	for (size_t i = 0; i < targets.size(); i++)
+	for (size_t i = 0; i < nui_points.size(); i++)
 	{
-		nui_circ.setPosition(targets.at(i) - sf::Vector2f(1, 1));
+		nui_circ.setPosition(nui_points.at(i) - sf::Vector2f(1, 1));
 		disp.draw(nui_circ);
 	}
 
 	// drawing robots
 	sf::CircleShape bot;
-	float radius = g_robot_diameter * 4.0f; // 4 is effectively '/ 2.0 * 800 / 100
+	float radius = g_robot_diameter * 4.0f; // 4 is effectively '/ 2.0 * 1080 / 100
 	bot.setRadius(radius);
 	bot.scale(1, 1.25); // scaling to  do a 2:1 screen
 	bot.setFillColor(sf::Color::Yellow);
@@ -388,27 +390,98 @@ int main(int argc, char **argv)
 			drawObstacles);
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
 
-	ros::Subscriber nui_tracking = n.subscribe("/nui_bridge/hand_1", 1000, nuiUpdate);
+	ros::Subscriber nui_tracking = n.subscribe("/nui_bridge/hand_1", 1000,
+			nuiUpdate);
+
+	ros::Subscriber map = n.subscribe("/map_data", 1000, updateMap);
 
 	// calibrating from file
 	calibrateFromFile(config);
 
-	// setting up contour plotdrawObstacles
-
 	// color map setup
-	ColorMap cmap(std::pair<double, sf::Color>(0, sf::Color::Red),
-			std::pair<double, sf::Color>(20, sf::Color::Magenta));
-	// cmap.addColor(std::tuple<double, sf::Color>(0, sf::Color::White));
-	cmap.addColor(std::tuple<double, sf::Color>(4, sf::Color::Yellow));
-	cmap.addColor(std::tuple<double, sf::Color>(8, sf::Color::Green));
-	cmap.addColor(std::tuple<double, sf::Color>(12, sf::Color::Cyan));
-	cmap.addColor(std::tuple<double, sf::Color>(16, sf::Color::Blue));
-	cont = new ContourMap(sf::Rect<int>(0, 0, 1280, 800), cmap);
+	std::vector<double> c_levs;
+	c_levs.push_back(0);
+	c_levs.push_back(4);
+	c_levs.push_back(8);
+	c_levs.push_back(12);
+	c_levs.push_back(16);
+	c_levs.push_back(20);
+
+	std::vector<int> c_reds;
+	c_reds.push_back(255);
+	c_reds.push_back(255);
+	c_reds.push_back(0);
+	c_reds.push_back(0);
+	c_reds.push_back(0);
+	c_reds.push_back(255);
+
+	std::vector<int> c_greens;
+	c_greens.push_back(0);
+	c_greens.push_back(255);
+	c_greens.push_back(255);
+	c_greens.push_back(255);
+	c_greens.push_back(0);
+	c_greens.push_back(0);
+
+	std::vector<int> c_blues;
+	c_blues.push_back(0);
+	c_blues.push_back(0);
+	c_blues.push_back(0);
+	c_blues.push_back(255);
+	c_blues.push_back(255);
+	c_blues.push_back(255);
+
+	std::vector<double> pc_levs;
+	n_priv.getParam("color_levels", pc_levs);
+
+	std::vector<int> pc_reds;
+	n_priv.getParam("color_reds", pc_reds);
+
+	std::vector<int> pc_greens;
+	n_priv.getParam("color_greens", pc_greens);
+
+	std::vector<int> pc_blues;
+	n_priv.getParam("color_blues", pc_blues);
+
+
+	size_t num_colors = pc_levs.size();
+	if (pc_reds.size() != num_colors || pc_greens.size() != num_colors || pc_blues.size() != num_colors)
+	{
+		ROS_ERROR("Number of colors mismatch in launch file");
+		throw "MISMATCH";
+	}
+
+	if (num_colors >= 2)
+	{
+		c_levs = pc_levs;
+		c_reds = pc_reds;
+		c_greens = pc_greens;
+		c_blues = pc_blues;
+	}
+
+	num_colors = c_levs.size();
+
+
+	ColorMap cmap(std::pair<double, sf::Color>(c_levs[0], sf::Color(c_reds[0], c_greens[0], c_blues[0])),
+			std::pair<double, sf::Color>(c_levs[1], sf::Color(c_reds[1], c_greens[1], c_blues[1])));
+	for (size_t i = 2;i < num_colors;i++)
+	{
+		cmap.addColor(std::tuple<double, sf::Color>(c_levs[i], sf::Color(c_reds[i], c_greens[i], c_blues[i])));
+#if TAB_DEBUG
+		std::cout << "Adding color: [Lev: " << c_levs[i] << ", Col: " << c_reds[i] << "," << c_greens[i] << "," << c_blues[i] << "]" << std::endl;
+#endif
+	}
+	cont = new ContourMap(sf::Rect<int>(0, 0, WIDTH, HEIGHT), cmap);
+
 
 	// adding levels
-	const double num_levels = 10.0; // number of levels to draw
-	const double range = 25.0;
-	for (double i = range / num_levels; i <= range; i += range / num_levels)
+	int num_levels;
+	double range_min, range_max;
+	n_priv.param<int>("num_levels", num_levels, 9);
+	n_priv.param<double>("range_top", range_max, 20);
+	n_priv.param<double>("range_bottom", range_min, -20);
+	double incr = (range_max - range_min) / (double)num_levels;
+	for (double i = range_min; i <= range_max; i += incr)
 	{
 		cont->levels.push_back(i);
 	}

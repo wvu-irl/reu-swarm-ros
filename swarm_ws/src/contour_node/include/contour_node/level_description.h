@@ -2,7 +2,7 @@
 #define LEVEL_DESCRIPTION_H
 
 #include <wvu_swarm_std_msgs/vicon_point.h>
-#include <contour_node/map_levels.h>
+#include <wvu_swarm_std_msgs/map_levels.h>
 
 
 namespace map_ns
@@ -12,10 +12,13 @@ namespace map_ns
 // current levels that are included in the overall map
 enum LEVEL
 {
+        NONE,
 	TARGET,
-	OBJECT,
+	OBSTACLE,
 	COMBINED
 };
+
+typedef enum LEVEL levelType;
 
 /**
  * Calculates the z value at a given point for a given map
@@ -24,8 +27,8 @@ enum LEVEL
  * @param loc is the current location of the robot
  *
  */
-double calculate(contour_node::map_level ml, wvu_swarm_std_msgs::vicon_point loc);
-contour_node::map_level combineLevels(contour_node::map_level a, contour_node::map_level b);
+double calculate(wvu_swarm_std_msgs::map_level ml, wvu_swarm_std_msgs::vicon_point loc);
+wvu_swarm_std_msgs::map_level combineLevels(wvu_swarm_std_msgs::map_level a, wvu_swarm_std_msgs::map_level b);
 
 };
 #endif

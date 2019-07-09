@@ -1,3 +1,12 @@
+/*
+ * IMPORTANT:
+ *  This file must use standard libraries only, such as cstdlib and Boost.
+ *  Do NOT add any dependencies to ROS. This same header is used by the Nuitrack
+ *  bridge UDP server, which cannot be compiled with ROS.
+ *  Thanks :) nh
+ */
+
+
 #ifndef NUITRACK_DATA_H
 #define NUITRACK_DATA_H
 

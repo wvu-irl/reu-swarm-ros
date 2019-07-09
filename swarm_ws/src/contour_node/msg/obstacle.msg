@@ -1,3 +1,0 @@
-contour_node/gaussian characteristic
-
-int32 level
