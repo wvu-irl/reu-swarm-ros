@@ -40,6 +40,10 @@ add_library(level_descriptor src/level_description.cpp)
 add_dependencies(level_descriptor wvu_swarm_std_msgs_generate_messages_cpp)
 target_link_libraries(level_descriptor ${catkin_LIBRARIES} gaussian_object)
 
+add_library(obj_finder src/object_finder.cpp)
+add_dependencies(obj_finder wvu_swarm_std_msgs_generate_messages_cpp)
+target_link_libraries(obj_finder ${catkin_LIBRARIES} level_object)
+
 add_executable(mapping src/mapping.cpp)
 add_dependencies(mapping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} wvu_swarm_std_msgs_generate_messages_cpp)
 target_link_libraries(mapping ${catkin_LIBRARIES} gaussian_object)

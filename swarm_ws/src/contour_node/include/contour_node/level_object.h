@@ -10,7 +10,8 @@ class levelObject
 {
 public:
 	levelObject(void);
-	levelObject(std::pair<double, double> _orig, std::string _name, levelType level);
+	levelObject(std::pair<double, double> _orig, std::string _name,
+			levelType level);
 	levelObject(double _xorg, double _yorig, std::string _name, levelType level);
 	virtual ~levelObject(void);
 
