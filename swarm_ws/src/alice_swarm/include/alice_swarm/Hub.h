@@ -9,7 +9,7 @@
 #include <wvu_swarm_std_msgs/vicon_points.h>
 #include <wvu_swarm_std_msgs/flows.h>
 #include <wvu_swarm_std_msgs/map_levels.h>
-//#include <wvu_swarm_std_msgs/chargers.h>
+#include <wvu_swarm_std_msgs/chargers.h>
 #include "alice_swarm/aliceStructs.h"
 #include <contour_node/level_description.h>
 
@@ -64,6 +64,7 @@ private:
 	wvu_swarm_std_msgs::vicon_points targets;
 	wvu_swarm_std_msgs::map_levels map;
 	wvu_swarm_std_msgs::flows flows;
+	wvu_swarm_std_msgs::chargers chargers;
 
 	std::vector<Bot> bots; //holds locations of all of the bots
 	std::vector<std::vector<Bot>> neighbors; //holds locations of all of the closests bots relative to each other
@@ -79,7 +80,7 @@ public:
 
 	//Adds the msgs gather from various topics to the private fields of Hub
 	void update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
-			wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f);
+			wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f, wvu_swarm_std_msgs::chargers &_c);
 
 
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
@@ -96,6 +97,7 @@ public:
 
 	void addContMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Gives each robot it's value on the contour map
 
+	void addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Gives each robot charger station info
 
 	wvu_swarm_std_msgs::alice_mail_array getAliceMail(); //Gathers all the relative information for a robot into one msg
 

@@ -22,7 +22,7 @@ void Hawk_Sim::makeChargers(ros::Publisher _pub)//creates chargers
 		temp_charger.x = coordinates[i].first;
 		temp_charger.y = coordinates[i].second;
 		temp_charger.occupied = false;
-		charger_vector.push_back(temp_charger);
+		charger_vector.charger.push_back(temp_charger);
 	}
 	_pub.publish(charger_vector);
 }

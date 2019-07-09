@@ -33,13 +33,14 @@ Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reas
 }
 
 void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
-		wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f)
+		wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f, wvu_swarm_std_msgs::chargers &_c)
 {
 	clearHub();
 	viconBotArray = _b;
 	targets = _t;
 	map = _o;
 	flows = _f;
+	chargers = _c;
 	processVicon(); //needed cause this data needs to be converted first
 	findNeighbors();
 }
@@ -214,6 +215,18 @@ void Hub::addContMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Gives each
 		_mail.contVal = 0;
 }
 
+void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
+{
+	for (int i = 0; i < chargers.charger.size(); i ++)
+	{
+		wvu_swarm_std_msgs::charger temp_charger;
+		temp_charger.x = chargers.charger.at(i).x;
+		temp_charger.y = chargers.charger.at(i).y;
+		temp_charger.occupied = chargers.charger.at(i).occupied;
+		_mail.chargerMail.push_back(temp_charger);
+	}
+}
+
 //void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail _mail) //Prints mail for debug purposes
 //{
 //	std::cout << "--- Mail for Alice " << _mail.name << "," << _mail.sid << " ---" << std::endl;
@@ -243,6 +256,7 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		addTargetMail(*it, temp);
 		addFlowMail(*it, temp);
 		addContMail(*it, temp);
+		addChargerMail(*it, temp);
 		temp.name = *it;
 		temp.sid = bots[*it].swarm_id;
 		temp.time = bots[*it].time;
