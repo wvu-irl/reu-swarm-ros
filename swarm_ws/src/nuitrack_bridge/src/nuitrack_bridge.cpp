@@ -40,9 +40,9 @@ void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
     geometry_msgs::PointStamped pt;
     pt.header.frame_id = "kinect";
     pt.header.stamp = ros::Time();
-    pt.point.x = _xyz.x / 10; // mm to cm
-    pt.point.y = _xyz.y / 10;
-    pt.point.z = _xyz.z / 10;
+    pt.point.x = _xyz.x / 1000; // mm to half meters
+    pt.point.y = _xyz.y / 1000;
+    pt.point.z = _xyz.z / 1000;
     
     try {
         // Another placeholder point to transform into
@@ -53,9 +53,9 @@ void xyzTf(xyz &_xyz, tf::TransformListener &tfLis)
         tfLis.transformPoint("world", pt, ptTf);
         
         // Apply to input
-        _xyz.x = ptTf.point.x;
-        _xyz.y = ptTf.point.y;
-        _xyz.z = ptTf.point.z;
+        _xyz.x = ptTf.point.x * 100; // half meters to cm
+        _xyz.y = ptTf.point.y * 100;
+        _xyz.z = ptTf.point.z * 100;
     }
     catch (tf::TransformException &ex) {
         ROS_ERROR("Transform error! %s", ex.what());
@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
         if(sendto(sockfd, &send, sizeof(send), MSG_CONFIRM,
                 (const struct sockaddr*)&servaddr, sizeof(servaddr)) >= 0)
         {
-            std::cout << "Sent " << send << " to server." << std::endl;
+//            std::cout << "Sent " << send << " to server." << std::endl;
         }
         else
         {
@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
             default:
             {
                 // Data is available!
-                std::cout << "Socket is available." << std::endl;
+//                std::cout << "Socket is available." << std::endl;
                 
                 int len, n;
                 

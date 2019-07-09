@@ -21,7 +21,7 @@ public:
     void deselect(void);
     bool isSelected(void);
     
-private:
+protected:
     std::pair<double, double> origin; // x, y
     std::string name;
     bool selected;

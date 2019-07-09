@@ -13,8 +13,8 @@
 #include <fstream>
 
 // dimensions for window
-#define WIDTH 1280
-#define HEIGHT 800
+#define WIDTH 1920
+#define HEIGHT 1080
 
 // definition for debugging messages
 #define DEBUG 0

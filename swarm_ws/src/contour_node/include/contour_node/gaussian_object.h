@@ -22,7 +22,7 @@ public:
     levelType getLevel(void);
     void setLevel(levelType _lvl);
     
-private:
+protected:
     double amplitude;
     levelType level;
 };

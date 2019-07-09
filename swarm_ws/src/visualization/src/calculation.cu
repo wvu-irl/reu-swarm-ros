@@ -53,7 +53,7 @@ __device__ void zfunc(double *z, double rx, double ry, gaussian_t *map, size_t n
 {
     rx -= 640;
 		ry -= 400;
-		rx *= 200.0 / 1280.0;
+		rx *= 200.0 / 1920.0;
 		ry *= 100.0 / 800.0;
 		*z = 0;
 

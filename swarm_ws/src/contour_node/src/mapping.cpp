@@ -19,6 +19,7 @@
 // Global variables for nuitrack data
 wvu_swarm_std_msgs::nuitrack_data g_nui;
 geometry_msgs::Point leftProjected, rightProjected;
+levelObject* g_selected = nullptr;
 
 // Find x,y where the line passing between alpha and beta intercepts an xy plane at z
 geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
@@ -36,11 +37,10 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 	// Check if no solution
 	if (_alpha.z == _beta.z)
 	{
-		printf(
-				"\033[1;31mhand_pointer: \033[0;31mNo solution for intercept\033[0m\n");
-		ret.x = 0.0;
-		ret.y = 0.0;
-		ret.z = 0.0;
+		printf("\033[1;31mhand_pointer: \033[0;31mNo solution for intercept\033[0m\n");
+		ret.x = 0;
+                ret.y = 0;
+                ret.z = 0;
 	}
 	else
 	{
@@ -97,12 +97,12 @@ void newObs(wvu_swarm_std_msgs::obstacle obs)
 
 void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 {
-	// Copy the message
-	g_nui = nui;
+    // Copy the message
+    g_nui = nui;
 
-	// Find projections of hands onto table
-	leftProjected = findZIntercept(g_nui.leftWrist, g_nui.leftHand, 0.0);
-	rightProjected = findZIntercept(g_nui.rightWrist, g_nui.rightHand, 0.0);
+    // Find projections of hands onto table
+    leftProjected = findZIntercept(g_nui.leftWrist, g_nui.leftHand, 0.0);
+    rightProjected = findZIntercept(g_nui.rightWrist, g_nui.rightHand, 0.0);
 }
 
 wvu_swarm_std_msgs::gaussian gausToRos(gaussianObject* _gaus)
@@ -121,6 +121,30 @@ wvu_swarm_std_msgs::gaussian gausToRos(gaussianObject* _gaus)
     return ret;
 }
 
+double getDistance(geometry_msgs::Point *_hand, levelObject *_target)
+{
+    double ret = pow(_hand->x - _target->getOrigin().first, 2)
+                    + pow(_hand->y - _target->getOrigin().second, 2);
+    return sqrt(ret);
+}
+
+void findSelection(double _maxDist, std::vector<levelObject*> _map)
+{
+    double currentMinimum = _maxDist, thisDist;
+    g_selected = nullptr;
+    
+    for(levelObject* i : _map)
+    {
+        // Check if this distance is less than threshold
+        thisDist = getDistance(&leftProjected, i);
+        if(thisDist < currentMinimum) {
+            // Decrease minimum, we want closest point
+            currentMinimum = thisDist;
+            g_selected = i;
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "mapping");
@@ -128,6 +152,8 @@ int main(int argc, char **argv)
 
 	ros::Publisher map_pub = n.advertise < wvu_swarm_std_msgs::map_levels
 			> ("/map_data", 1000);
+        ros::Publisher left_pub = n.advertise<geometry_msgs::Point>("/nui_bridge/hand_1", 1000);
+        ros::Publisher right_pub = n.advertise<geometry_msgs::Point>("/nui_bridge/hand_2", 1000);
 	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, newObs);
 	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge", 1000, nuiCallback);
 
@@ -177,10 +203,10 @@ int main(int argc, char **argv)
         
         levelObject* ptr;
         
-        ptr = new gaussianObject(0, 0, "Gary", 10, 20, M_PI / 4.0, 10, map_ns::NONE);
+        ptr = new gaussianObject(0, 0, "Gary", 10, 20, M_PI / 4.0, 10, map_ns::COMBINED);
         worldMap.push_back(ptr);
         
-        ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::NONE);
+        ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::COMBINED);
         worldMap.push_back(ptr);
 #endif 
         
@@ -195,6 +221,8 @@ int main(int argc, char **argv)
 #if TEST_EQU
 	int tick = 0;
 #endif
+        
+        geometry_msgs::Point* anchor = nullptr; // Where did the user's hand start when they grabbed a feature?
 
 	while (ros::ok())
 	{
@@ -223,11 +251,66 @@ int main(int argc, char **argv)
                 for(levelObject* i : worldMap) {
                     m.functions.push_back(gausToRos((gaussianObject*)i));
                 }
+                
                 overall_map.levels.clear();
+                overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
+                overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
+                overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
                 overall_map.levels.push_back(m);
 #endif
 
 		map_pub.publish(overall_map);
+                
+                // If user's left hand (RIGHT) is open, points are free to move
+                if(!g_nui.rightClick)
+                {
+                    // Reset anchor since nothing is being manipulated
+                    anchor = nullptr;
+                    
+                    // Check if something is selected, if so lock point to it
+                    findSelection(10.0, worldMap);
+                    if(g_selected != nullptr)
+                    {
+                        leftProjected.x = g_selected->getOrigin().first;
+                        leftProjected.y = g_selected->getOrigin().second;
+                    }
+                    
+                    // If nothing is selected, move points freely
+//                    if(leftProjected.x == 0.0 && leftProjected.y == 0.0 && leftProjected.z == 0.0)
+                        left_pub.publish(leftProjected);
+//                    if(rightProjected.x == 0.0 && rightProjected.y == 0.0 && rightProjected.z == 0.0)
+                        right_pub.publish(rightProjected);
+                }
+                // If user's left hand (RIGHT) is closed, maybe modify objects
+                else
+                {
+                    ROS_INFO("Hand closed!");
+                    // If nothing had been selected before hand was closed, do nothing
+                    if(g_selected != nullptr)
+                    {
+                        ROS_INFO("%s", g_selected->getName().c_str());
+                        // If object was just grabbed, set the anchor
+                        if(anchor == nullptr) {
+                            anchor = new geometry_msgs::Point;
+                            anchor->x = g_nui.leftHand.x;
+                            anchor->y = g_nui.leftHand.y;
+                            anchor->z = g_nui.leftHand.z;
+                        }
+                        
+                        // Manipulate the object
+                        g_selected->nuiManipulate(g_nui.leftHand.x - anchor->x,
+                                g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
+                        
+                        // Update anchor so it's one iteration behind hand
+                        anchor->x = g_nui.leftHand.x;
+                        anchor->y = g_nui.leftHand.y;
+                        anchor->z = g_nui.leftHand.z;
+                        
+                        ROS_INFO("Anchor moved!");
+                    }
+                }
+                
+                
 
 		ros::spinOnce();
 		rate.sleep();

@@ -29,8 +29,8 @@ static int g_draw_level;
 
 // width and height of generated image
 // also of starting window size in pixels
-#define WIDTH 1280
-#define HEIGHT 800
+#define WIDTH 1920
+#define HEIGHT 1080
 
 // turns on verbose mode
 #define TAB_DEBUG 0
@@ -295,20 +295,20 @@ void render(sf::RenderWindow *window)
 
 	// drawing NUI points
 	sf::CircleShape nui_circ;
-	nui_circ.setRadius(2);
+	nui_circ.setRadius(5);
 	nui_circ.scale(1, 1.25);
 	nui_circ.setFillColor(sf::Color::Cyan);
 	nui_circ.setOutlineColor(sf::Color::Black);
 	nui_circ.setOutlineThickness(1);
-	for (size_t i = 0; i < targets.size(); i++)
+	for (size_t i = 0; i < nui_points.size(); i++)
 	{
-		nui_circ.setPosition(targets.at(i) - sf::Vector2f(1, 1));
+		nui_circ.setPosition(nui_points.at(i) - sf::Vector2f(1, 1));
 		disp.draw(nui_circ);
 	}
 
 	// drawing robots
 	sf::CircleShape bot;
-	float radius = g_robot_diameter * 4.0f; // 4 is effectively '/ 2.0 * 800 / 100
+	float radius = g_robot_diameter * 4.0f; // 4 is effectively '/ 2.0 * 1080 / 100
 	bot.setRadius(radius);
 	bot.scale(1, 1.25); // scaling to  do a 2:1 screen
 	bot.setFillColor(sf::Color::Yellow);
@@ -473,7 +473,7 @@ int main(int argc, char **argv)
 		std::cout << "Adding color: [Lev: " << c_levs[i] << ", Col: " << c_reds[i] << "," << c_greens[i] << "," << c_blues[i] << "]" << std::endl;
 #endif
 	}
-	cont = new ContourMap(sf::Rect<int>(0, 0, 1280, 800), cmap);
+	cont = new ContourMap(sf::Rect<int>(0, 0, 1920, 1080), cmap);
 
 	// adding levels
 	int num_levels;

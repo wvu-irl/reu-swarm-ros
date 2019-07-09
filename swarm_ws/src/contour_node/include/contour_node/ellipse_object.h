@@ -17,7 +17,7 @@ public:
     std::pair<double, double> getRadii(void);
     double getTheta(void);
     
-private:
+protected:
     std::pair<double, double> radii; // x, y
     double theta;
 };
