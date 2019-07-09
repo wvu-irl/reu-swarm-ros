@@ -11,7 +11,6 @@ class Universe
 {
 private:
 	wvu_swarm_std_msgs::map_levels overall_map;
-	size_t numEqs_;
 
 public:
 	Universe();

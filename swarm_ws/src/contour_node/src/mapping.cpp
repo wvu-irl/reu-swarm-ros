@@ -11,10 +11,11 @@
 #include <math.h>
 
 #define DEBUG 0
-#define TEST_EQU 0
-#define TEST_NUI 1
+#define TEST_EQU 1
+#define TEST_NUI 0
 
-#define TEST_UNIVERSE 1
+#define RUN_UNIVERSE 1
+#define RATE_LIMIT 1
 
 #if DEBUG || TEST_EQU
 #include <iostream>
@@ -61,7 +62,7 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 	return ret;
 }
 
-#if TEST_UNIVERSE
+#if RUN_UNIVERSE
 static Universe universe;
 void additionCallback(wvu_swarm_std_msgs::obstacle obs)
 {
@@ -155,7 +156,7 @@ int main(int argc, char **argv)
 	ros::Publisher right_pub = n.advertise < geometry_msgs::Point
 			> ("/nui_bridge/hand_2", 1000);
 
-#if TEST_UNIVERSE
+#if RUN_UNIVERSE
 	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000,
 			additionCallback);
 #else
@@ -184,7 +185,7 @@ int main(int argc, char **argv)
 	obs.characteristic = gaus;
 	obs.level = map_ns::TARGET;
 
-#if TEST_UNIVERSE
+#if RUN_UNIVERSE
 	universe += obs;
 #else
 	newObs(obs);
@@ -203,7 +204,7 @@ int main(int argc, char **argv)
 	obs.characteristic = gaus;
 	obs.level = map_ns::TARGET;
 
-#if TEST_UNIVERSE
+#if RUN_UNIVERSE
 	universe += obs;
 #else
 	newObs(obs);
@@ -215,14 +216,14 @@ int main(int argc, char **argv)
 
 	ptr = new gaussianObject(0, 0, "Gary", 10, 20, M_PI / 4.0, 10,
 			map_ns::TARGET);
-#if TEST_UNIVERSE
+#if RUN_UNIVERSE
 	universe += ptr;
 #else
 	worldMap.push_back(ptr);
 #endif
 
 	ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::TARGET);
-#if TEST_UNIVERSE
+#if RUN_UNIVERSE
 	universe += ptr;
 #else
 	worldMap.push_back(ptr);
@@ -246,7 +247,7 @@ int main(int argc, char **argv)
 	obs.level = map_ns::OBSTACLE;
 
 	ptr = new gaussianObject(obs);
-#if TEST_UNIVERSE
+#if RUN_UNIVERSE
 	universe += ptr;
 #else
 	worldMap.push_back(ptr);
@@ -257,8 +258,9 @@ int main(int argc, char **argv)
 	std::cout << "\033[30;42mdone adding equation\033[0m" << std::endl;
 #endif
 
+#if RATE_LIMIT
 	ros::Rate rate(60);
-
+#endif
 #if TEST_EQU
 	int tick = 0;
 #endif
@@ -283,11 +285,15 @@ int main(int argc, char **argv)
 
 		obs.characteristic = gaus;
 		obs.level = map_ns::TARGET;
+#if RUN_UNIVERSE
+		universe += obs;
+#else
 		newObs(obs);
+#endif
 #elif TEST_NUI
 		for (levelObject *i : worldMap)
 		{
-#if TEST_UNIVERSE
+#if RUN_UNIVERSE
 			universe += i;
 #else
 			newObs(((gaussianObject*) i)->getGaussianMessage());
@@ -345,13 +351,15 @@ int main(int argc, char **argv)
 		}
 #endif
 
-#if TEST_UNIVERSE
+#if RUN_UNIVERSE
 		map_pub.publish(universe.getPublishable());
 #else
 		map_pub.publish(overall_map);
 #endif
 
 		ros::spinOnce();
+#if RATE_LIMIT
 		rate.sleep();
+#endif
 	}
 }

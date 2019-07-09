@@ -4,8 +4,7 @@
 
 #include <sstream>
 
-Universe::Universe() :
-		numEqs_(0)
+Universe::Universe()
 {
 }
 
@@ -40,7 +39,6 @@ void Universe::addEquation(wvu_swarm_std_msgs::obstacle obs)
 
 		addEquation(comb);
 	}
-	numEqs_++;
 }
 
 void Universe::addEquation(levelObject *equ)
@@ -153,7 +151,12 @@ wvu_swarm_std_msgs::map_levels& Universe::getPublishable()
 
 size_t Universe::numEquaitons()
 {
-	return numEqs_;
+	size_t count = 0;
+	for (size_t i = 0; i < overall_map.levels.size(); i++)
+	{
+		count += overall_map.levels[i].functions.size();
+	}
+	return count;
 }
 
 Universe::operator wvu_swarm_std_msgs::map_levels&()
@@ -191,7 +194,6 @@ void operator-=(Universe &uni, std::string name)
 	{
 		overall_map.levels[i].functions.erase(
 				overall_map.levels[i].functions.begin() + j);
-		uni.numEqs_--;
 	}
 
 }
@@ -219,7 +221,6 @@ void operator-=(Universe &uni, std::pair<double, double> loc)
 	{
 		overall_map.levels[i].functions.erase(
 				overall_map.levels[i].functions.begin() + j);
-		uni.numEqs_--;
 	}
 }
 
