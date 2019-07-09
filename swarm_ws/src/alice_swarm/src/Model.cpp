@@ -136,9 +136,9 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 	{
 		targets.push_back(tar);
 	}
-	for (auto& charg : _toAdd.charges)
+	for (auto& charg : _toAdd.chargers)
 	{
-		charges.push_back(charg);
+		chargers.push_back(charg);
 	}
 }
 

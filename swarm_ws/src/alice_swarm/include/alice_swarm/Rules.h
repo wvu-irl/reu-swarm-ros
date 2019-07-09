@@ -89,6 +89,8 @@ public:
 	 */
 	void findContour();
 
+	void findContour();
+
 	/*
 	 * Determines which state Alice is in
 	 */

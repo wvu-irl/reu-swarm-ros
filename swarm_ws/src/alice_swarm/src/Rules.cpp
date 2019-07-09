@@ -39,7 +39,7 @@ AliceStructs::vel Rules::stateLoop()
 //	case find_updraft:
 //		findUpdraft();
 //		break; */
-	findContour();
+//	findContour();
 	return final_vel;
 }
 
