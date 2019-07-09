@@ -6,20 +6,25 @@
 #include <nuitrack_bridge/nuitrack_data.h>
 #include <contour_node/gaussian_object.h>
 
+#include <contour_node/universe_object.h>
+
 #include <math.h>
 
 #define DEBUG 0
-#define TEST_EQU 0
-#define TEST_NUI 1
+#define TEST_EQU 1
+#define TEST_NUI 0
 
-#if DEBUG
+#define RUN_UNIVERSE 1
+#define RATE_LIMIT 1
+
+#if DEBUG || TEST_EQU
 #include <iostream>
 #endif
 
 // Global variables for nuitrack data
 wvu_swarm_std_msgs::nuitrack_data g_nui;
 geometry_msgs::Point leftProjected, rightProjected;
-levelObject* g_selected = nullptr;
+levelObject *g_selected = nullptr;
 
 // Find x,y where the line passing between alpha and beta intercepts an xy plane at z
 geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
@@ -37,10 +42,11 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 	// Check if no solution
 	if (_alpha.z == _beta.z)
 	{
-		printf("\033[1;31mhand_pointer: \033[0;31mNo solution for intercept\033[0m\n");
+		printf(
+				"\033[1;31mhand_pointer: \033[0;31mNo solution for intercept\033[0m\n");
 		ret.x = 0;
-                ret.y = 0;
-                ret.z = 0;
+		ret.y = 0;
+		ret.z = 0;
 	}
 	else
 	{
@@ -56,6 +62,13 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 	return ret;
 }
 
+#if RUN_UNIVERSE
+static Universe universe;
+void additionCallback(wvu_swarm_std_msgs::obstacle obs)
+{
+	universe += obs;
+}
+#else
 static wvu_swarm_std_msgs::map_levels overall_map;
 
 void newObs(wvu_swarm_std_msgs::obstacle obs)
@@ -87,62 +100,48 @@ void newObs(wvu_swarm_std_msgs::obstacle obs)
 	if (obs.level != map_ns::COMBINED)
 	{
 		wvu_swarm_std_msgs::obstacle comb;
-		obs.characteristic.amplitude *= 1 - ((obs.level % 2) * 2);
+		obs.characteristic.amplitude *= 1 - (((obs.level + 1) % 2) * 2);
 		comb.characteristic = obs.characteristic;
 		comb.level = map_ns::COMBINED;
 
 		newObs(comb);
 	}
 }
+#endif
 
 void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 {
-    // Copy the message
-    g_nui = nui;
+	// Copy the message
+	g_nui = nui;
 
-    // Find projections of hands onto table
-    leftProjected = findZIntercept(g_nui.leftWrist, g_nui.leftHand, 0.0);
-    rightProjected = findZIntercept(g_nui.rightWrist, g_nui.rightHand, 0.0);
-}
-
-wvu_swarm_std_msgs::gaussian gausToRos(gaussianObject* _gaus)
-{
-    wvu_swarm_std_msgs::gaussian ret;
-    
-    ret.amplitude = _gaus->getAmplitude();
-    ret.name = _gaus->getName();
-    ret.selected = _gaus->isSelected();
-    ret.ellipse.offset_x = _gaus->getOrigin().first;
-    ret.ellipse.offset_y = _gaus->getOrigin().second;
-    ret.ellipse.theta_offset = _gaus->getTheta();
-    ret.ellipse.x_rad = _gaus->getRadii().first;
-    ret.ellipse.y_rad = _gaus->getRadii().second;
-    
-    return ret;
+	// Find projections of hands onto table
+	leftProjected = findZIntercept(g_nui.leftWrist, g_nui.leftHand, 0.0);
+	rightProjected = findZIntercept(g_nui.rightWrist, g_nui.rightHand, 0.0);
 }
 
 double getDistance(geometry_msgs::Point *_hand, levelObject *_target)
 {
-    double ret = pow(_hand->x - _target->getOrigin().first, 2)
-                    + pow(_hand->y - _target->getOrigin().second, 2);
-    return sqrt(ret);
+	double ret = pow(_hand->x - _target->getOrigin().first, 2)
+			+ pow(_hand->y - _target->getOrigin().second, 2);
+	return sqrt(ret);
 }
 
 void findSelection(double _maxDist, std::vector<levelObject*> _map)
 {
-    double currentMinimum = _maxDist, thisDist;
-    g_selected = nullptr;
-    
-    for(levelObject* i : _map)
-    {
-        // Check if this distance is less than threshold
-        thisDist = getDistance(&leftProjected, i);
-        if(thisDist < currentMinimum) {
-            // Decrease minimum, we want closest point
-            currentMinimum = thisDist;
-            g_selected = i;
-        }
-    }
+	double currentMinimum = _maxDist, thisDist;
+	g_selected = nullptr;
+
+	for (levelObject *i : _map)
+	{
+		// Check if this distance is less than threshold
+		thisDist = getDistance(&leftProjected, i);
+		if (thisDist < currentMinimum)
+		{
+			// Decrease minimum, we want closest point
+			currentMinimum = thisDist;
+			g_selected = i;
+		}
+	}
 }
 
 int main(int argc, char **argv)
@@ -152,13 +151,19 @@ int main(int argc, char **argv)
 
 	ros::Publisher map_pub = n.advertise < wvu_swarm_std_msgs::map_levels
 			> ("/map_data", 1000);
-        ros::Publisher left_pub = n.advertise<geometry_msgs::Point>("/nui_bridge/hand_1", 1000);
-        ros::Publisher right_pub = n.advertise<geometry_msgs::Point>("/nui_bridge/hand_2", 1000);
-	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, newObs);
+	ros::Publisher left_pub = n.advertise < geometry_msgs::Point
+			> ("/nui_bridge/hand_1", 1000);
+	ros::Publisher right_pub = n.advertise < geometry_msgs::Point
+			> ("/nui_bridge/hand_2", 1000);
+
+#if RUN_UNIVERSE
+	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000,
+			additionCallback);
+#else
+			ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, newObs);
+#endif
 	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge", 1000, nuiCallback);
 
-	///////////////////////////////////////////////////////////////////
-	// default map setup
 #if DEBUG
 	std::cout << "Adding equation" << std::endl;
 #endif
@@ -180,7 +185,11 @@ int main(int argc, char **argv)
 	obs.characteristic = gaus;
 	obs.level = map_ns::TARGET;
 
+#if RUN_UNIVERSE
+	universe += obs;
+#else
 	newObs(obs);
+#endif
 
 	el.x_rad = 4;
 	el.y_rad = 7;
@@ -195,34 +204,68 @@ int main(int argc, char **argv)
 	obs.characteristic = gaus;
 	obs.level = map_ns::TARGET;
 
+#if RUN_UNIVERSE
+	universe += obs;
+#else
 	newObs(obs);
 #endif
-        
-#if TEST_NUI
-        std::vector<levelObject*> worldMap;
-        
-        levelObject* ptr;
-        
-        ptr = new gaussianObject(0, 0, "Gary", 10, 20, M_PI / 4.0, 10, map_ns::COMBINED);
-        worldMap.push_back(ptr);
-        
-        ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::COMBINED);
-        worldMap.push_back(ptr);
+#elif TEST_NUI
+	std::vector<levelObject*> worldMap;
+
+	levelObject *ptr;
+
+	ptr = new gaussianObject(0, 0, "Gary", 10, 20, M_PI / 4.0, 10,
+			map_ns::TARGET);
+#if RUN_UNIVERSE
+	universe += ptr;
+#else
+	worldMap.push_back(ptr);
+#endif
+
+	ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::TARGET);
+#if RUN_UNIVERSE
+	universe += ptr;
+#else
+	worldMap.push_back(ptr);
+#endif
+
+	// testing constructors
+	wvu_swarm_std_msgs::ellipse el;
+	el.x_rad = 5;
+	el.y_rad = 2;
+	el.theta_offset = M_PI_4;
+
+	wvu_swarm_std_msgs::gaussian gaus;
+	gaus.ellipse = el;
+	gaus.ellipse.offset_x = 0;
+	gaus.ellipse.offset_y = 0;
+	gaus.amplitude = 20;
+	gaus.name = "Bob";
+
+	wvu_swarm_std_msgs::obstacle obs;
+	obs.characteristic = gaus;
+	obs.level = map_ns::OBSTACLE;
+
+	ptr = new gaussianObject(obs);
+#if RUN_UNIVERSE
+	universe += ptr;
+#else
+	worldMap.push_back(ptr);
+#endif
 #endif 
-        
+
 #if DEBUG
 	std::cout << "\033[30;42mdone adding equation\033[0m" << std::endl;
 #endif
-	// end default map setup
-	///////////////////////////////////////////////////////////////////
 
+#if RATE_LIMIT
 	ros::Rate rate(60);
-
+#endif
 #if TEST_EQU
 	int tick = 0;
 #endif
-        
-        geometry_msgs::Point* anchor = nullptr; // Where did the user's hand start when they grabbed a feature?
+
+	geometry_msgs::Point *anchor = nullptr; // Where did the user's hand start when they grabbed a feature?
 
 	while (ros::ok())
 	{
@@ -242,77 +285,81 @@ int main(int argc, char **argv)
 
 		obs.characteristic = gaus;
 		obs.level = map_ns::TARGET;
+#if RUN_UNIVERSE
+		universe += obs;
+#else
 		newObs(obs);
 #endif
-                
-#if TEST_NUI
-                // Populate ros map from our map
-                wvu_swarm_std_msgs::map_level m;
-                for(levelObject* i : worldMap) {
-                    m.functions.push_back(gausToRos((gaussianObject*)i));
-                }
-                
-                overall_map.levels.clear();
-                overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
-                overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
-                overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
-                overall_map.levels.push_back(m);
-                
-                // If user's left hand (RIGHT) is open, points are free to move
-                if(!g_nui.rightClick)
-                {
-                    // Reset anchor since nothing is being manipulated
-                    anchor = nullptr;
-                    
-                    // Check if something is selected, if so lock point to it
-                    findSelection(10.0, worldMap);
-                    if(g_selected != nullptr)
-                    {
-                        leftProjected.x = g_selected->getOrigin().first;
-                        leftProjected.y = g_selected->getOrigin().second;
-                    }
-                    
-                    // If nothing is selected, move points freely
-//                    if(leftProjected.x == 0.0 && leftProjected.y == 0.0 && leftProjected.z == 0.0)
-                        left_pub.publish(leftProjected);
-//                    if(rightProjected.x == 0.0 && rightProjected.y == 0.0 && rightProjected.z == 0.0)
-                        right_pub.publish(rightProjected);
-                }
-                // If user's left hand (RIGHT) is closed, maybe modify objects
-                else
-                {
-                    ROS_INFO("Hand closed!");
-                    // If nothing had been selected before hand was closed, do nothing
-                    if(g_selected != nullptr)
-                    {
-                        ROS_INFO("%s", g_selected->getName().c_str());
-                        // If object was just grabbed, set the anchor
-                        if(anchor == nullptr) {
-                            anchor = new geometry_msgs::Point;
-                            anchor->x = g_nui.leftHand.x;
-                            anchor->y = g_nui.leftHand.y;
-                            anchor->z = g_nui.leftHand.z;
-                        }
-                        
-                        // Manipulate the object
-                        g_selected->nuiManipulate(g_nui.leftHand.x - anchor->x,
-                                g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
-                        
-                        // Update anchor so it's one iteration behind hand
-                        anchor->x = g_nui.leftHand.x;
-                        anchor->y = g_nui.leftHand.y;
-                        anchor->z = g_nui.leftHand.z;
-                        
-                        ROS_INFO("Anchor moved!");
-                    }
-                }
+#elif TEST_NUI
+		for (levelObject *i : worldMap)
+		{
+#if RUN_UNIVERSE
+			universe += i;
+#else
+			newObs(((gaussianObject*) i)->getGaussianMessage());
 #endif
-                
+		}
 
+		// If user's left hand (RIGHT) is open, points are free to move
+		if (!g_nui.rightClick)
+		{
+			// Reset anchor since nothing is being manipulated
+			anchor = nullptr;
+
+			// Check if something is selected, if so lock point to it
+			findSelection(10.0, worldMap);
+			if (g_selected != nullptr)
+			{
+				leftProjected.x = g_selected->getOrigin().first;
+				leftProjected.y = g_selected->getOrigin().second;
+			}
+
+			// If nothing is selected, move points freely
+//                    if(leftProjected.x == 0.0 && leftProjected.y == 0.0 && leftProjected.z == 0.0)
+			left_pub.publish(leftProjected);
+//                    if(rightProjected.x == 0.0 && rightProjected.y == 0.0 && rightProjected.z == 0.0)
+			right_pub.publish(rightProjected);
+		}
+		// If user's left hand (RIGHT) is closed, maybe modify objects
+		else
+		{
+			ROS_INFO("Hand closed!");
+			// If nothing had been selected before hand was closed, do nothing
+			if (g_selected != nullptr)
+			{
+				ROS_INFO("%s", g_selected->getName().c_str());
+				// If object was just grabbed, set the anchor
+				if (anchor == nullptr)
+				{
+					anchor = new geometry_msgs::Point;
+					anchor->x = g_nui.leftHand.x;
+					anchor->y = g_nui.leftHand.y;
+					anchor->z = g_nui.leftHand.z;
+				}
+
+				// Manipulate the object
+				g_selected->nuiManipulate(g_nui.leftHand.x - anchor->x,
+						g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
+
+				// Update anchor so it's one iteration behind hand
+				anchor->x = g_nui.leftHand.x;
+				anchor->y = g_nui.leftHand.y;
+				anchor->z = g_nui.leftHand.z;
+
+				ROS_INFO("Anchor moved!");
+			}
+		}
+#endif
+
+#if RUN_UNIVERSE
+		map_pub.publish(universe.getPublishable());
+#else
 		map_pub.publish(overall_map);
-                
+#endif
 
 		ros::spinOnce();
+#if RATE_LIMIT
 		rate.sleep();
+#endif
 	}
 }

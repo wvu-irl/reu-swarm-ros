@@ -8,11 +8,11 @@ levelObject::levelObject(void)
     selected = false;
 }
 
-levelObject::levelObject(std::pair<double, double> _orig, std::string _name)
-    : origin(_orig), name(_name), selected(false) {
+levelObject::levelObject(std::pair<double, double> _orig, std::string _name, levelType _lvl)
+    : origin(_orig), name(_name), selected(false), level(_lvl) {
 }
 
-levelObject::levelObject(double _xorg, double _yorg, std::string _name)
+levelObject::levelObject(double _xorg, double _yorg, std::string _name, levelType _lvl) : level(_lvl)
 {
     origin = std::pair<double, double>(_xorg, _yorg);
     name = _name;
@@ -28,3 +28,6 @@ std::string levelObject::getName() {return name;}
 void levelObject::select(void) {selected = true;}
 void levelObject::deselect(void) {selected = false;}
 bool levelObject::isSelected(void) {return selected;}
+
+levelType levelObject::getLevel(void) {return level;}
+void levelObject::setLevel(levelType _lvl) {level = _lvl;}

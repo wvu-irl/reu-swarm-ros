@@ -29,8 +29,8 @@ double map_ns::calculate(wvu_swarm_std_msgs::map_level ml,
 	return z;
 }
 
-wvu_swarm_std_msgs::map_level map_ns::combineLevels(wvu_swarm_std_msgs::map_level a,
-		wvu_swarm_std_msgs::map_level b)
+wvu_swarm_std_msgs::map_level map_ns::combineLevels(
+		wvu_swarm_std_msgs::map_level a, wvu_swarm_std_msgs::map_level b)
 {
 	wvu_swarm_std_msgs::map_level n_lev;
 	for (size_t i = 0; i < a.functions.size(); i++)
@@ -41,4 +41,3 @@ wvu_swarm_std_msgs::map_level map_ns::combineLevels(wvu_swarm_std_msgs::map_leve
 
 	return n_lev;
 }
-
