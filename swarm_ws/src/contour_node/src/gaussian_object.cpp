@@ -5,12 +5,12 @@ gaussianObject::gaussianObject(void) {
 
 gaussianObject::gaussianObject(std::pair<double, double> _orig, std::string _name,
     std::pair<double, double> _radii, double _theta, double _ampl, levelType _lvl)
-    : ellipseObject(_orig, _name, _radii, _theta), amplitude(_ampl), level(_lvl) {
+    : ellipseObject(_orig, _name, _radii, _theta, _lvl), amplitude(_ampl) {
 }
 
 gaussianObject::gaussianObject(double _xorg, double _yorg, std::string _name,
     double _xrad, double _yrad, double _theta, double _ampl, levelType _lvl)
-    : ellipseObject(_xorg, _yorg, _name, _xrad, _yrad, _theta), amplitude(_ampl), level(_lvl) {
+    : ellipseObject(_xorg, _yorg, _name, _xrad, _yrad, _theta, _lvl), amplitude(_ampl) {
 }
 
 gaussianObject::~gaussianObject(void) {}
@@ -33,5 +33,4 @@ void gaussianObject::nuiManipulate(double _x, double _y, double _z)
 
 double gaussianObject::getAmplitude(void) {return amplitude;}
 
-levelType gaussianObject::getLevel(void) {return level;}
-void gaussianObject::setLevel(levelType _lvl) {level = _lvl;}
+
