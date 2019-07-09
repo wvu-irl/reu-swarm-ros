@@ -21,6 +21,7 @@ Rules::Rules(Model _model) : model(_model)
 
 AliceStructs::vel Rules::stateLoop()
 {
+//	checkBattery();
 	checkBlocked();
 	if (state == "explore")
 	{
@@ -29,7 +30,18 @@ AliceStructs::vel Rules::stateLoop()
 	else if (state == "blocked")
 	{
 		avoidCollisions();
-	}/*
+	}
+
+//	else if (state == "needs_charging")
+//	{
+//
+//	}
+//	else if(state == "charging")
+//	{
+//
+//	}
+
+	/*
 	case charge:
 		Charge();
 		break;
