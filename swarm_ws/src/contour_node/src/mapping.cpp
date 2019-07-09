@@ -6,13 +6,17 @@
 #include <nuitrack_bridge/nuitrack_data.h>
 #include <contour_node/gaussian_object.h>
 
+#include <contour_node/universe_object.h>
+
 #include <math.h>
 
 #define DEBUG 0
 #define TEST_EQU 0
 #define TEST_NUI 1
 
-#if DEBUG
+#define TEST_UNIVERSE 1
+
+#if DEBUG || TEST_EQU
 #include <iostream>
 #endif
 
@@ -57,6 +61,13 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 	return ret;
 }
 
+#if TEST_UNIVERSE
+static Universe universe;
+void additionCallback(wvu_swarm_std_msgs::obstacle obs)
+{
+	universe += obs;
+}
+#else
 static wvu_swarm_std_msgs::map_levels overall_map;
 
 void newObs(wvu_swarm_std_msgs::obstacle obs)
@@ -95,6 +106,7 @@ void newObs(wvu_swarm_std_msgs::obstacle obs)
 		newObs(comb);
 	}
 }
+#endif
 
 void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 {
@@ -142,7 +154,13 @@ int main(int argc, char **argv)
 			> ("/nui_bridge/hand_1", 1000);
 	ros::Publisher right_pub = n.advertise < geometry_msgs::Point
 			> ("/nui_bridge/hand_2", 1000);
-	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, newObs);
+
+#if TEST_UNIVERSE
+	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000,
+			additionCallback);
+#else
+			ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, newObs);
+#endif
 	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge", 1000, nuiCallback);
 
 #if DEBUG
@@ -166,7 +184,11 @@ int main(int argc, char **argv)
 	obs.characteristic = gaus;
 	obs.level = map_ns::TARGET;
 
+#if TEST_UNIVERSE
+	universe += obs;
+#else
 	newObs(obs);
+#endif
 
 	el.x_rad = 4;
 	el.y_rad = 7;
@@ -181,7 +203,11 @@ int main(int argc, char **argv)
 	obs.characteristic = gaus;
 	obs.level = map_ns::TARGET;
 
+#if TEST_UNIVERSE
+	universe += obs;
+#else
 	newObs(obs);
+#endif
 #elif TEST_NUI
 	std::vector<levelObject*> worldMap;
 
@@ -189,10 +215,18 @@ int main(int argc, char **argv)
 
 	ptr = new gaussianObject(0, 0, "Gary", 10, 20, M_PI / 4.0, 10,
 			map_ns::TARGET);
+#if TEST_UNIVERSE
+	universe += ptr;
+#else
 	worldMap.push_back(ptr);
+#endif
 
 	ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::TARGET);
+#if TEST_UNIVERSE
+	universe += ptr;
+#else
 	worldMap.push_back(ptr);
+#endif
 
 	// testing constructors
 	wvu_swarm_std_msgs::ellipse el;
@@ -212,7 +246,11 @@ int main(int argc, char **argv)
 	obs.level = map_ns::OBSTACLE;
 
 	ptr = new gaussianObject(obs);
+#if TEST_UNIVERSE
+	universe += ptr;
+#else
 	worldMap.push_back(ptr);
+#endif
 #endif 
 
 #if DEBUG
@@ -249,7 +287,11 @@ int main(int argc, char **argv)
 #elif TEST_NUI
 		for (levelObject *i : worldMap)
 		{
+#if TEST_UNIVERSE
+			universe += i;
+#else
 			newObs(((gaussianObject*) i)->getGaussianMessage());
+#endif
 		}
 
 		// If user's left hand (RIGHT) is open, points are free to move
@@ -303,7 +345,11 @@ int main(int argc, char **argv)
 		}
 #endif
 
+#if TEST_UNIVERSE
+		map_pub.publish(universe.getPublishable());
+#else
 		map_pub.publish(overall_map);
+#endif
 
 		ros::spinOnce();
 		rate.sleep();
