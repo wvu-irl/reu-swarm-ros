@@ -1,5 +1,11 @@
 <launch>
 
+	<!-- Launch a static transform from the kinect to the table -->
+        <node pkg="tf" type="static_transform_publisher" name="kinect_nuitrack" args="0.113 -0.483 0.557 0.544 0.551 0.445 -0.451 kinect world 1000"/>
+	
+	<!-- Launches node to connect to udp and perform transforms -->
+	<node pkg="nuitrack_bridge" type="nuitrack_bridge" name="nui_bridge" output="screen" />
+
 	<node pkg="contour_node" type="mapping" name="map" output="screen"/>
 
 	<node pkg="visualization" type="table_vis" name="table"
@@ -7,10 +13,10 @@
 
 		<!-- Location of assets and config files respectively -->
 		<param name="asset_path"
-			value="/home/the_pun_king/git/reu-swarm-ros/swarm_ws/src/visualization/assets"
+			value="/home/air/swarm_ws/src/visualization/assets"
 			type="str" />
 		<param name="config_path"
-			value="/home/the_pun_king/git/reu-swarm-ros/swarm_ws/src/visualization/cfg/calib.config"
+			value="/home/air/swarm_ws/src/visualization/cfg/calib.config"
 			type="str" />
 
 		<!-- Background - setting to "None" will not draw a background - setting 
@@ -23,9 +29,9 @@
 		<param name="range_bottom" value="-20.0" type="double"/>
 		
 		<rosparam param="color_levels">[-20, -16, -12,  -8,  -4,  0,   4,   8,  12,  16,  20]</rosparam>
-		<rosparam param="color_reds"  >[  0,   0,   0, 127, 127,  0, 255, 255,   0,   0,   0]</rosparam>
-		<rosparam param="color_greens">[  0, 127, 127, 127,   0,  0,   0, 255, 255, 255,   0]</rosparam>
-		<rosparam param="color_blues" >[127, 127,   0,   0,   0,  0,   0,   0,   0, 255, 255]</rosparam>
+		<rosparam param="color_reds"  >[  0,   0,   0, 127, 127,  255, 255, 255,   0,   0,   0]</rosparam>
+		<rosparam param="color_greens">[  0, 127, 127, 127,   0,  255,   0, 255, 255, 255,   0]</rosparam>
+		<rosparam param="color_blues" >[127, 127,   0,   0,   0,  255,   0,   0,   0, 255, 255]</rosparam>
 		
 	</node>
 

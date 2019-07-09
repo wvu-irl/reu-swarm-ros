@@ -203,7 +203,7 @@ int main(int argc, char **argv)
         
         levelObject* ptr;
         
-        ptr = new gaussianObject(0, 0, "Gary", 10, 20, M_PI / 4.0, 20, map_ns::NONE);
+        ptr = new gaussianObject(0, 0, "Gary", 10, 20, M_PI / 4.0, 10, map_ns::COMBINED);
         worldMap.push_back(ptr);
         
         ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::COMBINED);
