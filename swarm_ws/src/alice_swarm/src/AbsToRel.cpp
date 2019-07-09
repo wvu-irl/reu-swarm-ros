@@ -10,6 +10,7 @@ wvu_swarm_std_msgs::vicon_bot_array temp_bot_array;
 wvu_swarm_std_msgs::map_levels temp_map;
 wvu_swarm_std_msgs::vicon_points temp_target;
 wvu_swarm_std_msgs::flows temp_flow_array;
+//wvu_swarm_std_msgs::chargers temp_charger_array;
 
 void botCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg)
 {

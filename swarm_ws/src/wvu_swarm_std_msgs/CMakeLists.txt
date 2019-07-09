@@ -48,6 +48,8 @@ find_package(catkin REQUIRED COMPONENTS
    obs_msg.msg
    tar_msg.msg
    cont_msg.msg
+   charger.msg
+   chargers.msg
   )
 
 ## Generate added messages and services with any dependencies listed here
