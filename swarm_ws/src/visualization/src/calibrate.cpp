@@ -12,10 +12,7 @@
 #include <iostream>
 #include <fstream>
 
-// dimensions for window
-#define WIDTH 1920
-#define HEIGHT 1080
-
+#include <visualization/visualization_settings.h>
 // definition for debugging messages
 #define DEBUG 0
 

@@ -12,6 +12,7 @@
 #include <math.h>
 #include <visualization/color_map.h>
 #include <wvu_swarm_std_msgs/map_level.h>
+#include <visualization/visualization_settings.h>
 
 #define CALC_DEBUG 0
 #define CUDA_DEBUG 0
@@ -53,8 +54,8 @@ __device__ void zfunc(double *z, double rx, double ry, gaussian_t *map, size_t n
 {
     rx -= 640;
 		ry -= 400;
-		rx *= 200.0 / 1920.0;
-		ry *= 100.0 / 800.0;
+		rx *= 200.0 / (double)WIDTH;
+		ry *= 100.0 / (double)HEIGHT;
 		*z = 0;
 
 		for (size_t i = 0;i < num_eqs;i++)

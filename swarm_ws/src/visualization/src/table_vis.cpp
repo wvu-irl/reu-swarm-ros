@@ -27,10 +27,8 @@ static int g_table_width, g_table_height;
 static int g_robot_diameter;
 static int g_draw_level;
 
-// width and height of generated image
-// also of starting window size in pixels
-#define WIDTH 1920
-#define HEIGHT 1080
+#include <visualization/visualization_settings.h>
+
 
 // turns on verbose mode
 #define TAB_DEBUG 0
@@ -473,7 +471,8 @@ int main(int argc, char **argv)
 		std::cout << "Adding color: [Lev: " << c_levs[i] << ", Col: " << c_reds[i] << "," << c_greens[i] << "," << c_blues[i] << "]" << std::endl;
 #endif
 	}
-	cont = new ContourMap(sf::Rect<int>(0, 0, 1920, 1080), cmap);
+	cont = new ContourMap(sf::Rect<int>(0, 0, WIDTH, HEIGHT), cmap);
+
 
 	// adding levels
 	int num_levels;
