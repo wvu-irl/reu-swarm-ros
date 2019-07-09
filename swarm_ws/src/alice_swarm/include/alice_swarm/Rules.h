@@ -80,19 +80,14 @@ public:
 	void Charge();
 
 	/*
-	 * Makes Alice find food
-	 */
-	void findFood();
-
-	/*
 	 * Makes Alice go to a target
 	 */
 	void goToTar();
 
 	/*
-	 * Makes Alice seek higher elevations
+	 * Makes Alice seek high values on the contour map
 	 */
-	void findUpdraft();
+	void findContour();
 
 	/*
 	 * Determines which state Alice is in

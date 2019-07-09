@@ -10,7 +10,7 @@
 	<!-- TODO launch ALICE nodes -->
 	<node pkg="alice_swarm" type="AbsToRel" name="hub" output="screen"/>
  	<node pkg="alice_swarm" type="AliceMain" name="alice" output="screen"/>
- 	<node pkg="alice_swarm" type="MapHub" name="map_hub" output="screen"/>
+ 	<node pkg="alice_swarm" type="InterHub" name="inter_hub" output="screen"/>
 
 	<node pkg="visualization"  type="alice_pov_main" name="map_debug" output="screen"/>
 	<node pkg="contour_node" type="mapping" name="contour_map" output="screen"/>

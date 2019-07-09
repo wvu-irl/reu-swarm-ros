@@ -289,11 +289,11 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
 
-	std::cout << "Time taken by srv: " << duration.count() << " microseconds" << std::endl;
+	//std::cout << "Time taken by srv: " << duration.count() << " microseconds" << std::endl;
 }
 void Model::forget()
 {
-	float TOLERANCE = 0.01; //objects within this distance in x and y will be simplified to one object
+	float TOLERANCE = 1; //objects within this distance in x and y will be simplified to one object
 	std::vector<AliceStructs::obj>::iterator it = archived_obstacles.begin();
 	while (it != archived_obstacles.end())
 	{

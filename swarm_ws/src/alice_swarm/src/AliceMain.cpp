@@ -71,15 +71,16 @@ int main(int argc, char **argv)
 			wvu_swarm_std_msgs::robot_command temp;
 			AliceStructs::vel tempVel = it->second.generateVel(); //Uses all of the ideals to generate compromises and commands.
 			temp.rid = it->second.name;
-
 			if (tempVel.mag > 1) //caps the speed
 				temp.r = 1;
 			else
 				temp.r = tempVel.mag;
 			temp.theta = 180 / M_PI * fmod(2 * M_PI + tempVel.dir, 2 * M_PI);
+			std::cout << temp.rid << " " << temp.r << " " << temp.theta << std::endl;
 
 			execute.commands.push_back(temp); //adds vector to published vector
 		}
+		std::cout << "oy" << std::endl;
 
 		pub.publish(execute);
 //		std::cout << "execute published" << std::endl;

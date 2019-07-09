@@ -9,6 +9,7 @@ void mapCallback(const wvu_swarm_std_msgs::map &msg)
 {
 	alice_map[msg.name]=msg;
 }
+//void pathCallback();
 
 bool getMap(alice_swarm::get_map::Request  &req,alice_swarm::get_map::Response &res)
 {
@@ -31,9 +32,10 @@ bool getMaps(alice_swarm::get_maps::Request  &req,alice_swarm::get_maps::Respons
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "map_hub");
+  ros::init(argc, argv, "inter_hub");
   ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("info_map", 1000, mapCallback);
+	//ros::Subscriber sub2 = n.subscribe("ideal_paths",1000,pathCallback;
   ros::ServiceServer service = n.advertiseService("get_map", getMap);
   ros::ServiceServer service2 = n.advertiseService("get_maps", getMaps);
   ros::spin();

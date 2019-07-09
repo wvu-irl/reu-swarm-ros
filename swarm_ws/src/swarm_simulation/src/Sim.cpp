@@ -58,6 +58,8 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 						a = -r * cos(theta / 2);
 						temp_r = a;
 						flock.flock.at(i).heading -= M_PI / 90 * (2 * M_PI - theta);
+					} else{
+						temp_r=r;
 					}
 
 					float x = temp_r * cos(flock.flock.at(i).heading);

@@ -21,36 +21,25 @@ Rules::Rules(Model _model) : model(_model)
 
 AliceStructs::vel Rules::stateLoop()
 {
-//	checkBattery();
-	checkBlocked();
-	if (state == "goToTar")
-	{
-		goToTar();
-	}
-	else if (state == "blocked")
-	{
-		avoidCollisions();
-	}
-
-	else if (state == "needs_charging")
-	{
-		Charge();
-	}
-//	else if(state == "charging")
+//	checkBlocked();
+//	if (state == "goToTar")
 //	{
-//
+//		goToTar();
 //	}
-
-	/*
-	case charge:
-		Charge();
-		break;
-	case find_food:
-		findFood();
-		break;
-	case find_updraft:
-		findUpdraft();
-		break; */
+//	else if (state == "blocked")
+//	{
+//		avoidCollisions();
+//	}/*
+//	case charge:
+//		Charge();
+//		break;
+//	case find_food:
+//		findFood();
+//		break;
+//	case find_updraft:
+//		findUpdraft();
+//		break; */
+	findContour();
 	return final_vel;
 }
 
@@ -71,50 +60,14 @@ void Rules::avoidCollisions()
 
 void Rules::Explore()
 {
- // To implement
+
 }
 
 void Rules::Charge()
 {
-	float min_sep = 1000.0;
-	float check_sep;
-	int closest_pos;
-	for (int i=0; i < model.chargers.size(); i++)
-	{
-		if(!model.chargers.at(i).occupied) //charger is open
-		{
-			check_sep = sqrt(pow(0,2) + pow(0,2)); //check seperation distance
-			if(check_sep < min_sep)
-			{
-				closest_pos = i; //saves pos of closest
-				min_sep = check_sep; //updates min_sep
-			}
-		}
-	}
-	model.chargers.at(closest_pos).occupied = true;
-	//make the bot go to some way point, overiding other directives.
-	//way point should be .y, .x + 5 if on the left wall.
+	//To implement
 }
 
-void Rules::findFood()
-{
-	/*
-	AliceStructs::pnt best;
-	float max_dis = 10; //to implement once model has the support
-	for (auto& contour : model.archived_contour)
-	{
-		if (calcDis(model.cur_pose.x, model.cur_pose.y, contour.x, contour.y) < max_dis && contour.z > best.z)
-		{
-			best.x = contour.x;
-			best.y = contour.y;
-			best.z = contour.z;
-		}
-	}
-	final_vel.dir = atan2(best.y - model.cur_pose.y, model.cur_pose.x - best.x);
-	final_vel.mag = 1;
-	model.goTo.x = best.x;
-	model.goTo.y = best.y; */
-}
 
 void Rules::goToTar()
 {
@@ -133,20 +86,20 @@ void Rules::goToTar()
 	final_vel.mag = 1;
 }
 
-void Rules::findUpdraft()
+void Rules::findContour()
 {
-	AliceStructs::pnt best;
-	float max_dis = 10; //to implement once model has the support
+	AliceStructs::pose best;
+	float pri=0; //uses a formula based on distance, recency(confidence), and strength
 	for (auto& contour : model.archived_contour)
 	{
-		if (calcDis(model.cur_pose.x, model.cur_pose.y, contour.x, contour.y) < max_dis && contour.z > best.z)
+		float temp_pri=contour.z/(10+model.time.sec - contour.time.sec)/pow(calcDis(model.cur_pose.x, model.cur_pose.y, contour.x, contour.y),0.5);
+		if (temp_pri>pri)
 		{
-			best.x = contour.x;
-			best.y = contour.y;
-			best.z = contour.z;
+			best=contour;
+			pri=temp_pri;
 		}
 	}
-	final_vel.dir = atan2(best.y - model.cur_pose.y, model.cur_pose.x - best.x);
+	final_vel.dir = 0;//atan2(best.y - model.cur_pose.y, best.x-model.cur_pose.x);
 	final_vel.mag = 1;
 	model.goTo.x = best.x;
 	model.goTo.y = best.y;

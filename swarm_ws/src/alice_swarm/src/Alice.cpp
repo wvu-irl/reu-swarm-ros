@@ -83,6 +83,7 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 
 void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_swarm_std_msgs::map> &_maps,  std::vector<int> &_ids)
 {
+	name=_data.name;
 	AliceStructs::mail mail = packageData(_data);
 	model.archiveAdd(mail);
 	model.sensorUpdate(mail);
