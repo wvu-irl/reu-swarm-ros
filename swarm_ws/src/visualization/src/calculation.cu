@@ -52,8 +52,8 @@ typedef struct
  */
 __device__ void zfunc(double *z, double rx, double ry, gaussian_t *map, size_t num_eqs)
 {
-    rx -= 640;
-		ry -= 400;
+    rx -= (double)WIDTH / 2;
+		ry -= (double)HEIGHT / 2;
 		rx *= 200.0 / (double)WIDTH;
 		ry *= 100.0 / (double)HEIGHT;
 		*z = 0;
