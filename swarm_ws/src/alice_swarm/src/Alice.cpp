@@ -16,14 +16,6 @@ Alice::Alice()
 	name = 0;
 }
 
-Alice::Alice(wvu_swarm_std_msgs::alice_mail &_data)
-{
-	name = _data.name;
-	model = Model(_data.name);
-	rules = Rules(model);
-//	(_data);
-}
-
 AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 {
 	AliceStructs::mail mail;
@@ -98,6 +90,6 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_s
 
 AliceStructs::vel Alice::generateVel() //implements the rules set
 {
-	AliceStructs::vel to_return = rules.stateLoop();
+	AliceStructs::vel to_return = rules.stateLoop(model);
 	return to_return;
 }

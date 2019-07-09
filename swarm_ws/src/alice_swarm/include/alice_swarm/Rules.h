@@ -68,7 +68,7 @@ public:
 	/*
 	 * Makes Alice explore new territory
 	 */
-	void Explore();
+	void explore();
 
 	/*
 	 * Prevents Alice from hitting obstacles or other robots
@@ -95,7 +95,7 @@ public:
 	/*
 	 * Determines which state Alice is in
 	 */
-	AliceStructs::vel stateLoop();
+	AliceStructs::vel stateLoop(Model &_model);
 
 };
 

@@ -51,18 +51,24 @@ int main(int argc, char **argv)
 		}
 
 		//One alice is selected to send her map out to the rest of them; less robots means a particular robot's map is sent more often
-		if (alice_map.size() != 0)
+//		if (alice_map.size() != 0)
+//		{
+//			if (map_it == alice_map.end() )
+//			{
+//				map_it = alice_map.begin();
+//				map_it->second.model.pass(pub2);
+//				map_it++;
+//			} else
+//			{
+//				map_it->second.model.pass(pub2);
+//				map_it++;
+//			}
+//		}
+		map_it = alice_map.begin();
+		while(map_it!=alice_map.end())
 		{
-			if (map_it == alice_map.end() )
-			{
-				map_it = alice_map.begin();
-				map_it->second.model.pass(pub2);
+			map_it->second.model.pass(pub2);
 				map_it++;
-			} else
-			{
-				map_it->second.model.pass(pub2);
-				map_it++;
-			}
 		}
 
 		wvu_swarm_std_msgs::robot_command_array execute;

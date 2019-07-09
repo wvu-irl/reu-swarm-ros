@@ -26,10 +26,6 @@ public:
 
 	Alice();
 
-	/*
-	 * Initializes Alice, rules, and the model
-	 */
-	Alice(wvu_swarm_std_msgs::alice_mail &_data);
 
 	/*
 	 * Takes data from messages to structs
