@@ -88,7 +88,7 @@ void newObs(wvu_swarm_std_msgs::obstacle obs)
 	if (obs.level != map_ns::COMBINED)
 	{
 		wvu_swarm_std_msgs::obstacle comb;
-		obs.characteristic.amplitude *= 1 - ((obs.level % 2) * 2);
+		obs.characteristic.amplitude *= 1 - (((obs.level + 1) % 2) * 2);
 		comb.characteristic = obs.characteristic;
 		comb.level = map_ns::COMBINED;
 
@@ -104,22 +104,6 @@ void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 	// Find projections of hands onto table
 	leftProjected = findZIntercept(g_nui.leftWrist, g_nui.leftHand, 0.0);
 	rightProjected = findZIntercept(g_nui.rightWrist, g_nui.rightHand, 0.0);
-}
-
-wvu_swarm_std_msgs::gaussian gausToRos(gaussianObject *_gaus)
-{
-	wvu_swarm_std_msgs::gaussian ret;
-
-	ret.amplitude = _gaus->getAmplitude();
-	ret.name = _gaus->getName();
-	ret.selected = _gaus->isSelected();
-	ret.ellipse.offset_x = _gaus->getOrigin().first;
-	ret.ellipse.offset_y = _gaus->getOrigin().second;
-	ret.ellipse.theta_offset = _gaus->getTheta();
-	ret.ellipse.x_rad = _gaus->getRadii().first;
-	ret.ellipse.y_rad = _gaus->getRadii().second;
-
-	return ret;
 }
 
 double getDistance(geometry_msgs::Point *_hand, levelObject *_target)
@@ -145,15 +129,6 @@ void findSelection(double _maxDist, std::vector<levelObject*> _map)
 			g_selected = i;
 		}
 	}
-}
-
-void insertObject(levelObject *obj)
-{
-	wvu_swarm_std_msgs::gaussian gaus = gausToRos((gaussianObject*) obj);
-	wvu_swarm_std_msgs::obstacle obstac;
-	obstac.characteristic = gaus;
-	obstac.level = obj->getLevel();
-	newObs(obstac);
 }
 
 int main(int argc, char **argv)
@@ -218,6 +193,26 @@ int main(int argc, char **argv)
 
 	ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::TARGET);
 	worldMap.push_back(ptr);
+
+	// testing constructors
+	wvu_swarm_std_msgs::ellipse el;
+	el.x_rad = 5;
+	el.y_rad = 2;
+	el.theta_offset = M_PI_4;
+
+	wvu_swarm_std_msgs::gaussian gaus;
+	gaus.ellipse = el;
+	gaus.ellipse.offset_x = 0;
+	gaus.ellipse.offset_y = 0;
+	gaus.amplitude = 20;
+	gaus.name = "Bob";
+
+	wvu_swarm_std_msgs::obstacle obs;
+	obs.characteristic = gaus;
+	obs.level = map_ns::OBSTACLE;
+
+	ptr = new gaussianObject(obs);
+	worldMap.push_back(ptr);
 #endif 
 
 #if DEBUG
@@ -252,10 +247,9 @@ int main(int argc, char **argv)
 		obs.level = map_ns::TARGET;
 		newObs(obs);
 #elif TEST_NUI
-		overall_map.levels.clear();
 		for (levelObject *i : worldMap)
 		{
-			insertObject(i);
+			newObs(((gaussianObject*) i)->getGaussianMessage());
 		}
 
 		// If user's left hand (RIGHT) is open, points are free to move
