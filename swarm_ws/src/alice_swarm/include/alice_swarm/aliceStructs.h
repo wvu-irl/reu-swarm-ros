@@ -88,6 +88,14 @@ typedef struct
 	int observer_name;
 } pose;
 
+
+typedef struct
+{
+	float x;
+	float y;
+	bool occupied;
+} charger;
+
 /*
  * A box of all these structs, for easy transport
  */
@@ -97,6 +105,7 @@ typedef struct
 	std::vector<obj> obstacles;
 	std::vector<pnt> targets;
 	std::vector<flow> flows;
+	std::vector<charger> chargers;
 	float xpos;
 	float ypos;
 	float contVal;

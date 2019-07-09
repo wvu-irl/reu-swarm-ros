@@ -25,6 +25,7 @@ void Model::clear()
 	flows.clear();
 	neighbors.clear();
 	targets.clear();
+	chargers.clear();
 }
 std::pair<float, float> Model::transformCur(float _x, float _y)
 {
@@ -134,6 +135,10 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 	for (auto& tar : _toAdd.targets)
 	{
 		targets.push_back(tar);
+	}
+	for (auto& charg : _toAdd.charges)
+	{
+		charges.push_back(charg);
 	}
 }
 

@@ -38,6 +38,7 @@ public:
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
 	std::vector<AliceStructs::pnt> targets;
+	std::vector<AliceStructs::charger> chargers;
 
 	AliceStructs::pnt goTo;
 

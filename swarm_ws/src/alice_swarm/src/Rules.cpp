@@ -32,10 +32,10 @@ AliceStructs::vel Rules::stateLoop()
 		avoidCollisions();
 	}
 
-//	else if (state == "needs_charging")
-//	{
-//
-//	}
+	else if (state == "needs_charging")
+	{
+		Charge();
+	}
 //	else if(state == "charging")
 //	{
 //
@@ -76,7 +76,24 @@ void Rules::Explore()
 
 void Rules::Charge()
 {
-	//To implement
+	float min_sep = 1000.0;
+	float check_sep;
+	int closest_pos;
+	for (int i=0; i < model.chargers.size(); i++)
+	{
+		if(!model.chargers.at(i).occupied) //charger is open
+		{
+			check_sep = sqrt(pow(0,2) + pow(0,2)); //check seperation distance
+			if(check_sep < min_sep)
+			{
+				closest_pos = i; //saves pos of closest
+				min_sep = check_sep; //updates min_sep
+			}
+		}
+	}
+	model.chargers.at(closest_pos).occupied = true;
+	//make the bot go to some way point, overiding other directives.
+	//way point should be .y, .x + 5 if on the left wall.
 }
 
 void Rules::findFood()

@@ -47,7 +47,6 @@ int main(int argc, char **argv)
 
 		for (int i = 0; i < temp_mail.mails.size(); i++)
 		{
-
 			alice_map[temp_mail.mails.at(i).name].updateModel(temp_mail.mails.at(i),maps,ids); //gives each robot the relative data it needs, whilst also creating the alice's
 		}
 
@@ -70,7 +69,7 @@ int main(int argc, char **argv)
 		for (std::map<int, Alice>::iterator it = alice_map.begin(); it != alice_map.end(); ++it) //eventually run this part asynchronously
 		{
 			wvu_swarm_std_msgs::robot_command temp;
-			AliceStructs::vel tempVel = it->second.generateVel(); //Uses all of the ideals to generate compromises
+			AliceStructs::vel tempVel = it->second.generateVel(); //Uses all of the ideals to generate compromises and commands.
 			temp.rid = it->second.name;
 
 			if (tempVel.mag > 1) //caps the speed

@@ -257,6 +257,7 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		addFlowMail(*it, temp);
 		addContMail(*it, temp);
 		addChargerMail(*it, temp);
+
 		temp.name = *it;
 		temp.sid = bots[*it].swarm_id;
 		temp.time = bots[*it].time;

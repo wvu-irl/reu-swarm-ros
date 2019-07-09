@@ -63,6 +63,14 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 		flow.spd = _flow.spd;
 		mail.flows.push_back(flow);
 	}
+	for (auto& _charger :_data.chargerMail)
+	{
+		AliceStructs::charger charger;
+		charger.x = _charger.x;
+		charger.y = _charger.y;
+		charger.occupied = _charger.occupied;
+	}
+
 	mail.xpos=_data.x;
 	mail.ypos=_data.y;
 	mail.contVal=_data.contVal;
@@ -82,7 +90,7 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_s
 	model.forget();
 }
 
-AliceStructs::vel Alice::generateVel()
+AliceStructs::vel Alice::generateVel() //implements the rules set
 {
 	AliceStructs::vel to_return = rules.stateLoop();
 	return to_return;
