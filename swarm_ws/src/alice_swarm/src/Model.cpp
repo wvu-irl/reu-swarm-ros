@@ -318,6 +318,8 @@ void Model::forget()
 		}
 
 	}
+//	std::cout << "oy" << std::endl;
+
 	std::vector<AliceStructs::pnt>::iterator it2 = archived_targets.begin();
 	while (it2 != archived_targets.end())
 	{
