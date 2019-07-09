@@ -27,6 +27,7 @@ Alice::Alice(wvu_swarm_std_msgs::alice_mail &_data)
 AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 {
 	AliceStructs::mail mail;
+	//------Updates all vectors in mail -----------
 	for (auto& _obstacle : _data.obsMail)
 	{
 		AliceStructs::obj obstacle;
@@ -69,8 +70,9 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 		charger.x = _charger.x;
 		charger.y = _charger.y;
 		charger.occupied = _charger.occupied;
-	}
+	}//--------------------------------------------
 
+	//----Updates simple attributes----------
 	mail.xpos=_data.x;
 	mail.ypos=_data.y;
 	mail.contVal=_data.contVal;
@@ -78,6 +80,9 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 	mail.name = _data.name;
 	mail.vision=_data.vision;
 	mail.time=_data.time;
+	mail.battery_lvl = _data.battery_lvl;
+	//-----------------------------------------
+
 	return mail;
 }
 

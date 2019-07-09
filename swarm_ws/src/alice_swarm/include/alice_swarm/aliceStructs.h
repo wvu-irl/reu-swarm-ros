@@ -112,6 +112,7 @@ typedef struct
 	float heading;
 	int name;
 	float vision;
+	float battery_lvl;
 	ros::Time time;
 } mail;
 }

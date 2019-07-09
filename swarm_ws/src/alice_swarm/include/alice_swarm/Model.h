@@ -36,6 +36,7 @@ public:
 	ros::Time time;
 	float vision;
 	float battery_lvl;
+
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
 	std::vector<AliceStructs::pnt> targets;
@@ -93,6 +94,9 @@ public:
 	 * Forgets unneeded data
 	 */
 	void forget();
+	void forgetObs(int TOLERANCE);
+	void forgetTargets(int TOLERANCE);
+	void forgetContour(int TOLERANCE);
 
 private:
 
