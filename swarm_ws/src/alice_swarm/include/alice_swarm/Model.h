@@ -35,6 +35,7 @@ public:
 	bool first;
 	ros::Time time;
 	float vision;
+	float battery_lvl;
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
 	std::vector<AliceStructs::pnt> targets;

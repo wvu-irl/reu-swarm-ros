@@ -21,6 +21,23 @@ Rules::Rules(Model _model) : model(_model)
 
 AliceStructs::vel Rules::stateLoop()
 {
+	state = checkBattery(state);
+	checkBlocked();
+	if (state == "goToTar")
+	{
+		goToTar();
+	}
+	else if (state == "blocked")
+	{
+		avoidCollisions();
+	}
+
+	else if (state == "needs_charging")
+	{
+		Charge();
+	}
+//	else if(state == "charging")
+
 //	checkBlocked();
 //	if (state == "goToTar")
 //	{
@@ -60,12 +77,29 @@ void Rules::avoidCollisions()
 
 void Rules::Explore()
 {
-
+ // To implement
 }
 
 void Rules::Charge()
 {
-	//To implement
+	float min_sep = 1000.0;
+	float check_sep;
+	int closest_pos;
+	for (int i=0; i < model.chargers.size(); i++)
+	{
+		if(!model.chargers.at(i).occupied) //charger is open
+		{
+			check_sep = sqrt(pow(0,2) + pow(0,2)); //check seperation distance
+			if(check_sep < min_sep)
+			{
+				closest_pos = i; //saves pos of closest
+				min_sep = check_sep; //updates min_sep
+			}
+		}
+	}
+	model.chargers.at(closest_pos).occupied = true;
+	//make the bot go to some way point, overiding other directives.
+	//way point should be .y, .x + 5 if on the left wall.
 }
 
 
@@ -126,6 +160,15 @@ bool Rules::checkBlocked()
 	return false;
 }
 
+std::string Rules::checkBattery(std::string state)
+{
+	float acceptable_lvl = model.battery_lvl * 0.2;
+	if(model.battery_lvl < acceptable_lvl && state != "charging")
+	{
+		state = "needs_charging";
+	}
+	return state;
+}
 void Rules::findAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
 {
 	std::vector<float> right;

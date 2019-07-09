@@ -47,6 +47,7 @@ public:
 	 */
 	bool checkBlocked();
 
+	std::string checkBattery(std::string state);//checks to make sure battery has sufficient charge.
 	/*
 	 * Finds an adjusted angle to drive at given a set of blocked zones
 	 */
