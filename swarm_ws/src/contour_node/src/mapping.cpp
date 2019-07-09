@@ -257,9 +257,6 @@ int main(int argc, char **argv)
                 overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
                 overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
                 overall_map.levels.push_back(m);
-#endif
-
-		map_pub.publish(overall_map);
                 
                 // If user's left hand (RIGHT) is open, points are free to move
                 if(!g_nui.rightClick)
@@ -309,7 +306,10 @@ int main(int argc, char **argv)
                         ROS_INFO("Anchor moved!");
                     }
                 }
+#endif
                 
+
+		map_pub.publish(overall_map);
                 
 
 		ros::spinOnce();
