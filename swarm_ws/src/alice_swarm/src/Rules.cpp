@@ -9,13 +9,13 @@
 
 Rules::Rules()
 {
-	state = "explore";
+	state = REST;
 }
 
 Rules::Rules(Model _model) :
 		model(_model)
 {
-	state = "explore";
+	state = REST;
 }
 
 //===================================================================================================================\\
@@ -23,49 +23,10 @@ Rules::Rules(Model _model) :
 AliceStructs::vel Rules::stateLoop(Model &_model)
 {
 
-	model = _model;
-	if (updateWaypoint()){avoidCollisions();}
-	updateVel();
-//
-//		state = checkBattery(state);
-		Charge();
-//	checkBlocked();
-//	if (state == "goToTar")
-//	{
-//		goToTar();
-//	}
-//	else if (state == "blocked")
-//	{
-//		avoidCollisions();
-//	}
-//
-//	else if (state == "needs_charging")
-//	{
-//		Charge();
-//	}
-//	else if(state == "charging")
-
-//	checkBlocked();
-//	if (state == "goToTar")
-//	{
-//		goToTar();
-//	}
-//	else if (state == "blocked")
-//	{
-//		avoidCollisions();
-//	}/*
-//	case charge:
-//		Charge();
-//		break;
-//	case find_food:
-//		findFood();
-//		break;
-//	case find_updraft:
-//		findUpdraft();
-//		break; */
-
-	findContour();
-	//explore();
+//	model = _model;
+//	updateWaypoint();
+//	if (checkCollisions()) avoidCollisions();
+//	updateVel();
 
 	return final_vel;
 }
@@ -76,7 +37,14 @@ void Rules::avoidCollisions()
 	float tf = atan2(model.goTo.y, model.goTo.x);
 	std::vector<std::pair<float, float>> dead_zones = findDeadZones();
 	findAngle(tf, dead_zones);
+	final_vel.mag = 1;
+	if (final_vel.dir == atan2(model.goTo.y, model.goTo.x))
+	{
+	//	state = "explore";
+	}
+}
 
+void Rules::rest(){
 }
 
 void Rules::explore()
@@ -102,11 +70,10 @@ void Rules::Charge()
 {
 	float min_sep = 1000.0;
 	float check_sep;
-	int closest_pos = -1;
-
-	for (int i=0; i < model.chargers->size(); i++)
+	int closest_pos;
+	for (int i=0; i < model.chargers.size(); i++)
 	{
-		if(!model.chargers->at(i).occupied) //charger is open
+		if(!model.chargers.at(i).occupied) //charger is open
 		{
 			check_sep = sqrt(pow(0,2) + pow(0,2)); //check seperation distance
 			if(check_sep < min_sep)
@@ -116,28 +83,10 @@ void Rules::Charge()
 			}
 		}
 	}
-	if(closest_pos >= 0)
-	{
-		model.chargers->at(closest_pos).occupied = true;
-	}
+	model.chargers.at(closest_pos).occupied = true;
 	//make the bot go to some way point, overiding other directives.
 	//way point should be .y, .x + 5 if on the left wall.
 }
-
-//--------------------Still need implementations-------------------------------------------
-bool Rules::checkCollisions()
-{
-
-}
-void Rules::updateVel()
-{
-
-}
-bool Rules::updateWaypoint()
-{
-
-}
-//-----------------------------------------------------------------------------------------
 
 void Rules::goToTar()
 {
@@ -194,22 +143,21 @@ bool Rules::checkBlocked()
 		if (zone.first < atan2(model.goTo.y, model.goTo.x) < zone.second
 				|| zone.first > atan2(model.goTo.y, model.goTo.x) > zone.second)
 		{
-			state = "blocked";
 			return true;
 		}
 	}
 	return false;
 }
 
-std::string Rules::checkBattery(std::string state)
-{
-	float acceptable_lvl = model.battery_lvl * 0.2;
-	if(model.battery_lvl < acceptable_lvl && state != "charging")
-	{
-		state = "needs_charging";
-	}
-	return state;
-}
+//std::string Rules::checkBattery(std::string state)
+//{
+//	float acceptable_lvl = model.battery_lvl * 0.2;
+//	if(model.battery_lvl < acceptable_lvl && state != "charging")
+//	{
+//		state = "needs_charging";
+//	}
+//	return state;
+//}
 void Rules::findAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
 {
 	std::vector<float> right;
@@ -287,38 +235,15 @@ std::vector<std::pair<float, float>> Rules::findDeadZones()
 	return dead_zones;
 }
 
+bool Rules::checkCollisions(){
+
+}
+
+
 void Rules::avoidNeighbors()
 {
 	for (auto& bot : model.neighbors)
 	{
-		float x_int = ((bot.y - bot.tar_y)/(bot.x - bot.tar_x)*bot.x - (model.cur_pose.y - model.goTo.y)/(model.cur_pose.x - model.goTo.y)*model.cur_pose.x - bot.y + model.cur_pose.y)/
-				((bot.y - bot.tar_y)/(bot.x - bot.tar_x) - (model.cur_pose.y - model.goTo.y)/(model.cur_pose.x - model.goTo.x));
-		float y_int = ((bot.x - bot.tar_x)/(bot.y - bot.tar_y)*bot.y - (model.cur_pose.x - model.goTo.x)/(model.cur_pose.y - model.goTo.y)*model.cur_pose.y + model.cur_pose.x - bot.x)/
-				((bot.x - bot.tar_x)/(bot.y - bot.tar_y) - (model.cur_pose.x - model.goTo.x)/(model.cur_pose.y - model.goTo.y));
-		float self_tti = (model.cur_pose.heading - atan2(model.goTo.y, model.goTo.x)/model.MAX_AV +
-				calcDis(x_int, y_int, model.cur_pose.x, model.cur_pose.y)/model.MAX_LV);
-		float bot_tti = (bot.ang - atan2(bot.tar_y, bot.tar_x)/model.MAX_AV +
-				calcDis(x_int, y_int, bot.x, bot.y)/model.MAX_LV);
-		if (abs(self_tti - bot_tti) < checkTiming(x_int, y_int, bot)/MAX_LV)
-		{
 
-		}
-	}
-}
-
-float Rules::checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot)
-{
-	float margin = 2*model.SIZE + model.SAFE_DIS;
-	float tcpx = -pow(pow(margin, 2)/(pow((bot.tar_x - bot.x)/(bot.y - bot.tar_y), 2) + 1), 0.5) + _x_int;
-	float tcpy = -pow(pow(margin, 2)/(pow((bot.y - bot.tar_y)/(bot.tar_x - bot.x), 2) + 1), 0.5) + _y_int;
-	float adj_x_int = (-(model.cur_pose.y - model.goTo.y)/(model.cur_pose.x - model.goTo.x)*model.cur_pose.x + model.cur_pose.y + (bot.y - bot.tar_y)/(bot.x - bot.tar_x)*tcpx - tcpy)/((bot.y - bot.tar_y)/(bot.x - bot.tar_x) - (model.cur_pose.y - model.goTo.y)/(model.cur_pose.x - model.goTo.x));
-	float adg_y_int = (-(bot.x - bot.tar_x)/(bot.y - bot.tar_y)*tcpy + tcpx + (model.cur_pose.x - model.goTo.x)/(model.cur_pose.y - model.goTo.y)*model.cur_pose.y - model.cur_pose.x)/((model.cur_pose.x - model.goTo.x)/(model.cur_pose.y - model.goTo.y) - (bot.x - bot.tar_x)/(bot.y - bot.tar_y));
-	if ((bot.y - bot.tar_y)/(bot.x - bot.tar_x) > 0)
-	{
-		return -calcDis(adj_x_int, adj_y_int, _x_int, _y_int);
-	}
-	else
-	{
-		return -calcDis(adj_x_int, adj_y_int, _x_int, _y_int);
 	}
 }

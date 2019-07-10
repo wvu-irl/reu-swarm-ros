@@ -30,7 +30,8 @@ public:
 
 	Rules(Model _model);
 
-	std::string state;
+	enum State{REST, CHARGE, CONTOUR, TARGET, EXPLORE};
+	State state;
 	std::string collision_state;
 	AliceStructs::vel final_vel;
 	std::vector<float> testers;
@@ -46,7 +47,7 @@ public:
 	 */
 	bool checkBlocked();
 
-	std::string checkBattery(std::string state);//checks to make sure battery has sufficient charge.
+	//std::string checkBattery(std::string state);//checks to make sure battery has sufficient charge.
 	/*
 	 * Finds an adjusted angle to drive at given a set of blocked zones
 	 */
@@ -68,6 +69,11 @@ public:
 	 * Makes Alice explore new territory
 	 */
 	void explore();
+
+	/*
+	 * Makes Alice stop moving
+	 */
+	void rest();
 
 	/*
 	 * Prevents Alice from hitting obstacles or other robots
