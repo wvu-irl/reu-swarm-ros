@@ -1,19 +1,20 @@
-#include <Hawk_Sim_Setup.h>
+#include <swarm_simulation/Hawk_Sim.h>
 
 
 
 
 // ================ Callback functions ================================
-void Hawk_Sim::chargersCallback(wvu_swarm_std_msgs::chargers &msg)
+void Hawk_Sim::chargersCallback(const wvu_swarm_std_msgs::chargers &msg)
 {
-	temp_chargers = &msg;
+	temp_chargers = msg;
 }
 //=====================================================================
 
 //-------------initializer functions-----------------------------------
 void Hawk_Sim::makeChargers(ros::Publisher _pub)//creates chargers
 {
-	std::vector<std::pair<float,float>> coordinates; //positions of the charging stations
+	std::pair<float,float> a1 = {-50,0};
+	std::vector<std::pair<float,float>> coordinates = {a1}; //positions of the charging stations
 
 	wvu_swarm_std_msgs::chargers charger_vector;
 	for (int i = 0; i < coordinates.size(); i++)
@@ -28,29 +29,25 @@ void Hawk_Sim::makeChargers(ros::Publisher _pub)//creates chargers
 }
 //---------------------------------------------------------------------
 
-void Hawk_Sim::run() // begin here
+void Hawk_Sim::run(ros::NodeHandle n) // begin here
 {
-	//palce holders for subscription data ---------------
-	wvu_swarm_std_msgs::chargers temp_chargers;
-	//---------------------------------------------------
-
-   // ros initialize
-	ros::init(argc, argv, "Hawk_Sim_Setup");
-	ros::NodeHandle n;
-	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::vicon_points > ("chargers", 1000); // pub to obstacles
+	//Publisher
+	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::chargers > ("chargers", 1000); // pub to obstacles
 
   // subscribing
-	ros::Subscriber sub1 = n.subscribe("chargers", 1000, pointCallback);
+	ros::Subscriber sub1 = n.subscribe("chargers", 1000, &Hawk_Sim::chargersCallback,this);
 	ros::Rate loopRate(100);
 	sleep(2); //waits for sim to be awake
 
-	int i = 0;
-	while (ros::ok() && i < 10000) // setup loop
-	{
-		makeChargers(pub1);
-		ros::spinOnce(); // spinning callbacks
-    usleep(10);
-		i++; // incrementing counter
+	makeChargers(pub1); //============changed for testing.==============
 
-	}
+//	int i = 0;
+//	while (ros::ok() && i < 10000) // setup loop
+//	{
+//		makeChargers(pub1);
+//		ros::spinOnce(); // spinning callbacks
+//    usleep(10);
+//		i++; // incrementing counter
+//
+//	}
 }

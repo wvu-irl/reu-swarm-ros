@@ -11,6 +11,8 @@
 #include "aliceStructs.h"
 #include "wvu_swarm_std_msgs/map.h"
 
+#include <wvu_swarm_std_msgs/map.h>
+
 class Model
 {
 public:
@@ -40,6 +42,7 @@ public:
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
 	std::vector<AliceStructs::pnt> targets;
+//	wvu_swarm_std_msgs::chargers *chargers;
 	std::vector<AliceStructs::charger> chargers;
 
 	AliceStructs::pnt goTo;

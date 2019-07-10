@@ -5,9 +5,8 @@
 int main(int argc, char **argv)
 {
     Hawk_Sim sim;
-    Sim sim;
 		ros::init(argc, argv, "Hawk_Simulation");
 		ros::NodeHandle n;
-  	sim.run();
+  	sim.run(n);
     return 0;
 }

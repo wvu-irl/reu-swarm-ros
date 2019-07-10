@@ -8,15 +8,19 @@
 #include <wvu_swarm_std_msgs/chargers.h>
 
 
-class Hawk_Sim_Setup
+class Hawk_Sim
 {
 private:
+	//palce holders for subscription data ---------------
+	wvu_swarm_std_msgs::chargers temp_chargers;
+	//---------------------------------------------------
+
 	//callback functions
-	void chargersCallback(wvu_swarm_std_msgs::chargers &msg)
+	void chargersCallback(const wvu_swarm_std_msgs::chargers &msg);
 
 	//initializer functions
 	void makeChargers(ros::Publisher _pub);
 
 public:
-	void Hawk_Sim_Setup::run();
+	void run(ros::NodeHandle n);
 };

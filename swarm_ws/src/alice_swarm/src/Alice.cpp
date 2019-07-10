@@ -56,13 +56,19 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 		flow.spd = _flow.spd;
 		mail.flows.push_back(flow);
 	}
+
+//	mail.chargers->charger = _data.chargerMail;
+
 	for (auto& _charger :_data.chargerMail)
 	{
 		AliceStructs::charger charger;
 		charger.x = _charger.x;
 		charger.y = _charger.y;
 		charger.occupied = _charger.occupied;
-	}//--------------------------------------------
+		mail.chargers.push_back(charger);
+	}
+
+	//--------------------------------------------
 
 	//----Updates simple attributes----------
 	mail.xpos=_data.x;

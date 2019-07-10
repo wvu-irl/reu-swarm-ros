@@ -25,6 +25,7 @@ add_library(Body src/Body.cpp)
 add_library(Flock src/Flock.cpp)
 add_library(Sim src/Sim.cpp)
 add_library(Pvector src/Pvector.cpp)
+add_library(Hawk_Sim src/Hawk_Sim.cpp)
 
 add_executable(main src/main.cpp)
 add_executable(virtual_objects src/virtual_objects.cpp)
@@ -34,8 +35,9 @@ add_dependencies(Flock wvu_swarm_std_msgs_generate_messages_cpp)
 add_dependencies(virtual_objects wvu_swarm_std_msgs_generate_messages_cpp)
 
 
+target_link_libraries(Hawk_Sim ${catkin_LIBRARIES})
 target_link_libraries(main ${catkin_LIBRARIES} Sim)
-target_link_libraries(Sim ${catkin_LIBRARIES} Flock Body Pvector)
+target_link_libraries(Sim ${catkin_LIBRARIES} Flock Body Pvector Hawk_Sim)
 target_link_libraries(Body ${catkin_LIBRARIES}) 
 target_link_libraries(Flock ${catkin_LIBRARIES})
 target_link_libraries(virtual_objects ${catkin_LIBRARIES})

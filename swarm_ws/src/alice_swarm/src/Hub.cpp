@@ -225,6 +225,7 @@ void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 		temp_charger.occupied = chargers.charger.at(i).occupied;
 		_mail.chargerMail.push_back(temp_charger);
 	}
+//	_mail.chargerMail = chargers.charger;
 }
 
 //void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail _mail) //Prints mail for debug purposes

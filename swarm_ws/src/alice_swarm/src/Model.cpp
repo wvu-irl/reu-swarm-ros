@@ -25,6 +25,7 @@ void Model::clear()
 	flows.clear();
 	neighbors.clear();
 	targets.clear();
+	chargers.clear();
 }
 std::pair<float, float> Model::transformCur(float _x, float _y)
 {
@@ -106,6 +107,7 @@ void Model::archiveAdd(AliceStructs::mail &_toAdd)
 void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 {
 	clear();
+	battery_lvl = _toAdd.battery_lvl; //updates battery level.
 	if (first)
 	{
 		first_pose.x = _toAdd.xpos;
@@ -135,6 +137,19 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 	{
 		targets.push_back(tar);
 	}
+
+	//chargers = _toAdd.chargers;
+	for (auto& charger : _toAdd.chargers)
+	{
+		chargers.push_back(charger);
+//		std::cout<<"==============================\n";
+//		std::cout<<"x,y: "<<chargers.at(0).x<<", "<<chargers.at(0).y<<std::endl;
+//		std::cout<<"==============================\n";
+	}
+//	std::cout<<"==============================\n";
+////	std::cout<<"x,y: "<<chargers.at(0).x<<", "<<chargers.at(0).y<<std::endl
+////	std::cout<<"x,y: "<<chargers->charger.at(0).x<<", "<<chargers->charger.at(0).y<<std::endl;
+//	std::cout<<"==============================\n";
 }
 
 void Model::pass(ros::Publisher _pub)
@@ -286,40 +301,44 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 
 	//std::cout << "Time taken by srv: " << duration.count() << " microseconds" << std::endl;
 }
+
 void Model::forget()
 {
 	float TOLERANCE = 5; //objects within this distance in x and y will be simplified to one object
-	std::vector<AliceStructs::obj>::iterator it = archived_obstacles.begin();
-	while (it != archived_obstacles.end())
+	forgetObs(TOLERANCE);
+	forgetTargets(TOLERANCE);
+	forgetContour(TOLERANCE);
+}
+
+void Model::forgetContour(int TOLERANCE) //erases Contours based on time stamp or duplicity.
+{
+	std::vector<AliceStructs::pose>::iterator it3 = archived_contour.begin();
+	while (it3 != archived_contour.end())
 	{
-		std::pair<float, float> temp = transformFir(it->x_off, it->y_off);
-		if (time.sec - it->time.sec > 10)
+		if (time.sec - it3->time.sec > 10)
 		{
-			it = archived_obstacles.erase(it);
-		} else if (pow(pow(temp.first, 2) + pow(temp.second, 2), 0.5) < vision)
-		{
-			it = archived_obstacles.erase(it);
+			it3 = archived_contour.erase(it3);
 		} else
 		{
-			std::vector<AliceStructs::obj>::iterator iit = it;
-			iit++;
-			while (iit != archived_obstacles.end()) //checks for repeat elements
+			std::vector<AliceStructs::pose>::iterator iit3 = it3;
+			iit3++;
+			while (iit3 != archived_contour.end()) //checks for repeat elements
 			{
-				if (abs(iit->x_off - it->x_off) < TOLERANCE && abs(iit->y_off - it->y_off) < TOLERANCE)
+				if (abs(iit3->x - it3->x) < TOLERANCE && abs(iit3->y - it3->y) < TOLERANCE)
 				{
-					if (time.sec - it->time.sec > 1 && iit->time > it->time)
-						std::swap(*iit, *it);
-					iit = archived_obstacles.erase(iit);
+					if (time.sec - it3->time.sec > 1 &&iit3->time > it3->time) std::swap(*iit3, *it3);
+					iit3 = archived_contour.erase(iit3);
 
 				} else
-					iit++;
+					iit3++;
 			}
-			it++;
+			it3++;
 		}
-
 	}
-//	std::cout << "oy" << std::endl;
+}
 
+void Model::forgetTargets(int TOLERANCE)//erases targets based on time stamp or duplicity.
+{
 	std::vector<AliceStructs::pnt>::iterator it2 = archived_targets.begin();
 	while (it2 != archived_targets.end())
 	{
@@ -349,28 +368,36 @@ void Model::forget()
 			it2++;
 		}
 	}
-	std::vector<AliceStructs::pose>::iterator it3 = archived_contour.begin();
-	while (it3 != archived_contour.end())
+}
+
+void Model::forgetObs(int TOLERANCE) //erases obstacles based on time stamp or duplicity.
+{
+	std::vector<AliceStructs::obj>::iterator it = archived_obstacles.begin();
+	while (it != archived_obstacles.end())
 	{
-		if (time.sec - it3->time.sec > 10)
+		std::pair<float, float> temp = transformFir(it->x_off, it->y_off);
+		if (time.sec - it->time.sec > 10)
 		{
-			it3 = archived_contour.erase(it3);
+			it = archived_obstacles.erase(it);
+		} else if (pow(pow(temp.first, 2) + pow(temp.second, 2), 0.5) < vision)
+		{
+			it = archived_obstacles.erase(it);
 		} else
 		{
-			std::vector<AliceStructs::pose>::iterator iit3 = it3;
-			iit3++;
-			while (iit3 != archived_contour.end()) //checks for repeat elements
+			std::vector<AliceStructs::obj>::iterator iit = it;
+			iit++;
+			while (iit != archived_obstacles.end()) //checks for repeat elements
 			{
-				if (abs(iit3->x - it3->x) < TOLERANCE && abs(iit3->y - it3->y) < TOLERANCE)
+				if (abs(iit->x_off - it->x_off) < TOLERANCE && abs(iit->y_off - it->y_off) < TOLERANCE)
 				{
-					if (time.sec - it3->time.sec > 1 &&iit3->time > it3->time) std::swap(*iit3, *it3);
-					iit3 = archived_contour.erase(iit3);
+					if (time.sec - it->time.sec > 1 && iit->time > it->time)
+						std::swap(*iit, *it);
+					iit = archived_obstacles.erase(iit);
 
 				} else
-					iit3++;
+					iit++;
 			}
-			it3++;
+			it++;
 		}
 	}
 }
-
