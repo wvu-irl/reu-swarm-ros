@@ -7,27 +7,27 @@
 #include <stdio.h>
 
 // UDP includes
-#include <stdlib.h> 
-#include <unistd.h> 
-#include <string.h> 
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <sys/time.h>
-#include <sys/types.h> 
-#include <sys/socket.h> 
-#include <arpa/inet.h> 
-#include <netinet/in.h> 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
 // Threading-based includes
 #include <thread>
 #include <signal.h>
-  
-#define DEBUG 1
-#define PORT 8080 
 
-// When 1, use handTracker for hand location. When 0,
+#define DEBUG 1
+#define PORT 8080
+
+// When 1, use handTracker for hand location (big not recommend). When 0,
 //   use skeletonTracker's hand joint for hand location.
 #define USEHAND 0
 
-using namespace tdv::nuitrack;
+using namespace tdv::nuitrack; // This *shouldn't* cause scope issues
 
 // Global variables for UDP
 int sockfd;
@@ -68,8 +68,8 @@ void onHandUpdate(HandTrackerData::Ptr handData)
     {
         // No right hand
         std::cout << "Right hand of the first user is not found" << std::endl;
-        return;
     }
+    // If hand is found,update its position
     else
     {
         nui.rightClick = rightHand->click;
@@ -80,14 +80,14 @@ void onHandUpdate(HandTrackerData::Ptr handData)
         nui.confLH = 1.0;
 #endif
     }
-    
+
     auto leftHand = userHands[0].leftHand;
     if (!leftHand)
     {
         // No right hand
         std::cout << "Left hand of the first user is not found" << std::endl;
-        return;
     }
+    // If hand is found,update its position
     else
     {
         nui.leftClick = leftHand->click;
@@ -97,8 +97,6 @@ void onHandUpdate(HandTrackerData::Ptr handData)
         nui.leftHand.z = leftHand->zReal;
         nui.confRH = 1.0;
 #endif
-        
-        
     }
 }
 
@@ -110,18 +108,18 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         std::cout << "No skeleton data" << std::endl;
         return;
     }
-    
+
     auto skeletons = skelData->getSkeletons();
     if (skeletons.empty())
     {
         // No skeletons somehow
         return;
     }
-    
+
     Joint leftWrist, leftHand, rightWrist, rightHand;
-    nui.leftFound = true;
-    nui.rightFound = true; //assume both found
-    
+    nui.leftFound = true; // Have left/right wrist and hand been found
+    nui.rightFound = true;
+
     try {
         leftWrist = skeletons.at(0).joints.at(JOINT_LEFT_WRIST);
     }
@@ -130,7 +128,7 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         std::cout << "Left wrist of the first user is not found" << std::endl;
         nui.leftFound = false;
     }
-    
+
     try {
         rightWrist = skeletons.at(0).joints.at(JOINT_RIGHT_WRIST);
     }
@@ -139,7 +137,7 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         std::cout << "Right wrist of the first user is not found" << std::endl;
         nui.rightFound = false;
     }
-    
+
 #if !USEHAND
     try {
         leftHand = skeletons.at(0).joints.at(JOINT_LEFT_HAND);
@@ -149,7 +147,7 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         std::cout << "Left hand of the first user is not found" << std::endl;
         nui.leftFound = false;
     }
-    
+
     try {
         rightHand = skeletons.at(0).joints.at(JOINT_RIGHT_HAND);
     }
@@ -159,8 +157,8 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         nui.rightFound = false;
     }
 #endif
-    
-    //Pull data into struct
+
+    // Pull data into struct
     if(nui.leftFound)
     {
         nui.leftWrist.x = leftWrist.real.x;
@@ -174,6 +172,7 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         nui.confLH = leftHand.confidence;
 #endif
     }
+    // If left stuff not found reset to zero
     else
     {
         nui.leftWrist = xyz();
@@ -194,6 +193,7 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
         nui.confRH = rightHand.confidence;
 #endif
     }
+    // If right stuff not found reset to zero
     else
     {
         nui.rightWrist = xyz();
@@ -203,44 +203,45 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
     }
 }
 
+// Send a reply to the port after receiving rec
 void serverResponse(char rec)
 {
     nuiData send;
-    
+
     // Send data
     send = nui;
     if(sendto(sockfd, (void*)&send, sizeof(send), MSG_CONFIRM,
             (const struct sockaddr*)&cliaddr, sizeof(cliaddr)) >= 0)
     {
-        std::cout << "Sent " /*<< send*/ << "to client." << std::endl;
+//        std::cout << "Sent " /*<< send*/ << "to client." << std::endl;
     }
     else
     {
         std::cout << "Error in sending!" << std::endl;
     }
-    
+
     // Reset client address
-    memset(&cliaddr, 0, sizeof(cliaddr)); 
+    memset(&cliaddr, 0, sizeof(cliaddr));
 }
 
+// Loop to handle the server asynchronously
 void serverLoop(void)
 {
     std::cout << "Entered server loop." << std::endl;
     int recVal;
-    fd_set rfds;
+    fd_set rfds; // File descriptor for the socket, necessary for select() later
 
-    
     while(!g_sigint_received)
     {
         // Set up socket to watch in select()
         FD_ZERO(&rfds);
         FD_SET(sockfd, &rfds);
-        
+
         // Set timeout to 10 ms
         struct timeval timeout;
         timeout.tv_sec = 1;
         timeout.tv_usec = 0;//10000;
-        
+
         // Check if socket is available (non-blocking) for up to timeout seconds
         recVal = select(sockfd + 2, &rfds, NULL, NULL, &timeout);
         switch(recVal)
@@ -261,30 +262,31 @@ void serverLoop(void)
             {
                 // Data is available!
                 std::cout << "Socket is available." << std::endl;
-                
+
                 int len, n;
                 char rec;
-                
+
                 // Read into rec
                 n = recvfrom(sockfd, &rec, sizeof(rec), MSG_WAITALL,
                         (struct sockaddr*)&cliaddr, (socklen_t*)&len);
 
-                std::cout << "Client sent " << (uint8_t)rec << std::endl;
-                
+//                std::cout << "Client sent " << (uint8_t)rec << std::endl;
+
                 // Handle this request
                 serverResponse(rec);
-                
+
                 break;
             }
         }
     }
-    
+
     std::cout << "Closing socket!" << std::endl;
     close(sockfd);
-    
+
     std::cout << "Successfully closed server." << std::endl;
 }
 
+// Loop to run handTracker asynchronously
 void handTrackerLoop(HandTracker::Ptr handTracker)
 {
     std::cout << "Entered hand tracker loop." << std::endl;
@@ -307,6 +309,7 @@ void handTrackerLoop(HandTracker::Ptr handTracker)
     }
 }
 
+// Loop to run skeletonTracker asynchronously
 void skelTrackerLoop(SkeletonTracker::Ptr skelTracker)
 {
     std::cout << "Entered skeleton tracker loop." << std::endl;
@@ -338,23 +341,23 @@ int main(int argc, char* argv[])
         return -1;
     }
     std::cout << "Socket successfully created." << std::endl;
-    
+
     // Zero out addresses
-    memset(&servaddr, 0, sizeof(servaddr)); 
-    memset(&cliaddr, 0, sizeof(cliaddr)); 
-    
+    memset(&servaddr, 0, sizeof(servaddr));
+    memset(&cliaddr, 0, sizeof(cliaddr));
+
     // Fill the data structures with server information
     servaddr.sin_family = AF_INET; // IPv4
     servaddr.sin_addr.s_addr = INADDR_ANY; // Accept messages from any address
     servaddr.sin_port = htons(PORT); // Sets port number, converts byte order
-    
+
     // Attempt to bind the socket
     if(bind(sockfd, (const struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
         std::cerr << "Error binding to port " << PORT << "!" << std::endl;
         return -2;
     }
     std::cout << "Successfully bound to port " << PORT << "." << std::endl;
-    
+
     /* NUITRACK SETUP */
     try
     {
@@ -365,7 +368,7 @@ int main(int argc, char* argv[])
         std::cerr << "Can not initialize Nuitrack (ExceptionType: " << e.type() << ")" << std::endl;
         return EXIT_FAILURE;
     }
-    
+
     // Create HandTracker module, other required modules will be
     // created automatically
     auto handTracker = HandTracker::create();
@@ -385,20 +388,20 @@ int main(int argc, char* argv[])
         std::cerr << "Can not start Nuitrack (ExceptionType: " << e.type() << ")" << std::endl;
         return EXIT_FAILURE;
     }
-    
+
     // Set up signal handler
     signal(SIGINT, flagger);
-    
+
     // Start a thread for the server handler and the nuitrack handler
     g_server = std::thread(serverLoop);
     g_hTracker = std::thread(handTrackerLoop, handTracker);
     g_sTracker = std::thread(skelTrackerLoop, skelTracker);
-    
+
     // Join threads after exiting from sigint
     g_server.join();
     g_hTracker.join();
     g_sTracker.join();
-    
+
     // Release Nuitrack
     std::cout << "Releasing Nuitrack!" << std::endl;
     try
@@ -410,7 +413,7 @@ int main(int argc, char* argv[])
         std::cerr << "Nuitrack release failed (ExceptionType: " << e.type() << ")" << std::endl;
         return -1;
     }
-    
+
     std::cout << "Successfully released Nuitrack." << std::endl;
 
     return 1;

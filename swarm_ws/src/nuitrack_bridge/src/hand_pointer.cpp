@@ -1,3 +1,5 @@
+// DEPRECIATED.
+
 #include <iostream>
 #include <stdio.h>
 
@@ -20,9 +22,9 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
      * Offset vector: v0 = (xa, ya, za)
      * Plug in z to r(t), solve for t, use t to solve for x and y/
      */
-    
+
     geometry_msgs::Point ret;
-    
+
     // Check if no solution
     if(_alpha.z == _beta.z) {
         printf("\033[1;31mhand_pointer: \033[0;31mNo solution for intercept\033[0m\n");
@@ -39,14 +41,14 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
         ret.y = y;
         ret.z = _zed;
     }
-    
+
     return ret;
 }
 
 int main(int argc, char** argv) {
     // ROS setup
     ros::init(argc, argv, "hand_pointer");
-    
+
     // Generates nodehandles, publishers, subscriber
     ros::NodeHandle n;
     ros::NodeHandle n_priv("~"); // private handle
@@ -55,18 +57,18 @@ int main(int argc, char** argv) {
     pub1 = n.advertise<geometry_msgs::Point>("nuitrack_bridge/hand_1", 1000);
     pub2 = n.advertise<geometry_msgs::Point>("nuitrack_bridge/hand_2", 1000);
     sub = n.subscribe("nuitrack_bridge", 10, &msgCallback);
-    
+
     // Create two hand pointers for output and a markerarray for input
     geometry_msgs::Point handOne, handTwo;
     visualization_msgs::MarkerArray mArr;
-    
+
     while(ros::ok()){
         mArr = *(ros::topic::waitForMessage<visualization_msgs::MarkerArray>("nuitrack_bridge"));
-        
+
         // Create data to hold joints to find and bools of whether they're found
         geometry_msgs::Point lH, lW, rH, rW;
         bool foundLH, foundLW, foundRH, foundRW;
-        
+
         // Iterate through received data, look for our points
         for(visualization_msgs::Marker m : mArr.markers)
         {
@@ -96,22 +98,21 @@ int main(int argc, char** argv) {
                 rW.z = m.pose.position.z;
             }
         }
-        
+
         // Move the left hand pointer if joints were found
         if(foundLH && foundLW) {
             handOne = findZIntercept(lH, lW, 0);
         }
-        
+
         // Move the right hand pointer if joints were found
         if(foundRH && foundRH) {
             handTwo = findZIntercept(rH, rW, 0);
         }
-        
+
         // Publish hands
         pub1.publish(handOne);
         pub2.publish(handTwo);
     }
-    
+
     return 0;
 }
-

@@ -6,7 +6,6 @@
  *  Thanks :) nh
  */
 
-
 #ifndef NUITRACK_DATA_H
 #define NUITRACK_DATA_H
 
@@ -14,16 +13,8 @@
 
 using std::string;
 
-// Physical transform of the Kinect's lens against global frame
-#define KINECT_TRAN_X 0.226 //-0.450
-#define KINECT_TRAN_Y -0.966 //-0.107
-#define KINECT_TRAN_Z 1.114 //0.585
-#define KINECT_QUAT_X 0.54374 //0.543
-#define KINECT_QUAT_Y 0.55073 //0.550
-#define KINECT_QUAT_Z 0.44479 //0.444
-#define KINECT_QUAT_W -0.45078 //0.450
-
-enum class gestureType : char 
+// Enumeration to define some types of gestures
+enum class gestureType : char
 {
     NONE = '\0',
     WAVING = (char)1,
@@ -34,6 +25,8 @@ enum class gestureType : char
     PUSH = (char)6
 };
 
+// Simple struct to contain x, y, and z. Like a geometry_msgs::Point just with
+//   less crazy typecasting and far simpler constructors.
 typedef struct xyz
 {
     xyz() //Default Constructor
@@ -42,19 +35,22 @@ typedef struct xyz
         y = 0.0;
         z = 0.0;
     }
-    
+
     xyz(double _x, double _y, double _z) //Alternate Constructor
     {
         x = _x;
         y = _y;
         z = _z;
     }
-    
+
     double x;
     double y;
     double z;
 } xyz;
 
+// Struct to contain all relevant info for us. This struct is shared between
+//   both halves of the bridge (UDP server and ROS client), so changes must be
+//   addressed in both files.
 typedef struct nuiData
 {
     nuiData() //Default Constructor
@@ -95,7 +91,7 @@ typedef struct nuiData
         leftClick = _lC;
         rightClick = _rC;
     }
-    
+
     nuiData(bool _gF, bool _lF, bool _rF, gestureType _gT,
             double _lHX, double _lHY, double _lHZ,
             double _lWX, double _lWY, double _lWZ,
@@ -128,13 +124,12 @@ typedef struct nuiData
 
     // Data for each point
     xyz leftHand, rightHand, leftWrist, rightWrist;
-    
+
     // Confidence for each point
     double confLH, confRH, confLW, confRW;
-    
-    // Rates of hand closure, clicks
+
+    // "Clicks" are Nuitrack's way of knowing if a hand is closed
     bool leftClick, rightClick;
 } nuiData;
 
 #endif /* NUITRACK_DATA_H */
-
