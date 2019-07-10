@@ -17,7 +17,7 @@ class Rules
 {
 
 	/*
-	 * To do:
+	 * TODO
 	 * Implement neighbor collisions. See picture on phone for math. Should be doable.
 	 * Simulate
 	 * Implement other rules (should also be doable)
@@ -61,7 +61,7 @@ public:
 	/*
 	 * Avoids other robots dynamically
 	 */
-	void avoidNeighbors(float tf);
+	void avoidNeighbors();
 
 //===================================================================================================================\\
 
@@ -86,16 +86,34 @@ public:
 	void goToTar();
 
 	/*
-	 * Makes Alice seek high values on the contour map
+	 * Makes Alice seek higher elevations
 	 */
 	void findContour();
 
-	void findContour();
+	/*
+	 * The part of obstacle avoidance that always runs. Checks if any part of the environment has changed enough (or the robot's divergence from the predicted path)
+	 * require a recalculation of the path.
+	 */
+	bool checkCollisions();
+
+	/*
+	 * Used to update the distance and direction of the command vector, without changing the true way-point.
+	 */
+	void updateVel();
+
+	/*
+	 * Changes the way-point's true location. Most simplistically, does this if the way point has been reached.
+	 * Can also change the waypoint if certain priority checks are satisfied.
+	 * Returns true is the waypoint was changed.
+	 */
+	bool updateWaypoint();
 
 	/*
 	 * Determines which state Alice is in
 	 */
 	AliceStructs::vel stateLoop(Model &_model);
+
+
 
 };
 

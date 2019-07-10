@@ -24,6 +24,9 @@ AliceStructs::vel Rules::stateLoop(Model &_model)
 {
 
 	model = _model;
+	updateWaypoint();
+	if (checkCollisions()) avoidCollision();
+	updateVel();
 //
 //	state = checkBattery(state);
 //	checkBlocked();
@@ -61,8 +64,8 @@ AliceStructs::vel Rules::stateLoop(Model &_model)
 //		findUpdraft();
 //		break; */
 
-	//findContour();
-	explore();
+	findContour();
+	//explore();
 
 	return final_vel;
 }
@@ -161,7 +164,7 @@ void Rules::findContour()
 
 	for (auto& contour : model.archived_contour)
 	{
-		float temp_pri = contour.z / (10 + model.time.sec - contour.time.sec)
+		float temp_pri = (contour.z-model.cur_pose.z) / (10 + model.time.sec - contour.time.sec)
 				/ pow(calcDis(temp.first, temp.second, contour.x, contour.y), 0.5);
 
 		if (temp_pri > pri)
