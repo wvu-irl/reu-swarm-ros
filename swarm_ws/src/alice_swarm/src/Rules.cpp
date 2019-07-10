@@ -25,7 +25,7 @@ AliceStructs::vel Rules::stateLoop(Model &_model)
 
 	model = _model;
 	updateWaypoint();
-	if (checkCollisions()) avoidCollision();
+	if (checkCollisions()){avoidCollisions();}
 	updateVel();
 //
 //	state = checkBattery(state);
@@ -138,6 +138,21 @@ void Rules::Charge()
 	//make the bot go to some way point, overiding other directives.
 	//way point should be .y, .x + 5 if on the left wall.
 }
+
+//--------------------Still need implementations-------------------------------------------
+bool Rules::checkCollisions()
+{
+
+}
+void Rules::updateVel()
+{
+
+}
+bool Rules::updateWaypoint()
+{
+
+}
+//-----------------------------------------------------------------------------------------
 
 void Rules::goToTar()
 {
