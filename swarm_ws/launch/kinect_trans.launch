@@ -1,0 +1,28 @@
+<launch>
+
+	<!--
+		This launchfile sets up the vicon to track an axis wand
+        and a transform listener to output the inverse of the wand.
+        Run it, place the wand on the Kinect's axis, record the tf
+        values, and use these values when creating static transforms
+        when using the Kinect later in other launchfiles.
+	-->
+
+	<!-- Transform echo -->
+    <node pkg="tf" type="tf_echo" name="tf_listener" args="kinect world" output="screen"/>
+	
+	<!-- Set up vicon -->
+	<node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
+		<param name="stream_mode" value="ClientPull" type="str" />
+		<param name="datastream_hostport" value="192.168.10.1:801" type="str" />
+		<param name="tf_ref_frame_id" value="/world" type="str" />
+	
+		<!-- Don't publish individual points, but yes to transforms -->
+		<param name="publish_markers" value="false" type="bool" />
+		<param name="publish_transform" value="true" type="bool" />
+
+        <!-- Track things named "kinect_wand" -->
+		<param name="swarmbot_prefix" value="kinect_wand" type="str" />
+	</node>
+
+</launch>
