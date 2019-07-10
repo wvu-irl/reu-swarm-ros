@@ -272,6 +272,10 @@ int beginServer(std::function<void(command, int)> command_callback,
 	{
 		char err[64];
 		sprintf(err, "Error binding to socket (%d) retrying", errno); // making an error message that tells what went wrong
+
+		char err_cmd[32];
+		sprintf(err_cmd, "errno %d", errno);
+		system(err_cmd);
 		// with binding the socket
 		error_callback(err);
 		g_server_failure = true;
