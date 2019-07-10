@@ -10,11 +10,19 @@
 
 #include <math.h>
 
+// toggles verbose option
 #define DEBUG 0
+
+// toggles using testing equations
 #define TEST_EQU 0
+
+// toggles running NUI track test code
 #define TEST_NUI 1
 
+// toggles using a universe object to contain map data
 #define RUN_UNIVERSE 1
+
+// toggles if the main loop has a rate
 #define RATE_LIMIT 1
 
 #if DEBUG || TEST_EQU
@@ -63,7 +71,9 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 }
 
 #if RUN_UNIVERSE
-static Universe universe;
+static Universe universe; // creates a universe
+
+// subscriber callback to add things to the universe
 void additionCallback(wvu_swarm_std_msgs::obstacle obs)
 {
 	universe += obs;
@@ -157,9 +167,9 @@ int main(int argc, char **argv)
 			> ("/nui_bridge/hand_2", 1000);
 
 #if RUN_UNIVERSE
-	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, additionCallback);
+	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, additionCallback); // subscriber to handle incoming objects
 #else
-			ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, newObs);
+			ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, newObs); // subscriber to handle incoming objects
 #endif
 	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge", 1000, nuiCallback);
 
@@ -168,6 +178,8 @@ int main(int argc, char **argv)
 #endif
 
 #if TEST_EQU
+
+	// creating testing equation
 	wvu_swarm_std_msgs::ellipse el;
 	el.x_rad = 5;
 	el.y_rad = 2;
@@ -184,12 +196,14 @@ int main(int argc, char **argv)
 	obs.characteristic = gaus;
 	obs.level = map_ns::TARGET;
 
+	// adding testing equation to map
 #if RUN_UNIVERSE
 	universe += obs;
 #else
 	newObs(obs);
 #endif
 
+	// creating testing function
 	el.x_rad = 4;
 	el.y_rad = 7;
 	el.theta_offset = 0;
@@ -203,6 +217,7 @@ int main(int argc, char **argv)
 	obs.characteristic = gaus;
 	obs.level = map_ns::TARGET;
 
+	// adding testing function
 #if RUN_UNIVERSE
 	universe += obs;
 #else
@@ -350,15 +365,16 @@ int main(int argc, char **argv)
 		}
 #endif
 
+		// publishing map
 #if RUN_UNIVERSE
 		map_pub.publish(universe.getPublishable());
 #else
 		map_pub.publish(overall_map);
 #endif
 
-		ros::spinOnce();
+		ros::spinOnce(); // spinning
 #if RATE_LIMIT
-		rate.sleep();
+		rate.sleep(); // sleeping
 #endif
 	}
 }

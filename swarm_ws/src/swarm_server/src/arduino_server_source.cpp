@@ -11,6 +11,7 @@
 #include <chrono>
 using namespace std::chrono;
 
+// macros to print timestampped messgae
 #define PRINTF_TS(form, dat...) (printf("\033[32m[%ld.%09ld] \033[0m"#form"\n",(long) duration_cast<seconds>(high_resolution_clock::now().time_since_epoch()).count(), (long)duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000,dat))
 #define PUTS_TS(form) (printf("\033[32m[%ld.%09ld] \033[0m"#form"\n", (long)duration_cast<seconds>(high_resolution_clock::now().time_since_epoch()).count(), (long)((long)duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000)))
 #endif

@@ -15,8 +15,10 @@
 #include <visualization/contour.h>
 #include <contour_node/level_description.h>
 
+// toggles verbose option
 #define DEBUG_CONT_SRC 0
 
+// toggles CPU drawing
 #define USE_CPU 0
 
 // constructor

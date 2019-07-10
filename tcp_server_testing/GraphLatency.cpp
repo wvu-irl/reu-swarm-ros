@@ -11,6 +11,9 @@
  *
  * g++ GraphLatency.cpp -oGraphLatency.o -lsfml-graphics -lsfml-window -lsfml-system
  *
+ *
+ *	Graphs from a single column CSV file containing floats
+ *	gives the standard deviation and the mean as well as the graph
  */
 
 

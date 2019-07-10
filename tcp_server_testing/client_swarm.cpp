@@ -4,7 +4,7 @@
  *  Created on: Jun 6, 2019
  *      Author: Henry Vos
  *
- *  This is meant to simulate connections to the server
+ *  This is meant to simulate many connections to the server
  */
 
 #include <unistd.h>

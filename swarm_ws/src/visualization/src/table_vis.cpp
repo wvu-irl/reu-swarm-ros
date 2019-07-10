@@ -29,7 +29,6 @@ static int g_draw_level;
 
 #include <visualization/visualization_settings.h>
 
-
 // turns on verbose mode
 #define TAB_DEBUG 0
 
@@ -257,6 +256,7 @@ void render(sf::RenderWindow *window)
 	}
 	else
 	{
+		// drawing image from file
 		sf::Image checker;
 		checker.loadFromFile(g_background);
 		sf::Texture checker_texture;
@@ -358,6 +358,7 @@ int main(int argc, char **argv)
 
 	std::string assets, config;
 
+	// getting parameters from launch file to get asset and config locations
 	n_priv.param < std::string
 			> ("asset_path", assets, "/home/ssvnormandy/git/reu-swarm-ros/swarm_ws/src/visualization/assets");
 	n_priv.param < std::string
@@ -369,6 +370,7 @@ int main(int argc, char **argv)
 	n_priv.param<int>("robot_diameter", g_robot_diameter, 5);
 	n_priv.param<int>("draw_level", g_draw_level, map_ns::COMBINED);
 
+	// setting origin
 	table_origin = sf::Vector2f(g_table_width / 2, g_table_height / 2);
 
 #if TAB_DEBUG
@@ -390,6 +392,7 @@ int main(int argc, char **argv)
 			drawObstacles);
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
 
+	// subscribing to draw the NUI intersect onto the table
 	ros::Subscriber nui_tracking = n.subscribe("/nui_bridge/hand_1", 1000,
 			nuiUpdate);
 
@@ -398,7 +401,7 @@ int main(int argc, char **argv)
 	// calibrating from file
 	calibrateFromFile(config);
 
-	// color map setup
+	// default color map setup
 	std::vector<double> c_levs;
 	c_levs.push_back(0);
 	c_levs.push_back(4);
@@ -431,6 +434,7 @@ int main(int argc, char **argv)
 	c_blues.push_back(255);
 	c_blues.push_back(255);
 
+	// getting from parameter list
 	std::vector<double> pc_levs;
 	n_priv.getParam("color_levels", pc_levs);
 
@@ -443,14 +447,16 @@ int main(int argc, char **argv)
 	std::vector<int> pc_blues;
 	n_priv.getParam("color_blues", pc_blues);
 
-
+	// checking parameters
 	size_t num_colors = pc_levs.size();
-	if (pc_reds.size() != num_colors || pc_greens.size() != num_colors || pc_blues.size() != num_colors)
+	if (pc_reds.size() != num_colors || pc_greens.size() != num_colors
+			|| pc_blues.size() != num_colors)
 	{
 		ROS_ERROR("Number of colors mismatch in launch file");
 		throw "MISMATCH";
 	}
 
+	// setting parameters
 	if (num_colors >= 2)
 	{
 		c_levs = pc_levs;
@@ -461,18 +467,22 @@ int main(int argc, char **argv)
 
 	num_colors = c_levs.size();
 
-
-	ColorMap cmap(std::pair<double, sf::Color>(c_levs[0], sf::Color(c_reds[0], c_greens[0], c_blues[0])),
-			std::pair<double, sf::Color>(c_levs[1], sf::Color(c_reds[1], c_greens[1], c_blues[1])));
-	for (size_t i = 2;i < num_colors;i++)
+	// setting up color map from parameters
+	ColorMap cmap(
+			std::pair<double, sf::Color>(c_levs[0],
+					sf::Color(c_reds[0], c_greens[0], c_blues[0])),
+			std::pair<double, sf::Color>(c_levs[1],
+					sf::Color(c_reds[1], c_greens[1], c_blues[1])));
+	for (size_t i = 2; i < num_colors; i++)
 	{
-		cmap.addColor(std::tuple<double, sf::Color>(c_levs[i], sf::Color(c_reds[i], c_greens[i], c_blues[i])));
+		cmap.addColor(
+				std::tuple<double, sf::Color>(c_levs[i],
+						sf::Color(c_reds[i], c_greens[i], c_blues[i])));
 #if TAB_DEBUG
 		std::cout << "Adding color: [Lev: " << c_levs[i] << ", Col: " << c_reds[i] << "," << c_greens[i] << "," << c_blues[i] << "]" << std::endl;
 #endif
 	}
 	cont = new ContourMap(sf::Rect<int>(0, 0, WIDTH, HEIGHT), cmap);
-
 
 	// adding levels
 	int num_levels;
@@ -480,7 +490,7 @@ int main(int argc, char **argv)
 	n_priv.param<int>("num_levels", num_levels, 9);
 	n_priv.param<double>("range_top", range_max, 20);
 	n_priv.param<double>("range_bottom", range_min, -20);
-	double incr = (range_max - range_min) / (double)num_levels;
+	double incr = (range_max - range_min) / (double) num_levels;
 	for (double i = range_min; i <= range_max; i += incr)
 	{
 		cont->levels.push_back(i);
