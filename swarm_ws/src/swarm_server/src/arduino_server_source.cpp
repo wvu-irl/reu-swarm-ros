@@ -23,8 +23,8 @@ using namespace std::chrono;
 struct client_param
 {
 	std::function<void(command, int)> command_callback;
-	std::function<void(const char *, void *)> info_callback;
-	std::function<void(const char *)> error_callback;
+	std::function<void(const char*, void*)> info_callback;
+	std::function<void(const char*)> error_callback;
 	std::function<bool()> exit_condition_callback;
 	int id;
 };
@@ -80,18 +80,18 @@ void sendCommandToRobots(command cmd, int recip_rid)
 //            printf("[\033[1;33marduino_server_source\033[0m] Could not locate info\n");
 #endif
 
-        int nbytes = 0;
+	int nbytes = 0;
 	// sending directly to recipiant
 	if (registry->find(recip_rid) != registry->end() && registry->size() > 0) // check to see that the location in the map exists
-		nbytes = send(registry->at(recip_rid).getConnectionDescriptor(), &cmd, COMMAND_SIZE,
-				0); // sending message
+		nbytes = send(registry->at(recip_rid).getConnectionDescriptor(), &cmd,
+		COMMAND_SIZE, 0); // sending message
 #if DEBUG_CPP || DEBUG_MESSAGE
 	else
 		PRINTF_TS(\033[37;41mCould not locate ConnectionInfo for %02d <-> %s\033[0m,
 				recip_rid, rid_indexing[recip_rid].c_str());
-        
-        if (nbytes != COMMAND_SIZE)
-            PUTS_TS(\033[30;41mError failed to send to robot\033[0m);
+
+	if (nbytes != COMMAND_SIZE)
+		PUTS_TS(\033[30;41mError failed to send to robot\033[0m);
 #endif
 
 	// checking for monitors
@@ -113,19 +113,19 @@ void sendCommandToRobots(command cmd, int recip_rid)
 	}
 }
 
-void *runClient(void *args)
+void* runClient(void *args)
 {
 #if DEBUG_CPP
 	PUTS_TS(Starting client thread);
 #endif
 
 	// getting parameters
-	struct client_param *vals = (struct client_param *) args; // separating out parameter type
+	struct client_param *vals = (struct client_param*) args; // separating out parameter type
 
 	// putting parameters into easily useable variables
 	std::function<void(command, int)> command_callback = vals->command_callback;
-	std::function<void(const char *, void *)> info_callback = vals->info_callback;
-	std::function<void(const char *)> error_callback = vals->error_callback;
+	std::function<void(const char*, void*)> info_callback = vals->info_callback;
+	std::function<void(const char*)> error_callback = vals->error_callback;
 	std::function < bool() > exit_condition_callback =
 			vals->exit_condition_callback;
 	int id = vals->id;
@@ -137,10 +137,10 @@ void *runClient(void *args)
 	{
 		// Read data from connection into buffer. Continue to loop while message size is >0.
 		int message_size = 0;
-		command *buffer = ((command *) malloc(sizeof(command))); // allocating memory for read buffer
+		command *buffer = ((command*) malloc(sizeof(command))); // allocating memory for read buffer
 		//reading the message
-		while ((message_size = read(connection_descriptor, buffer, sizeof(command)))
-				> 0)
+		while ((message_size = read(connection_descriptor, buffer, sizeof(command))
+				&& exit_condition_callback()) > 0)
 		{
 			// Display if there was an error
 			if (message_size == -1)
@@ -172,18 +172,19 @@ void *runClient(void *args)
 				}
 				else
 				{
-                                        //Replace entry if already existing
-                                        if(registry->find(rid) != registry->end())
-                                            registry->at(rid) = sockets->at(id);
-                                        else
-					registry->insert(std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
+					//Replace entry if already existing
+					if (registry->find(rid) != registry->end())
+						registry->at(rid) = sockets->at(id);
+					else
+						registry->insert(
+								std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
 #if DEBUG_CPP
 					printf("SERVER: Registry size: \033[31m%d\033[0m\n",
 							(int) registry->size());
 #endif
 				}
 
-				info_callback("Registered %s", (void *) (buffer->str));
+				info_callback("Registered %s", (void*) (buffer->str));
 			}
 			// cheking to see if the exit command was sent
 			else if (sockets->size() > 0
@@ -227,10 +228,10 @@ void *runClient(void *args)
 }
 
 int beginServer(std::function<void(command, int)> command_callback,
-		std::function<void(const char *, void *)> info_callback,
-		std::function<void(const char *)> error_callback,
+		std::function<void(const char*, void*)> info_callback,
+		std::function<void(const char*)> error_callback,
 		std::function<bool()> exit_condition_callback,
-		std::function<void(const char *)> warn_callback)
+		std::function<void(const char*)> warn_callback)
 {
 #if DEBUG_CPP
 	puts("SERVER: Getting socket");
@@ -252,7 +253,7 @@ int beginServer(std::function<void(command, int)> command_callback,
 	struct timeval timeout;
 	timeout.tv_sec = 1;
 	setsockopt(socket_descriptor, SOL_SOCKET, SO_RCVTIMEO,
-			(struct timeval *) &timeout, sizeof(struct timeval));
+			(struct timeval*) &timeout, sizeof(struct timeval));
 
 	// Instantiate struct to store socket settings.
 	struct sockaddr_in socket_address;
@@ -266,15 +267,15 @@ int beginServer(std::function<void(command, int)> command_callback,
 #endif
 
 	// Bind to the socket
-	if (bind(socket_descriptor, (struct sockaddr *) &socket_address,
+	if (bind(socket_descriptor, (struct sockaddr*) &socket_address,
 			sizeof(socket_address)) == -1)
 	{
 		char err[64];
 		sprintf(err, "Error binding to socket (%d) retrying", errno); // making an error message that tells what went wrong
 		// with binding the socket
 		error_callback(err);
-                g_server_failure = true;
-                return 2;
+		g_server_failure = true;
+		return 2;
 	}
 #if DEBUG_CPP
 	puts("SERVER: Listening to socket");
@@ -310,21 +311,21 @@ int beginServer(std::function<void(command, int)> command_callback,
 #if DEBUG_CPP
 		printf("SERVER: accepted \033[31;1m%s\033[0m\n", connection_addr.sa_data);
 #endif
-                if (connection_descriptor > 1)
-                {
+		if (connection_descriptor > 1)
+		{
 #if DEBUG_CPP
-                    puts("Adding to connections");
+			puts("Adding to connections");
 #endif
-                    sockets->push_back(ConnectionInfo(connection_descriptor));
+			sockets->push_back(ConnectionInfo(connection_descriptor));
 #if DEBUG_CPP
-                    puts("SERVER: Made connection info object");
+			puts("SERVER: Made connection info object");
 #endif
-                }
+		}
 #if DEBUG_CPP
-                else
-                {
-                    puts("connection timed out");
-                }
+		else
+		{
+			puts("connection timed out");
+		}
 #endif
 
 		if (connection_descriptor == -1)
@@ -358,7 +359,7 @@ int beginServer(std::function<void(command, int)> command_callback,
 
 	// waiting for all client handling to die
 #if DEBUG_CPP
-        puts("Waiting for threads to join");
+	puts("Waiting for threads to join");
 #endif
 	for (pthread_t tid : threads)
 	{

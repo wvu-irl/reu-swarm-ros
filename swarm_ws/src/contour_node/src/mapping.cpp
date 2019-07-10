@@ -157,8 +157,7 @@ int main(int argc, char **argv)
 			> ("/nui_bridge/hand_2", 1000);
 
 #if RUN_UNIVERSE
-	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000,
-			additionCallback);
+	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, additionCallback);
 #else
 			ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, newObs);
 #endif
