@@ -11,8 +11,8 @@
 #include <math.h>
 
 #define DEBUG 0
-#define TEST_EQU 1
-#define TEST_NUI 0
+#define TEST_EQU 0
+#define TEST_NUI 1
 
 #define RUN_UNIVERSE 1
 #define RATE_LIMIT 1

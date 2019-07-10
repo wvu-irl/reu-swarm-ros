@@ -2,12 +2,18 @@
 #define ARDINO_SERVER_SOURCE
 // definition of a "verbose" option
 #define DEBUG_CPP 0
-#if DEBUG_CPP
-#include <iostream>
-#endif
 
 // setting this to 1 shows what messages failed and succeeded
 #define DEBUG_MESSAGE 1
+
+#if DEBUG_CPP || DEBUG_MESSAGE
+#include <iostream>
+#include <chrono>
+using namespace std::chrono;
+
+#define PRINTF_TS(form, dat...) (printf("\033[32m[%ld.%09ld] \033[0m"#form"\n",(long) duration_cast<seconds>(high_resolution_clock::now().time_since_epoch()).count(), (long)duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000,dat))
+#define PUTS_TS(form) (printf("\033[32m[%ld.%09ld] \033[0m"#form"\n", (long)duration_cast<seconds>(high_resolution_clock::now().time_since_epoch()).count(), (long)((long)duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000)))
+#endif
 
 #include "arduino_server.h"
 
@@ -67,7 +73,7 @@ void sendCommandToRobots(command cmd, int recip_rid)
 #if DEBUG_CPP || DEBUG_MESSAGE
 //	printf("[\033[1;33marduino_server_source\033[0m] Command executing\033[0m\n");
 	if (registry->find(recip_rid) != registry->end() && registry->size() > 0)
-		printf("\033[30;42mSERVER: sending message [%02d <-> %s]: %s\t%d\033[0m\n",
+		PRINTF_TS(\033[30;42mSERVER: sending message [%02d <-> %s]: %s\t%d\033[0m,
 				recip_rid, rid_indexing[recip_rid].c_str(), cmd.str,
 				registry->at(recip_rid).getConnectionDescriptor());
 //        else
@@ -81,11 +87,11 @@ void sendCommandToRobots(command cmd, int recip_rid)
 				0); // sending message
 #if DEBUG_CPP || DEBUG_MESSAGE
 	else
-		printf("\033[37;41mCould not locate ConnectionInfo for %02d <-> %s\033[0m\n",
+		PRINTF_TS(\033[37;41mCould not locate ConnectionInfo for %02d <-> %s\033[0m,
 				recip_rid, rid_indexing[recip_rid].c_str());
         
         if (nbytes != COMMAND_SIZE)
-            printf("\033[30;41mError failed to send to robot\033[0m\n");
+            PUTS_TS(\033[30;41mError failed to send to robot\033[0m);
 #endif
 
 	// checking for monitors
@@ -97,7 +103,7 @@ void sendCommandToRobots(command cmd, int recip_rid)
 				rid_indexing[recip_rid].c_str(), cmd.str);
 		strncpy(cmd.str, mon_str, sizeof(cmd.str)); // safe copy
 #if DEBUG_CPP || DEBUG_MESSAGE
-		printf("\033[37;44mSERVER: sending message to monitor: %s\033[0m\n",
+		PRINTF_TS(\033[37;44mSERVER: sending message to monitor: %s\033[0m,
 				cmd.str);
 #endif
 		for (ConnectionInfo ci : *monitors) // sending message to all open monitors
@@ -107,21 +113,16 @@ void sendCommandToRobots(command cmd, int recip_rid)
 	}
 }
 
-void sendCommandToRobots(command cmd)
-{
-	sendCommandToRobots(cmd, -1);
-}
-
 void *runClient(void *args)
 {
 #if DEBUG_CPP
-	puts("Starting client thread");
+	PUTS_TS(Starting client thread);
 #endif
 
 	// getting parameters
 	struct client_param *vals = (struct client_param *) args; // separating out parameter type
 
-	// putting parameters into easily useabel variables
+	// putting parameters into easily useable variables
 	std::function<void(command, int)> command_callback = vals->command_callback;
 	std::function<void(const char *, void *)> info_callback = vals->info_callback;
 	std::function<void(const char *)> error_callback = vals->error_callback;
@@ -145,7 +146,7 @@ void *runClient(void *args)
 			if (message_size == -1)
 			{
 				error_callback("Error receiving message.");
-				exit(1);
+				pthread_exit(0);
 			}
 
 			// checking if the client is registering their RID
@@ -244,12 +245,12 @@ int beginServer(std::function<void(command, int)> command_callback,
 	if (socket_descriptor == -1)
 	{
 		error_callback("Error getting socket.");
-		exit(1); // crash out
+		return 1;
 	}
 
 	// Change receive timeout to 30 seconds.
 	struct timeval timeout;
-	timeout.tv_sec = 30;
+	timeout.tv_sec = 1;
 	setsockopt(socket_descriptor, SOL_SOCKET, SO_RCVTIMEO,
 			(struct timeval *) &timeout, sizeof(struct timeval));
 
@@ -265,14 +266,15 @@ int beginServer(std::function<void(command, int)> command_callback,
 #endif
 
 	// Bind to the socket
-	while (bind(socket_descriptor, (struct sockaddr *) &socket_address,
+	if (bind(socket_descriptor, (struct sockaddr *) &socket_address,
 			sizeof(socket_address)) == -1)
 	{
 		char err[64];
 		sprintf(err, "Error binding to socket (%d) retrying", errno); // making an error message that tells what went wrong
 		// with binding the socket
 		error_callback(err);
-		usleep(100000);
+                g_server_failure = true;
+                return 2;
 	}
 #if DEBUG_CPP
 	puts("SERVER: Listening to socket");
@@ -281,7 +283,7 @@ int beginServer(std::function<void(command, int)> command_callback,
 	if (listen(socket_descriptor, 3) == -1)
 	{
 		error_callback("Error listening for connections.");
-		exit(1); // crash out
+		return 1;
 	}
 
 	int connection_descriptor; // variable that will contain the connection_descriptor of the most recent client accept
@@ -306,15 +308,28 @@ int beginServer(std::function<void(command, int)> command_callback,
 		connection_descriptor = accept(socket_descriptor, &connection_addr,
 				&connection_addr_size);
 #if DEBUG_CPP
-		puts("SERVER: accepted");
+		printf("SERVER: accepted \033[31;1m%s\033[0m\n", connection_addr.sa_data);
 #endif
-		sockets->push_back(ConnectionInfo(connection_descriptor));
+                if (connection_descriptor > 1)
+                {
 #if DEBUG_CPP
-		puts("SERVER: Made connection info object");
+                    puts("Adding to connections");
 #endif
+                    sockets->push_back(ConnectionInfo(connection_descriptor));
+#if DEBUG_CPP
+                    puts("SERVER: Made connection info object");
+#endif
+                }
+#if DEBUG_CPP
+                else
+                {
+                    puts("connection timed out");
+                }
+#endif
+
 		if (connection_descriptor == -1)
 		{
-			warn_callback("Error accepting connection.");
+//			warn_callback("Error accepting connection.");
 			continue;
 		}
 		else
@@ -342,6 +357,9 @@ int beginServer(std::function<void(command, int)> command_callback,
 	}
 
 	// waiting for all client handling to die
+#if DEBUG_CPP
+        puts("Waiting for threads to join");
+#endif
 	for (pthread_t tid : threads)
 	{
 		pthread_join(tid, NULL); // waiting for threads to die

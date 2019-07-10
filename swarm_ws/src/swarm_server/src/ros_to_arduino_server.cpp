@@ -31,6 +31,15 @@ void flagger(int sig)
 }
 
 /**
+ * Function for keeping all loops and threads alive
+ * Based on ros ok and the interrupt flag
+ */
+bool keepAlive()
+{
+	return !g_flag && ros::ok() && !g_server_failure;
+}
+
+/**
  *  Callback for getting data from the arduino clients
  *
  *  All recieved data will get published as soon as it comes
@@ -73,10 +82,8 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 {
 	for (wvu_swarm_std_msgs::robot_command msg : msga.commands)
 	{
-#if DEBUG
-		ROS_INFO(PRINT_HEADER"Sending message: %c%c, %f, %f", msg.rid[0],
-				msg.rid[1], msg.r, msg.theta);
-#endif
+                if (!keepAlive())
+                        break;
 		command cmd = { { '\0' } }; // creating command
 		sprintf(cmd.str, "%f,%f", msg.r, msg.theta);
 		int id = msg.rid;
@@ -84,6 +91,8 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 		ROS_INFO(PRINT_HEADER"Constructed command: %02d,\t%s", id, cmd.str);
 #endif
 		sendCommandToRobots(cmd, id); // sending to robots through TCP server
+                if (!keepAlive())
+                    break;
 	}
 }
 
@@ -93,15 +102,6 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 void errorCallBack(const char *msg)
 {
 	ROS_ERROR(msg, NULL);
-}
-
-/**
- * Function for keeping all loops and threads alive
- * Based on ros ok and the interrupt flag
- */
-bool keepAlive()
-{
-	return !g_flag && ros::ok();
 }
 
 /**
@@ -119,8 +119,13 @@ void *controlThread(void *arg0)
 	while (keepAlive())
 	{
 		ros::spinOnce();
+#if DEBUG  
+//               puts("Thread running");
+#endif
 	}
-
+#if DEBUG  
+        puts("Thread exiting");
+#endif
 	pthread_exit(0); // exiting thread
 									 // this is probably unreachable
 }
@@ -144,12 +149,21 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_t tid;
+#if DEBUG
+        ROS_INFO("Starting main-thread");
+#endif
 	pthread_create(&tid, &attr, controlThread, &n);
-
+#if DEBUG
+        ROS_INFO("Starting server");
+#endif
 	// starting server
 	beginServer(commandCallback, info, errorCallBack, keepAlive, warnInfo);
-
+#if DEBUG
+        ROS_INFO("Waiting for main-thread to die");
+#endif
+        
 	// waiting for thread to die
 	pthread_join(tid, NULL);
+        ROS_WARN("Server is \033[1;31mDEAD\033[0m");
 	return 0;
 }

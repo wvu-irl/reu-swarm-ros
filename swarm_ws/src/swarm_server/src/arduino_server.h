@@ -40,6 +40,8 @@
 #define SERVER_PORT 4321 // port number
 #define COMMAND_SIZE 32
 
+bool g_server_failure = false;
+
 // datastructure that is used to send/recieve commands
 // this is using a struct as it is only a public data storing application
 typedef struct

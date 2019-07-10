@@ -49,5 +49,5 @@ add_dependencies(universe wvu_swarm_std_msgs_generate_messages_cpp)
 target_link_libraries(universe ${catkin_LIBRARIES} gaussian_object)
 
 add_executable(mapping src/mapping.cpp)
-add_dependencies(mapping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} wvu_swarm_std_msgs_generate_messages_cpp)
+add_dependencies(mapping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} wvu_swarm_std_msgs_generate_messages_cpp universe)
 target_link_libraries(mapping ${catkin_LIBRARIES} gaussian_object universe)
