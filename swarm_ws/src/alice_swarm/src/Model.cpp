@@ -27,7 +27,7 @@ void Model::clear()
 	targets.clear();
 //	chargers->clear(); //this will delete the whole msg lol
 }
-std::pair<float, float> Model::transformCur(float _x, float _y)
+std::pair<float, float> Model::transformCur(float _x, float _y) //goes from cur frame to first frame.
 {
 	std::pair<float, float> to_return;
 	float abs_x = _x * cos(cur_pose.heading) + _y * -sin(cur_pose.heading);
@@ -39,7 +39,7 @@ std::pair<float, float> Model::transformCur(float _x, float _y)
 	return to_return;
 }
 
-std::pair<float, float> Model::transformFir(float _x, float _y)
+std::pair<float, float> Model::transformFir(float _x, float _y) //goes from first frame to cur frame
 {
 	std::pair<float, float> to_return;
 	float abs_x = _x * cos(first_pose.heading) + _y * -sin(first_pose.heading);
@@ -51,7 +51,7 @@ std::pair<float, float> Model::transformFir(float _x, float _y)
 	return to_return;
 }
 std::pair<float, float> Model::transformFtF(float _x, float _y, float _ox, float _oy, float _oheading)
-{
+{//convert specified frame to first frame.
 	std::pair<float, float> to_return;
 	float abs_x = _x * cos(_oheading) + _y * -sin(_oheading);
 	float abs_y = _x * sin(_oheading) + _y * cos(_oheading);

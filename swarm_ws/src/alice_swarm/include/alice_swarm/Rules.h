@@ -105,7 +105,7 @@ public:
 	/*
 	 * Used to update the distance and direction of the command vector, without changing the true way-point.
 	 */
-	void updateVel();
+	void updateVel(AliceStructs::vel *_fv);
 
 	/*
 	 * Changes the way-point's true location. Most simplistically, does this if the way point has been reached.

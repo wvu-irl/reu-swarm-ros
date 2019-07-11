@@ -23,9 +23,9 @@ Rules::Rules(Model _model) :
 AliceStructs::vel Rules::stateLoop(Model &_model)
 {
 
-	model = _model;
+	model = _model; //do not comment this out. Doing so causes Ragnarok.
 	if (updateWaypoint()){avoidCollisions();}
-	updateVel();
+	updateVel(&final_vel);
 //
 //	state = checkBattery(state);
 //	checkBlocked();
@@ -136,15 +136,21 @@ bool Rules::checkCollisions()
 {
 
 }
-void Rules::updateVel()
-{
 
-}
 bool Rules::updateWaypoint()
 {
 
 }
 //-----------------------------------------------------------------------------------------
+
+void Rules::updateVel(AliceStructs::vel *_fv) //puts the final_velocity in the frame of the bot.
+{
+	std::pair<float,float> cur_goTo = model.transformCur(model.goTo.x, model.goTo.y);
+	float magnitude = sqrt(pow(cur_goTo.first,2) + pow(cur_goTo.second,2));
+	float direction = atan2(cur_goTo.second,cur_goTo.first);
+	_fv->mag = magnitude;
+	_fv->dir = direction;
+}
 
 void Rules::goToTar()
 {
