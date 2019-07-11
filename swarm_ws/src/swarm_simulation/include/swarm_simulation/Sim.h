@@ -8,6 +8,7 @@
 #include <wvu_swarm_std_msgs/robot_command_array.h>
 #include <wvu_swarm_std_msgs/flows.h>
 #include <wvu_swarm_std_msgs/virtual_objects.h>
+#include <wvu_swarm_std_msgs/chargers.h>
 //#include <swarm_server/robot_id.h>
 
 #ifndef SIM_H
@@ -42,6 +43,7 @@ private:
 	//vector<wvu_swarm_std_msgs::vicon_point> obstacles;
 	wvu_swarm_std_msgs::vicon_points obstacles;
 	wvu_swarm_std_msgs::vicon_points targets;
+	wvu_swarm_std_msgs::chargers chargers;
 	wvu_swarm_std_msgs::flows flows;
 	vector<sf::CircleShape> obs_shapes;
 	bool game;
@@ -65,12 +67,14 @@ private:
 	void obsCallback(const wvu_swarm_std_msgs::vicon_points &msg);   //processes info from virtual_obstacles
 	void targetCallback(const wvu_swarm_std_msgs::vicon_points &msg);   //processes info from virtual_targets
 	void flowCallback(const wvu_swarm_std_msgs::flows &msg);         //processes info from virtual_flows
+	void chargerCallback(const wvu_swarm_std_msgs::chargers &msg);   //processes info from chargers
 
 	//Specific objects to be rendered.
 	void drawObstacles();
 	void drawTargets();
 	void updateTargetPos();
 	void drawFlows();
+	void drawChargers(); //draws chargers
 
 	//hockey sim specific
 	void drawGoals();

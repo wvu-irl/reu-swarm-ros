@@ -77,7 +77,9 @@ void Rules::avoidCollisions()
 	findAngle(tf, dead_zones);
 }
 
-void Rules::rest(){
+void Rules::rest()
+{
+
 }
 
 void Rules::explore()
@@ -96,11 +98,13 @@ void Rules::explore()
 	}
 	final_vel.dir = atan2(-sum.second,-sum.first);
 	final_vel.mag = 1;
-
 }
 
 void Rules::Charge()
 {
+	float dx;
+	float dy;
+
 	float min_sep = 1000.0;
 	float check_sep;
 	int closest_pos = -1;
@@ -109,7 +113,9 @@ void Rules::Charge()
 	{
 		if(!model.chargers->at(i).occupied) //charger is open
 		{
-			check_sep = sqrt(pow(0,2) + pow(0,2)); //check seperation distance
+			dx = model.chargers->at(i).x - model.cur_pose.x;
+			dy = model.chargers->at(i).y - model.cur_pose.y;
+			check_sep = sqrt(pow(dx,2) + pow(dy,2)); //check separation distance
 			if(check_sep < min_sep)
 			{
 				closest_pos = i; //saves pos of closest
@@ -174,7 +180,6 @@ void Rules::findContour()
 			pri = temp_pri;
 		}
 	}
-
 	final_vel.dir = atan2(best.y - temp.second, best.x - temp.first) + model.first_pose.heading - model.cur_pose.heading;
 	final_vel.mag = 1;
 	model.goTo.x = best.x;
