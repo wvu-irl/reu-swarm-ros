@@ -36,6 +36,7 @@ public:
 	AliceStructs::vel final_vel;
 	std::vector<float> testers;
 	Model model;
+	float margin = 2*model.SIZE + model.SAFE_DIS;
 
 	/*
 	 * Helper method to find the distance between two points
