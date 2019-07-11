@@ -25,7 +25,7 @@ void Model::clear()
 	flows.clear();
 	neighbors.clear();
 	targets.clear();
-	chargers.clear();
+//	chargers->clear(); //this will delete the whole msg lol
 }
 std::pair<float, float> Model::transformCur(float _x, float _y)
 {
@@ -138,17 +138,24 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 		targets.push_back(tar);
 	}
 
-	//chargers = _toAdd.chargers;
-	for (auto& charger : _toAdd.chargers)
-	{
-		chargers.push_back(charger);
+	chargers = _toAdd.chargers;
+	int i=0;
+//	for (auto& charger : _toAdd.chargers)
+//	{
+//		chargers.push_back(charger);
 //		std::cout<<"==============================\n";
-//		std::cout<<"x,y: "<<chargers.at(0).x<<", "<<chargers.at(0).y<<std::endl;
-//		std::cout<<"==============================\n";
-	}
+//		std::cout<<"x,y: "<<chargers.at(i).x<<", "<<chargers.at(i).y<<std::endl;
+//		i++;
+//	}
 //	std::cout<<"==============================\n";
-////	std::cout<<"x,y: "<<chargers.at(0).x<<", "<<chargers.at(0).y<<std::endl
-////	std::cout<<"x,y: "<<chargers->charger.at(0).x<<", "<<chargers->charger.at(0).y<<std::endl;
+
+// debugging print statments for chargers data transfer;
+//	for(int i = 0; i < chargers->size(); i++)
+//	{
+//		std::cout<<"==============================\n";
+//		std::cout<<"x,y: "<<chargers->at(i).x<<", "<<chargers->at(i).y<<" | "<<(chargers->at(i).occupied ? "true" : "false")<<std::endl;
+//		std::cout<<"x,y: "<<chargers->at(i).x<<", "<<chargers->at(i).y<<" | "<<(chargers->at(i).occupied ? "true" : "false")<<std::endl;
+//	}
 //	std::cout<<"==============================\n";
 }
 

@@ -27,7 +27,8 @@ AliceStructs::vel Rules::stateLoop(Model &_model)
 	if (updateWaypoint()){avoidCollisions();}
 	updateVel();
 //
-//	state = checkBattery(state);
+//		state = checkBattery(state);
+		Charge();
 //	checkBlocked();
 //	if (state == "goToTar")
 //	{
@@ -101,35 +102,24 @@ void Rules::Charge()
 {
 	float min_sep = 1000.0;
 	float check_sep;
-	int closest_pos;
-	for (int i=0; i < model.chargers.size(); i++)
+	int closest_pos = -1;
+
+	for (int i=0; i < model.chargers->size(); i++)
+	{
+		if(!model.chargers->at(i).occupied) //charger is open
 		{
-			if(!model.chargers.at(i).occupied) //charger is open
+			check_sep = sqrt(pow(0,2) + pow(0,2)); //check seperation distance
+			if(check_sep < min_sep)
 			{
-				check_sep = sqrt(pow(0,2) + pow(0,2)); //check seperation distance
-				if(check_sep < min_sep)
-				{
-					closest_pos = i; //saves pos of closest
-					min_sep = check_sep; //updates min_sep
-				}
+				closest_pos = i; //saves pos of closest
+				min_sep = check_sep; //updates min_sep
 			}
 		}
-		model.chargers.at(closest_pos).occupied = true;
-
-//	for (int i=0; i < model.chargers->charger.size(); i++)
-//	{
-//		if(!model.chargers->charger.at(i).occupied) //charger is open
-//		{
-//			check_sep = sqrt(pow(0,2) + pow(0,2)); //check seperation distance
-//			if(check_sep < min_sep)
-//			{
-//				closest_pos = i; //saves pos of closest
-//				min_sep = check_sep; //updates min_sep
-//			}
-//		}
-//	}
-//	model.chargers->charger.at(closest_pos).occupied = true;
-
+	}
+	if(closest_pos >= 0)
+	{
+		model.chargers->at(closest_pos).occupied = true;
+	}
 	//make the bot go to some way point, overiding other directives.
 	//way point should be .y, .x + 5 if on the left wall.
 }

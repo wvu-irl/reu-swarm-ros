@@ -11,6 +11,7 @@
 class Hawk_Sim
 {
 private:
+	bool first = true;
 	//palce holders for subscription data ---------------
 	wvu_swarm_std_msgs::chargers temp_chargers;
 	//---------------------------------------------------

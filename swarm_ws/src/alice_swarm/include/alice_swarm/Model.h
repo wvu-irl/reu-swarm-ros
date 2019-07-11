@@ -44,8 +44,8 @@ public:
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
 	std::vector<AliceStructs::pnt> targets;
-//	wvu_swarm_std_msgs::chargers *chargers;
-	std::vector<AliceStructs::charger> chargers;
+	std::vector<wvu_swarm_std_msgs::charger> *chargers;
+//	std::vector<AliceStructs::charger> chargers;
 
 	AliceStructs::pnt goTo;
 

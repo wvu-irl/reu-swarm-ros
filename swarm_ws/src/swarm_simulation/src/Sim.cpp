@@ -3,10 +3,6 @@
 #include <swarm_simulation/Body.h>
 #include <swarm_simulation/Pvector.h>
 #include <swarm_simulation/Sim.h>
-
-#include <swarm_simulation/Hawk_Sim.h> //for testing
-
-
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <math.h>
@@ -233,11 +229,6 @@ void Sim::Run(ros::NodeHandle _n)
 		//			targets.point.at(0).y = vb_array.poseVect.at(0).botPose.transform.translation.y;
 		//			//targets.point.at(0).sid=0;
 		//		}
-
-			// =================== Testing ==================================
-			Hawk_Sim hsim;
-			hsim.run(_n);
-			//===============================================================
 			if (!update)
 			{
 				pub2.publish(targets);

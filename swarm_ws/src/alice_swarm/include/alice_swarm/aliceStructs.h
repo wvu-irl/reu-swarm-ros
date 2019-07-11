@@ -10,7 +10,6 @@
 #include <vector>
 #include <list>
 #include <ros/ros.h>
-
 #include <wvu_swarm_std_msgs/chargers.h>
 
 namespace AliceStructs
@@ -108,8 +107,8 @@ typedef struct
 	std::vector<obj> obstacles;
 	std::vector<pnt> targets;
 	std::vector<flow> flows;
-	std::vector<charger> chargers;
-//	wvu_swarm_std_msgs::chargers *chargers;
+//	std::vector<charger> chargers;
+	std::vector<wvu_swarm_std_msgs::charger> *chargers;
 	float xpos;
 	float ypos;
 	float contVal;

@@ -57,6 +57,8 @@ int main(int argc, char **argv)
 
 		wvu_swarm_std_msgs::alice_mail_array mail = alice_hub.getAliceMail();
 
+		mail.chargers = temp_charger_array.charger;
+
 		pub.publish(mail);
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);

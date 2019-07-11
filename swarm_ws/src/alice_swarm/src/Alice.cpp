@@ -16,7 +16,8 @@ Alice::Alice()
 	name = 0;
 }
 
-AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
+AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data, 
+		std::vector<wvu_swarm_std_msgs::charger> &_chargers)
 {
 	AliceStructs::mail mail;
 	//------Updates all vectors in mail -----------
@@ -57,18 +58,8 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 		mail.flows.push_back(flow);
 	}
 
-//	mail.chargers->charger = _data.chargerMail;
-
-	for (auto& _charger :_data.chargerMail)
-	{
-		AliceStructs::charger charger;
-		charger.x = _charger.x;
-		charger.y = _charger.y;
-		charger.occupied = _charger.occupied;
-		mail.chargers.push_back(charger);
-	}
-
-	//--------------------------------------------
+	mail.chargers = &(_chargers);
+//--------------------------------------------
 
 	//----Updates simple attributes----------
 	mail.xpos=_data.x;
@@ -84,10 +75,11 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data)
 	return mail;
 }
 
-void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_swarm_std_msgs::map> &_maps,  std::vector<int> &_ids)
+void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_swarm_std_msgs::map> &_maps,  std::vector<int> &_ids,
+		std::vector<wvu_swarm_std_msgs::charger> &_chargers)
 {
 	name=_data.name;
-	AliceStructs::mail mail = packageData(_data);
+	AliceStructs::mail mail = packageData(_data, _chargers);
 	model.archiveAdd(mail);
 	model.sensorUpdate(mail);
 	model.receiveMap(_maps,_ids);
