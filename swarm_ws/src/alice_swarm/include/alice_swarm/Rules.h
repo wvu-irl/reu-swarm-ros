@@ -41,7 +41,6 @@ public:
 	 */
 	float calcDis(float _x1, float _y1, float _x2, float _y2);
 
-
 	/*
 	 * Checks whether there's an obstacle in the robot's path
 	 */
@@ -113,7 +112,10 @@ public:
 	 */
 	AliceStructs::vel stateLoop(Model &_model);
 
-
+	/*
+	 * Checks whether two robots will collide
+	 */
+	float checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot);
 
 };
 

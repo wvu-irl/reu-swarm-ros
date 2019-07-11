@@ -24,8 +24,7 @@ AliceStructs::vel Rules::stateLoop(Model &_model)
 {
 
 	model = _model;
-	updateWaypoint();
-	if (checkCollisions()){avoidCollisions();}
+	if (updateWaypoint()){avoidCollisions();}
 	updateVel();
 //
 //	state = checkBattery(state);
@@ -76,11 +75,7 @@ void Rules::avoidCollisions()
 	float tf = atan2(model.goTo.y, model.goTo.x);
 	std::vector<std::pair<float, float>> dead_zones = findDeadZones();
 	findAngle(tf, dead_zones);
-	final_vel.mag = 1;
-	if (final_vel.dir == atan2(model.goTo.y, model.goTo.x))
-	{
-		state = "explore";
-	}
+
 }
 
 void Rules::explore()
@@ -306,6 +301,34 @@ void Rules::avoidNeighbors()
 {
 	for (auto& bot : model.neighbors)
 	{
+		float x_int = ((bot.y - bot.tar_y)/(bot.x - bot.tar_x)*bot.x - (model.cur_pose.y - model.goTo.y)/(model.cur_pose.x - model.goTo.y)*model.cur_pose.x - bot.y + model.cur_pose.y)/
+				((bot.y - bot.tar_y)/(bot.x - bot.tar_x) - (model.cur_pose.y - model.goTo.y)/(model.cur_pose.x - model.goTo.x));
+		float y_int = ((bot.x - bot.tar_x)/(bot.y - bot.tar_y)*bot.y - (model.cur_pose.x - model.goTo.x)/(model.cur_pose.y - model.goTo.y)*model.cur_pose.y + model.cur_pose.x - bot.x)/
+				((bot.x - bot.tar_x)/(bot.y - bot.tar_y) - (model.cur_pose.x - model.goTo.x)/(model.cur_pose.y - model.goTo.y));
+		float self_tti = (model.cur_pose.heading - atan2(model.goTo.y, model.goTo.x)/model.MAX_AV +
+				calcDis(x_int, y_int, model.cur_pose.x, model.cur_pose.y)/model.MAX_LV);
+		float bot_tti = (bot.ang - atan2(bot.tar_y, bot.tar_x)/model.MAX_AV +
+				calcDis(x_int, y_int, bot.x, bot.y)/model.MAX_LV);
+		if (abs(self_tti - bot_tti) < checkTiming(x_int, y_int, bot)/MAX_LV)
+		{
 
+		}
+	}
+}
+
+float Rules::checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot)
+{
+	float margin = 2*model.SIZE + model.SAFE_DIS;
+	float tcpx = -pow(pow(margin, 2)/(pow((bot.tar_x - bot.x)/(bot.y - bot.tar_y), 2) + 1), 0.5) + _x_int;
+	float tcpy = -pow(pow(margin, 2)/(pow((bot.y - bot.tar_y)/(bot.tar_x - bot.x), 2) + 1), 0.5) + _y_int;
+	float adj_x_int = (-(model.cur_pose.y - model.goTo.y)/(model.cur_pose.x - model.goTo.x)*model.cur_pose.x + model.cur_pose.y + (bot.y - bot.tar_y)/(bot.x - bot.tar_x)*tcpx - tcpy)/((bot.y - bot.tar_y)/(bot.x - bot.tar_x) - (model.cur_pose.y - model.goTo.y)/(model.cur_pose.x - model.goTo.x));
+	float adg_y_int = (-(bot.x - bot.tar_x)/(bot.y - bot.tar_y)*tcpy + tcpx + (model.cur_pose.x - model.goTo.x)/(model.cur_pose.y - model.goTo.y)*model.cur_pose.y - model.cur_pose.x)/((model.cur_pose.x - model.goTo.x)/(model.cur_pose.y - model.goTo.y) - (bot.x - bot.tar_x)/(bot.y - bot.tar_y));
+	if ((bot.y - bot.tar_y)/(bot.x - bot.tar_x) > 0)
+	{
+		return -calcDis(adj_x_int, adj_y_int, _x_int, _y_int);
+	}
+	else
+	{
+		return -calcDis(adj_x_int, adj_y_int, _x_int, _y_int);
 	}
 }

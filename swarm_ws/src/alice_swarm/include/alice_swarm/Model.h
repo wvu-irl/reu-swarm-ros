@@ -22,6 +22,8 @@ public:
 	 */
 	float MAX_LV;
 	float MAX_AV;
+	float SIZE = 5;
+	float SAFE_DIS = 2;
 
 	/*
 	 * Information about Alice's immediate environment
