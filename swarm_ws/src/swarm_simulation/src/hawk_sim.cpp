@@ -75,7 +75,7 @@ void Hawk_Sim::run(ros::NodeHandle n) // begin here
 	ros::Rate loopRate(10);
 
 	int i = 0;
-	while (ros::ok() && i < 1000) // setup loop
+	while (ros::ok() && i < 5000) // setup loop
 	{
 		makeChargers(pub1);
 		makePriority(pub2);
