@@ -14,6 +14,8 @@ TCPClient client;
 #include <Particle.h>
 
 #include "screen.h"
+#include "drivetrain.h"
+#include "easy_tcp.h"
 
 // FOR AN ARGON BOARD
 #define mosi D12 //blue - DIN - MO on Argon Board

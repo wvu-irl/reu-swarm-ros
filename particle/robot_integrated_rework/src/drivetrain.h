@@ -1,6 +1,8 @@
 #ifndef DRIVETRAIN_H
 #define DRIVETRAIN_H
 
+#include <Particle.h>
+
 class Drivetrain {
 public:
     Drivetrain(void) {}
