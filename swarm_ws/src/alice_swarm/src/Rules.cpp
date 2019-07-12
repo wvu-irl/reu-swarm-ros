@@ -78,9 +78,16 @@ AliceStructs::vel Rules::stateLoop(Model &_model)
 //===================================================================================================================
 void Rules::avoidCollisions()
 {
-	float tf = atan2(model.goTo.y, model.goTo.x);
-	std::vector<std::pair<float, float>> dead_zones = findDeadZones();
-	findAngle(tf, dead_zones);
+	bool checker = true;
+	while (checker)
+	{
+		float tf = atan2(model.goTo.y, model.goTo.x);
+		if (checkBlocked())
+		{
+			findAngle(tf, findDeadZones());
+		}
+		checker = avoidNeighbors();
+	}
 }
 
 void Rules::explore()
@@ -274,12 +281,20 @@ float Rules::calcDis(float _x1, float _y1, float _x2, float _y2)
 	return pow(pow(_x1 - _x2, 2) + pow(_y1 - _y2, 2), 0.5);
 }
 
+std::pair<float, float> Rules::calcQuad(float a, float b, float c)
+{
+	std::pair<float, float> to_return;
+	to_return.first = (-b + pow(pow(b, 2) - 4*a*c, 0.5))/(2*a);
+	to_return.second = (-b - pow(pow(b, 2) - 4*a*c, 0.5))/(2*a);
+	return to_return;
+}
+
 bool Rules::checkBlocked()
 {
 	for (auto& zone : findDeadZones())
 	{
-		if (zone.first < atan2(model.goTo.y, model.goTo.x) < zone.second
-				|| zone.first > atan2(model.goTo.y, model.goTo.x) > zone.second)
+		if (zone.first.first < atan2(model.goTo.y, model.goTo.x) < zone.first.second
+				|| zone.first.first > atan2(model.goTo.y, model.goTo.x) > zone.first.second)
 		{
 			return true;
 		}
@@ -296,66 +311,89 @@ bool Rules::checkBlocked()
 //	}
 //	return state;
 //}
-void Rules::findAngle(float tf, std::vector<std::pair<float, float>> dead_zones)
+void Rules::findAngle(float tf, std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones)
 {
-	std::vector<float> right;
-	std::vector<float> left;
+	std::vector<std::pair<float, AliceStructs::obj>> right;
+	std::vector<std::pair<float, AliceStructs::obj>> left;
 	for (auto& zone : dead_zones)
 	{
 		if (pow(pow(model.cur_pose.x, 2) + pow(model.cur_pose.y, 2), 0.5) <= // Checks that the obstacle is on the correct side of the bot
 				pow(pow(model.cur_pose.x - model.goTo.x, 2) + pow(model.cur_pose.y - model.goTo.x, 2), 0.5))
 		{
+			std::pair<float, AliceStructs::obj> to_push;
 			if (tf < 0) // Checks which side of the bot the obstacle is on
 			{
-				if (zone.first > tf)
+				if (zone.first.first > tf)
 				{
-					right.push_back(zone.first);
+					to_push.first = zone.first.first;
+					to_push.second = zone.second;
+					right.push_back(to_push);
 				}
 			} else
 			{
-				if (zone.second < tf)
+				if (zone.first.second < tf)
 				{
-					left.push_back(zone.second);
+					to_push.first = zone.first.second;
+					to_push.second = zone.second;
+					right.push_back(to_push);
 				}
 
 			}
 		}
 	}
+	std::pair<float, AliceStructs::obj> final;
+	final.first = 0;
 	if (right.size() > 0 && left.size() > 0)
 	{
-		sort(right.begin(), right.end());
-		sort(left.begin(), left.end());
-		std::cout << left.front() << std::endl;
-		if (right.front() > left.front())
+		for (auto& to_check : right)
 		{
-			final_vel.dir = left.front();
-		} else
-		{
-			final_vel.dir = right.front();
+			if (final.first < to_check.first)
+			{
+				final = to_check;
+			}
 		}
-	} else if (right.size() > 0)
+		for (auto& to_check : left)
+		{
+			if (final.first < to_check.first)
+			{
+				final = to_check;
+			}
+		}
+	}
+	else if (right.size() > 0)
 	{
-		sort(right.begin(), right.end());
-		final_vel.dir = right.front();
-	} else if (left.size() > 0)
+		for (auto& to_check : right)
+		{
+			if (final.first < to_check.first)
+			{
+				final = to_check;
+			}
+		}
+	}
+	else if (left.size() > 0)
 	{
-		sort(left.begin(), left.end());
-		std::cout << left.front() << std::endl;
-		final_vel.dir = left.front();
-	} else
+		for (auto& to_check : left)
+		{
+			if (final.first < to_check.first)
+			{
+				final = to_check;
+			}
+		}
+	}
+	if (final.first != 0)
 	{
-		final_vel.dir = tf;
+
 	}
 }
 
-std::vector<std::pair<float, float>> Rules::findDeadZones()
+std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDeadZones()
 {
-	std::vector<std::pair<float, float>> dead_zones;
+	std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones;
 	for (auto& obs : model.obstacles)
 	{
 		float temp_a_x = model.cur_pose.x - obs.x_off;
 		float temp_a_y = model.cur_pose.y - obs.y_off;
-		std::pair<float, float> aoe;
+		std::pair<float, float> aoe = calcQuad((pow(temp_a_y, 2) - pow(obs.y_rad, 2)), -2 * temp_a_x * temp_a_y, pow(temp_a_x, 2) - pow(obs.x_rad, 2));
 		float plus = (2 * temp_a_x * temp_a_y + //This is the quadratic formula. It's just awful
 				pow(pow(-2 * temp_a_x * temp_a_y, 2)
 								- 4 * (pow(temp_a_y, 2) - pow(obs.y_rad, 2)) * (pow(temp_a_x, 2) - pow(obs.x_rad, 2)), 0.5))
@@ -364,15 +402,21 @@ std::vector<std::pair<float, float>> Rules::findDeadZones()
 				pow(pow(-2 * temp_a_x * temp_a_y, 2)
 								- 4 * (pow(temp_a_y, 2) - pow(obs.y_rad, 2)) * (pow(temp_a_x, 2) - pow(obs.x_rad, 2)), 0.5))
 				/ (2 * (pow(temp_a_x, 2) - pow(obs.y_rad, 2)));
-		aoe.first = atan(plus);
+		std::cout << aoe.first << std::endl;
+		aoe.first = plus;
+		std::cout << aoe.first << std::endl;
 		aoe.second = atan(neg);
-		dead_zones.push_back(aoe);
+		std::pair<std::pair<float, float>, AliceStructs::obj> to_push;
+		to_push.first = aoe;
+		to_push.second = obs;
+		dead_zones.push_back(to_push);
 	}
 	return dead_zones;
 }
 
-void Rules::avoidNeighbors()
+bool Rules::avoidNeighbors()
 {
+	bool to_return = false;
 	for (auto& bot : model.neighbors)
 	{
 		float x_int = ((bot.y - bot.tar_y)/(bot.x - bot.tar_x)*bot.x - (model.cur_pose.y - model.goTo.y)/(model.cur_pose.x - model.goTo.y)*model.cur_pose.x - bot.y + model.cur_pose.y)/
@@ -410,9 +454,11 @@ void Rules::avoidNeighbors()
 			{
 				model.goTo.x = new_tar.first;
 				model.goTo.y = new_tar.second;
+				to_return = true;
 			}
 		}
 	}
+	return to_return;
 }
 
 float Rules::checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot)

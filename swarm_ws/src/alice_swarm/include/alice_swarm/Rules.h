@@ -30,7 +30,7 @@ public:
 
 	Rules(Model _model);
 
-	enum State{REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}; // always keep UNUSED at the back of the array.
+	enum State{REST, CHARGE, CONTOUR, TARGET, EXPLORE};
 	State state;
 	std::string collision_state;
 	AliceStructs::vel final_vel;
@@ -39,19 +39,67 @@ public:
 	float margin = 2*model.SIZE + model.SAFE_DIS;
 
 	/*
-	 * Determines which state Alice is in
+	 * Helper method to find the distance between two points
 	 */
-	AliceStructs::vel stateLoop(Model &_model);
+	float calcDis(float _x1, float _y1, float _x2, float _y2);
+
+	/*
+	 * Helper method to calculate the roots of a quadratic equation
+	 */
+	std::pair<float, float> calcQuad(float a, float b, float c);
 
 	/*
 	 * Checks whether there's an obstacle in the robot's path
 	 */
 	bool checkBlocked();
 
+	//std::string checkBattery(std::string state);//checks to make sure battery has sufficient charge.
 	/*
-	* Checks whether two robots will collide
-	*/
-	float checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot);
+	 * Finds an adjusted angle to drive at given a set of blocked zones
+	 */
+	void findAngle(float tf, std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones);
+
+	/*
+	 * Finds the set of angles at which the robot will collide with an obstacle
+	 */
+	std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> findDeadZones();
+
+	/*
+	 * Avoids other robots dynamically
+	 */
+	bool avoidNeighbors();
+
+//===================================================================================================================\\
+
+	/*
+	 * Makes Alice explore new territory
+	 */
+	void explore();
+
+	/*
+	 * Makes Alice stop moving
+	 */
+	void rest();
+
+	/*
+	 * Prevents Alice from hitting obstacles or other robots
+	 */
+	void avoidCollisions();
+
+	/*
+	 * Makes Alice find a charging station
+	 */
+	void Charge();
+
+	/*
+	 * Makes Alice go to a target
+	 */
+	void goToTar();
+
+	/*
+	 * Makes Alice seek higher elevations
+	 */
+	void findContour();
 
 	/*
 	 * The part of obstacle avoidance that always runs. Checks if any part of the environment has changed enough (or the robot's divergence from the predicted path)
@@ -60,49 +108,9 @@ public:
 	bool checkCollisions();
 
 	/*
-	 * Checks that the battery is not bellow acceptable levels.
-	 */
-	bool checkBattery(std::string state);
-
-	/*
-	 * function to check for potential pit falls. Add cases for hard to find bugs.
-	 */
-	void checkForProblems();
-
-	/*
-	 * checks if the highest priority rule has changed.
-	 */
-	bool changeState();
-
-	/*
-	 * Finds an adjusted angle to drive at given a set of blocked zones
-	 */
-	void findAngle(float tf, std::vector<std::pair<float, float>> dead_zones);
-
-	/*
-	 * Finds the set of angles at which the robot will collide with an obstacle
-	 */
-	std::vector<std::pair<float, float>> findDeadZones();
-
-	/*
-	 * Helper method to find the distance between two points
-	 */
-	float calcDis(float _x1, float _y1, float _x2, float _y2);
-
-	/*
 	 * Used to update the distance and direction of the command vector, without changing the true way-point.
 	 */
-	void updateVel(AliceStructs::vel *_fv);
-
-	/*
-	 * Avoids other robots dynamically
-	 */
-	void avoidNeighbors();
-
-	/*
-	 * Prevents Alice from hitting obstacles or other robots
-	 */
-	void avoidCollisions();
+	void updateVel();
 
 	/*
 	 * Changes the way-point's true location. Most simplistically, does this if the way point has been reached.
@@ -110,32 +118,16 @@ public:
 	 * Returns true is the waypoint was changed.
 	 */
 	bool updateWaypoint();
-	//============================================Priority Rules================================================================
-	/*
-	 * Makes Alice stop moving
-	 */
-	void rest();
 
 	/*
-	 * Makes Alice find a charging station
+	 * Determines which state Alice is in
 	 */
-	void charge();
+	AliceStructs::vel stateLoop(Model &_model);
 
 	/*
-	 * Makes Alice seek higher elevations
+	 * Checks whether two robots will collide
 	 */
-	void findContour();
-
-	/*
-	 * Makes Alice go to a target
-	 */
-	void goToTar();
-
-	/*
-	 * Makes Alice explore new territory
-	 */
-	void explore();
-	//=========================================================================================================================
+	float checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot);
 
 };
 
