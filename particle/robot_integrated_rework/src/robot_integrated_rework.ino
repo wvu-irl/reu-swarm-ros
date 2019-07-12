@@ -16,6 +16,7 @@ TCPClient client;
 #include "screen.h"
 #include "drivetrain.h"
 #include "easy_tcp.h"
+#include "imu_calibrate.h"
 
 // FOR AN ARGON BOARD
 #define mosi D12 //blue - DIN - MO on Argon Board
@@ -228,14 +229,14 @@ void threadFunction(void)
 
 void driveTurnCW(float theta)
 {
-    myservoB.write(170);
+    myservoB.write(110);
     myservoA.write(110);
 }
 
 void driveTurnCCW(float theta)
 {
     myservoB.write(70);
-    myservoA.write(0);
+    myservoA.write(70);
 }
 
 
