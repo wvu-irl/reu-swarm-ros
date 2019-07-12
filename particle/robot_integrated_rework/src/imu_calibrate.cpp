@@ -14,8 +14,8 @@ void IMUCalibrate::init(void)
 {
     accelGyro.initialize();
     #if IMU_DEBUG
-    Serial.println("Testing device connections...");
-    Serial.println(accelGyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+    Serial.println("IMU: Testing device connections...");
+    Serial.println(accelGyro.testConnection() ? "IMU: MPU6050 connection successful" : "IMU: MPU6050 connection failed");
     #endif
 }
 

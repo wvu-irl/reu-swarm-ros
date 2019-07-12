@@ -46,26 +46,17 @@ Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, PIXEL_TYPE);
 
 Thread testThread; //("testThread", threadFunction);
 void threadFunction(void);
+DiffDrive diff_drive;
+IMUCalibrate imu;
 
-float theta = 0, pos = 10;
-float vicon_theta = 0, vicon_pos = 10;
-float imu_theta = 0, imu_pos = 10;
-
-
-// Pitch, Roll and Yaw values
-float pitch = 0;
-float roll = 0;
-float yaw = 0.001;
-float oldYaw = 0;
-float timeStep = 0.001;
-int t1=0;
+// float theta = 0, pos = 10;
+// float vicon_theta = 0, vicon_pos = 10;
+// float imu_theta = 0, imu_pos = 10;
 
 struct command
 {
     char str[32];
 };
-
-Servo myservoB, myservoA; //creating servo object
 
 byte server[] = {192, 168, 10, 187};
 // MPU variables:
@@ -76,10 +67,6 @@ void handler(const char *topic, const char *data)
     Serial.println("received " + String(topic) + ": " + String(data));
 }
 */
-
-MPU6050 accelGyro;
-int16_t ax, ay, az;
-int16_t gx, gy, gz;
 
 // Option 2: Software SPI - use any pins but a little slower
 Adafruit_SSD1351 tft = Adafruit_SSD1351(cs, dc, mosi, sclk, rst);
@@ -102,15 +89,14 @@ void setup(void)
     // tcpClient.init(ip, port, "NE");
 
     // Initialize drivetrain
-    // diffDrive.init()
+    diff_drive.init();
+
+    // Initialize IMU
+    imu.init();
 
     // Initialize neopixel
     strip.begin();
     strip.show();
-
-    // Initialize IMU
-    Wire.begin();
-    accelGyro.initialize();
 
     tft.begin();
     tft.fillScreen(BLACK);
@@ -143,27 +129,16 @@ void setup(void)
         Serial.println("Connection failed");
     }
 
-    myservoB.attach(A1); //attaching servos to pins
-    myservoA.attach(A2);
-
+   
     // Wire.begin();
 
     Serial.println("Initializing I2C devices...");
-
-    // accelGyro.initialize();
-
-    // Cerify the connection:
-    Serial.println("Testing device connections...");
-    Serial.println(accelGyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
 
     testThread = Thread("test", threadFunction);
 }
 
 void loop()
 {
-    accelGyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-    Serial.println(gz);
-
     while (client.connected())
     {
         headingUpdate();
@@ -172,28 +147,8 @@ void loop()
         Serial.print("\tTH: ");
         Serial.print(theta);
 
-        //Attempt at modifying pereira stuff to relative frame
-        float v = 3 * cos(theta * 3.14 / 180);
-        float w = 2 * sin(theta * 3.14 / 180);
-
-        if (theta >= 0 && theta <= 90 || theta > 270)
-        {
-            myservoA.write(90 + 10 * (v - w));
-            myservoB.write(90 - 10 * (v + w));
-        }
-        else if (theta > 90 && theta <= 180)
-        { //we still want this because we want linear velocity to be non-negative ( change for pd)
-            driveTurnCCW(theta);
-        }
-        else if (theta > 180 && theta < 270)
-        {
-            driveTurnCW(theta);
-        }
-        else//if somehow the command is invalid
-        { 
-            myservoA.write(90);
-            myservoB.write(90); 
-        }
+        //need to get this from some decision betweeen imu and vicon
+        //diff_drive.drive(_theta,_speed);
 
         Serial.print("Finish drive command check client");
         Serial.println(millis());
@@ -202,8 +157,6 @@ void loop()
 
     if (!client.connected())
     {
-        myservoA.write(90);
-        myservoB.write(90);
         Serial.println("Disconnected.");
         client.connect(server, 4321);
         Serial.println("Reconnecting...");
@@ -225,18 +178,6 @@ void threadFunction(void)
     {
         oledArrow(theta);
     }
-}
-
-void driveTurnCW(float theta)
-{
-    myservoB.write(110);
-    myservoA.write(110);
-}
-
-void driveTurnCCW(float theta)
-{
-    myservoB.write(70);
-    myservoA.write(70);
 }
 
 
@@ -273,7 +214,6 @@ void battStat()
         tft.println("Needs Charging");
     }
 }
-
 
 /*
 void driveStat(float theta, float pos)
