@@ -7,6 +7,8 @@
 #include <iostream>
 #include <bits/stdc++.h>
 
+#define DEBUG_schange 0
+
 Rules::Rules()
 {
 	state = REST;
@@ -22,11 +24,15 @@ Rules::Rules(Model _model) :
 
 AliceStructs::vel Rules::stateLoop(Model &_model)
 {
-
 	model = _model; //do not comment this out. Doing so causes Ragnarok.
-	if (updateWaypoint()){avoidCollisions();}
-//
-//	state = checkBattery(state);
+
+	checkForProblems(); //feel free to add hard to find casees to this function. Will save debugging time.
+//	checkBattery(state);
+
+	if (updateWaypoint())
+	{
+		avoidCollisions();
+	}
 //	checkBlocked();
 //	if (state == "goToTar")
 //	{
@@ -95,7 +101,7 @@ void Rules::explore()
 	final_vel.mag = 1;
 }
 
-void Rules::Charge()
+void Rules::charge()
 {
 	float dx;
 	float dy;
@@ -137,12 +143,12 @@ void Rules::rest()
 
 }
 
-bool Rules::changedPriorities()
-{
+bool Rules::changeState()
+{ //finds highest priority in list and coorespoinding state.
 	bool result;
 	float highest_prior = 0;
-	float highest_i;
-	for(int i = 0; i < model.priority->size(); i ++)
+	int highest_i;
+	for(int i = 0; i < UNUSED; i ++)
 	{
 		if(model.priority->at(i) > highest_prior)
 		{
@@ -150,9 +156,24 @@ bool Rules::changedPriorities()
 			highest_i = i;
 		}
 	}
-	if(highest_i != model.prev_highest_i)
+#if DEBUG_schange
+	std::cout<<"==========Pre adjustment===========\n";
+	std::cout<<"state: "<<int(state)<<std::endl;
+	std::cout<<"highest_i: "<<highest_i<<std::endl;
+	std::cout<<"priority:  "<<highest_prior<<std::endl;
+	std::cout<<"=====================\n";
+#endif
+	if(highest_i != (int)state) //if a different state has higher priority
 	{
 		result = true;
+		state = (State)highest_i; //this has been verified to produce the correct output.
+#if DEBUG_schange
+		std::cout<<"==========Post adjustment===========\n";
+		std::cout<<"state: "<<int(state)<<std::endl;
+		std::cout<<"highest_i: "<<highest_i<<std::endl;
+		std::cout<<"priority:  "<<highest_prior<<std::endl;
+		std::cout<<"=====================\n";
+#endif
 	}
 	else
 	{
@@ -161,20 +182,39 @@ bool Rules::changedPriorities()
 	return result;
 }
 
-bool Rules::updateWaypoint() //priority recieved in order {charge, target, contour, rest}.
-{
+bool Rules::updateWaypoint() //checks if action should be taken (if near goT0 or new rule has higher priority).
+{//priority received in order {REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}.
+
+	bool changed; //tells you if priorities of rules have changed.
+	bool take_action = false; //only made true if near waypoint, or if state priorities change.
+
 	float tolerance = 1; //arbitrary limit of how close the bot needs to get to a waypoint for it to count as reaching it.
 	std::pair<float,float> waypoint = model.transformFir(model.goTo.x,model.goTo.y);
 	float r = sqrt(pow(waypoint.first - model.cur_pose.x,2) + pow(waypoint.second - model.cur_pose.y,2));
+
 	if(r<tolerance)
 	{
-	//pick new rule
-	}else if(changedPriorities())
-	{
-		//priorities changed
+		changed = changeState();
+		take_action = true;
+		std::cout<<(changed? "true" : "false")<<std::endl;
 	}
-
-//	model.priority->at(i)
+	else if(changeState())
+	{
+		changed = true;
+		take_action = true;
+	}
+	if(take_action)
+	{
+		switch((int)state)
+		{
+			case 1: charge();
+			case 2:	findContour();
+			case 3: goToTar();
+			case 4: explore();
+			default: rest();
+		}
+	}
+	return take_action;
 }
 //-----------------------------------------------------------------------------------------
 
@@ -390,5 +430,14 @@ float Rules::checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot)
 	else
 	{
 		return calcDis(adj_x_int, adj_y_int, _x_int, _y_int);
+	}
+}
+
+void Rules::checkForProblems()
+{
+	if(model.priority->size() != (int)UNUSED)
+	{
+		std::cout<<"--------------ERROR: priority vector from <hawk_sim> does not have "
+				"the priorities for each state in <enum State>------------------"<<std::endl;
 	}
 }

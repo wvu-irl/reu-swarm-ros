@@ -30,13 +30,18 @@ public:
 
 	Rules(Model _model);
 
-	enum State{REST, CHARGE, CONTOUR, TARGET, EXPLORE};
+	enum State{REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}; // always keep UNUSED at the back of the array.
 	State state;
 	std::string collision_state;
 	AliceStructs::vel final_vel;
 	std::vector<float> testers;
 	Model model;
 	float margin = 2*model.SIZE + model.SAFE_DIS;
+
+	/*
+	 * Determines which state Alice is in
+	 */
+	AliceStructs::vel stateLoop(Model &_model);
 
 	/*
 	 * Checks whether there's an obstacle in the robot's path
@@ -59,7 +64,15 @@ public:
 	 */
 	bool checkBattery(std::string state);
 
-	bool changedPriorities(); //checks if the highest prior rule has changed.
+	/*
+	 * function to check for potential pit falls. Add cases for hard to find bugs.
+	 */
+	void checkForProblems();
+
+	/*
+	 * checks if the highest priority rule has changed.
+	 */
+	bool changeState();
 
 	/*
 	 * Finds an adjusted angle to drive at given a set of blocked zones
@@ -87,11 +100,6 @@ public:
 	void avoidNeighbors();
 
 	/*
-	 * Makes Alice go to a target
-	 */
-	void goToTar();
-
-	/*
 	 * Prevents Alice from hitting obstacles or other robots
 	 */
 	void avoidCollisions();
@@ -102,18 +110,7 @@ public:
 	 * Returns true is the waypoint was changed.
 	 */
 	bool updateWaypoint();
-
-	/*
-	 * Determines which state Alice is in
-	 */
-	AliceStructs::vel stateLoop(Model &_model);
-
 	//============================================Priority Rules================================================================
-	/*
-	 * Makes Alice explore new territory
-	 */
-	void explore();
-
 	/*
 	 * Makes Alice stop moving
 	 */
@@ -122,12 +119,22 @@ public:
 	/*
 	 * Makes Alice find a charging station
 	 */
-	void Charge();
+	void charge();
 
 	/*
 	 * Makes Alice seek higher elevations
 	 */
 	void findContour();
+
+	/*
+	 * Makes Alice go to a target
+	 */
+	void goToTar();
+
+	/*
+	 * Makes Alice explore new territory
+	 */
+	void explore();
 	//=========================================================================================================================
 
 };

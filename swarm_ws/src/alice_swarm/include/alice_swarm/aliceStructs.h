@@ -108,7 +108,7 @@ typedef struct
 	std::vector<pnt> targets;
 	std::vector<flow> flows;
 	std::vector<wvu_swarm_std_msgs::charger> *chargers;
-	std::vector<float> *priority;
+	std::vector<float> *priority; //{REST, CHARGE, CONTOUR, TARGET, EXPLORE}
 	float xpos;
 	float ypos;
 	float contVal;

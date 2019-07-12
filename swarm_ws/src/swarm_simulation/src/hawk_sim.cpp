@@ -48,7 +48,7 @@ void Hawk_Sim::makePriority(ros::Publisher _pub)//creates chargers
 	if (first)
 	{
 		wvu_swarm_std_msgs::priority priority_msg;
-		priority_msg.priority = {0,1,2,3}; //{charge, target, contour, rest}
+		priority_msg.priority = {0,1,2,3,4}; //{REST, CHARGE, CONTOUR, TARGET, EXPLORE}
 
 		wvu_swarm_std_msgs::priorities priorities_msg;
 		for(int i = 0; i < num_bots; i ++)
@@ -75,7 +75,7 @@ void Hawk_Sim::run(ros::NodeHandle n) // begin here
 	ros::Rate loopRate(10);
 
 	int i = 0;
-	while (ros::ok() && i < 5000) // setup loop
+	while (ros::ok() && i < 7000) // setup loop
 	{
 		makeChargers(pub1);
 		makePriority(pub2);
