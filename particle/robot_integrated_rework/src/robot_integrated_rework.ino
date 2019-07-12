@@ -333,7 +333,7 @@ void loop() {
     if (theta>=0 && theta<=90 || theta>270){
         float tstep2=millis();
 
-        float l=((bCommand)-(aCommand)/yaw;
+        float l=((bCommand)-(aCommand)/yaw);
         error = atan2(sin(theta),cos(theta));
         dError=(error-oldError)/tStep;
         omega=kp*error+kd*dError;

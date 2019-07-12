@@ -2,7 +2,7 @@
 //       THIS IS A GENERATED FILE - DO NOT EDIT       //
 /******************************************************/
 
-#line 1 "/home/smart2/git/reu-swarm-ros/robot_integrated_rework/src/robot_integrated_rework.ino"
+#line 1 "/home/smart2/git/reu-swarm-ros/particle/robot_integrated_rework/src/robot_integrated_rework.ino"
 // This #include statement was automatically added by the Particle IDE.
 //#include <pid.h>
 
@@ -50,7 +50,7 @@ void obstacleAvoid();
 int getviconHeading();
 void getIMUHeading();
 void headingUpdate();
-#line 32 "/home/smart2/git/reu-swarm-ros/robot_integrated_rework/src/robot_integrated_rework.ino"
+#line 32 "/home/smart2/git/reu-swarm-ros/particle/robot_integrated_rework/src/robot_integrated_rework.ino"
 
 
 // FOR AN ARGON BOARD
@@ -355,7 +355,7 @@ void loop() {
     if (theta>=0 && theta<=90 || theta>270){
         float tstep2=millis();
 
-        float l=((bCommand)-(aCommand)/yaw);
+        float l=((bCommand)-(aCommand)/yaw;
         error = atan2(sin(theta),cos(theta));
         dError=(error-oldError)/tStep;
         omega=kp*error+kd*dError;
