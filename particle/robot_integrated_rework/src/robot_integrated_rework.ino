@@ -46,35 +46,18 @@ float theta = 0, pos = 10;
 float vicon_theta = 0, vicon_pos = 10;
 float imu_theta = 0, imu_pos = 10;
 
-unsigned long timer = 0;
-float timeStep = 0.001;
-int t1 = 0;
 
 // Pitch, Roll and Yaw values
 float pitch = 0;
 float roll = 0;
 float yaw = 0.001;
 float oldYaw = 0;
-
-float error = 0;
-float oldError = 0;
-float dError = 0;
-float omega = 0;
-float kp = 1;
-float kd = .07;
-float aCommand = 90;
-float bCommand = 90;
-float tStep = .01;
+float timeStep = 0.001;
+int t1=0;
 
 struct command
 {
     char str[32];
-};
-
-struct heading
-{
-    float r;
-    float theta;
 };
 
 Servo myservoB, myservoA; //creating servo object
@@ -82,10 +65,12 @@ Servo myservoB, myservoA; //creating servo object
 byte server[] = {192, 168, 10, 187};
 // MPU variables:
 
+/*
 void handler(const char *topic, const char *data)
 {
     Serial.println("received " + String(topic) + ": " + String(data));
 }
+*/
 
 MPU6050 accelgyro;
 int16_t ax, ay, az;
@@ -162,28 +147,14 @@ void loop()
         Serial.print("\tTH: ");
         Serial.print(theta);
 
+        //Attempt at modifying pereira stuff to relative frame
+        float v = 3 * cos(theta * 3.14 / 180);
+        float w = 2 * sin(theta * 3.14 / 180);
+
         if (theta >= 0 && theta <= 90 || theta > 270)
         {
-            float tstep2 = millis();
-
-            float l = ((bCommand) - (aCommand) / yaw);
-            error = atan2(sin(theta), cos(theta));
-            dError = (error - oldError) / tStep;
-            omega = kp * error + kd * dError;
-            if (theta < 180)
-            {
-                aCommand = -(omega / l) + bCommand;
-            }
-            else
-            {
-                bCommand = (omega / l) + aCommand;
-            }
-            //Acommand=90+10*(v-w);
-            //Bcommand=90-10*(v+w);
-            myservoA.write(aCommand + 90); //180
-            myservoB.write(bCommand - 90); //0
-            float tstep1 = tstep2;
-            tStep = tstep2 - tstep1;
+            myservoA.write(90 + 10 * (v - w));
+            myservoB.write(90 - 10 * (v + w));
         }
         else if (theta > 90 && theta <= 180)
         { //we still want this because we want linear velocity to be non-negative ( change for pd)
@@ -192,6 +163,11 @@ void loop()
         else if (theta > 180 && theta < 270)
         {
             driveTurnCW(theta);
+        }
+        else//if somehow the command is invalid
+        { 
+            myservoA.write(90);
+            myservoB.write(90); 
         }
 
         Serial.print("Finish drive command check client");
@@ -230,26 +206,17 @@ void driveTurnCW(float theta)
 {
     myservoB.write(170);
     myservoA.write(110);
-    delay(10);
 }
 
 void driveTurnCCW(float theta)
 {
     myservoB.write(70);
     myservoA.write(0);
-    delay(10);
 }
 
-void driveStraight(float vel)
-{
-    myservoA.write(180);
-    myservoB.write(0);
-    delay(20);
-}
 
 void sysStat()
 {
-
     if (client.connected())
     {
         tft.fillCircle(83, 31, 4, GREEN);
@@ -282,6 +249,8 @@ void battStat()
     }
 }
 
+
+/*
 void driveStat(float theta, float pos)
 {
     tft.setTextSize(1);
@@ -328,6 +297,7 @@ void oledPrint(float theta, float pos)
     Serial.println("End ");
     Serial.println(millis());
 }
+*/
 
 void oledArrow(float theta)
 {
@@ -350,6 +320,7 @@ void ledChangeHandler(uint8_t r, uint8_t g, uint8_t b)
     strip.show();
 }
 
+/* 
 void obstacleAvoid()
 {
     myservoB.write(180);
@@ -362,6 +333,7 @@ void obstacleAvoid()
     myservoA.write(180);
     delay(500);
 }
+*/
 
 int getviconHeading()
 {
