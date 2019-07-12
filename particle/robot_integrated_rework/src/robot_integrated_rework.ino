@@ -13,6 +13,8 @@ TCPClient client;
 #include "spark_wiring.h"
 #include <Particle.h>
 
+#include "screen.h"
+
 // FOR AN ARGON BOARD
 #define mosi D12 //blue - DIN - MO on Argon Board
 #define sclk D13 //yellow
@@ -72,21 +74,41 @@ void handler(const char *topic, const char *data)
 }
 */
 
-MPU6050 accelgyro;
+MPU6050 accelGyro;
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
-// Option 1: Hardware SPI - uses some analog pins, but much faster
-//Adafruit_SSD1351 tft = Adafruit_SSD1351(cs, dc, rst);
-
 // Option 2: Software SPI - use any pins but a little slower
 Adafruit_SSD1351 tft = Adafruit_SSD1351(cs, dc, mosi, sclk, rst);
+// TODO: initialize our own Screen class instead
+// Screen screenObject(cs, dc, mosi, sclk, rst);
 
 void setup(void)
 {
     Serial.begin(9600);
     waitUntil(WiFi.ready);
     Serial.println("Connected to wifi");
+
+    // Initialize screen
+    // screenObject.init();
+
+    // Set up pins
+    // pinSetup();
+
+    // Initialize tcp client
+    // tcpClient.init(ip, port, "NE");
+
+    // Initialize drivetrain
+    // diffDrive.init()
+
+    // Initialize neopixel
+    strip.begin();
+    strip.show();
+
+    // Initialize IMU
+    Wire.begin();
+    accelGyro.initialize();
+
     tft.begin();
     tft.fillScreen(BLACK);
 
@@ -121,22 +143,22 @@ void setup(void)
     myservoB.attach(A1); //attaching servos to pins
     myservoA.attach(A2);
 
-    Wire.begin();
+    // Wire.begin();
 
     Serial.println("Initializing I2C devices...");
 
-    accelgyro.initialize();
+    // accelGyro.initialize();
 
     // Cerify the connection:
     Serial.println("Testing device connections...");
-    Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+    Serial.println(accelGyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
 
     testThread = Thread("test", threadFunction);
 }
 
 void loop()
 {
-    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    accelGyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
     Serial.println(gz);
 
     while (client.connected())
@@ -368,7 +390,7 @@ void getIMUHeading()
     int t2 = millis();
     timeStep = t2 - t1;
     float oldYaw = gz / 131;
-    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    accelGyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
     float yaw = gz / 131;
 
     imu_theta = theta - ((yaw + oldYaw) / 2) * timeStep * .001;
