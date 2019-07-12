@@ -53,11 +53,6 @@ float theta = 0, pos = 10;
 float vicon_theta = 0, vicon_pos = 10;
 float imu_theta = 0, imu_pos = 10;
 
-struct command
-{
-    char str[32];
-};
-
 byte server[] = {192, 168, 10, 187};
 // MPU variables:
 
