@@ -1,18 +1,23 @@
-/*
- * Project thread_test_1
- * Description:
- * Author:
- * Date:
+/* TEST 1
+ * QUESTION: Can while loops replace waitFor?
+ * RESULTS: Setup prints after WiFi is connected, loop prints immediately after.
+ *     Thus, while can replace waitFor. Further, loop() is not called until
+ *     setup() has returned, even with threading on.
  */
 
-// setup() runs once, when the device is first turned on.
-void setup() {
-  // Put initialization like pinMode and begin functions here.
+SYSTEM_THREAD(ENABLED)
 
+int count = 0;
+
+void setup() {
+  while(!WiFi.ready()) count++;
+  Serial.begin(9600);
+  Serial.print("setup: ");
+  Serial.println(count); 
 }
 
-// loop() runs over and over again, as quickly as it can execute.
 void loop() {
-  // The core of your code will likely live here.
-
+  Serial.print("loop: ");
+  Serial.println(count);
+  while(true); // hang here forever
 }
