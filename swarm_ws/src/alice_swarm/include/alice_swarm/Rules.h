@@ -53,7 +53,24 @@ public:
 	 */
 	bool checkBlocked();
 
-	//std::string checkBattery(std::string state);//checks to make sure battery has sufficient charge.
+	/*
+	* Checks whether two robots will collide
+	*/
+	float checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot);
+
+	/*
+	 * The part of obstacle avoidance that always runs. Checks if any part of the environment has changed enough (or the robot's divergence from the predicted path)
+	 * require a recalculation of the path.
+	 */
+	bool checkCollisions();
+
+	/*
+	 * Checks that the battery is not bellow acceptable levels.
+	 */
+	bool checkBattery(std::string state);
+
+	bool changedPriorities(); //checks if the highest prior rule has changed.
+
 	/*
 	 * Finds an adjusted angle to drive at given a set of blocked zones
 	 */
@@ -65,31 +82,14 @@ public:
 	std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> findDeadZones();
 
 	/*
+	 * Used to update the distance and direction of the command vector, without changing the true way-point.
+	 */
+	void updateVel(AliceStructs::vel *_fv);
+
+	/*
 	 * Avoids other robots dynamically
 	 */
 	bool avoidNeighbors();
-
-//===================================================================================================================\\
-
-	/*
-	 * Makes Alice explore new territory
-	 */
-	void explore();
-
-	/*
-	 * Makes Alice stop moving
-	 */
-	void rest();
-
-	/*
-	 * Prevents Alice from hitting obstacles or other robots
-	 */
-	void avoidCollisions();
-
-	/*
-	 * Makes Alice find a charging station
-	 */
-	void Charge();
 
 	/*
 	 * Makes Alice go to a target
@@ -97,20 +97,9 @@ public:
 	void goToTar();
 
 	/*
-	 * Makes Alice seek higher elevations
+	 * Prevents Alice from hitting obstacles or other robots
 	 */
-	void findContour();
-
-	/*
-	 * The part of obstacle avoidance that always runs. Checks if any part of the environment has changed enough (or the robot's divergence from the predicted path)
-	 * require a recalculation of the path.
-	 */
-	bool checkCollisions();
-
-	/*
-	 * Used to update the distance and direction of the command vector, without changing the true way-point.
-	 */
-	void updateVel();
+	void avoidCollisions();
 
 	/*
 	 * Changes the way-point's true location. Most simplistically, does this if the way point has been reached.
@@ -124,10 +113,27 @@ public:
 	 */
 	AliceStructs::vel stateLoop(Model &_model);
 
+	//============================================Priority Rules================================================================
 	/*
-	 * Checks whether two robots will collide
+	 * Makes Alice explore new territory
 	 */
-	float checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot);
+	void explore();
+
+	/*
+	 * Makes Alice stop moving
+	 */
+	void rest();
+
+	/*
+	 * Makes Alice find a charging station
+	 */
+	void Charge();
+
+	/*
+	 * Makes Alice seek higher elevations
+	 */
+	void findContour();
+	//=========================================================================================================================
 
 };
 
