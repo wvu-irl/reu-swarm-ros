@@ -49,9 +49,9 @@ void threadFunction(void);
 DiffDrive diff_drive;
 IMUCalibrate imu;
 
-// float theta = 0, pos = 10;
-// float vicon_theta = 0, vicon_pos = 10;
-// float imu_theta = 0, imu_pos = 10;
+float theta = 0, pos = 10;
+float vicon_theta = 0, vicon_pos = 10;
+float imu_theta = 0, imu_pos = 10;
 
 struct command
 {
@@ -141,7 +141,7 @@ void loop()
 {
     while (client.connected())
     {
-        headingUpdate();
+      //  headingUpdate();
         Serial.print("\tR: ");
         Serial.print(pos);
         Serial.print("\tTH: ");
@@ -327,31 +327,19 @@ int getviconHeading()
     return bytes;
 }
 
-void getIMUHeading()
-{
-
-    int t2 = millis();
-    timeStep = t2 - t1;
-    float oldYaw = gz / 131;
-    accelGyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-    float yaw = gz / 131;
-
-    imu_theta = theta - ((yaw + oldYaw) / 2) * timeStep * .001;
-    t1 = t2;
-}
-void headingUpdate()
-{
-    getIMUHeading();
-    if (getviconHeading() < 1)
-    {
-        Serial.println("imu heading");
-        pos = imu_pos;
-        theta = imu_theta;
-    }
-    else
-    {
-        Serial.println("Vicon Heading");
-        pos = vicon_pos;
-        theta = vicon_theta;
-    }
-}
+// void headingUpdate()
+// {
+//     getIMUHeading();
+//     if (getviconHeading() < 1)
+//     {
+//         Serial.println("imu heading");
+//         pos = imu_pos;
+//         theta = imu_theta;
+//     }
+//     else
+//     {
+//         Serial.println("Vicon Heading");
+//         pos = vicon_pos;
+//         theta = vicon_theta;
+//     }
+// }
