@@ -7,8 +7,6 @@
 #include <iostream>
 #include <bits/stdc++.h>
 
-#define DEBUG_schange 0
-
 Rules::Rules()
 {
 	state = REST;
@@ -24,54 +22,15 @@ Rules::Rules(Model _model) :
 
 AliceStructs::vel Rules::stateLoop(Model &_model)
 {
+
 	model = _model; //do not comment this out. Doing so causes Ragnarok.
+//	if (updateWaypoint()){avoidCollisions();}
+//	updateVel(&final_vel);
 
-	checkForProblems(); //feel free to add hard to find casees to this function. Will save debugging time.
-//	checkBattery(state);
-
-	if (updateWaypoint())
-	{
-		avoidCollisions();
-	}
-//	checkBlocked();
-//	if (state == "goToTar")
-//	{
-//		goToTar();
-//	}
-//	else if (state == "blocked")
-//	{
-//		avoidCollisions();
-//	}
-//
-//	else if (state == "needs_charging")
-//	{
-//		Charge();
-//	}
-//	else if(state == "charging")
-
-//	checkBlocked();
-//	if (state == "goToTar")
-//	{
-//		goToTar();
-//	}
-//	else if (state == "blocked")
-//	{
-//		avoidCollisions();
-//	}/*
-//	case charge:
-//		Charge();
-//		break;
-//	case find_food:
-//		findFood();
-//		break;
-//	case find_updraft:
-//		findUpdraft();
-//		break; */
-
-	findContour();
+	findDeadZones();
+	//findContour();
 	//explore();
-	updateVel(&final_vel);
-
+	//	updateVel(&final_vel);
 	return final_vel;
 }
 
@@ -88,6 +47,11 @@ void Rules::avoidCollisions()
 		}
 		checker = avoidNeighbors();
 	}
+}
+
+void Rules::rest()
+{
+
 }
 
 void Rules::explore()
@@ -108,13 +72,13 @@ void Rules::explore()
 	final_vel.mag = 1;
 }
 
-void Rules::charge()
+void Rules::Charge()
 {
 	float dx;
 	float dy;
 
 	float min_sep = 1000.0;
-	float check_sep; //sep distance
+	float check_sep;
 	int closest_pos = -1;
 
 	for (int i=0; i < model.chargers->size(); i++)
@@ -145,83 +109,9 @@ bool Rules::checkCollisions()
 
 }
 
-void Rules::rest()
+bool Rules::updateWaypoint()
 {
 
-}
-
-bool Rules::changeState()
-{ //finds highest priority in list and coorespoinding state.
-	bool result;
-	float highest_prior = 0;
-	int highest_i;
-	for(int i = 0; i < UNUSED; i ++)
-	{
-		if(model.priority->at(i) > highest_prior)
-		{
-			highest_prior = model.priority->at(i);
-			highest_i = i;
-		}
-	}
-#if DEBUG_schange
-	std::cout<<"==========Pre adjustment===========\n";
-	std::cout<<"state: "<<int(state)<<std::endl;
-	std::cout<<"highest_i: "<<highest_i<<std::endl;
-	std::cout<<"priority:  "<<highest_prior<<std::endl;
-	std::cout<<"=====================\n";
-#endif
-	if(highest_i != (int)state) //if a different state has higher priority
-	{
-		result = true;
-		state = (State)highest_i; //this has been verified to produce the correct output.
-#if DEBUG_schange
-		std::cout<<"==========Post adjustment===========\n";
-		std::cout<<"state: "<<int(state)<<std::endl;
-		std::cout<<"highest_i: "<<highest_i<<std::endl;
-		std::cout<<"priority:  "<<highest_prior<<std::endl;
-		std::cout<<"=====================\n";
-#endif
-	}
-	else
-	{
-		result = false;
-	}
-	return result;
-}
-
-bool Rules::updateWaypoint() //checks if action should be taken (if near goT0 or new rule has higher priority).
-{//priority received in order {REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}.
-
-	bool changed; //tells you if priorities of rules have changed.
-	bool take_action = false; //only made true if near waypoint, or if state priorities change.
-
-	float tolerance = 1; //arbitrary limit of how close the bot needs to get to a waypoint for it to count as reaching it.
-	std::pair<float,float> waypoint = model.transformFir(model.goTo.x,model.goTo.y);
-	float r = sqrt(pow(waypoint.first - model.cur_pose.x,2) + pow(waypoint.second - model.cur_pose.y,2));
-
-	if(r<tolerance)
-	{
-		changed = changeState();
-		take_action = true;
-		std::cout<<(changed? "true" : "false")<<std::endl;
-	}
-	else if(changeState())
-	{
-		changed = true;
-		take_action = true;
-	}
-	if(take_action)
-	{
-		switch((int)state)
-		{
-			case 1: charge();
-			case 2:	findContour();
-			case 3: goToTar();
-			case 4: explore();
-			default: rest();
-		}
-	}
-	return take_action;
 }
 //-----------------------------------------------------------------------------------------
 
@@ -342,7 +232,7 @@ void Rules::findAngle(float tf, std::vector<std::pair<std::pair<float, float>, A
 		}
 	}
 	std::pair<float, AliceStructs::obj> final;
-	final.first = 0;
+	final.first = tf;
 	if (right.size() > 0 && left.size() > 0)
 	{
 		for (auto& to_check : right)
@@ -380,9 +270,17 @@ void Rules::findAngle(float tf, std::vector<std::pair<std::pair<float, float>, A
 			}
 		}
 	}
-	if (final.first != 0)
+	if (final.first != tf)
 	{
-
+		float adj_x = model.cur_pose.x - final.second.x_off;
+		float adj_y = model.cur_pose.y - final.second.y_off;
+		float m = tan(final.first);
+		std::pair<float, float> go_to_first = std::make_pair( //The first of these isn't properly simplified, since it isn't ~that~ important
+				-(2*adj_x/(m*pow(final.second.x_rad, 2)) - 2*adj_y/(pow(m, 2)*pow(final.second.x_rad, 2)))/(2*(1/(pow(m, 2)*pow(final.second.x_rad, 2)) + 1/pow(final.second.y_rad, 2))),
+				-(2*m*(adj_y - m*adj_x)/pow(final.second.y_rad, 2))/(2*(1/pow(final.second.x_rad, 2) + pow(m, 2)/pow(final.second.y_rad, 2))));
+		float to_add = abs(sin(final.first))*calcDis(go_to_first.first, go_to_first.second, model.cur_pose.x, model.cur_pose.y);
+		model.goTo.x = go_to_first.first + sin(final.first)*to_add;
+		model.goTo.y = go_to_first.second + cos(final.first)*to_add;
 	}
 }
 
@@ -393,19 +291,9 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 	{
 		float temp_a_x = model.cur_pose.x - obs.x_off;
 		float temp_a_y = model.cur_pose.y - obs.y_off;
-		std::pair<float, float> aoe = calcQuad((pow(temp_a_y, 2) - pow(obs.y_rad, 2)), -2 * temp_a_x * temp_a_y, pow(temp_a_x, 2) - pow(obs.x_rad, 2));
-		float plus = (2 * temp_a_x * temp_a_y + //This is the quadratic formula. It's just awful
-				pow(pow(-2 * temp_a_x * temp_a_y, 2)
-								- 4 * (pow(temp_a_y, 2) - pow(obs.y_rad, 2)) * (pow(temp_a_x, 2) - pow(obs.x_rad, 2)), 0.5))
-				/ (2 * (pow(temp_a_x, 2) - pow(obs.y_rad, 2)));
-		float neg = (2 * temp_a_x * temp_a_y - //This is the quadratic formula again, this time the minus half
-				pow(pow(-2 * temp_a_x * temp_a_y, 2)
-								- 4 * (pow(temp_a_y, 2) - pow(obs.y_rad, 2)) * (pow(temp_a_x, 2) - pow(obs.x_rad, 2)), 0.5))
-				/ (2 * (pow(temp_a_x, 2) - pow(obs.y_rad, 2)));
-		std::cout << aoe.first << std::endl;
-		aoe.first = plus;
-		std::cout << aoe.first << std::endl;
-		aoe.second = atan(neg);
+		std::pair<float, float> aoe = calcQuad(pow(temp_a_x, 2) - pow(obs.x_rad, 2), -2 * temp_a_x * temp_a_y, pow(temp_a_y, 2) - pow(obs.y_rad, 2));
+		aoe.first = atan(aoe.first);
+		aoe.second = atan(aoe.second);
 		std::pair<std::pair<float, float>, AliceStructs::obj> to_push;
 		to_push.first = aoe;
 		to_push.second = obs;
@@ -429,18 +317,15 @@ bool Rules::avoidNeighbors()
 				calcDis(x_int, y_int, bot.x, bot.y)/model.MAX_LV);
 		if (abs(self_tti - bot_tti) < checkTiming(x_int, y_int, bot)/model.MAX_LV)
 		{
+			std::pair<float, float> slopes = calcQuad(pow(model.cur_pose.x - x_int, 2) - pow(margin, 2),
+					2*(model.cur_pose.x - x_int)*(model.cur_pose.y - y_int),
+					pow(model.cur_pose.y - y_int, 2) - pow(margin, 2));
 			std::pair<float, float> new_tar_1;
-			float a_slope = (2*(model.cur_pose.x - x_int)*(model.cur_pose.y - y_int) -
-					pow(pow(2*(model.cur_pose.x - x_int)*(model.cur_pose.y - y_int), 2) - 4*(pow(model.cur_pose.x - x_int, 2) - pow(margin, 2))*(pow(model.cur_pose.y - y_int, 2) - pow(margin, 2)), 0.5))/
-					2*(pow(model.cur_pose.x - x_int, 2) - pow(margin, 2));
-			new_tar_1.first = (a_slope*model.cur_pose.x - model.cur_pose.y + x_int/a_slope + y_int)/(1/a_slope + a_slope);
-			new_tar_1.second = (a_slope*y_int + x_int + model.cur_pose.y/a_slope - model.cur_pose.x)/(1/a_slope + a_slope);
+			new_tar_1.first = (slopes.first*model.cur_pose.x - model.cur_pose.y + x_int/slopes.first + y_int)/(1/slopes.first + slopes.first);
+			new_tar_1.second = (slopes.first*y_int + x_int + model.cur_pose.y/slopes.first - model.cur_pose.x)/(1/slopes.first + slopes.first);
 			std::pair<float, float> new_tar_2;
-			float b_slope = (2*(model.cur_pose.x - x_int)*(model.cur_pose.y - y_int) +
-					pow(pow(2*(model.cur_pose.x - x_int)*(model.cur_pose.y - y_int), 2) - 4*(pow(model.cur_pose.x - x_int, 2) - pow(margin, 2))*(pow(model.cur_pose.y - y_int, 2) - pow(margin, 2)), 0.5))/
-					2*(pow(model.cur_pose.x - x_int, 2) - pow(margin, 2));
-			new_tar_2.first = (a_slope*model.cur_pose.x - model.cur_pose.y + x_int/a_slope + y_int)/(1/a_slope + a_slope);
-			new_tar_2.second = (a_slope*y_int + x_int + model.cur_pose.y/a_slope - model.cur_pose.x)/(1/a_slope + a_slope);
+			new_tar_2.first = (slopes.second*model.cur_pose.x - model.cur_pose.y + x_int/slopes.second + y_int)/(1/slopes.second + slopes.second);
+			new_tar_2.second = (slopes.second*y_int + x_int + model.cur_pose.y/slopes.second - model.cur_pose.x)/(1/slopes.second + slopes.second);
 			std::pair<float, float> new_tar;
 			if (calcDis(new_tar_1.first, new_tar_1.second, bot.x, bot.y) < calcDis(new_tar_2.first, new_tar_2.second, bot.x, bot.y))
 			{
@@ -476,14 +361,5 @@ float Rules::checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot)
 	else
 	{
 		return calcDis(adj_x_int, adj_y_int, _x_int, _y_int);
-	}
-}
-
-void Rules::checkForProblems()
-{
-	if(model.priority->size() != (int)UNUSED)
-	{
-		std::cout<<"--------------ERROR: priority vector from <hawk_sim> does not have "
-				"the priorities for each state in <enum State>------------------"<<std::endl;
 	}
 }
