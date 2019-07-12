@@ -50,6 +50,8 @@ find_package(catkin REQUIRED COMPONENTS
    cont_msg.msg
    charger.msg
    chargers.msg
+   priority.msg
+   priorities.msg
   )
 
 ## Generate added messages and services with any dependencies listed here

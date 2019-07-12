@@ -6,7 +6,7 @@
 	<node pkg="swarm_simulation"  type="virtual_objects" name="virtual_objects" output="screen"/>
 		
 	<!-- Launching hawk sim node -->
-	<node pkg="swarm_simulation"  type="Sim_Execute" name="hawk_simulation" output="screen"/>
+	<node pkg="swarm_simulation"  type="hawk_sim_execute" name="hawk_simulation" output="screen"/>
 	
 	<!-- TODO launch ALICE nodes -->
 	<node pkg="alice_swarm" type="AbsToRel" name="hub" output="screen"/>

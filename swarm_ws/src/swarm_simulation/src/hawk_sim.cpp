@@ -8,9 +8,13 @@ void Hawk_Sim::chargersCallback(const wvu_swarm_std_msgs::chargers &msg)
 {
 	temp_chargers = msg;
 }
+void Hawk_Sim::priorityCallback(const wvu_swarm_std_msgs::priorities &msg)
+{
+	temp_priorities = msg;
+}
 //=====================================================================
 
-//-------------initializer functions-----------------------------------
+//==========================initializer functions=====================================================================
 void Hawk_Sim::makeChargers(ros::Publisher _pub)//creates chargers
 {
 	if(first)
@@ -29,28 +33,52 @@ void Hawk_Sim::makeChargers(ros::Publisher _pub)//creates chargers
 			charger_vector.charger.push_back(temp_charger);
 		}
 		_pub.publish(charger_vector);
-		if(temp_chargers.charger.size() > 0){first = false;}
+		if(temp_chargers.charger.size() > 0)
+		{
+			first = false;
+		}
 	}else
 	{
 		_pub.publish(temp_chargers);
 	}
 }
-//---------------------------------------------------------------------
+void Hawk_Sim::makePriority(ros::Publisher _pub)//creates chargers
+{
+	int num_bots = 10;
+	if (first)
+	{
+		wvu_swarm_std_msgs::priority priority_msg;
+		priority_msg.priority = {0,1,2,3}; //{charge, target, contour, rest}
+
+		wvu_swarm_std_msgs::priorities priorities_msg;
+		for(int i = 0; i < num_bots; i ++)
+		{
+			priorities_msg.priorities.push_back(priority_msg);
+		}
+		_pub.publish(priorities_msg);
+	}else
+	{
+		_pub.publish(temp_priorities);
+	}
+}
+//========================================================================================================================
 
 void Hawk_Sim::run(ros::NodeHandle n) // begin here
 {
-	//Publisher
+	//Publishers
 	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::chargers > ("chargers", 1000); // pub to obstacles
+	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::priorities > ("priority", 1000); // pub to priority.
 
-  // subscribing
+  // subscribers
 	ros::Subscriber sub1 = n.subscribe("chargers", 1000, &Hawk_Sim::chargersCallback,this);
+	ros::Subscriber sub2 = n.subscribe("priority", 1000, &Hawk_Sim::priorityCallback,this);
 	ros::Rate loopRate(10);
 
-	makeChargers(pub1); //============changed for testing.=============
 	int i = 0;
-	while (ros::ok() && i < 10000) // setup loop
+	while (ros::ok() && i < 1000) // setup loop
 	{
 		makeChargers(pub1);
+		makePriority(pub2);
 		ros::spinOnce(); // spinning callbacks
 //    usleep(10);
 		i++; // incrementing counter
@@ -63,6 +91,7 @@ void Hawk_Sim::run(ros::NodeHandle n) // begin here
 	while (ros::ok()) // main loop
 	{
 		makeChargers(pub1); // publishing chargers
+		makePriority(pub2); //publishes priority
 		ros::spinOnce(); // spinning callbacks
 		loopRate.sleep();
 	}

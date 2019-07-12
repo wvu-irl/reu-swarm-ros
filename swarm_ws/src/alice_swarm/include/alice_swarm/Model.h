@@ -9,8 +9,6 @@
 #define MODEL_H
 
 #include "aliceStructs.h"
-#include "wvu_swarm_std_msgs/map.h"
-
 #include <wvu_swarm_std_msgs/map.h>
 
 class Model
@@ -39,13 +37,14 @@ public:
 	bool first;
 	ros::Time time;
 	float vision;
+	float prev_highest_i; //rule from last iteration with highest priority
 	float battery_lvl;
 
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
 	std::vector<AliceStructs::pnt> targets;
 	std::vector<wvu_swarm_std_msgs::charger> *chargers;
-//	std::vector<AliceStructs::charger> chargers;
+	std::vector<float> *priority;
 
 	AliceStructs::pnt goTo;
 

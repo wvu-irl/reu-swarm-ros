@@ -25,7 +25,6 @@ AliceStructs::vel Rules::stateLoop(Model &_model)
 
 	model = _model; //do not comment this out. Doing so causes Ragnarok.
 	if (updateWaypoint()){avoidCollisions();}
-	updateVel(&final_vel);
 //
 //	state = checkBattery(state);
 //	checkBlocked();
@@ -65,6 +64,7 @@ AliceStructs::vel Rules::stateLoop(Model &_model)
 
 	findContour();
 	//explore();
+	updateVel(&final_vel);
 
 	return final_vel;
 }
@@ -75,11 +75,6 @@ void Rules::avoidCollisions()
 	float tf = atan2(model.goTo.y, model.goTo.x);
 	std::vector<std::pair<float, float>> dead_zones = findDeadZones();
 	findAngle(tf, dead_zones);
-}
-
-void Rules::rest()
-{
-
 }
 
 void Rules::explore()
@@ -106,7 +101,7 @@ void Rules::Charge()
 	float dy;
 
 	float min_sep = 1000.0;
-	float check_sep;
+	float check_sep; //sep distance
 	int closest_pos = -1;
 
 	for (int i=0; i < model.chargers->size(); i++)
@@ -137,9 +132,49 @@ bool Rules::checkCollisions()
 
 }
 
-bool Rules::updateWaypoint()
+void Rules::rest()
 {
 
+}
+
+bool Rules::changedPriorities()
+{
+	bool result;
+	float highest_prior = 0;
+	float highest_i;
+	for(int i = 0; i < model.priority->size(); i ++)
+	{
+		if(model.priority->at(i) > highest_prior)
+		{
+			highest_prior = model.priority->at(i);
+			highest_i = i;
+		}
+	}
+	if(highest_i != model.prev_highest_i)
+	{
+		result = true;
+	}
+	else
+	{
+		result = false;
+	}
+	return result;
+}
+
+bool Rules::updateWaypoint() //priority recieved in order {charge, target, contour, rest}.
+{
+	float tolerance = 1; //arbitrary limit of how close the bot needs to get to a waypoint for it to count as reaching it.
+	std::pair<float,float> waypoint = model.transformFir(model.goTo.x,model.goTo.y);
+	float r = sqrt(pow(waypoint.first - model.cur_pose.x,2) + pow(waypoint.second - model.cur_pose.y,2));
+	if(r<tolerance)
+	{
+	//pick new rule
+	}else if(changedPriorities())
+	{
+		//priorities changed
+	}
+
+//	model.priority->at(i)
 }
 //-----------------------------------------------------------------------------------------
 

@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "wvu_swarm_std_msgs/alice_mail_array.h"
 #include "wvu_swarm_std_msgs/robot_command_array.h"
+#include <wvu_swarm_std_msgs/priorities.h>
 #include "wvu_swarm_std_msgs/map.h"
 #include "alice_swarm/Hub.h"
 #include "alice_swarm/Alice.h"
@@ -12,10 +13,16 @@
 #include <chrono>
 
 wvu_swarm_std_msgs::alice_mail_array temp_mail;
+wvu_swarm_std_msgs::priorities temp_priorities;
 
 void aliceCallback(const wvu_swarm_std_msgs::alice_mail_array &msg)
 {
 	temp_mail = msg;
+}
+
+void prioritiesCallback(const wvu_swarm_std_msgs::priorities &msg)
+{
+	temp_priorities = msg;
 }
 
 int main(int argc, char **argv)
@@ -26,11 +33,13 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "AliceBrain");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("alice_mail_array", 1000, aliceCallback);
+	ros::Subscriber sub2 = n.subscribe("priority", 1000, prioritiesCallback);
 
 	ros::Rate loopRate(50);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::robot_command_array > ("final_execute", 1000);
 	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::map > ("info_map", 1000);
 	ros::Publisher pub3 = n.advertise <wvu_swarm_std_msgs::chargers> ("chargers", 1000);
+//	ros::Publisher pub4 = n.advertise <wvu_swarm_std_msgs::priorities> ("priority", 1000);
 	ros::ServiceClient client = n.serviceClient < alice_swarm::get_maps > ("get_maps");
 
 	while (ros::ok())
@@ -48,9 +57,11 @@ int main(int argc, char **argv)
 
 		for (int i = 0; i < temp_mail.mails.size(); i++)
 		{
+			//==gives each robot the relative data it needs, whilst also creating the alice's
 			alice_map[temp_mail.mails.at(i).name].updateModel(temp_mail.mails.at(i),maps,ids,
-						temp_mail.chargers); //gives each robot the relative data it needs, whilst also creating the alice's
+						temp_mail.chargers, temp_priorities.priorities.at(i).priority);
 		}
+
 		//One alice is selected to send her map out to the rest of them; less robots means a particular robot's map is sent more often
 //		if (alice_map.size() != 0)
 //		{
@@ -90,23 +101,14 @@ int main(int argc, char **argv)
 		}
 		pub.publish(execute);
 
-//		=====================================================================================================================================
+//	=====================================================================================================================================
 		wvu_swarm_std_msgs::chargers chargers_to_publish;
 		chargers_to_publish.charger = temp_mail.chargers;
-//		std::cout<<"+++++++++++++++++++++Testing the output++++++++++++++++\n";
-////
-//		for (int j = 0; j < temp_mail.chargers.size(); j ++)
-//		{
-//			std::cout<<"a"<<j<<": "<<temp_mail.chargers.at(j).x<<","<<temp_mail.chargers.at(j).y<<" | "
-//					<< (temp_mail.chargers.at(j).occupied ? "true" : "false") <<std::endl;
-//		}
-//		std::cout<<"+++++++++++++++++++++Done++++++++++++++++\n";
-//
 		if(temp_mail.chargers.size()>0) //publishes when there is actually stuff to publish.
 		{
 			pub3.publish(chargers_to_publish);
 		}
-		//======================================================================================================================================
+//	======================================================================================================================================
 
 //		std::cout << "execute published" << std::endl;
 		auto stop = std::chrono::high_resolution_clock::now();

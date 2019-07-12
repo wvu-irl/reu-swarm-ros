@@ -139,7 +139,9 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 	}
 
 	chargers = _toAdd.chargers;
-	int i=0;
+	priority = _toAdd.priority;
+
+//	int i=0;
 //	for (auto& charger : _toAdd.chargers)
 //	{
 //		chargers.push_back(charger);

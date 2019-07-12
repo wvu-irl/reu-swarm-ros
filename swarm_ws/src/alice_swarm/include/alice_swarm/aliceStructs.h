@@ -107,8 +107,8 @@ typedef struct
 	std::vector<obj> obstacles;
 	std::vector<pnt> targets;
 	std::vector<flow> flows;
-//	std::vector<charger> chargers;
 	std::vector<wvu_swarm_std_msgs::charger> *chargers;
+	std::vector<float> *priority;
 	float xpos;
 	float ypos;
 	float contVal;
@@ -118,7 +118,7 @@ typedef struct
 	float battery_lvl;
 	ros::Time time;
 } mail;
-}
-;
+
+};
 
 #endif
