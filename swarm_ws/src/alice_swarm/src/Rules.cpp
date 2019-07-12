@@ -291,7 +291,7 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 	{
 		float temp_a_x = model.cur_pose.x - obs.x_off;
 		float temp_a_y = model.cur_pose.y - obs.y_off;
-		std::pair<float, float> aoe = calcQuad(pow(temp_a_x, 2) - pow(obs.x_rad, 2), -2 * temp_a_x * temp_a_y, pow(temp_a_y, 2) - pow(obs.y_rad, 2));
+		std::pair<float, float> aoe = calcQuad(pow(temp_a_x, 2) - pow(obs.x_rad + model.SIZE + model.SAFE_DIS, 2), -2 * temp_a_x * temp_a_y, pow(temp_a_y, 2) - pow(obs.y_rad + model.SIZE + model.SAFE_DIS, 2));
 		aoe.first = atan(aoe.first);
 		aoe.second = atan(aoe.second);
 		std::pair<std::pair<float, float>, AliceStructs::obj> to_push;
