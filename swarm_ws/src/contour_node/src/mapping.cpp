@@ -13,19 +13,10 @@
 // toggles verbose option
 #define DEBUG 0
 
-// toggles using testing equations
-#define TEST_EQU 0
-
-// toggles running NUI track test code
-#define TEST_NUI 1
-
-// toggles using a universe object to contain map data
-#define RUN_UNIVERSE 1
-
 // toggles if the main loop has a rate
 #define RATE_LIMIT 1
 
-#if DEBUG || TEST_EQU
+#if DEBUG
 #include <iostream>
 #endif
 
@@ -50,8 +41,7 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 	// Check if no solution
 	if (_alpha.z == _beta.z)
 	{
-		printf(
-				"\033[1;31mhand_pointer: \033[0;31mNo solution for intercept\033[0m\n");
+		printf("\033[1;31mhand_pointer: \033[0;31mNo solution for intercept\033[0m\n");
 		ret.x = 0;
 		ret.y = 0;
 		ret.z = 0;
@@ -70,7 +60,6 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 	return ret;
 }
 
-#if RUN_UNIVERSE
 static Universe universe; // creates a universe
 
 // subscriber callback to add things to the universe
