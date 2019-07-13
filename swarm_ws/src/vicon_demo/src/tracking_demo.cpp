@@ -273,6 +273,7 @@ double processBot(wvu_swarm_std_msgs::robot_command_array &outputMsg, std::strin
         degrees = atan(pointTransformed.y / pointTransformed.x) * 180 / 3.14159265;
     else
         degrees = (atan(pointTransformed.y / pointTransformed.x) * 180 / 3.14159265) + 180;
+    degrees -= 180;
     if(degrees < 0) degrees += 360;
     
     // Build a command for this specific bot

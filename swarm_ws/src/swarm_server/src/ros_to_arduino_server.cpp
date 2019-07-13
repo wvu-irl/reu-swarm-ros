@@ -28,6 +28,7 @@ volatile sig_atomic_t g_flag = 0;
 void flagger(int sig)
 {
 	g_flag = 1;
+        system("fuser 4321/tcp -k");
 }
 
 /**
@@ -82,8 +83,8 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 {
 	for (wvu_swarm_std_msgs::robot_command msg : msga.commands)
 	{
-		if (!keepAlive())
-			break;
+                if (!keepAlive())
+                        break;
 		command cmd = { { '\0' } }; // creating command
 		sprintf(cmd.str, "%f,%f", msg.r, msg.theta);
 		int id = msg.rid;
@@ -91,8 +92,8 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 		ROS_INFO(PRINT_HEADER"Constructed command: %02d,\t%s", id, cmd.str);
 #endif
 		sendCommandToRobots(cmd, id); // sending to robots through TCP server
-		if (!keepAlive())
-			break;
+                if (!keepAlive())
+                    break;
 	}
 }
 
@@ -109,10 +110,10 @@ void errorCallBack(const char *msg)
  *
  *  This is nessessary because the server contains a closed loop
  */
-void* controlThread(void *arg0)
+void *controlThread(void *arg0)
 {
 	signal(SIGINT, flagger);
-	ros::NodeHandle *n = (ros::NodeHandle*) arg0; // passed node handle
+	ros::NodeHandle *n = (ros::NodeHandle *) arg0; // passed node handle
 	ros::Subscriber to_ard = n->subscribe("final_execute", 1000,
 			sendToRobotCallback); // subscribing to movment datastream
 
@@ -129,6 +130,7 @@ void* controlThread(void *arg0)
 	pthread_exit(0); // exiting thread
 									 // this is probably unreachable
 }
+
 
 void warnInfo(const char *str)
 {
@@ -160,9 +162,9 @@ int main(int argc, char **argv)
 #if DEBUG
         ROS_INFO("Waiting for main-thread to die");
 #endif
-
+        
 	// waiting for thread to die
 	pthread_join(tid, NULL);
-	ROS_WARN("Server is \033[1;31mDEAD\033[0m");
+        ROS_WARN("Server is \033[1;31mDEAD\033[0m");
 	return 0;
 }
