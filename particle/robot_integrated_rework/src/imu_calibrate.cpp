@@ -31,3 +31,5 @@ float IMUCalibrate::getIMUHeading(float _otheta)
     t1 = t2;
     return theta;
 }
+
+#endif 
