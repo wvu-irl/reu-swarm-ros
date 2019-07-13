@@ -78,46 +78,6 @@ void additionCallback(wvu_swarm_std_msgs::obstacle obs)
 {
 	universe += obs;
 }
-#else
-static wvu_swarm_std_msgs::map_levels overall_map;
-
-void newObs(wvu_swarm_std_msgs::obstacle obs)
-{
-	while (overall_map.levels.size() <= obs.level)
-	{
-#if DEBUG
-		std::cout << "\033[30;43mAdded level: " << overall_map.levels.size()
-				<< "\033[0m" << std::endl;
-#endif
-		overall_map.levels.push_back(wvu_swarm_std_msgs::map_level());
-	}
-	bool found = false;
-
-	for (size_t i = 0;
-			i < overall_map.levels.at(obs.level).functions.size() && !found; i++)
-	{
-		if (overall_map.levels.at(obs.level).functions.at(i).name.compare(
-				obs.characteristic.name) == 0)
-		{
-			overall_map.levels.at(obs.level).functions[i] = obs.characteristic;
-			found = true;
-		}
-	}
-
-	if (!found)
-		overall_map.levels[obs.level].functions.push_back(obs.characteristic);
-
-	if (obs.level != map_ns::COMBINED)
-	{
-		wvu_swarm_std_msgs::obstacle comb;
-		obs.characteristic.amplitude *= 1 - (((obs.level + 1) % 2) * 2);
-		comb.characteristic = obs.characteristic;
-		comb.level = map_ns::COMBINED;
-
-		newObs(comb);
-	}
-}
-#endif
 
 void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 {
@@ -129,30 +89,6 @@ void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 	rightProjected = findZIntercept(g_nui.rightWrist, g_nui.rightHand, 0.0);
 }
 
-double getDistance(geometry_msgs::Point *_hand, levelObject *_target)
-{
-	double ret = pow(_hand->x - _target->getOrigin().first, 2)
-			+ pow(_hand->y - _target->getOrigin().second, 2);
-	return sqrt(ret);
-}
-
-void findSelection(double _maxDist, std::vector<levelObject*> _map)
-{
-	double currentMinimum = _maxDist, thisDist;
-	g_selected = nullptr;
-
-	for (levelObject *i : _map)
-	{
-		// Check if this distance is less than threshold
-		thisDist = getDistance(&leftProjected, i);
-		if (thisDist < currentMinimum)
-		{
-			// Decrease minimum, we want closest point
-			currentMinimum = thisDist;
-			g_selected = i;
-		}
-	}
-}
 
 int main(int argc, char **argv)
 {
@@ -166,107 +102,22 @@ int main(int argc, char **argv)
 	ros::Publisher right_pub = n.advertise < geometry_msgs::Point
 			> ("/nui_bridge/hand_2", 1000);
 
-#if RUN_UNIVERSE
-	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, additionCallback); // subscriber to handle incoming objects
-#else
-			ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, newObs); // subscriber to handle incoming objects
-#endif
+	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000,
+			additionCallback);
 	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge", 1000, nuiCallback);
 
 #if DEBUG
 	std::cout << "Adding equation" << std::endl;
 #endif
 
-#if TEST_EQU
-
-	// creating testing equation
-	wvu_swarm_std_msgs::ellipse el;
-	el.x_rad = 5;
-	el.y_rad = 2;
-	el.theta_offset = M_PI_4;
-
-	wvu_swarm_std_msgs::gaussian gaus;
-	gaus.ellipse = el;
-	gaus.ellipse.offset_x = 0;
-	gaus.ellipse.offset_y = 0;
-	gaus.amplitude = 20;
-	gaus.name = "Bob";
-
-	wvu_swarm_std_msgs::obstacle obs;
-	obs.characteristic = gaus;
-	obs.level = map_ns::TARGET;
-
-	// adding testing equation to map
-#if RUN_UNIVERSE
-	universe += obs;
-#else
-	newObs(obs);
-#endif
-
-	// creating testing function
-	el.x_rad = 4;
-	el.y_rad = 7;
-	el.theta_offset = 0;
-
-	gaus.ellipse = el;
-	gaus.ellipse.offset_x = 10;
-	gaus.ellipse.offset_y = 0;
-	gaus.amplitude = 10;
-	gaus.name = "Jeff";
-
-	obs.characteristic = gaus;
-	obs.level = map_ns::TARGET;
-
-	// adding testing function
-#if RUN_UNIVERSE
-	universe += obs;
-#else
-	newObs(obs);
-#endif
-#elif TEST_NUI
-	std::vector<levelObject*> worldMap;
-
 	levelObject *ptr;
 
 	ptr = new gaussianObject(0, 0, "Gary", 10, 20, M_PI / 4.0, 10,
 			map_ns::TARGET);
-#if RUN_UNIVERSE
 	universe += ptr;
-#else
-	worldMap.push_back(ptr);
-#endif
 
 	ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::TARGET);
-#if RUN_UNIVERSE
 	universe += ptr;
-#else
-	worldMap.push_back(ptr);
-#endif
-
-	// testing constructors
-	wvu_swarm_std_msgs::ellipse el;
-	el.x_rad = 5;
-	el.y_rad = 2;
-	el.theta_offset = M_PI_4;
-
-	wvu_swarm_std_msgs::gaussian gaus;
-	gaus.ellipse = el;
-	gaus.ellipse.offset_x = 0;
-	gaus.ellipse.offset_y = 0;
-	gaus.amplitude = 20;
-	gaus.name = "Bob";
-
-	wvu_swarm_std_msgs::obstacle obs;
-	obs.characteristic = gaus;
-	obs.level = map_ns::OBSTACLE;
-
-	ptr = new gaussianObject(obs);
-#if RUN_UNIVERSE
-	universe += ptr;
-#else
-	worldMap.push_back(ptr);
-#endif
-#endif 
 
 #if DEBUG
 	std::cout << "\033[30;42mdone adding equation\033[0m" << std::endl;
@@ -275,45 +126,11 @@ int main(int argc, char **argv)
 #if RATE_LIMIT
 	ros::Rate rate(60);
 #endif
-#if TEST_EQU
-	int tick = 0;
-#endif
 
 	geometry_msgs::Point *anchor = nullptr; // Where did the user's hand start when they grabbed a feature?
 
 	while (ros::ok())
 	{
-#if TEST_EQU
-		tick++;
-		tick %= 1000;
-
-		el.x_rad = 5;
-		el.y_rad = 2;
-		el.theta_offset = tick * M_PI / 100;
-
-		gaus.ellipse = el;
-		gaus.ellipse.offset_x = 0;
-		gaus.ellipse.offset_y = 0;
-		gaus.amplitude = 20;
-		gaus.name = "Bob";
-
-		obs.characteristic = gaus;
-		obs.level = map_ns::TARGET;
-#if RUN_UNIVERSE
-		universe += obs;
-#else
-		newObs(obs);
-#endif
-#elif TEST_NUI
-		for (levelObject *i : worldMap)
-		{
-#if RUN_UNIVERSE
-			universe += i;
-#else
-			newObs(((gaussianObject*) i)->getGaussianMessage());
-#endif
-		}
-
 		// If user's left hand (RIGHT) is open, points are free to move
 		if (!g_nui.rightClick)
 		{
@@ -321,7 +138,9 @@ int main(int argc, char **argv)
 			anchor = nullptr;
 
 			// Check if something is selected, if so lock point to it
-			findSelection(10.0, worldMap);
+			std::pair<double, double> leftProjPair(leftProjected.x, leftProjected.y);
+                        g_selected = universe.findWithinRadius(leftProjPair, 10.0);
+                        
 			if (g_selected != nullptr)
 			{
 				leftProjected.x = g_selected->getOrigin().first;
@@ -363,18 +182,12 @@ int main(int argc, char **argv)
 				ROS_INFO("Anchor moved!");
 			}
 		}
-#endif
 
-		// publishing map
-#if RUN_UNIVERSE
 		map_pub.publish(universe.getPublishable());
-#else
-		map_pub.publish(overall_map);
-#endif
 
-		ros::spinOnce(); // spinning
+		ros::spinOnce();
 #if RATE_LIMIT
-		rate.sleep(); // sleeping
+		rate.sleep();
 #endif
 	}
 }

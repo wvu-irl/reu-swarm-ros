@@ -92,6 +92,9 @@ public:
 	 *
 	 */
 	levelObject* findByLocation(std::pair<double, double>);
+    
+    /** TODO: THIS **/
+    levelObject* findWithinRadius(std::pair<double, double> loc, double radius);
 
 	/**
 	 * Gets a reference to the map that is able to be published in mapping.cpp
