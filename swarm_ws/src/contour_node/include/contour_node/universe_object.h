@@ -2,6 +2,7 @@
 #define UNIVERSE_H
 
 #include <iostream>
+#include <functional>
 
 #include <wvu_swarm_std_msgs/obstacle.h>
 #include <wvu_swarm_std_msgs/map_levels.h>
@@ -98,6 +99,13 @@ public:
 	 * @returns a map_levels message to be published into ROS
 	 */
 	wvu_swarm_std_msgs::map_levels& getPublishable();
+
+	/**
+	 * Iterates through all the objects
+	 *
+	 * @param funk lambda function that takes a gaussian and a level and does something with them
+	 */
+	void foreach(std::function<void(wvu_swarm_std_msgs::gaussian*, int)> funk);
 
 	///////////////////////////////////////////////////////////////////////////
 	//                             Operators                                 //

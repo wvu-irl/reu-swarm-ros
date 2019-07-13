@@ -173,6 +173,18 @@ size_t Universe::numEquaitons()
 	return count;
 }
 
+void Universe::foreach(
+		std::function<void(wvu_swarm_std_msgs::gaussian*, int)> funk)
+{
+	for (size_t i = 0; i < overall_map.levels.size(); i++)
+	{
+		for (size_t j = 0; j < overall_map.levels[i].functions.size(); j++)
+		{
+			funk(&overall_map.levels[i].functions[j], (int) i);
+		}
+	}
+}
+
 Universe::operator wvu_swarm_std_msgs::map_levels&()
 {
 	return overall_map; // cast acts the same way as the get publishable
