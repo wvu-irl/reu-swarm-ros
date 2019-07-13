@@ -3,3 +3,6 @@
 *.o
 /latency_log(IRL_ROBONET w Internet).csv
 /latency_log(Stessed).csv
+/latency_log.csv
+/used.txt
+*.csv

@@ -50,7 +50,7 @@ int main()
 	inet_aton(IP, &(socket_address.sin_addr));
 
 	// Connect to the socket
-	if (connect(socket_descriptor, (struct sockaddr *) &socket_address,
+	if (connect(socket_descriptor, (struct sockaddr*) &socket_address,
 			sizeof(socket_address)) == -1)
 	{
 		printf("Error connecting to socket: %d\n", errno);
@@ -58,11 +58,11 @@ int main()
 	}
 
 	struct command reg;
-	for (size_t i = 0;i < sizeof(reg.str) / sizeof(char);i++)
+	for (size_t i = 0; i < sizeof(reg.str) / sizeof(char); i++)
 	{
 
 	}
-	strcpy(reg.str, "register YY");
+	strcpy(reg.str, "register MN");
 	int bytes = write(socket_descriptor, (&reg), sizeof(reg));
 	if (bytes < 0)
 	{
@@ -83,7 +83,7 @@ int main()
 		{
 			std::cout << "Message Recieved" << std::endl;
 			printf("CLIENT GOT: %s\n", str);
-			sleep(1);
+			//sleep(1);
 		}
 
 		// Display if there was an error
@@ -92,7 +92,7 @@ int main()
 			puts("Error receiving message.");
 			return 1;
 		}
-		sleep(1);
+//		sleep(1);
 	}
 	return 0;
 }
