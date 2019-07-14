@@ -1,5 +1,6 @@
 {
     "particle.firmwareVersion": "1.1.0",
     "particle.targetPlatform": "argon",
-    "cortex-debug.openocdPath": "C:\\Users\\jeong\\.particle\\toolchains\\openocd\\0.10.0-particle.1\\bin\\openocd.exe"
+    "cortex-debug.openocdPath": "C:\\Users\\jeong\\.particle\\toolchains\\openocd\\0.10.0-particle.1\\bin\\openocd.exe",
+    "particle.targetDevice": "swarm_02-PA"
 }

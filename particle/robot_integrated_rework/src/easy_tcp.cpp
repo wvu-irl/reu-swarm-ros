@@ -26,7 +26,8 @@ bool EasyTCP::init(int _timeout)
     client.connect(address, port);
 
     int currentTime = millis();
-    while (!client.connected() && currentTime - millis() > CONN_TIMEOUT_MILLIS);
+    while (!client.connected() && currentTime - millis() > CONN_TIMEOUT_MILLIS)
+        ;
 
     // Check if connection succeeded
     if (client.connected())
@@ -103,7 +104,6 @@ bool EasyTCP::reconnect(int _timeout)
 // Also changes the vicon heading, passed by reference
 int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
 {
-    struct command c;
 
 #if TCP_DEBUG
     Serial.println("TCP: Beginning read()");
@@ -134,8 +134,8 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
         // Update last successful timestamp
         readTimer = millis();
 
-        bytes = client.read((uint8_t *)(&c), sizeof(struct command));
-        _pos = (float)strtod(strtok(c.str, ","), NULL);
+        bytes = client.read(_buf, _len);
+       // _pos = (float)strtod(strtok(c.str, ","), NULL); i dunno how to get a str from _buf
         _theta = (float)strtod(strtok(NULL, ","), NULL);
     }
     // Error case

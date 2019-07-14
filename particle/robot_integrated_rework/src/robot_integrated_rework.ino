@@ -34,22 +34,19 @@ SYSTEM_THREAD(ENABLED)
 
 Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, PIXEL_TYPE);
 
-// Color definitions
-#define BLACK 0x0000
-#define BLUE 0x001F
-#define RED 0xF800
-#define GREEN 0x07E0
-#define CYAN 0x07FF
-#define MAGENTA 0xF81F
-#define YELLOW 0xFFE0
-#define WHITE 0xFFFF
+typedef struct command {
+    char str[32];
+} command;
 
-Thread testThread; //("testThread", threadFunction);
-void threadFunction(void);
+Thread oledThread; //("testThread", threadFunction);
+void threadOled(void);
 DiffDrive diff_drive;
 IMUCalibrate imu;
 Screen screenObject;
-
+ int port = 4321;
+     byte ip[4] = {192, 168, 1, 187};
+EasyTCP tcpClient( port,ip, "PA");
+  struct command c;
 float theta = 0, pos = 10;
 
 byte server[] = {192, 168, 10, 187};
@@ -87,16 +84,16 @@ void setup(void)
         ;
 
     // Initialize tcp client
-    tcpClient.init(ip, port, "NE");
-    oledThread = Thread("oled", threadFunction);
+    tcpClient.init(10000);
+    oledThread = Thread("oled", threadOled);
 }
 
 void loop()
 {
-    int temp = read(uint8_t _buf *, size_t _len, theta, float pos); // what are buf and len?
+    int temp = tcpClient. read((uint8_t *)(&c), sizeof(struct command), theta, pos); // what are buf and len?
     if (temp > 0)
     {
-       theta = imu.getIMUHeading();
+        imu.getIMUHeading(theta);
 #if INTEGRATED_DEBUG
         Serial.print("VICON\tR: ");
         Serial.print(pos);
@@ -106,7 +103,7 @@ void loop()
     }
     else if (temp == 0)
     {
-        imu.getIMUHeading();
+        theta= imu.getIMUHeading(theta);
 #if INTEGRATED_DEBUG
         Serial.print("IMU\tR: ");
         Serial.print(pos);
@@ -135,7 +132,6 @@ void threadOled(void)
 {
     while (true)
     {
-        screenObject.updateScreen(theta, client.connected())
+        screenObject.updateScreen(theta, tcpClient.connected());
     }
 }
-#endif

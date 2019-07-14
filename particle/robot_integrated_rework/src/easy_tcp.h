@@ -2,7 +2,7 @@
 #define EASY_TCP_H
 
 #include <Particle.h>
-#define EASY_TCP_DEBUG 0
+#define EASY_TCP_DEBUG 1
 #include <string.h>
 #define CONN_TIMEOUT_MILLIS 30000
 #define READ_TIMEOUT_MILLIS 5000
@@ -14,9 +14,7 @@
  * outdated packets or worrying about buffers.
  */
 
-typedef struct command {
-    char str[32];
-} command;
+
 
 class EasyTCP {
 public:

@@ -1,6 +1,16 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+// Color definitions
+#define BLACK 0x0000
+#define BLUE 0x001F
+#define RED 0xF800
+#define GREEN 0x07E0
+#define CYAN 0x07FF
+#define MAGENTA 0xF81F
+#define YELLOW 0xFFE0
+#define WHITE 0xFFFF
+
 #include <Particle.h>
 #include <Wire.h>
 #include "spark_wiring.h"
@@ -15,10 +25,10 @@ public:
     void init(void); // Turn on SSD1351
 
     
-    void updateScreen(float theta); //displays the information shown by the latter functions
+    void updateScreen(float _theta, bool _connected); //displays the information shown by the latter functions
 
     // TODO: need functions to output text, battery status, etc
-    void sysStat(float _connected); //shows the connection status
+    void sysStat(bool _connected); //shows the connection status
     void battStat(); //shows the battery status
     void oledArrow(float theta); //shows the direction the robot has been commanded to go
 

@@ -19,7 +19,7 @@ void DiffDrive::drive(double _theta, double _speed)
     float v = lv * cos(_theta * 3.14 / 180);
     float w = lw * sin(_theta * 3.14 / 180);
 
-    if (_theta >= 0 && _theta <= 90 || _theta > 270)
+    if ((_theta >= 0 && _theta <= 90) || _theta > 270)
     {
         servLeft.write(90 + 10 * (v - w));
         servRight.write(90 - 10 * (v + w));
