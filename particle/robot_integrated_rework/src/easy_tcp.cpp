@@ -2,16 +2,16 @@
 
 EasyTCP::EasyTCP(void)
 {
-    //client = TCPClient();
+    client = TCPClient();
 }
 
 EasyTCP::EasyTCP(int _pt, byte _addr[], String _reg) : port(_pt), registerStr(_reg)
 {
-    //client = TCPClient();
-    address[0] = _addr[0];
-    address[1] = _addr[1];
-    address[2] = _addr[2];
-    address[3] = _addr[3];
+    client = TCPClient();
+    // address[0] = _addr[0];
+    // address[1] = _addr[1];
+    // address[2] = _addr[2];
+    // address[3] = _addr[3];
 }
 
 // Handles connection and registration. Returns false for a problem with either.
@@ -24,6 +24,8 @@ bool EasyTCP::init(int _timeout)
     readTimer = 0;
 
     client.connect(address, port);
+    waitFor(client.connected, 30000);
+
     int currentTime = millis();
     while (!client.connected() && currentTime - millis() > CONN_TIMEOUT_MILLIS)
         ;
@@ -67,30 +69,30 @@ bool EasyTCP::connected(void)
 // Identical to init, but can specify timeout. Not my best work.
 bool EasyTCP::reconnect(int _timeout)
 {
-#if EASYTCP_DEBUG
+#if EASY_TCP_DEBUG
     Serial.println("TCP: Beginning reconnect()");
 #endif
 
     readTimer = 0;
 
-    client.connect(server, 4321);
-    waitFor(client.connected, _timeout);
+    client.connect(address, 4321);
+    //waitFor(client.connected, _timeout);
     if (client.connected())
     {
-#if EASYTCP_DEBUG
+#if EASY_TCP_DEBUG
         Serial.println("TCP: Connected.");
 #endif
 
         // Send registration to server
         client.print("register ");
-        client.println(register); // Append register identifier
+        client.println(registerStr); // Append register identifier
         client.println();
 
         return true;
     }
     else
     {
-#if EASYTCP_DEBUG
+#if EASY_TCP_DEBUG
         Serial.println("TCP: Connection timeout!");
 #endif
 
@@ -101,8 +103,10 @@ bool EasyTCP::reconnect(int _timeout)
 // Tries to read. If it fails, keeps track of time since last success.
 //   Returns 0 if nothing available, -1 if error, # of bytes if success
 // Also changes the vicon heading, passed by reference
-int EasyTCP::read(uint8_t _buf *, size_t _len, float &_theta, float &_pos)
+int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
 {
+    struct command c;
+
 #if TCP_DEBUG
     Serial.println("TCP: Beginning read()");
 #endif

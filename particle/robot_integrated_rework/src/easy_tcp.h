@@ -24,13 +24,14 @@ public:
     EasyTCP(int _pt, byte _addr[], String _reg);
     bool init(int _timeout = CONN_TIMEOUT_MILLIS);
     int available(void);
+    bool connected(void);
     bool reconnect(int _timeout = 1000);
-    int read(uint8_t _buf*, size_t _len, float &_theta, float &_pos);
+    int read(uint8_t *_buf, size_t _len, float &_theta, float &_pos);
 private:
     TCPClient client;
     const int port = 4321;
     const byte address[4] = {192, 168, 1, 187};
-    const String register = "XX";
+    String registerStr = "XX";
     unsigned long readTimer;
 };
 
