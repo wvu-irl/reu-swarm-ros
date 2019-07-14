@@ -2,41 +2,49 @@
 
 EasyTCP::EasyTCP(void)
 {
-    client = TCPClient();
+    //client = TCPClient();
 }
 
-EasyTCP::EasyTCP(int _pt, byte _addr[4], string _reg) : port(_pt), address(_addr), register(_reg)
+EasyTCP::EasyTCP(int _pt, byte _addr[], String _reg) : port(_pt), registerStr(_reg)
 {
-    client = TCPClient();
+    //client = TCPClient();
+    address[0] = _addr[0];
+    address[1] = _addr[1];
+    address[2] = _addr[2];
+    address[3] = _addr[3];
 }
 
 // Handles connection and registration. Returns false for a problem with either.
-bool EasyTCP::init(void)
+bool EasyTCP::init(int _timeout)
 {
-#if EASYTCP_DEBUG
+#if EASY_TCP_DEBUG
     Serial.println("TCP: Beginning init()");
 #endif
 
     readTimer = 0;
 
-    client.connect(server, 4321);
-    waitFor(client.connected, CONN_TIMEOUT_MILLIS);
+    client.connect(address, port);
+    int currentTime = millis();
+    while (!client.connected() && currentTime - millis() > CONN_TIMEOUT_MILLIS)
+        ;
+
+    // Check if connection succeeded
     if (client.connected())
     {
-#if EASYTCP_DEBUG
+#if EASY_TCP_DEBUG
         Serial.println("TCP: Connected.");
 #endif
 
         // Send registration to server
         client.print("register ");
-        client.println(register); // Append register identifier
+        client.println(registerStr); // Append register identifier
         client.println();
 
         return true;
     }
     else
     {
-#if EASYTCP_DEBUG
+#if EASY_TCP_DEBUG
         Serial.println("TCP: Connection timeout!");
 #endif
 
@@ -113,7 +121,7 @@ int EasyTCP::read(uint8_t _buf *, size_t _len, float &_theta, float &_pos)
         bytes = client.available();
     }
 
-#if TCP_DEBUG
+#if EASY_TCP_DEBUG
     Serial.print("TCP: bytes = ");
     Serial.println(bytes);
 #endif
@@ -122,7 +130,7 @@ int EasyTCP::read(uint8_t _buf *, size_t _len, float &_theta, float &_pos)
     if (bytes > 0)
     {
         // Update last successful timestamp
-        readMillis = millis();
+        readTimer = millis();
 
         bytes = client.read((uint8_t *)(&c), sizeof(struct command));
         _pos = (float)strtod(strtok(c.str, ","), NULL);
@@ -136,19 +144,19 @@ int EasyTCP::read(uint8_t _buf *, size_t _len, float &_theta, float &_pos)
     else
     {
         // If it's been too long with no data, try to reconnect
-        if (millis() - readMillis >= READ_TIMEOUT_MILLIS)
+        if (millis() - readTimer >= READ_TIMEOUT_MILLIS)
         {
-#if TCP_DEBUG
+#if EASY_TCP_DEBUG
             Serial.println("TCP: Read timeout!");
 #endif
 
             // Disconnect
-            client.disconnect();
+            client.stop();
 
-            // Reconnect
-            bool reConn = reconnect(1000);
+            // Reconnect, timeout 1000ms
+            bool reConn = init(1000);
 
-#if TCP_DEBUG
+#if EASY_TCP_DEBUG
             Serial.println(reConn ? "TCP: Reconnected." : "TCP: Reconnect timeout!");
 #endif
         }

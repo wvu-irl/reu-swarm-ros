@@ -52,11 +52,6 @@ Screen screenObject;
 
 float theta = 0, pos = 10;
 
-struct command
-{
-    char str[32];
-};
-
 byte server[] = {192, 168, 10, 187};
 
 void setup(void)

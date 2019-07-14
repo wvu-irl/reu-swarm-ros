@@ -16,7 +16,6 @@
  *	gives the standard deviation and the mean as well as the graph
  */
 
-
 #define WIDTH 700
 #define HEIGHT 500
 
@@ -25,13 +24,15 @@ std::vector<double> data;
 sf::VertexArray line;
 double max;
 
-int range_max = 100000;
+int range_max = 200000;
 
 void render(sf::RenderWindow *window)
 {
 	for (size_t i = 0; i < range_max; i++)
 	{
-		line[i].position = sf::Vector2f((double)i * (double)WIDTH / (double)range_max, (double)HEIGHT - (data[i] * (double)HEIGHT / max));
+		line[i].position = sf::Vector2f(
+				(double) i * (double) WIDTH / (double) range_max,
+				(double) HEIGHT - (data[i] * (double) HEIGHT / max));
 		line[i].color = sf::Color::White;
 	}
 
@@ -40,8 +41,11 @@ void render(sf::RenderWindow *window)
 
 int main(int argc, char **argv)
 {
+	const size_t idx = 1;
 	std::ifstream fin;
-	fin.open("latency_log(Stessed).csv");
+	std::cout << "graphing: " << argv[idx] << std::endl;
+
+	fin.open(argv[idx]);
 	if (!fin)
 	{
 		std::cout << "\033[41;30mCould not open file!!!!!\033[0m" << std::endl;
