@@ -24,11 +24,9 @@ bool EasyTCP::init(int _timeout)
     readTimer = 0;
 
     client.connect(address, port);
-    waitFor(client.connected, 30000);
 
     int currentTime = millis();
-    while (!client.connected() && currentTime - millis() > CONN_TIMEOUT_MILLIS)
-        ;
+    while (!client.connected() && currentTime - millis() > CONN_TIMEOUT_MILLIS);
 
     // Check if connection succeeded
     if (client.connected())
