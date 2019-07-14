@@ -30,7 +30,7 @@ public:
 private:
     TCPClient client;
     const int port = 4321;
-    const byte address[4] = {192, 168, 1, 187};
+     byte address[4] = {192, 168, 1, 187};
     String registerStr = "XX";
     unsigned long readTimer;
 };

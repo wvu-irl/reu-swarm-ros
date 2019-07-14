@@ -8,10 +8,10 @@ EasyTCP::EasyTCP(void)
 EasyTCP::EasyTCP(int _pt, byte _addr[], String _reg) : port(_pt), registerStr(_reg)
 {
     client = TCPClient();
-    // address[0] = _addr[0];
-    // address[1] = _addr[1];
-    // address[2] = _addr[2];
-    // address[3] = _addr[3];
+    address[0] = _addr[0];
+    address[1] = _addr[1];
+    address[2] = _addr[2];
+    address[3] = _addr[3];
 }
 
 // Handles connection and registration. Returns false for a problem with either.
