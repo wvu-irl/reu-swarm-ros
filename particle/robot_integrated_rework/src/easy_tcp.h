@@ -4,8 +4,8 @@
 #include <Particle.h>
 #define EASY_TCP_DEBUG 1
 #include <string.h>
-#define CONN_TIMEOUT_MILLIS 30000
-#define READ_TIMEOUT_MILLIS 5000
+#define CONN_TIMEOUT_MILLIS 10000
+#define READ_TIMEOUT_MILLIS 1000
 
 /*
  * EASY TCP
@@ -28,8 +28,8 @@ public:
 private:
     TCPClient client;
     const int port = 4321;
-     byte address[4] = {192, 168, 1, 187};
-    String registerStr = "XX";
+     byte address[4] = {192, 168, 10, 187};
+    String registerStr = "PA";
     unsigned long readTimer;
 };
 

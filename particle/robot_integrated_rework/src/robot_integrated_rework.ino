@@ -44,12 +44,10 @@ DiffDrive diff_drive;
 IMUCalibrate imu;
 Screen screenObject;
  int port = 4321;
-     byte ip[4] = {192, 168, 1, 187};
+     byte ip[4] = {192, 168, 10, 187};
 EasyTCP tcpClient( port,ip, "PA");
   struct command c;
 float theta = 0, pos = 10;
-
-byte server[] = {192, 168, 10, 187};
 
 void setup(void)
 {
@@ -59,7 +57,7 @@ void setup(void)
     Serial.println("Connected to wifi");
 #endif
     // Initialize screen
-    screenObject.init();
+    //screenObject.init();
 
     // Set up pins
     // pinSetup();
@@ -69,7 +67,7 @@ void setup(void)
     pinMode(RGBR, INPUT);
     pinMode(RGBG, INPUT);
     pinMode(RGBB, INPUT);
-
+    Wire.begin();
     // Initialize drivetrain
     diff_drive.init();
 
@@ -78,14 +76,17 @@ void setup(void)
 
     //neopixel stuff on hold until i get the reset working
 
-    // Non-blocking replacement for delay(300), have no idea why it's here but i kept it
-    int wait = millis() + 300;
-    while (millis() < wait)
-        ;
+
+    // Non-blocking replacement for delay(3000), have no idea why it's here but i kept it
+    // int wait = millis() + 3000;
+    // while (millis() < wait){
+    //     Serial.println("waiting");
+    // }
+
 
     // Initialize tcp client
-    tcpClient.init(10000);
-    oledThread = Thread("oled", threadOled);
+    while(!tcpClient.init(10000));
+   // oledThread = Thread("oled", threadOled);
 }
 
 void loop()
@@ -94,22 +95,22 @@ void loop()
     if (temp > 0)
     {
         imu.getIMUHeading(theta);
-#if INTEGRATED_DEBUG
-        Serial.print("VICON\tR: ");
-        Serial.print(pos);
-        Serial.print("\tTH: ");
-        Serial.print(theta);
-#endif
+// #if INTEGRATED_DEBUG
+//         Serial.print("VICON\tR: ");
+//         Serial.print(pos);
+//         Serial.print("\tTH: ");
+//         Serial.print(theta);
+// #endif
     }
     else if (temp == 0)
     {
         theta= imu.getIMUHeading(theta);
-#if INTEGRATED_DEBUG
-        Serial.print("IMU\tR: ");
-        Serial.print(pos);
-        Serial.print("\tTH: ");
-        Serial.print(theta);
-#endif
+// #if INTEGRATED_DEBUG
+//         Serial.print("IMU\tR: ");
+//         Serial.print(pos);
+//         Serial.print("\tTH: ");
+//         Serial.print(theta);
+// #endif
     }
     else
     {
@@ -123,8 +124,6 @@ void loop()
 
     Serial.print("Finish drive command check client");
     Serial.println(millis());
-    Particle.process();
-
     Particle.process();
 }
 
