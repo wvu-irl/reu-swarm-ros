@@ -3,8 +3,8 @@
 
 DiffDrive::DiffDrive(void)
 {
-    servRight.attach(A1);
-    servLeft.attach(A2);
+    servRight.attach(LEFTPIN);
+    servLeft.attach(RIGHTPIN);
     lv = 3;
     lw = 2;
 }
@@ -39,4 +39,18 @@ void DiffDrive::drive(double _theta, double _speed)
         servLeft.write(90);
         servRight.write(90);
     }
+}
+
+// Completely disconnects servos to stop
+void fullStop(void)
+{
+    servLeft.disconnect();
+    servRight.disconnect();
+}
+
+// Reattaches servos. Call this after a fullStop
+void restart(void)
+{
+    servRight.attach(LEFTPIN);
+    servLeft.attach(RIGHTPIN);
 }
