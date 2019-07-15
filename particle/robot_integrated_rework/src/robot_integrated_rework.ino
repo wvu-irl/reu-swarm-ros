@@ -45,7 +45,8 @@ IMUCalibrate imu;
 Screen screenObject;
  int port = 4321;
      byte ip[4] = {192, 168, 10, 187};
-EasyTCP tcpClient( port,ip, "NH");
+String registerString = "MA";
+EasyTCP tcpClient(port, ip, registerString);
   struct command c;
 float theta = 0, pos = 10;
 
@@ -53,20 +54,24 @@ void setup(void)
 {
     Serial.begin(9600);
     waitUntil(WiFi.ready);
+
 #if INTEGRATED_DEBUG
     Serial.println("Connected to wifi");
 #endif
+
     // Initialize screen
-    screenObject.init();
+    screenObject.init(registerString);
 
     // Set up pins
     // pinSetup();
     pinMode(PWR, INPUT);
     pinMode(CHG, INPUT);
+
     // disable on-board RGB LED on Photon/Electron / You can also set these pins for other uses. also kept this because idk what it is
     pinMode(RGBR, INPUT);
     pinMode(RGBG, INPUT);
     pinMode(RGBB, INPUT);
+
     Wire.begin();
     // Initialize drivetrain
     diff_drive.init();
@@ -74,18 +79,10 @@ void setup(void)
     // Initialize IMU
     imu.init();
 
-    //neopixel stuff on hold until i get the reset working
-
-
-    // Non-blocking replacement for delay(3000), have no idea why it's here but i kept it
-    // int wait = millis() + 3000;
-    // while (millis() < wait){
-    //     Serial.println("waiting");
-    // }
-
+    // TODO: neopixel stuff on hold until i get the reset working
 
     // Initialize tcp client
-    while(!tcpClient.init(10000));
+    while(!tcpClient.init(10000)) tone(A4, 1760, 1000); // screams out an A6 on pin A4 :^)
     oledThread = Thread("oled", threadOled);
 }
 
@@ -120,7 +117,7 @@ void loop()
     }
     //need to get this from some decision betweeen imu and vicon
     diff_drive.drive(theta, pos);
-    if (temp<0) while(!tcpClient.init(10000));
+    if (temp<0) while(!tcpClient.init(10000)) tone(A4, 1760, 1000);;
     Serial.print("Finish drive command check client");
     Serial.println(millis());
     Particle.process();

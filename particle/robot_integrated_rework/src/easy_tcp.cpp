@@ -39,28 +39,12 @@ bool EasyTCP::init(int _timeout)
 
     } while (connect != 1 && (millis() - currentTime) < CONN_TIMEOUT_MILLIS);
 
-    //     int currentTime = millis();
-    //    // waitFor(client.connected,_timeout); this doesn't work in a method, only in main...
-    //     while (!client.connected() &&  millis()-currentTime> CONN_TIMEOUT_MILLIS)
-    //     {
-    // //         int x= (currentTime - millis());
-    // // #if EASY_TCP_DEBUG
-    // //         Serial.println("TCP: Trying to Connect, "+x);
-    // // #endif
-    //     }
-
     // Check if connection succeeded
     if (client.connected())
     {
 #if EASY_TCP_DEBUG
         Serial.println("TCP: Connected.");
 #endif
-        Serial.println("register " + registerStr); // Append register identifier
-        Serial.println();
-        // Send registration to server (this dun work)
-        // client.print("register ");
-        // client.println(registerStr); // Append register identifier
-        // client.println();
 
         client.println("register " + registerStr); // Append register identifier
         client.println();
