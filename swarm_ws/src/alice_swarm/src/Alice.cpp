@@ -92,6 +92,9 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_s
 
 AliceStructs::vel Alice::generateVel() //implements the rules set
 {
-	AliceStructs::vel to_return = rules.stateLoop(model);
+	rules.stateLoop(model);
+	AliceStructs::vel to_return;
+	to_return.mag = 1;
+	to_return.dir = atan2(model.goTo.y - model.cur_pose.y, model.goTo.x - model.cur_pose.x);
 	return to_return;
 }

@@ -41,7 +41,7 @@ public:
 	/*
 	 * Determines which state Alice is in
 	 */
-	AliceStructs::vel stateLoop(Model &_model);
+	void stateLoop(Model &_model);
 	/*
 	 * Helper method to find the distance between two points
 	 */
@@ -68,6 +68,8 @@ public:
 	 */
 	bool checkCollisions();
 
+	bool shouldLoop();
+
 	/*
 	 * Checks that the battery is not bellow acceptable levels.
 	 */
@@ -86,7 +88,7 @@ public:
 	/*
 	 * Finds an adjusted angle to drive at given a set of blocked zones
 	 */
-	void findAngle(float tf, std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones);
+	void findPath(float tf, std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones);
 
 	/*
 	 * Finds the set of angles at which the robot will collide with an obstacle
@@ -133,7 +135,7 @@ public:
 	/*
 	 * Makes Alice go to a target
 	 */
-	void goToTar();
+	AliceStructs::pnt goToTar();
 
 	/*
 	 * Makes Alice explore new territory

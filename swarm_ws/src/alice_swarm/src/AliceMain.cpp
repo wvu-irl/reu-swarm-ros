@@ -27,6 +27,7 @@ void prioritiesCallback(const wvu_swarm_std_msgs::priorities &msg)
 
 int main(int argc, char **argv)
 {
+	std::cout << "wheee" << std::endl;
 	std::map<int, Alice> alice_map; //Maps robot id's to robots so they can be accessed easily
 	std::map<int, Alice>::iterator map_it = alice_map.begin();
 	//Creates an AliceBrain node, and subscribes/publishes to the necessary topics
@@ -132,7 +133,7 @@ int main(int argc, char **argv)
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
 
-		std::cout << "Time taken by Alice: " << duration.count() << " microseconds" << std::endl;
+		//std::cout << "Time taken by Alice: " << duration.count() << " microseconds" << std::endl;
 		//is_updated = true;
 		ros::spinOnce();
 		loopRate.sleep();

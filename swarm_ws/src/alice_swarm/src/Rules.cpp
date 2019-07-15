@@ -7,7 +7,7 @@
 #include <iostream>
 #include <bits/stdc++.h>
 
-#define DEBUG_schange 0
+#define DEBUG_schange 1
 
 Rules::Rules()
 {
@@ -22,43 +22,46 @@ Rules::Rules(Model _model) :
 
 //===================================================================================================================\\
 
-AliceStructs::vel Rules::stateLoop(Model &_model)
+void Rules::stateLoop(Model &_model)
 {
 	model = _model; //do not comment this out. Doing so causes Ragnarok.
-
-	checkForProblems(); //feel free to add hard to find casees to this function. Will save debugging time.
-//	checkBattery(state);
-
-	if (updateWaypoint())
+	if (shouldLoop())
 	{
+		std::vector<AliceStructs::pnt> go_to_list;
+		go_to_list.push_back(goToTar());
+		// add other rules here
+		float temp = -1;
+		for (auto& rule : go_to_list)
+		{
+			if (rule.z > temp)
+			{
+				temp = rule.z;
+				model.goTo = rule;
+			}
+		}
 		avoidCollisions();
 	}
-//	checkBlocked();
-//	if (state == "goToTar")
-//	{
-//		goToTar();
-//	}
-//	else if (state == "blocked")
-//	{
-//		avoidCollisions();
-//	}
-//
-//	else if (state == "needs_charging")
-//	{
-//		Charge();
-//	}
-//	else if(state == "charging")
-
-
-	findDeadZones();
-	//findContour();
-	//explore();
-	updateVel(&final_vel);
-
-	return final_vel;
 }
 
 //===================================================================================================================
+
+bool Rules::shouldLoop()
+{
+	if (calcDis(model.goTo.x, model.goTo.y, model.cur_pose.x, model.cur_pose.y) < model.SIZE/2)
+	{
+		return true;
+	} /* to implement
+	else if (checkCritical())
+	{
+		return true;
+	}
+	else if (notConforming())
+	{
+		return true;
+	} */
+	return false;
+}
+
 void Rules::avoidCollisions()
 {
 	bool checker = true;
@@ -67,7 +70,7 @@ void Rules::avoidCollisions()
 		float tf = atan2(model.goTo.y, model.goTo.x);
 		if (checkBlocked())
 		{
-			findAngle(tf, findDeadZones());
+			findPath(tf, findDeadZones());
 		}
 		checker = avoidNeighbors();
 	}
@@ -176,7 +179,7 @@ bool Rules::changeState()
 
 bool Rules::updateWaypoint() //checks if action should be taken (if near goT0 or new rule has higher priority).
 {//priority received in order {REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}.
-
+	std::cout << model.goTo.x << model.goTo.y << std::endl;
 	bool changed; //tells you if priorities of rules have changed.
 	bool take_action = false; //only made true if near waypoint, or if state priorities change.
 
@@ -219,21 +222,23 @@ void Rules::updateVel(AliceStructs::vel *_fv) //puts the final_velocity in the f
 	_fv->dir = direction;
 }
 
-void Rules::goToTar()
+AliceStructs::pnt Rules::goToTar()
 {
 	float temp = 10000;
+	AliceStructs::pnt to_return;
+	to_return.z = 0;
 	for (auto& tar : model.targets)
 	{
 		float check = calcDis(tar.x, tar.y, model.cur_pose.x, model.cur_pose.y);
 		if (check < temp)
 		{
 			temp = check;
-			model.goTo = tar;
+			to_return = tar;
+			to_return.z = 1;
 		}
 	}
-	checkBlocked();
-	final_vel.dir = atan2(model.goTo.y, model.goTo.x);
-	final_vel.mag = 1;
+	std::cout << "x: " << model.goTo.x << "y: " << model.goTo.y << std::endl;
+	return to_return;
 }
 
 void Rules::findContour()
@@ -296,7 +301,7 @@ bool Rules::checkBlocked()
 //	}
 //	return state;
 //}
-void Rules::findAngle(float tf, std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones)
+void Rules::findPath(float tf, std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones)
 {
 	std::vector<std::pair<float, AliceStructs::obj>> right;
 	std::vector<std::pair<float, AliceStructs::obj>> left;
