@@ -17,7 +17,7 @@ SYSTEM_THREAD(ENABLED)
 #include "easy_tcp.h"
 #include "imu_calibrate.h"
 #define INTEGRATED_DEBUG 1
-
+#define COMMAND_DEBUG 0
 // // FOR AN ARGON BOARD
 // #define mosi D12 //blue - DIN - MO on Argon Board
 // #define sclk D13 //yellow
@@ -45,7 +45,7 @@ IMUCalibrate imu;
 Screen screenObject;
  int port = 4321;
      byte ip[4] = {192, 168, 10, 187};
-EasyTCP tcpClient( port,ip, "PA");
+EasyTCP tcpClient( port,ip, "NH");
   struct command c;
 float theta = 0, pos = 10;
 
@@ -57,7 +57,7 @@ void setup(void)
     Serial.println("Connected to wifi");
 #endif
     // Initialize screen
-    //screenObject.init();
+    screenObject.init();
 
     // Set up pins
     // pinSetup();
@@ -91,26 +91,26 @@ void setup(void)
 
 void loop()
 {
-    int temp = tcpClient. read((uint8_t *)(&c), sizeof(struct command), theta, pos); // what are buf and len?
+    int temp = tcpClient.read((uint8_t *)(&c), sizeof(struct command), theta, pos); // what are buf and len?
     if (temp > 0)
     {
         imu.getIMUHeading(theta);
-// #if INTEGRATED_DEBUG
-//         Serial.print("VICON\tR: ");
-//         Serial.print(pos);
-//         Serial.print("\tTH: ");
-//         Serial.print(theta);
-// #endif
+#if COMMAND_DEBUG
+        Serial.print("VICON\tR: ");
+        Serial.print(pos);
+        Serial.print("\tTH: ");
+        Serial.print(theta);
+#endif
     }
     else if (temp == 0)
     {
         theta= imu.getIMUHeading(theta);
-// #if INTEGRATED_DEBUG
-//         Serial.print("IMU\tR: ");
-//         Serial.print(pos);
-//         Serial.print("\tTH: ");
-//         Serial.print(theta);
-// #endif
+#if COMMAND_DEBUG
+        Serial.print("IMU\tR: ");
+        Serial.print(pos);
+        Serial.print("\tTH: ");
+        Serial.print(theta);
+#endif
     }
     else
     {
@@ -118,10 +118,9 @@ void loop()
         Serial.println("Read Error!");
 #endif
     }
-
     //need to get this from some decision betweeen imu and vicon
     diff_drive.drive(theta, pos);
-
+    if (temp<0) while(!tcpClient.init(10000));
     Serial.print("Finish drive command check client");
     Serial.println(millis());
     Particle.process();
