@@ -26,13 +26,13 @@ void DiffDrive::drive(double _theta, double _speed)
     }
     else if (_theta > 90 && _theta <= 180)
     { //we still want this because we want linear velocity to be non-negative ( change for pd)
-        servLeft.write(90 - 10 * w);
-        servRight.write(90 - 10 * w);
+        servLeft.write(90 - 10 * lw);
+        servRight.write(90 - 10 * lw);
     }
     else if (_theta > 180 && _theta < 270)
     {
-        servLeft.write(90 + 10 * w);
-        servRight.write(90 + 10 * w);
+        servLeft.write(90 + 10 * lw);
+        servRight.write(90 + 10 * lw);
     }
     else //if somehow the command is invalid
     {

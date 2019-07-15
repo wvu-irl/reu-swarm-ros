@@ -22,12 +22,28 @@ bool EasyTCP::init(int _timeout)
 #endif
 
     readTimer = 0;
-
-    client.connect(address, port);
-
     int currentTime = millis();
-    while (!client.connected() && currentTime - millis() > CONN_TIMEOUT_MILLIS)
-        ;
+    int connect = -1;
+    do
+    {
+        connect = client.connect(address, port);
+
+#if EASY_TCP_DEBUG
+        Serial.print("TCP: Trying to Connect : connect = ");
+        Serial.println(connect);
+#endif
+
+    } while (connect != 1 && (millis() - currentTime) > CONN_TIMEOUT_MILLIS);
+
+    //     int currentTime = millis();
+    //    // waitFor(client.connected,_timeout); this doesn't work in a method, only in main...
+    //     while (!client.connected() &&  millis()-currentTime> CONN_TIMEOUT_MILLIS)
+    //     {
+    // //         int x= (currentTime - millis());
+    // // #if EASY_TCP_DEBUG
+    // //         Serial.println("TCP: Trying to Connect, "+x);
+    // // #endif
+    //     }
 
     // Check if connection succeeded
     if (client.connected())
@@ -35,12 +51,15 @@ bool EasyTCP::init(int _timeout)
 #if EASY_TCP_DEBUG
         Serial.println("TCP: Connected.");
 #endif
+        Serial.println("register " + registerStr); // Append register identifier
+        Serial.println();
+        // Send registration to server (this dun work)
+        // client.print("register ");
+        // client.println(registerStr); // Append register identifier
+        // client.println();
 
-        // Send registration to server
-        client.print("register ");
-        client.println(registerStr); // Append register identifier
+        client.println("register " + registerStr); // Append register identifier
         client.println();
-
         return true;
     }
     else
@@ -68,6 +87,7 @@ bool EasyTCP::connected(void)
 // Identical to init, but can specify timeout. Not my best work.
 bool EasyTCP::reconnect(int _timeout)
 {
+
 #if EASY_TCP_DEBUG
     Serial.println("TCP: Beginning reconnect()");
 #endif
@@ -105,10 +125,6 @@ bool EasyTCP::reconnect(int _timeout)
 int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
 {
 
-#if TCP_DEBUG
-    Serial.println("TCP: Beginning read()");
-#endif
-
     if (readTimer == 0)
         readTimer = millis(); // Set timeout timer if first read
 
@@ -135,12 +151,16 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
         readTimer = millis();
 
         bytes = client.read(_buf, _len);
-       // _pos = (float)strtod(strtok(c.str, ","), NULL); i dunno how to get a str from _buf
+        _pos = (float)strtod(strtok((char *)_buf, ","), NULL); //i dunno how to get a str from _buf
         _theta = (float)strtod(strtok(NULL, ","), NULL);
     }
     // Error case
     else if (bytes < 0)
     {
+#if EASY_TCP_DEBUG
+
+        Serial.println("TCP: We somehow got negative bytes");
+#endif
     }
     // No data case
     else
@@ -151,16 +171,19 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
 #if EASY_TCP_DEBUG
             Serial.println("TCP: Read timeout!");
 #endif
-
+            _theta = -1; // makes theta invalid
             // Disconnect
             client.stop();
-
+            bool reConn = false;
             // Reconnect, timeout 1000ms
-            bool reConn = init(1000);
-
+            while (!reConn)
+            {
+                init(CONN_TIMEOUT_MILLIS);
 #if EASY_TCP_DEBUG
-            Serial.println(reConn ? "TCP: Reconnected." : "TCP: Reconnect timeout!");
+                if (!reConn)
+                    Serial.println(reConn ? "TCP: Reconnected." : "TCP: Reconnect timeout!");
 #endif
+            }
         }
     }
     return bytes;
