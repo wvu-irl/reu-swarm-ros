@@ -22,7 +22,7 @@ bool EasyTCP::init(int _timeout)
 #endif
 
     readTimer = 0;
-    int currentTime = millis();
+    unsigned long currentTime = millis();
     int connect = -1;
     do
     {
@@ -30,10 +30,14 @@ bool EasyTCP::init(int _timeout)
 
 #if EASY_TCP_DEBUG
         Serial.print("TCP: Trying to Connect : connect = ");
-        Serial.println(connect);
+        Serial.print(connect);
+        Serial.print(" ");
+        Serial.print(millis());
+        Serial.print(" ");
+        Serial.println(currentTime);
 #endif
 
-    } while (connect != 1 && (millis() - currentTime) > CONN_TIMEOUT_MILLIS);
+    } while (connect != 1 && (millis() - currentTime) < CONN_TIMEOUT_MILLIS);
 
     //     int currentTime = millis();
     //    // waitFor(client.connected,_timeout); this doesn't work in a method, only in main...

@@ -9,17 +9,16 @@ void Screen::init(void)
 {
     oled.begin();
     oled.fillScreen(BLACK);
+    oled.setTextSize(2);
+    oled.setTextColor(WHITE);
+    oled.println("Battery: ");
+    oled.setCursor(0, 28);
+    oled.println("CONNECTIVITY: ");
+    oled.drawTriangle(64, 38, 61, 43, 67, 43, WHITE); //Declares the front of the robot
 }
 
 void Screen::updateScreen(float _theta, bool _connected)
 {
-    oled.setTextSize(2);
-    oled.setTextColor(WHITE);
-    oled.println("Battery: ");
-    oled.setTextSize(1);
-    oled.setCursor(0, 28);
-    oled.println("CONNECTIVITY: ");
-    oled.drawTriangle(64, 38, 61, 43, 67, 43, WHITE); //Declares the front of the robot
 
     sysStat(_connected);
     battStat();
@@ -28,6 +27,7 @@ void Screen::updateScreen(float _theta, bool _connected)
 
 void Screen::sysStat(bool _connected)
 {
+    oled.setCursor(0, 0);
     if (_connected)
     {
         oled.fillCircle(83, 31, 4, GREEN);

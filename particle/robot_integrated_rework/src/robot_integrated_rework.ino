@@ -86,7 +86,7 @@ void setup(void)
 
     // Initialize tcp client
     while(!tcpClient.init(10000));
-   // oledThread = Thread("oled", threadOled);
+    oledThread = Thread("oled", threadOled);
 }
 
 void loop()
