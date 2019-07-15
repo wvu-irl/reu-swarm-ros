@@ -42,14 +42,14 @@ void DiffDrive::drive(double _theta, double _speed)
 }
 
 // Completely disconnects servos to stop
-void fullStop(void)
+void DiffDrive::fullStop(void)
 {
-    servLeft.disconnect();
-    servRight.disconnect();
+    servLeft.detach();
+    servRight.detach();
 }
 
 // Reattaches servos. Call this after a fullStop
-void restart(void)
+void DiffDrive::restart(void)
 {
     servRight.attach(LEFTPIN);
     servLeft.attach(RIGHTPIN);
