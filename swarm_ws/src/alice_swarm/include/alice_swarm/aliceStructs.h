@@ -107,7 +107,8 @@ typedef struct
 	std::vector<obj> obstacles;
 	std::vector<pnt> targets;
 	std::vector<flow> flows;
-	std::vector<wvu_swarm_std_msgs::charger> *chargers;
+	std::vector<wvu_swarm_std_msgs::charger> *abs_chargers; //pointer to absolute chargers
+	std::vector<wvu_swarm_std_msgs::charger> rel_chargers; //copy of chargers with pos relative to each bot.
 	std::vector<float> *priority; //{REST, CHARGE, CONTOUR, TARGET, EXPLORE}
 	float xpos;
 	float ypos;

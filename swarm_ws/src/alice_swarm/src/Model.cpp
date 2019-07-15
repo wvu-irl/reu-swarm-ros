@@ -25,7 +25,7 @@ void Model::clear()
 	flows.clear();
 	neighbors.clear();
 	targets.clear();
-//	chargers->clear(); //this will delete the whole msg lol
+  rel_chargers.clear();
 }
 std::pair<float, float> Model::transformCur(float _x, float _y) //goes from cur frame to first frame.
 {
@@ -121,6 +121,7 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 	cur_pose.heading = _toAdd.heading;
 	name = _toAdd.name;
 	time = _toAdd.time;
+
 	for (auto& obstacle : _toAdd.obstacles)
 	{
 		obstacles.push_back(obstacle);
@@ -137,8 +138,14 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 	{
 		targets.push_back(tar);
 	}
+	//Im pretty sure this does the same as the above loops.
+//	obstacles =  _toAdd.obstacles;
+//	flows =  _toAdd.flows;
+//	neighbors =  _toAdd.neighbors;
+//	targets =  _toAdd.targets;
 
-	chargers = _toAdd.chargers;
+	abs_chargers = _toAdd.abs_chargers; //pointer to absolute chargers vector
+	rel_chargers = _toAdd.rel_chargers; //copy of chargers vector with pos in current frame, not absolute.
 	priority = _toAdd.priority;
 
 //	int i=0;

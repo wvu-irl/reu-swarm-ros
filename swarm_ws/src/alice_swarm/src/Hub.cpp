@@ -216,8 +216,23 @@ void Hub::addContMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Gives each
 }
 
 void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
-{
-//_mail.chargerMail = chargers.charger;
+{//converts each charger into relative coordinates of the current bot. Adds it to mail.
+
+	for(int j = 0; j < chargers.charger.size(); j++)
+	{
+		std::pair<float, float> temp = {chargers.charger.at(j).x, chargers.charger.at(j).y};
+		std::pair<float, float> temp2 = getSeparation(bots[i], temp);
+
+		wvu_swarm_std_msgs::charger cur_charger;
+		cur_charger.x = temp2.first;
+		cur_charger.y = temp2.second;
+		cur_charger.occupied = chargers.charger.at(j).occupied;
+		_mail.rel_chargerMail.push_back(cur_charger);
+
+//		std::cout<<"bot #: "<<i<<" abs_charger: "<<chargers.charger.at(j).x<<","<<chargers.charger.at(j).y<<std::endl;
+//		std::cout<<"bot #: "<<i<<" rel_charger: "<<cur_charger.x<<","<<cur_charger.y<<std::endl;
+//		std::cout<<"-------------------------------\n";
+	}
 }
 
 //void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail _mail) //Prints mail for debug purposes
@@ -249,7 +264,7 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		addTargetMail(*it, temp);
 		addFlowMail(*it, temp);
 		addContMail(*it, temp);
-//		addChargerMail(*it, temp);
+		addChargerMail(*it, temp);
 
 		temp.name = *it;
 		temp.sid = bots[*it].swarm_id;

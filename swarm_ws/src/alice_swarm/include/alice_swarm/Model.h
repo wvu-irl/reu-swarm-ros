@@ -43,7 +43,8 @@ public:
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
 	std::vector<AliceStructs::pnt> targets;
-	std::vector<wvu_swarm_std_msgs::charger> *chargers;
+	std::vector<wvu_swarm_std_msgs::charger> *abs_chargers; //copy of chargers vector with pos in current frame, not absolute.
+	std::vector<wvu_swarm_std_msgs::charger> rel_chargers; //pointer to absolute chargers vector
 	std::vector<float> *priority;
 
 	AliceStructs::pnt goTo;

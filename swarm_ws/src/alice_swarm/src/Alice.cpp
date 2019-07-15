@@ -57,11 +57,11 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data,
 		flow.spd = _flow.spd;
 		mail.flows.push_back(flow);
 	}
-//	for(int i = 0; i < _priority.size(); i++)
-//	{
-//			mail.priority.push_back(_priority.at(i));
-//	}
-	mail.chargers = &(_chargers);
+	for(auto& _rel_charger : _data.rel_chargerMail)
+	{
+			mail.rel_chargers.push_back(_rel_charger);
+	}
+	mail.abs_chargers = &(_chargers);
 	mail.priority = &(_priority);
 //--------------------------------------------
 

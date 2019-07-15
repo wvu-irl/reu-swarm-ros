@@ -10,6 +10,7 @@
 #include <wvu_swarm_std_msgs/flows.h>
 #include <wvu_swarm_std_msgs/map_levels.h>
 #include <wvu_swarm_std_msgs/chargers.h>
+#include <wvu_swarm_std_msgs/charger.h>
 #include "alice_swarm/aliceStructs.h"
 #include <contour_node/level_description.h>
 

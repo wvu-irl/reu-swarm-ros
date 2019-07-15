@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 		{
 			//==gives each robot the relative data it needs, whilst also creating the alice's
 			alice_map[temp_mail.mails.at(i).name].updateModel(temp_mail.mails.at(i),maps,ids,
-						temp_mail.chargers, temp_priorities.priorities.at(i).priority);
+						temp_mail.abs_chargers, temp_priorities.priorities.at(i).priority);
 		}
 
 		//One alice is selected to send her map out to the rest of them; less robots means a particular robot's map is sent more often
@@ -108,8 +108,8 @@ int main(int argc, char **argv)
 
 //	============Publish chargers (pub3)=============
 		wvu_swarm_std_msgs::chargers chargers_to_publish;
-		chargers_to_publish.charger = temp_mail.chargers;
-		if(temp_mail.chargers.size()>0) //publishes when there is actually stuff to publish.
+		chargers_to_publish.charger = temp_mail.abs_chargers;
+		if(temp_mail.abs_chargers.size()>0) //publishes when there is actually stuff to publish.
 		{
 			pub3.publish(chargers_to_publish);
 		}
