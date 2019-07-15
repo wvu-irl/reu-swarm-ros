@@ -3,6 +3,9 @@
 
 #include <Particle.h>
 
+#define LEFTPIN A1
+#define RIGHTPIN A2
+
 class Drivetrain
 {
 public:

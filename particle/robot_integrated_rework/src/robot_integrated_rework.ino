@@ -88,8 +88,21 @@ void setup(void)
 
 void loop()
 {
-    if (!tcpClient.connected()) while(!tcpClient.init(10000));
-    int temp = tcpClient.read((uint8_t *)(&c), sizeof(struct command), theta, pos); // what are buf and len?
+    if (!tcpClient.connected()) {
+        // Stop moving
+        diff_drive.fullStop();
+
+        // Keep trying to reconnect as needed
+        while(!tcpClient.init(10000)) tone(A4, 1760, 1000);
+
+        // Restart drivetrain
+        diff_drive.restart();
+    }
+
+    // Read from TCP
+    int temp = tcpClient.read((uint8_t *)(&c), sizeof(struct command), theta, pos); 
+
+    // If got a heading from VICON, just update IMU calibration
     if (temp > 0)
     {
         imu.getIMUHeading(theta);
@@ -100,9 +113,10 @@ void loop()
         Serial.print(theta);
 #endif
     }
+    // If no data, use IMU estimate
     else if (temp == 0)
     {
-        theta= imu.getIMUHeading(theta);
+        theta = imu.getIMUHeading(theta);
 #if COMMAND_DEBUG
         Serial.print("IMU\tR: ");
         Serial.print(pos);
@@ -110,16 +124,18 @@ void loop()
         Serial.print(theta);
 #endif
     }
+    // Else, error
     else
     {
 #if INTEGRATED_DEBUG
         Serial.println("Read Error!");
 #endif
     }
-    //need to get this from some decision betweeen imu and vicon
+    
+    // Send drive command
     diff_drive.drive(theta, pos);
-    if (temp<0) while(!tcpClient.init(10000)) tone(A4, 1760, 1000);;
-    Serial.print("Finish drive command check client");
+
+    Serial.print("Finish drive command check client ");
     Serial.println(millis());
     Particle.process();
 }
