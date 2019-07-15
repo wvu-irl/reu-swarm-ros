@@ -45,9 +45,9 @@ IMUCalibrate imu;
 Screen screenObject;
  int port = 4321;
      byte ip[4] = {192, 168, 10, 187};
-EasyTCP tcpClient( port,ip, "NH");
+EasyTCP tcpClient( port,ip, "DE");
   struct command c;
-float theta = 0, pos = 10;
+float theta = -100, pos = 10;
 
 void setup(void)
 {
@@ -91,6 +91,7 @@ void setup(void)
 
 void loop()
 {
+    if (!tcpClient.connected()) while(!tcpClient.init(10000));
     int temp = tcpClient.read((uint8_t *)(&c), sizeof(struct command), theta, pos); // what are buf and len?
     if (temp > 0)
     {
