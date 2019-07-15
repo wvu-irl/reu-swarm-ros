@@ -21,7 +21,7 @@ bool EasyTCP::init(int _timeout)
     Serial.println("TCP: Beginning init()");
 #endif
 
-    readTimer = 0;
+    readTimer = millis();
     unsigned long currentTime = millis();
     int connect = -1;
     do
@@ -88,41 +88,6 @@ bool EasyTCP::connected(void)
     return client.connected();
 }
 
-// Identical to init, but can specify timeout. Not my best work.
-bool EasyTCP::reconnect(int _timeout)
-{
-
-#if EASY_TCP_DEBUG
-    Serial.println("TCP: Beginning reconnect()");
-#endif
-
-    readTimer = 0;
-
-    client.connect(address, 4321);
-    //waitFor(client.connected, _timeout);
-    if (client.connected())
-    {
-#if EASY_TCP_DEBUG
-        Serial.println("TCP: Connected.");
-#endif
-
-        // Send registration to server
-        client.print("register ");
-        client.println(registerStr); // Append register identifier
-        client.println();
-
-        return true;
-    }
-    else
-    {
-#if EASY_TCP_DEBUG
-        Serial.println("TCP: Connection timeout!");
-#endif
-
-        return false;
-    }
-}
-
 // Tries to read. If it fails, keeps track of time since last success.
 //   Returns 0 if nothing available, -1 if error, # of bytes if success
 // Also changes the vicon heading, passed by reference
@@ -175,19 +140,17 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
 #if EASY_TCP_DEBUG
             Serial.println("TCP: Read timeout!");
 #endif
-            _theta = -1; // makes theta invalid
-            // Disconnect
-            client.stop();
-            bool reConn = false;
-            // Reconnect, timeout 1000ms
-            while (!reConn)
-            {
-                init(CONN_TIMEOUT_MILLIS);
-#if EASY_TCP_DEBUG
-                if (!reConn)
-                    Serial.println(reConn ? "TCP: Reconnected." : "TCP: Reconnect timeout!");
-#endif
-            }
+            _theta = -100; // makes theta invalid
+            // Disconnect, we'll reconnect afterwards so the drive command actually gets sent...
+            //client.stop(); don't do this, our server doesn't handle the reconnection correctly
+            //             bool reConn = false;
+            //             // Reconnect, timeout 1000ms
+
+            //                 reConn = init(CONN_TIMEOUT_MILLIS);
+            // #if EASY_TCP_DEBUG
+            //                 if (!reConn)
+            //                     Serial.println(reConn ? "TCP: Reconnected." : "TCP: Reconnect timeout!");
+            // #endif
         }
     }
     return bytes;
