@@ -27,7 +27,6 @@ void prioritiesCallback(const wvu_swarm_std_msgs::priorities &msg)
 
 int main(int argc, char **argv)
 {
-	std::cout << "wheee" << std::endl;
 	std::map<int, Alice> alice_map; //Maps robot id's to robots so they can be accessed easily
 	std::map<int, Alice>::iterator map_it = alice_map.begin();
 	//Creates an AliceBrain node, and subscribes/publishes to the necessary topics
@@ -100,7 +99,7 @@ int main(int argc, char **argv)
 			else
 				temp.r = tempVel.mag;
 			temp.theta = 180 / M_PI * fmod(2 * M_PI + tempVel.dir, 2 * M_PI);
-			std::cout << temp.rid << " " << temp.r << " " << temp.theta << std::endl;
+			//std::cout << temp.rid << " " << temp.r << " " << temp.theta << std::endl;
 
 			execute.commands.push_back(temp); //adds vector to published vector
 		}

@@ -6,10 +6,10 @@
 #include "wvu_swarm_std_msgs/gaussian.h"
 #include "wvu_swarm_std_msgs/neighbor_mail.h"
 #include "wvu_swarm_std_msgs/map.h"
-#include "alice_swarm/aliceStructs.h"
-#include <iostream>
 
-#define DEBUG_generateVel 0
+#include "alice_swarm/aliceStructs.h"
+
+#include <iostream>
 
 Alice::Alice()
 {
@@ -57,11 +57,11 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data,
 		flow.spd = _flow.spd;
 		mail.flows.push_back(flow);
 	}
-	for(auto& _rel_charger : _data.rel_chargerMail)
-	{
-			mail.rel_chargers.push_back(_rel_charger);
-	}
-	mail.abs_chargers = &(_chargers);
+//	for(int i = 0; i < _priority.size(); i++)
+//	{
+//			mail.priority.push_back(_priority.at(i));
+//	}
+	mail.chargers = &(_chargers);
 	mail.priority = &(_priority);
 //--------------------------------------------
 
@@ -92,20 +92,13 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_s
 
 AliceStructs::vel Alice::generateVel() //implements the rules set
 {
-	/*
-	 * There is actually a duplication of model happening in here. Not sure how or why. But use rules.model.
-	 */
+	std::cout << "loop started" << std::endl;
 	rules.stateLoop(model);
-	std::pair<float,float> cur_goTo = model.transformFir(rules.model.goTo.x, rules.model.goTo.y); //from first to current frame.
+	//std::cout << model.goTo.x << " " << model.cur_pose.x << " - " << model.goTo.y << " " << model.cur_pose.y << std::endl;
 	AliceStructs::vel to_return;
-	to_return.dir = atan2(cur_goTo.second, cur_goTo.first);
 	to_return.mag = 1;
-
-#if DEBUG_generateVel
-	std::cout<<"alice executes: "<<cur_goTo.first<<","<<cur_goTo.second<<std::endl;//this is the rules model
-	std::cout<<"alice executes: "<<model.goTo.x<<","<< model.goTo.y<<std::endl; //this is the alice model (not the same).
-	std::cout<<"=================================================\n";
-#endif
-
+	//std::cout << "x: " << model.goTo.x << "y: " << model.goTo.y << std::endl;
+	to_return.dir = atan((model.goTo.y - model.cur_pose.y)/(model.goTo.x - model.cur_pose.x)) - model.cur_pose.heading;
+	std::cout << to_return.dir << std::endl;
 	return to_return;
 }

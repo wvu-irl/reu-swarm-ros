@@ -81,11 +81,6 @@ public:
 	void checkForProblems();
 
 	/*
-	 * checks if the highest priority rule has changed.
-	 */
-	bool changeState();
-
-	/*
 	 * Finds an adjusted angle to drive at given a set of blocked zones
 	 */
 	void findPath(float tf, std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones);
@@ -109,13 +104,6 @@ public:
 	 * Prevents Alice from hitting obstacles or other robots
 	 */
 	void avoidCollisions();
-
-	/*
-	 * Changes the way-point's true location. Most simplistically, does this if the way point has been reached.
-	 * Can also change the waypoint if certain priority checks are satisfied.
-	 * Returns true is the waypoint was changed.
-	 */
-	bool updateWaypoint();
 	//============================================Priority Rules================================================================
 	/*
 	 * Makes Alice stop moving

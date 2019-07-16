@@ -20,54 +20,52 @@ Rules::Rules(Model _model) :
 	state = REST;
 }
 
-//===================================================================================================================
+//===================================================================================================================\\
 
 void Rules::stateLoop(Model &_model)
 {
+	std::cout << "looping" << std::endl;
 	model = _model; //do not comment this out. Doing so causes Ragnarok.
-	if (shouldLoop())
+	model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
+	if (true) //shouldLoop())
 	{
 		std::vector<AliceStructs::pnt> go_to_list;
 		go_to_list.push_back(goToTar());
-		go_to_list.push_back(charge());
 		// add other rules here
 		float temp = -1;
 		for (auto& rule : go_to_list)
 		{
-			std::cout<<"the rule z is: "<<rule.z<<std::endl;
 			if (rule.z > temp)
 			{
 				temp = rule.z;
-				model.goTo = rule;
-				std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<std::endl;
+				model.goTo.x = rule.x;
+				model.goTo.y = rule.y;
+				std::cout << atan2(model.goTo.y, model.goTo.x) << std::endl;
 			}
 		}
-//		avoidCollisions();
-		std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<std::endl;
-		std::cout<<"-----------------------------------"<<std::endl;
+		//avoidCollisions();
 	}
+	model.transformCur(model.goTo.x, model.goTo.y); //Shifts the frame go goTo back to the first frame
 }
-
-//===================================================================================================================
 
 bool Rules::shouldLoop()
 {
-	bool result = false;
-	if (calcDis(model.goTo.x, model.goTo.y, model.cur_pose.x, model.cur_pose.y) < model.SIZE/2)
+	if (calcDis(model.goTo.x, model.goTo.y, 0, 0) < model.SIZE/2)
 	{
-		result = true;
+		return true;
 	} /* to implement
 	else if (checkCritical())
 	{
-		result = true;
+		return true;
 	}
 	else if (notConforming())
 	{
-		result = true;
+		return true;
 	} */
-	return true;
-//	return result;
+	return false;
 }
+
+//===================================================================================================================
 
 void Rules::avoidCollisions()
 {
@@ -101,54 +99,35 @@ void Rules::explore()
 	final_vel.mag = 1;
 }
 
-AliceStructs::pnt Rules::charge()
+void Rules::charge()
 {
 	float dx;
 	float dy;
 
 	float min_sep = 1000.0;
 	float check_sep; //sep distance
+	int closest_pos = -1;
 
-	for (int i=0; i < model.rel_chargers.size(); i++)
+	for (int i=0; i < model.chargers->size(); i++)
 	{
-		if((!model.abs_chargers->at(i).occupied) || (!model.committed)) //charger is open
+		if(!model.chargers->at(i).occupied) //charger is open
 		{
-			dx = model.rel_chargers.at(i).x;
-			dy = model.rel_chargers.at(i).y;
+			dx = model.chargers->at(i).x - model.cur_pose.x;
+			dy = model.chargers->at(i).y - model.cur_pose.y;
 			check_sep = sqrt(pow(dx,2) + pow(dy,2)); //check separation distance
-
-			std::cout<<"charger: "<<i<<":"<<"dx,dy: "<<dx<<","<<dy<<"|"<<check_sep<<std::endl;
-
 			if(check_sep < min_sep)
 			{
-				model.closest_pos = i; //saves pos of closest
+				closest_pos = i; //saves pos of closest
 				min_sep = check_sep; //updates min_sep
 			}
 		}
-		std::cout<<"why you break? "<<i<<std::endl;
 	}
-	AliceStructs::pnt go_to;
-	std::cout<<model.closest_pos<<" :closest pos"<<std::endl;
-	//something is either wrong here, or in generate vel.
-	go_to.x = model.rel_chargers.at(model.closest_pos).x;
-	go_to.y = model.rel_chargers.at(model.closest_pos).y;
-
-	if(model.battery_lvl<0.1) //assign priority
+	if(closest_pos >= 0)
 	{
-		go_to.z = 2; //given highest priority
-		model.abs_chargers->at(model.closest_pos).occupied = true; //charger is "checked out".
-		model.committed = true;
-		model.rel_chargers.at(model.closest_pos).occupied = true;
-	}else
-	{
-		go_to.z = 0;
+		model.chargers->at(closest_pos).occupied = true;
 	}
-
-	std::pair<float,float> temp_pnt = model.transformCur(go_to.x, go_to.y); //transform into first frame of bot (reasons).
-	go_to.x = temp_pnt.first;
-	go_to.y = temp_pnt.second;
-
-	return go_to;
+	//make the bot go to some way point, overiding other directives.
+	//way point should be .y, .x + 5 if on the left wall.
 }
 
 //--------------------Still need implementations-------------------------------------------
@@ -157,94 +136,16 @@ bool Rules::checkCollisions()
 
 }
 
-void Rules::rest() //gives a command to not move.
+void Rules::rest()
 {
-	std::pair<float,float> do_not = model.transformCur(0,0); //puts null command into first frame (reasons).
-	model.goTo.x = do_not.first;
-	model.goTo.y = do_not.second;
+
 }
+
 //-----------------------------------------------------------------------------------------
-bool Rules::changeState()
-{ //finds highest priority in list and coorespoinding state.
-	bool result;
-	float highest_prior = 0;
-	int highest_i;
-	for(int i = 0; i < UNUSED; i ++)
-	{
-		if(model.priority->at(i) > highest_prior)
-		{
-			highest_prior = model.priority->at(i);
-			highest_i = i;
-		}
-	}
-
-#if DEBUG_schange
-	std::cout<<"==========Pre adjustment===========\n";
-	std::cout<<"state: "<<(int)state<<std::endl;
-	std::cout<<"highest_i: "<<highest_i<<std::endl;
-	std::cout<<"priority:  "<<highest_prior<<std::endl;
-	std::cout<<"=====================\n";
-#endif
-
-	if(highest_i != (int)state) //if a different state has higher priority
-	{
-		result = true;
-		state = (State)highest_i; //this has been verified to produce the correct output.
-
-#if DEBUG_schange
-		std::cout<<"==========Post adjustment===========\n";
-		std::cout<<"state: "<<(int)state<<std::endl;
-		std::cout<<"highest_i: "<<highest_i<<std::endl;
-		std::cout<<"priority:  "<<highest_prior<<std::endl;
-		std::cout<<"=====================\n";
-#endif
-
-	}
-	else
-	{
-		result = false;
-	}
-	return result;
-}
-
-bool Rules::updateWaypoint() //checks if action should be taken (if near goTo or new rule has higher priority).
-{//priority received in order {REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}.
-	std::cout << model.goTo.x << model.goTo.y << std::endl;
-	bool changed; //tells you if priorities of rules have changed.
-	bool take_action = false; //only made true if near waypoint, or if state priorities change.
-
-	float tolerance = 1; //arbitrary limit of how close the bot needs to get to a waypoint for it to count as reaching it.
-	std::pair<float,float> waypoint = model.transformFir(model.goTo.x,model.goTo.y);
-	float r = sqrt(pow(waypoint.first - model.cur_pose.x,2) + pow(waypoint.second - model.cur_pose.y,2));
-
-	if(r<tolerance) //if inside
-	{
-		changed = changeState();
-		take_action = true;
-		std::cout<<(changed? "true" : "false")<<std::endl;
-	}
-	else if(changeState())
-	{
-		changed = true;
-		take_action = true;
-	}
-	if(take_action)
-	{
-		switch((int)state)
-		{
-			case 1: charge();
-			case 2:	findContour();
-			case 3: goToTar();
-			case 4: explore();
-			default: rest();
-		}
-	}
-	return take_action;
-}
 
 void Rules::updateVel(AliceStructs::vel *_fv) //puts the final_velocity in the frame of the bot.
 {
-	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y);
+	std::pair<float,float> cur_goTo = model.transformCur(model.goTo.x, model.goTo.y);
 	float magnitude = sqrt(pow(cur_goTo.first,2) + pow(cur_goTo.second,2));
 	float direction = atan2(cur_goTo.second,cur_goTo.first);
 	_fv->mag = magnitude;
@@ -258,7 +159,7 @@ AliceStructs::pnt Rules::goToTar()
 	to_return.z = 0;
 	for (auto& tar : model.targets)
 	{
-		float check = calcDis(tar.x, tar.y, model.cur_pose.x, model.cur_pose.y);
+		float check = calcDis(tar.x, tar.y, 0, 0);
 		if (check < temp)
 		{
 			temp = check;
@@ -266,7 +167,6 @@ AliceStructs::pnt Rules::goToTar()
 			to_return.z = 1;
 		}
 	}
-	std::cout << "x: " << model.goTo.x << "y: " << model.goTo.y << std::endl;
 	return to_return;
 }
 
@@ -292,6 +192,8 @@ void Rules::findContour()
 	model.goTo.x = best.x;
 	model.goTo.y = best.y;
 }
+
+//===================================================================================================================\\
 
 float Rules::calcDis(float _x1, float _y1, float _x2, float _y2)
 {
