@@ -5,70 +5,108 @@ Screen::Screen(void)
     //dummy
 }
 
-void Screen::init(void)
+void Screen::init(String _reg)
 {
     oled.begin();
     oled.fillScreen(BLACK);
-    oled.setTextSize(2);
-    oled.setTextColor(WHITE);
-    oled.println("Battery: ");
+    oled.setCursor(97, 0);
     oled.setTextSize(1);
-    oled.setCursor(0, 28);
-    oled.println("CONNECTIVITY: ");
-    oled.drawTriangle(64, 38, 61, 43, 67, 43, WHITE); //Declares the front of the robot
+    oled.setFont(TIMESNR_8);
+    oled.print(_reg);
 }
 
 void Screen::updateScreen(float _theta, bool _connected)
 {
-
     sysStat(_connected);
-    //battStat();
+    battStat();
     oledArrow(_theta);
 }
 
 void Screen::sysStat(bool _connected)
 {
-    oled.setCursor(0, 0);
-    if (_connected)
-    {
-        oled.fillCircle(83, 31, 4, GREEN);
-    }
-    else
-    {
-        oled.fillCircle(83, 31, 4, RED);
+    if(_connected != tcpConnected) {
+        tcpConnected = _connected;
+        if (_connected)
+        {
+            oled.fillCircle(123, 4, 4, GREEN);
+        }
+        else
+        {
+            oled.fillCircle(123, 4, 4, RED);
+        }
     }
 }
 
 void Screen::battStat()
 {
-    oled.setCursor(0, 18);
-    oled.setTextSize(1);
+    // Check voltage
+    enum BATT_STATE currentState;
     float voltage = analogRead(BATT) * 0.0011224;
+    // TODO: check for charging
     if (voltage >= 4.2) // If battery voltage is greater than 4.2 V it is at full charge
     {
-        oled.setTextColor(GREEN);
-        oled.println("Full Charge");
+        currentState = B_HIGH;
     }
     else if (voltage < 4.2 or voltage > 3.5) // If battery voltage is between 4.2 and 3.5 V battery is at safe usage levels
     {
-        oled.setTextColor(YELLOW);
-        oled.println("Useable Level");
+        currentState = B_MED;
     }
     else if (voltage <= 3.5) // If battery voltage is less than 3.5 V battery needs charged
     {
-        oled.setTextColor(RED);
-        oled.println("Needs Charging");
+        currentState = B_LOW;
+    }
+
+    // Change value of battery and update screen if value has changed
+    if(currentState != batteryState)
+    {
+        batteryState = currentState;
+
+        if(batteryState == B_HIGH)
+        {
+            oled.fillRect(0, 0, 19, 9, GREEN);
+            oled.drawRect(1, 1, 17, 7, BLACK);
+            oled.drawRect(20, 2, 2, 5, GREEN);
+        }
+        else if(batteryState == B_MED)
+        {
+            oled.fillRect(0, 0, 19, 9, YELLOW);
+            oled.drawRect(1, 1, 17, 7, BLACK);
+            oled.fillRect(13, 2, 5, 5, BLACK);
+            oled.drawRect(20, 2, 2, 5, YELLOW);
+        }
+        else if(batteryState == B_LOW)
+        {
+            oled.fillRect(0, 0, 19, 9, RED);
+            oled.drawRect(1, 1, 17, 7, BLACK);
+            oled.fillRect(8, 2, 10, 5, BLACK);
+            oled.drawRect(20, 2, 2, 5, RED);
+        }
+        else   // charging
+        {
+            // TODO: lightning or something
+            oled.fillRect(0, 0, 19, 9, YELLOW);
+            oled.drawRect(1, 1, 17, 7, BLACK);
+            oled.fillRect(13, 2, 5, 5, BLACK);
+            oled.drawRect(20, 2, 2, 5, YELLOW);
+        }
     }
 }
 
 void Screen::oledArrow(float _theta)
 {
-    oled.setCursor(0, 0);
+    // Only update if theta has changed
+    if(_theta != oldTheta) {
+        // Erase old arrow
+        oled.drawLine(64, 85, 64 + (40 * cos((oldTheta + 90) * 3.14 / 180)), 85 - (40 * sin((oldTheta + 90) * 3.14 / 180)), BLACK);
+        oled.drawLine(64 + (40 * cos((oldTheta + 90) * 3.14 / 180)), 85 - (40 * sin((oldTheta + 90) * 3.14 / 180)), (64 + (30 * cos((oldTheta + 100) * 3.14 / 180))), (85 - (30 * sin((oldTheta + 100) * 3.14 / 180))), BLACK);
+        oled.drawLine(64 + (40 * cos((oldTheta + 90) * 3.14 / 180)), 85 - (40 * sin((oldTheta + 90) * 3.14 / 180)), (64 + (30 * cos((oldTheta + 80) * 3.14 / 180))), (85 - (30 * sin((oldTheta + 80) * 3.14 / 180))), BLACK);
 
-    oled.drawLine(64, 85, 64 + (40 * cos((_theta + 90) * 3.14 / 180)), 85 - (40 * sin((_theta + 90) * 3.14 / 180)), CYAN);
-    oled.drawLine(64 + (40 * cos((_theta + 90) * 3.14 / 180)), 85 - (40 * sin((_theta + 90) * 3.14 / 180)), (64 + (30 * cos((_theta + 100) * 3.14 / 180))), (85 - (30 * sin((_theta + 100) * 3.14 / 180))), CYAN);
-    oled.drawLine(64 + (40 * cos((_theta + 90) * 3.14 / 180)), 85 - (40 * sin((_theta + 90) * 3.14 / 180)), (64 + (30 * cos((_theta + 80) * 3.14 / 180))), (85 - (30 * sin((_theta + 80) * 3.14 / 180))), CYAN);
-    oled.drawLine(64, 85, 64 + (40 * cos((_theta + 90) * 3.14 / 180)), 85 - (40 * sin((_theta + 90) * 3.14 / 180)), BLACK);
-    oled.drawLine(64 + (40 * cos((_theta + 90) * 3.14 / 180)), 85 - (40 * sin((_theta + 90) * 3.14 / 180)), (64 + (30 * cos((_theta + 100) * 3.14 / 180))), (85 - (30 * sin((_theta + 100) * 3.14 / 180))), BLACK);
-    oled.drawLine(64 + (40 * cos((_theta + 90) * 3.14 / 180)), 85 - (40 * sin((_theta + 90) * 3.14 / 180)), (64 + (30 * cos((_theta + 80) * 3.14 / 180))), (85 - (30 * sin((_theta + 80) * 3.14 / 180))), BLACK);
+        // Draw new arrow
+        oled.drawLine(64, 85, 64 + (40 * cos((_theta + 90) * 3.14 / 180)), 85 - (40 * sin((_theta + 90) * 3.14 / 180)), CYAN);
+        oled.drawLine(64 + (40 * cos((_theta + 90) * 3.14 / 180)), 85 - (40 * sin((_theta + 90) * 3.14 / 180)), (64 + (30 * cos((_theta + 100) * 3.14 / 180))), (85 - (30 * sin((_theta + 100) * 3.14 / 180))), CYAN);
+        oled.drawLine(64 + (40 * cos((_theta + 90) * 3.14 / 180)), 85 - (40 * sin((_theta + 90) * 3.14 / 180)), (64 + (30 * cos((_theta + 80) * 3.14 / 180))), (85 - (30 * sin((_theta + 80) * 3.14 / 180))), CYAN);
+
+        // Update old theta
+        oldTheta = _theta;
+    }
 }

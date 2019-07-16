@@ -4,6 +4,9 @@
 #include <Particle.h>
 #define DIFF_DRIVE_DEBUG 1
 
+#define LEFTPIN A1
+#define RIGHTPIN A2
+
 class Drivetrain
 {
 public:
