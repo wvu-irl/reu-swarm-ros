@@ -17,6 +17,7 @@ Model::Model(int _name)
 {
 	first = true;
 	name = _name;
+	committed = false;
 }
 
 void Model::clear()

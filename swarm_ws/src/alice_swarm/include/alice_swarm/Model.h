@@ -37,14 +37,18 @@ public:
 	bool first;
 	ros::Time time;
 	float vision;
+
+	//these 4 allow for self charging.
 	float prev_highest_i; //rule from last iteration with highest priority
-	float battery_lvl;
+	float battery_lvl = 0.05;
+	bool committed;
+	int closest_pos;
 
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
 	std::vector<AliceStructs::pnt> targets;
-	std::vector<wvu_swarm_std_msgs::charger> *abs_chargers; //copy of chargers vector with pos in current frame, not absolute.
-	std::vector<wvu_swarm_std_msgs::charger> rel_chargers; //pointer to absolute chargers vector
+	std::vector<wvu_swarm_std_msgs::charger> *abs_chargers; //pointer to absolute chargers vector
+	std::vector<wvu_swarm_std_msgs::charger> rel_chargers; //copy of chargers vector with pos in current frame, not absolute.
 	std::vector<float> *priority;
 
 	AliceStructs::pnt goTo;

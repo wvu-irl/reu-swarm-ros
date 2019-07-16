@@ -29,17 +29,22 @@ void Rules::stateLoop(Model &_model)
 	{
 		std::vector<AliceStructs::pnt> go_to_list;
 		go_to_list.push_back(goToTar());
+//		go_to_list.push_back(charge());
 		// add other rules here
 		float temp = -1;
 		for (auto& rule : go_to_list)
 		{
+			std::cout<<"the rule z is: "<<rule.z<<std::endl;
 			if (rule.z > temp)
 			{
 				temp = rule.z;
 				model.goTo = rule;
+				std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<std::endl;
 			}
 		}
-		avoidCollisions();
+//		avoidCollisions();
+		std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<std::endl;
+		std::cout<<"-----------------------------------"<<std::endl;
 	}
 }
 
@@ -47,19 +52,21 @@ void Rules::stateLoop(Model &_model)
 
 bool Rules::shouldLoop()
 {
+	bool result = false;
 	if (calcDis(model.goTo.x, model.goTo.y, model.cur_pose.x, model.cur_pose.y) < model.SIZE/2)
 	{
-		return true;
+		result = true;
 	} /* to implement
 	else if (checkCritical())
 	{
-		return true;
+		result = true;
 	}
 	else if (notConforming())
 	{
-		return true;
+		result = true;
 	} */
-	return false;
+	return true;
+//	return result;
 }
 
 void Rules::avoidCollisions()
@@ -94,37 +101,54 @@ void Rules::explore()
 	final_vel.mag = 1;
 }
 
-void Rules::charge()
+AliceStructs::pnt Rules::charge()
 {
 	float dx;
 	float dy;
 
 	float min_sep = 1000.0;
 	float check_sep; //sep distance
-	int closest_pos = -1;
 
-//	std::cout<<"running loop: "<<model.rel_chargers.size()<<" times"<<std::endl;
 	for (int i=0; i < model.rel_chargers.size(); i++)
 	{
-		if(!model.abs_chargers->at(i).occupied) //charger is open
+		if((!model.abs_chargers->at(i).occupied) || (!model.committed)) //charger is open
 		{
 			dx = model.rel_chargers.at(i).x;
 			dy = model.rel_chargers.at(i).y;
 			check_sep = sqrt(pow(dx,2) + pow(dy,2)); //check separation distance
+
+			std::cout<<"charger: "<<i<<":"<<"dx,dy: "<<dx<<","<<dy<<"|"<<check_sep<<std::endl;
+
 			if(check_sep < min_sep)
 			{
-				closest_pos = i; //saves pos of closest
+				model.closest_pos = i; //saves pos of closest
 				min_sep = check_sep; //updates min_sep
 			}
 		}
+		std::cout<<"why you break? "<<i<<std::endl;
 	}
-	if(closest_pos >= 0)
+	AliceStructs::pnt go_to;
+	std::cout<<model.closest_pos<<" :closest pos"<<std::endl;
+	//something is either wrong here, or in generate vel.
+	go_to.x = model.rel_chargers.at(model.closest_pos).x;
+	go_to.y = model.rel_chargers.at(model.closest_pos).y;
+
+	if(model.battery_lvl<0.1) //assign priority
 	{
-		model.abs_chargers->at(closest_pos).occupied = true;
-		model.rel_chargers.at(closest_pos).occupied = true;
+		go_to.z = 2; //given highest priority
+		model.abs_chargers->at(model.closest_pos).occupied = true; //charger is "checked out".
+		model.committed = true;
+		model.rel_chargers.at(model.closest_pos).occupied = true;
+	}else
+	{
+		go_to.z = 0;
 	}
-	//make the bot go to some way point, overiding other directives.
-	//way point should be .y, .x + 5 if on the left wall.
+
+	std::pair<float,float> temp_pnt = model.transformCur(go_to.x, go_to.y); //transform into first frame of bot (reasons).
+	go_to.x = temp_pnt.first;
+	go_to.y = temp_pnt.second;
+
+	return go_to;
 }
 
 //--------------------Still need implementations-------------------------------------------
@@ -133,11 +157,13 @@ bool Rules::checkCollisions()
 
 }
 
-void Rules::rest()
+void Rules::rest() //gives a command to not move.
 {
-
+	std::pair<float,float> do_not = model.transformCur(0,0);
+	model.goTo.x = do_not.first;
+	model.goTo.y = do_not.second;
 }
-
+//-----------------------------------------------------------------------------------------
 bool Rules::changeState()
 { //finds highest priority in list and coorespoinding state.
 	bool result;
@@ -177,7 +203,7 @@ bool Rules::changeState()
 	return result;
 }
 
-bool Rules::updateWaypoint() //checks if action should be taken (if near goT0 or new rule has higher priority).
+bool Rules::updateWaypoint() //checks if action should be taken (if near goTo or new rule has higher priority).
 {//priority received in order {REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}.
 	std::cout << model.goTo.x << model.goTo.y << std::endl;
 	bool changed; //tells you if priorities of rules have changed.
@@ -211,11 +237,10 @@ bool Rules::updateWaypoint() //checks if action should be taken (if near goT0 or
 	}
 	return take_action;
 }
-//-----------------------------------------------------------------------------------------
 
 void Rules::updateVel(AliceStructs::vel *_fv) //puts the final_velocity in the frame of the bot.
 {
-	std::pair<float,float> cur_goTo = model.transformCur(model.goTo.x, model.goTo.y);
+	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y);
 	float magnitude = sqrt(pow(cur_goTo.first,2) + pow(cur_goTo.second,2));
 	float direction = atan2(cur_goTo.second,cur_goTo.first);
 	_fv->mag = magnitude;
@@ -263,8 +288,6 @@ void Rules::findContour()
 	model.goTo.x = best.x;
 	model.goTo.y = best.y;
 }
-
-//===================================================================================================================\\
 
 float Rules::calcDis(float _x1, float _y1, float _x2, float _y2)
 {

@@ -92,9 +92,17 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_s
 
 AliceStructs::vel Alice::generateVel() //implements the rules set
 {
+	/*
+	 * There is actually a duplication of model happening in here. Not sure how or why. But use rules.model.
+	 */
 	rules.stateLoop(model);
+//	std::pair<float,float> cur_goTo = {rules.model.goTo.x, rules.model.goTo.y};
+	std::pair<float,float> cur_goTo = model.transformFir(rules.model.goTo.x, rules.model.goTo.y);
 	AliceStructs::vel to_return;
+	to_return.dir = atan2(cur_goTo.second, cur_goTo.first);
 	to_return.mag = 1;
-	to_return.dir = atan2(model.goTo.y - model.cur_pose.y, model.goTo.x - model.cur_pose.x);
+	std::cout<<"alice executes: "<<cur_goTo.first<<","<<cur_goTo.second<<std::endl;\
+	std::cout<<"alice executes: "<<model.goTo.x<<","<< model.goTo.y<<std::endl;
+	std::cout<<"=================================================\n";
 	return to_return;
 }

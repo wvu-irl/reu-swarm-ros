@@ -125,7 +125,7 @@ public:
 	/*
 	 * Makes Alice find a charging station
 	 */
-	void charge();
+	AliceStructs::pnt charge();
 
 	/*
 	 * Makes Alice seek higher elevations

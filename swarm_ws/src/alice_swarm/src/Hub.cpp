@@ -10,9 +10,10 @@
 #include <math.h>
 #include <swarm_server/robot_id.h>
 #define DEBUG_HUB 0
+#define DEBUG_ChargerMail 0
 
 std::pair<float, float> Hub::getSeparation(Bot _bot, std::pair<float, float> _obs) //helper function for finding obstacle points.
-{ // takes current bot and looks at distance to each obs point. If it "sees"[[ it, converts that obs to polar and pushes to its vector stored in polar_obs.
+{
 	float loc_r; //|distance| b/w bot and current obstacle point.
 	float theta; //in radians
 	float dx; //x separation.
@@ -23,8 +24,8 @@ std::pair<float, float> Hub::getSeparation(Bot _bot, std::pair<float, float> _ob
 	dy = _obs.second - _bot.y;
 	loc_r = sqrt(pow(dx, 2) + pow(dy, 2)); //magnitude of separation
 	theta = fmod(atan2(dy, dx) - _bot.heading, 2 * M_PI);
-	to_return.first = loc_r * cos(theta);
-	to_return.second = loc_r * sin(theta);
+	to_return.first = loc_r * cos(theta); //x in cur frame
+	to_return.second = loc_r * sin(theta); //y in cur frame
 	return to_return;
 }
 
@@ -220,7 +221,8 @@ void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 
 	for(int j = 0; j < chargers.charger.size(); j++)
 	{
-		std::pair<float, float> temp = {chargers.charger.at(j).x, chargers.charger.at(j).y};
+		//makes the x coord that of the way point of that charger, for charge() rule. (Needs to be 5 cm in front.
+		std::pair<float, float> temp = {chargers.charger.at(j).x + 5, chargers.charger.at(j).y};
 		std::pair<float, float> temp2 = getSeparation(bots[i], temp);
 
 		wvu_swarm_std_msgs::charger cur_charger;
@@ -228,10 +230,12 @@ void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 		cur_charger.y = temp2.second;
 		cur_charger.occupied = chargers.charger.at(j).occupied;
 		_mail.rel_chargerMail.push_back(cur_charger);
-
-//		std::cout<<"bot #: "<<i<<" abs_charger: "<<chargers.charger.at(j).x<<","<<chargers.charger.at(j).y<<std::endl;
-//		std::cout<<"bot #: "<<i<<" rel_charger: "<<cur_charger.x<<","<<cur_charger.y<<std::endl;
-//		std::cout<<"-------------------------------\n";
+#if DEBUG_ChargerMail
+		std::cout<<"bot #: "<<i<<" abs_charger: "<<chargers.charger.at(j).x<<","<<chargers.charger.at(j).y<<std::endl;
+		std::cout<<"bot #: "<<i<<" target: "<<temp.first<<","<<temp.second<<std::endl;
+		std::cout<<"bot #: "<<i<<" rel_charger: "<<cur_charger.x<<","<<cur_charger.y<<std::endl;
+		std::cout<<"-------------------------------\n";
+#endif
 	}
 }
 
