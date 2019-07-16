@@ -5,6 +5,7 @@
 
 #include "arduino_server.h"
 #include <swarm_server/robot_id.h>
+#include <swarm_server/battery_states.h>
 #include <stdlib.h>
 #include <string.h>
 #include <map>
@@ -16,7 +17,7 @@
 #include <iostream>
 #include <fstream>
 
-#define DEBUG 0
+#define DEBUG 1
 #define PRINT_HEADER "[\033[1;33mros_to_arduino_server\033[0m]"
 
 ros::Publisher g_from_ard; // global publisher for data from the arduinos
@@ -29,7 +30,7 @@ volatile sig_atomic_t g_flag = 0;
 void flagger(int sig)
 {
 	g_flag = 1;
-        system("fuser 4321/tcp -k");
+//        system("fuser 4321/tcp -k");
 }
 
 /**
@@ -51,7 +52,28 @@ void commandCallback(command cmd, int rid)
 	ROS_INFO("\033[34mCommand: \033[30;44m%s\033[0m", cmd.str); // displaying recieved data
 	wvu_swarm_std_msgs::sensor_data inf; // conversion container
 	inf.rid = rid;
-	inf.battery = (float)strtod(cmd.str, NULL);
+        inf.battery_state = NONE;
+        inf.battery_level = -1;
+        if (strcmp(cmd.str, "charged") == 0)
+        {
+            inf.battery_state = CHARGED;
+        }
+        else if (strcmp(cmd.str, "going") == 0)
+        {
+            inf.battery_state = GOING;
+        }
+        else if (strcmp(cmd.str, "charging") == 0)
+        {
+            inf.battery_state = CHARGING;
+        }
+        else if (strcmp(cmd.str, "error") == 0)
+        {
+            inf.battery_state = ERROR;
+        }
+        else
+        {
+            inf.battery_level = (float)strtod(cmd.str, NULL);
+        }
 	if (&g_from_ard != NULL)
 		g_from_ard.publish(inf); // publishing
 
@@ -110,14 +132,7 @@ void errorCallBack(const char *msg)
  *  This is nessessary because the server contains a closed loop
  */
 void *controlThread(void *arg0)
-{
-	signal(SIGINT, flagger);
-	ros::NodeHandle *n = (ros::NodeHandle *) arg0; // passed node handle
-	ros::Subscriber to_ard = n->subscribe("final_execute", 1000,
-			sendToRobotCallback); // subscribing to movment datastream
-
-	g_from_ard = n->advertise<wvu_swarm_std_msgs::sensor_data>("/sensor_data", 1000);
-
+{	
 	while (keepAlive())
 	{
 		ros::spinOnce();
@@ -126,7 +141,7 @@ void *controlThread(void *arg0)
 #endif
 	}
 #if DEBUG  
-        puts("Thread exiting");
+        puts("\033[1;32mThread exiting\033[0m");
 #endif
 	pthread_exit(0); // exiting thread
 									 // this is probably unreachable
@@ -143,6 +158,13 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "arduino_server");
 	ros::NodeHandle n;
+        
+        signal(SIGINT, flagger);
+        
+        ros::Subscriber to_ard = n.subscribe("final_execute", 1000,
+			sendToRobotCallback); // subscribing to movment datastream
+
+	g_from_ard = n.advertise<wvu_swarm_std_msgs::sensor_data>("/sensor_data", 1000);
 
 	ROS_INFO("Starting");
 	ROS_INFO("Sending %d bytes per message\n", (int) sizeof(command));
