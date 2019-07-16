@@ -23,13 +23,14 @@ public:
     bool init(int _timeout = CONN_TIMEOUT_MILLIS);
     int available(void);
     bool connected(void);
+      unsigned long readTimer;
     int read(uint8_t *_buf, size_t _len, float &_theta, float &_pos);
 private:
     TCPClient client;
     const int port = 4321;
      byte address[4] = {192, 168, 10, 187};
     String registerStr = "PA";
-    unsigned long readTimer;
+  
 };
 
 #endif

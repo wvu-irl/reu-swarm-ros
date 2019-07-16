@@ -18,23 +18,30 @@
 #include <Adafruit_mfGFX.h>
 #include <Adafruit_SSD1351_Photon.h>
 
-enum BATT_STATE {B_NONE, B_LOW, B_MED, B_HIGH, B_CHARGING};
+enum BATT_STATE
+{
+    B_NONE,
+    B_LOW,
+    B_MED,
+    B_HIGH,
+    B_CHARGING
+};
 
-class Screen {
+class Screen
+{
 public:
     Screen(void);
     Screen(uint8_t cs, uint8_t rs, uint8_t sid, uint8_t sclk, uint8_t rst);
 
     void init(String _reg); // Turn on SSD1351
 
-    
-    void updateScreen(float _theta, bool _connected); //displays the information shown by the latter functions
+    void updateScreen(float _theta, bool _connected,unsigned long _timer); //displays the information shown by the latter functions
 
     // TODO: need functions to output text, battery status, etc
-    void sysStat(bool _connected); //shows the connection status
-    void battStat(); //shows the battery status
-    void oledArrow(float theta); //shows the direction the robot has been commanded to go
-
+    void sysStat(bool _connected);          //shows the connection status
+    void battStat();                        //shows the battery status
+    void oledArrow(float theta);            //shows the direction the robot has been commanded to go
+    void oledLatency(unsigned long _timer); //shows how long it's been since the last vicon update
 private:
     const uint8_t cs = A5, rs = D4, sid = D12, sclk = D13, rst = D5;
     Adafruit_SSD1351 oled = Adafruit_SSD1351(cs, rs, sid, sclk, rst);
@@ -43,8 +50,7 @@ private:
     enum BATT_STATE batteryState = B_NONE;
     bool tcpConnected = false;
     double oldTheta = 0.0;
-
-    
+    unsigned long oldTimer=0;
     // TODO: variables for location of arrow / text cursor / etc?
 };
 

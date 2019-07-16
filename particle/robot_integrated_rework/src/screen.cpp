@@ -13,18 +13,21 @@ void Screen::init(String _reg)
     oled.setTextSize(1);
     oled.setFont(TIMESNR_8);
     oled.print(_reg);
+    battStat();
 }
 
-void Screen::updateScreen(float _theta, bool _connected)
+void Screen::updateScreen(float _theta, bool _connected, unsigned long _timer)
 {
     sysStat(_connected);
     battStat();
     oledArrow(_theta);
+    oledLatency(_timer);
 }
 
 void Screen::sysStat(bool _connected)
 {
-    if(_connected != tcpConnected) {
+    if (_connected != tcpConnected)
+    {
         tcpConnected = _connected;
         if (_connected)
         {
@@ -57,31 +60,31 @@ void Screen::battStat()
     }
 
     // Change value of battery and update screen if value has changed
-    if(currentState != batteryState)
+    if (currentState != batteryState)
     {
         batteryState = currentState;
 
-        if(batteryState == B_HIGH)
+        if (batteryState == B_HIGH)
         {
             oled.fillRect(0, 0, 19, 9, GREEN);
             oled.drawRect(1, 1, 17, 7, BLACK);
             oled.drawRect(20, 2, 2, 5, GREEN);
         }
-        else if(batteryState == B_MED)
+        else if (batteryState == B_MED)
         {
             oled.fillRect(0, 0, 19, 9, YELLOW);
             oled.drawRect(1, 1, 17, 7, BLACK);
             oled.fillRect(13, 2, 5, 5, BLACK);
             oled.drawRect(20, 2, 2, 5, YELLOW);
         }
-        else if(batteryState == B_LOW)
+        else if (batteryState == B_LOW)
         {
             oled.fillRect(0, 0, 19, 9, RED);
             oled.drawRect(1, 1, 17, 7, BLACK);
             oled.fillRect(8, 2, 10, 5, BLACK);
             oled.drawRect(20, 2, 2, 5, RED);
         }
-        else   // charging
+        else // charging
         {
             // TODO: lightning or something
             oled.fillRect(0, 0, 19, 9, YELLOW);
@@ -95,7 +98,8 @@ void Screen::battStat()
 void Screen::oledArrow(float _theta)
 {
     // Only update if theta has changed
-    if(_theta != oldTheta) {
+    if (_theta != oldTheta)
+    {
         // Erase old arrow
         oled.drawLine(64, 85, 64 + (40 * cos((oldTheta + 90) * 3.14 / 180)), 85 - (40 * sin((oldTheta + 90) * 3.14 / 180)), BLACK);
         oled.drawLine(64 + (40 * cos((oldTheta + 90) * 3.14 / 180)), 85 - (40 * sin((oldTheta + 90) * 3.14 / 180)), (64 + (30 * cos((oldTheta + 100) * 3.14 / 180))), (85 - (30 * sin((oldTheta + 100) * 3.14 / 180))), BLACK);
@@ -109,4 +113,25 @@ void Screen::oledArrow(float _theta)
         // Update old theta
         oldTheta = _theta;
     }
+}
+
+void Screen::oledLatency(unsigned long _timer)
+{
+
+    double newTime = (double)(millis() - _timer) / 10;
+    double oldTime = (double)(millis() - oldTimer) / 10;
+    Serial.print("Oled: ");
+    Serial.print(newTime);
+    Serial.print((uint16_t)newTime);
+    // if (newTime >= oldTime)
+    // {
+    //     oled.fillRect((uint16_t) oldTime, 117, (uint16_t)(newTime-oldTime), 4, YELLOW);
+    // } else
+    // {
+    //     oled.fillRect((uint16_t) newTime, 117, (uint16_t)(oldTime-newTime), 4, BLACK);
+    // }
+    oled.fillRect(0, 117, (uint16_t)oldTime, 4, BLACK);
+    oled.fillRect(0, 117, (uint16_t)newTime, 4, YELLOW);
+
+    newTime = oldTime;
 }

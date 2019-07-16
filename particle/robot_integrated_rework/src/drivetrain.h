@@ -2,7 +2,7 @@
 #define DRIVETRAIN_H
 
 #include <Particle.h>
-#define DIFF_DRIVE_DEBUG 1
+#define DIFF_DRIVE_DEBUG 0
 
 #define LEFTPIN A1
 #define RIGHTPIN A2

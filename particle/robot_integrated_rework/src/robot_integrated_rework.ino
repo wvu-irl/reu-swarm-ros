@@ -16,8 +16,8 @@ SYSTEM_THREAD(ENABLED)
 #include "drivetrain.h"
 #include "easy_tcp.h"
 #include "imu_calibrate.h"
-#define INTEGRATED_DEBUG 1
-#define COMMAND_DEBUG 0
+#define INTEGRATED_DEBUG 0
+#define COMMAND_DEBUG 1
 // // FOR AN ARGON BOARD
 // #define mosi D12 //blue - DIN - MO on Argon Board
 // #define sclk D13 //yellow
@@ -45,7 +45,7 @@ IMUCalibrate imu;
 Screen screenObject;
  int port = 4321;
      byte ip[4] = {192, 168, 10, 187};
-String registerString = "OK";
+String registerString = "MD";
 EasyTCP tcpClient(port, ip, registerString);
   struct command c;
 float theta = -100, pos = 10;
@@ -144,6 +144,6 @@ void threadOled(void)
 {
     while (true)
     {
-        screenObject.updateScreen(theta, tcpClient.connected());
+        screenObject.updateScreen(theta, tcpClient.connected(),tcpClient.readTimer);
     }
 }
