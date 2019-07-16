@@ -14,8 +14,8 @@ void IMUCalibrate::init(void)
 {
     accelGyro.initialize();
     #if IMU_DEBUG
-    Serial.println("IMU: Testing device connections...");
-    Serial.println(accelGyro.testConnection() ? "IMU: MPU6050 connection successful" : "IMU: MPU6050 connection failed");
+    Serial.println("IMU: \t\tTesting device connections...");
+    Serial.println(accelGyro.testConnection() ? "IMU: \t\tMPU6050 connection successful" : "IMU: \t\tMPU6050 connection failed");
     #endif
 }
 
@@ -30,4 +30,9 @@ float IMUCalibrate::getIMUHeading(float _otheta)
     float theta = _otheta - ((yaw + oldYaw) / 2) * timeStep * .001;
     t1 = t2;
     return theta;
+}
+
+float IMUCalibrate::getYawRate()
+{
+   yaw = gz / 131; 
 }
