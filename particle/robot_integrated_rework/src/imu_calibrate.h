@@ -11,9 +11,14 @@ public:
     void init(void);
     
     /*
-     *  returns the desired relative heading after a timestep using the imu.
-     */
+    *  returns the desired relative heading after a timestep using the imu.
+    */
     float getIMUHeading(float _otheta);
+    /*
+    *
+    * returns measured yaw rate from imu
+    */
+    float getYawRate();
 
 private:
     MPU6050 accelGyro;
@@ -23,8 +28,8 @@ private:
     // Pitch, Roll and Yaw values (seemed to be unused)
     // float pitch = 0;
     // float roll = 0;
-     float yaw;
-     float oldYaw;
+    float yaw;
+    float oldYaw;
 
     // Time values
     float timeStep;

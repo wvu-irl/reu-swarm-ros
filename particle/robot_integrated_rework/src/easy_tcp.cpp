@@ -18,7 +18,7 @@ EasyTCP::EasyTCP(int _pt, byte _addr[], String _reg) : port(_pt), registerStr(_r
 bool EasyTCP::init(int _timeout)
 {
 #if EASY_TCP_DEBUG
-    Serial.println("TCP: Beginning init()");
+    Serial.println("TCP: \t\tBeginning init()");
 #endif
 
     readTimer = millis();
@@ -29,7 +29,7 @@ bool EasyTCP::init(int _timeout)
         connect = client.connect(address, port);
 
 #if EASY_TCP_DEBUG
-        Serial.print("TCP: Trying to Connect : connect = ");
+        Serial.print("TCP: \t\tTrying to Connect : connect = ");
         Serial.print(connect);
         Serial.print(" ");
         Serial.print(millis());
@@ -53,7 +53,7 @@ bool EasyTCP::init(int _timeout)
     if (client.connected())
     {
 #if EASY_TCP_DEBUG
-        Serial.println("TCP: Connected.");
+        Serial.println("TCP: \t\tConnected.");
 #endif
         Serial.println("register " + registerStr); // Append register identifier
         Serial.println();
@@ -69,7 +69,7 @@ bool EasyTCP::init(int _timeout)
     else
     {
 #if EASY_TCP_DEBUG
-        Serial.println("TCP: Connection timeout!");
+        Serial.println("TCP: \t\tConnection timeout!");
 #endif
 
         return false;
@@ -109,7 +109,7 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
     }
 
 #if EASY_TCP_DEBUG
-    Serial.print("TCP: bytes = ");
+    Serial.print("TCP: \t\tbytes = ");
     Serial.println(bytes);
 #endif
 
@@ -128,7 +128,7 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
     {
 #if EASY_TCP_DEBUG
 
-        Serial.println("TCP: We somehow got negative bytes");
+        Serial.println("TCP: \t\tWe somehow got negative bytes");
 #endif
     }
     // No data case
@@ -138,7 +138,7 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
         if (millis() - readTimer >= READ_TIMEOUT_MILLIS)
         {
 #if EASY_TCP_DEBUG
-            Serial.println("TCP: Read timeout!");
+            Serial.println("TCP: \t\tRead timeout!");
 #endif
             _theta = -100; // makes theta invalid
             // Disconnect, we'll reconnect afterwards so the drive command actually gets sent...

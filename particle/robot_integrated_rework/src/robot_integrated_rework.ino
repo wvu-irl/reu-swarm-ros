@@ -45,7 +45,7 @@ IMUCalibrate imu;
 Screen screenObject;
  int port = 4321;
      byte ip[4] = {192, 168, 10, 187};
-EasyTCP tcpClient( port,ip, "NH");
+EasyTCP tcpClient( port,ip, "PA");
   struct command c;
 float theta = 0, pos = 10;
 
@@ -119,9 +119,10 @@ void loop()
 #endif
     }
     //need to get this from some decision betweeen imu and vicon
-    diff_drive.drive(theta, pos);
+   
+    diff_drive.drive(theta, pos, imu.getYawRate());
     if (temp<0) while(!tcpClient.init(10000));
-    Serial.print("Finish drive command check client");
+    Serial.print("Finish drive command check client ");
     Serial.println(millis());
     Particle.process();
 }
