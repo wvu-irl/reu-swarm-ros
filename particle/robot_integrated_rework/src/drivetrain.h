@@ -28,6 +28,8 @@ public:
     DiffDrive(void);
     void init(void);
     void drive(double _theta, double _speed, float yaw);
+    void restart(void);
+    void fullStop(void);
 
 private:
     Servo servLeft, servRight;
