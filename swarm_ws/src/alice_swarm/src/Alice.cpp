@@ -6,10 +6,10 @@
 #include "wvu_swarm_std_msgs/gaussian.h"
 #include "wvu_swarm_std_msgs/neighbor_mail.h"
 #include "wvu_swarm_std_msgs/map.h"
-
 #include "alice_swarm/aliceStructs.h"
-
 #include <iostream>
+
+#define DEBUG_generateVel 0
 
 Alice::Alice()
 {
@@ -96,13 +96,16 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 	 * There is actually a duplication of model happening in here. Not sure how or why. But use rules.model.
 	 */
 	rules.stateLoop(model);
-//	std::pair<float,float> cur_goTo = {rules.model.goTo.x, rules.model.goTo.y};
-	std::pair<float,float> cur_goTo = model.transformFir(rules.model.goTo.x, rules.model.goTo.y);
+	std::pair<float,float> cur_goTo = model.transformFir(rules.model.goTo.x, rules.model.goTo.y); //from first to current frame.
 	AliceStructs::vel to_return;
 	to_return.dir = atan2(cur_goTo.second, cur_goTo.first);
 	to_return.mag = 1;
-	std::cout<<"alice executes: "<<cur_goTo.first<<","<<cur_goTo.second<<std::endl;\
-	std::cout<<"alice executes: "<<model.goTo.x<<","<< model.goTo.y<<std::endl;
+
+#if DEBUG_generateVel
+	std::cout<<"alice executes: "<<cur_goTo.first<<","<<cur_goTo.second<<std::endl;//this is the rules model
+	std::cout<<"alice executes: "<<model.goTo.x<<","<< model.goTo.y<<std::endl; //this is the alice model (not the same).
 	std::cout<<"=================================================\n";
+#endif
+
 	return to_return;
 }
