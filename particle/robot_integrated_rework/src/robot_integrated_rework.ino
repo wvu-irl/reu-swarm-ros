@@ -53,6 +53,7 @@ float theta = -100, pos = 10;
 
 ChargerStatus chargeStat;
 unsigned long lastBattPublish;
+String prevMessage;
 String message;
 
 void setup(void)
@@ -68,7 +69,10 @@ void setup(void)
     screenObject.init(registerString);
 
     //Send it's first battery status then intialize the lastPublish for when it last published status
-    tcpClient.println(chargeStat.checkChargingState());
+    prevMessage=chargeStat.checkChargingState();
+    tcpClient.println(prevMessage);
+    lastBattPublish=millis();
+
     
 
     // Set up pins
@@ -147,8 +151,9 @@ void loop()
     Serial.println(millis());
     
     message=chargeStat.checkChargingState();
-    if(!message.equals("")) // Send it
+    if(!message.equals(prevMessage)) // Send it
         tcpClient.println(message);
+        prevMessage=message;
     if(millis()-lastBattPublish>60000)
         tcpClient.println(chargeStat.giveBatteryVoltage());
 

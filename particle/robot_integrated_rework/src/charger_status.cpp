@@ -16,50 +16,53 @@ ChargerStatus::ChargerStatus(void)
 
 String ChargerStatus::checkChargingState(void)
 {
-    String message = "";
+    
     switch(state)
   {
     case CHARGED:
+    message="charged";
     //client.write this is my battery level
     if(voltage < 3.8){
         
         state = GOTOCHARGER;
-        message="needs charging";
+        //message="go to charger";
     }
     
     break;
        
     case GOTOCHARGER:
     //CLIENT PRINT GOING TO CHARGER
+      message="going";
       if(voltage>=4){
         state = CHARGED;
-        message="cancel charging ";
       }
       else if(PWR==1){
           state=CHARGING;
-          message="charging! ";
-
       }
       break;
  
     case CHARGING:
+      message="charging";
       if(PWR==1 && CHG==0){
         //CLIENT PRINT CHARGING
         //CLIENT PRINT BATTERY LEVEL
       }
       else if(CHG==1 && voltage>4){
           state=CHARGED;
+          
       }
       else if(PWR==0){
           state=GOTOCHARGER;
+
       }
       else{
           state=ERROR;
       }
-      message="Charging-Battery Level:";
+     
       break;
  
     case ERROR:
+      message="error";
       if(CHG==1 && voltage>4){
           state=CHARGED;
       }
@@ -67,6 +70,7 @@ String ChargerStatus::checkChargingState(void)
           //tone to signal error
           tone(A4,1760,1000);
       }
+      
       break;
   }
   return message;
