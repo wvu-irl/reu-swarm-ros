@@ -139,3 +139,14 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
     }
     return bytes;
 }
+
+void EasyTCP::write(uint8_t *_buf, size_t _len)
+{
+    // TODO
+}
+
+void EasyTCP::println(String _s)
+{
+    // Literally just a wrapper function
+    client.println(_s);
+}
