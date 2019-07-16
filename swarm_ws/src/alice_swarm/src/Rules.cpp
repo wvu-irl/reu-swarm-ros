@@ -25,12 +25,14 @@ Rules::Rules(Model _model) :
 Model Rules::stateLoop(Model &_model)
 {
 	model = _model; //do not comment this out. Doing so causes Ragnarok.
-	model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
+	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
+	model.goTo.x = cur_goTo.first;
+	model.goTo.y = cur_goTo.second;
 	if (true) //shouldLoop())
 	{
 		std::vector<AliceStructs::pnt> go_to_list;
 		go_to_list.push_back(goToTar());
-//	go_to_list.push_back(charge());
+		go_to_list.push_back(charge());
 		// add other rules here
 		float temp = -1;
 		for (auto& rule : go_to_list)
@@ -49,7 +51,9 @@ Model Rules::stateLoop(Model &_model)
 		std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<std::endl;
 		std::cout<<"-----------------------------------"<<std::endl;
 	}
-	model.transformCur(model.goTo.x, model.goTo.y); //Shifts the frame go goTo back to the first frame
+	std::pair<float,float> first_goTo = model.transformCur(model.goTo.x, model.goTo.y); //Shifts the frame go goTo back to the first frame
+	model.goTo.x = first_goTo.first;
+	model.goTo.y = first_goTo.second;
 	return model;
 }
 
