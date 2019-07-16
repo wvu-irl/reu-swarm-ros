@@ -25,14 +25,11 @@ Rules::Rules(Model _model) :
 Model Rules::stateLoop(Model &_model)
 {
 	model = _model; //do not comment this out. Doing so causes Ragnarok.
-	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
-	model.goTo.x = cur_goTo.first;
-	model.goTo.y = cur_goTo.second;
 	if (true) //shouldLoop())
 	{
 		std::vector<AliceStructs::pnt> go_to_list;
 		go_to_list.push_back(goToTar());
-		go_to_list.push_back(charge());
+//	go_to_list.push_back(charge());
 		// add other rules here
 		float temp = -1;
 		for (auto& rule : go_to_list)
@@ -43,17 +40,13 @@ Model Rules::stateLoop(Model &_model)
 				temp = rule.z;
 				model.goTo.x = rule.x;
 				model.goTo.y = rule.y;
-				//std::cout << atan2(model.goTo.y, model.goTo.x) << std::endl;
-				std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<std::endl;
+				//std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<std::endl;
 			}
 		}
 		//avoidCollisions();
 		std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<std::endl;
 		std::cout<<"-----------------------------------"<<std::endl;
 	}
-	std::pair<float,float> first_goTo = model.transformCur(model.goTo.x, model.goTo.y); //Shifts the frame go goTo back to the first frame
-	model.goTo.x = first_goTo.first;
-	model.goTo.y = first_goTo.second;
 	return model;
 }
 
@@ -138,6 +131,7 @@ AliceStructs::pnt Rules::charge()
 	}
 	AliceStructs::pnt go_to;
 	std::cout<<model.closest_pos<<" :closest pos"<<std::endl;
+	//something is either wrong here, or in generate vel.
 	go_to.x = model.rel_chargers.at(model.closest_pos).x;
 	go_to.y = model.rel_chargers.at(model.closest_pos).y;
 

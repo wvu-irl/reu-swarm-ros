@@ -92,27 +92,21 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_s
 
 AliceStructs::vel Alice::generateVel() //implements the rules set
 {
-	/*
-	 * There is actually a duplication of model happening in here. Not sure how or why. But use rules.model.
-	 */
+	model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
 	model = rules.stateLoop(model);
-	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y);
-	model.goTo.x = cur_goTo.first;
-	model.goTo.y = cur_goTo.second;
 	//std::cout << model.goTo.x << " " << model.cur_pose.x << " - " << model.goTo.y << " " << model.cur_pose.y << std::endl;
 	AliceStructs::vel to_return;
 	to_return.mag = 1;
 	//std::cout << "x: " << model.goTo.x << "y: " << model.goTo.y << std::endl;
-	float theta = atan((model.goTo.y - model.cur_pose.y)/(model.goTo.x - model.cur_pose.x)) - model.cur_pose.heading;
-	to_return.dir = atan2(model.goTo.y,model.goTo.x);
+	to_return.dir = atan2((model.goTo.y),(model.goTo.x));
+	std::cout << to_return.dir << std::endl;
 
 #if DEBUG_generateVel
-	std::cout<<"rules model: "<<rules.model.goTo.x<<","<<rules.model.goTo.y<<std::endl;//this is the rules model
-	std::cout<<"alice model: "<<model.goTo.x<<","<< model.goTo.y<<std::endl; //this is the alice model (not the same).
-	std::cout<<"to_return.dir: "<<to_return.dir<<std::endl;//this is the rules model
-	std::cout <<"theta: "<<theta<< std::endl;
+	std::cout<<"alice executes: "<<rules.model.goTo.x<<","<<rules.model.goTo.y<<std::endl;//this is the rules model
+	std::cout<<"alice executes: "<<model.goTo.x<<","<< model.goTo.y<<std::endl; //this is the alice model (not the same).
 	std::cout<<"=================================================\n";
 #endif
 
+	model.transformCur(model.goTo.x, model.goTo.y); //Shifts the frame go goTo back to the first frame
 	return to_return;
 }
