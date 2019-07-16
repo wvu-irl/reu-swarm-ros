@@ -20,7 +20,7 @@ Rules::Rules(Model _model) :
 	state = REST;
 }
 
-//===================================================================================================================\\
+//===================================================================================================================
 
 void Rules::stateLoop(Model &_model)
 {
@@ -29,7 +29,7 @@ void Rules::stateLoop(Model &_model)
 	{
 		std::vector<AliceStructs::pnt> go_to_list;
 		go_to_list.push_back(goToTar());
-//		go_to_list.push_back(charge());
+		go_to_list.push_back(charge());
 		// add other rules here
 		float temp = -1;
 		for (auto& rule : go_to_list)
@@ -159,7 +159,7 @@ bool Rules::checkCollisions()
 
 void Rules::rest() //gives a command to not move.
 {
-	std::pair<float,float> do_not = model.transformCur(0,0);
+	std::pair<float,float> do_not = model.transformCur(0,0); //puts null command into first frame (reasons).
 	model.goTo.x = do_not.first;
 	model.goTo.y = do_not.second;
 }
@@ -177,6 +177,7 @@ bool Rules::changeState()
 			highest_i = i;
 		}
 	}
+
 #if DEBUG_schange
 	std::cout<<"==========Pre adjustment===========\n";
 	std::cout<<"state: "<<(int)state<<std::endl;
@@ -184,10 +185,12 @@ bool Rules::changeState()
 	std::cout<<"priority:  "<<highest_prior<<std::endl;
 	std::cout<<"=====================\n";
 #endif
+
 	if(highest_i != (int)state) //if a different state has higher priority
 	{
 		result = true;
 		state = (State)highest_i; //this has been verified to produce the correct output.
+
 #if DEBUG_schange
 		std::cout<<"==========Post adjustment===========\n";
 		std::cout<<"state: "<<(int)state<<std::endl;
@@ -195,6 +198,7 @@ bool Rules::changeState()
 		std::cout<<"priority:  "<<highest_prior<<std::endl;
 		std::cout<<"=====================\n";
 #endif
+
 	}
 	else
 	{

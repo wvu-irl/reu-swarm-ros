@@ -61,6 +61,10 @@ void Hawk_Sim::makePriority(ros::Publisher _pub)//creates chargers
 		_pub.publish(temp_priorities);
 	}
 }
+void Hawk_Sim::makeHealth(ros::Publisher _pub)
+{
+
+}
 //========================================================================================================================
 
 void Hawk_Sim::run(ros::NodeHandle n) // begin here
