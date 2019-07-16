@@ -9,7 +9,7 @@
 #include "alice_swarm/aliceStructs.h"
 #include <iostream>
 
-#define DEBUG_generateVel 0
+#define DEBUG_generateVel 1
 
 Alice::Alice()
 {
@@ -92,11 +92,10 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_s
 
 AliceStructs::vel Alice::generateVel() //implements the rules set
 {
-	std::cout << "loop started" << std::endl;
 	/*
 	 * There is actually a duplication of model happening in here. Not sure how or why. But use rules.model.
 	 */
-	rules.stateLoop(model);
+	model = rules.stateLoop(model);
 	//std::cout << model.goTo.x << " " << model.cur_pose.x << " - " << model.goTo.y << " " << model.cur_pose.y << std::endl;
 	AliceStructs::vel to_return;
 	to_return.mag = 1;
@@ -105,9 +104,8 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 	std::cout << to_return.dir << std::endl;
 
 #if DEBUG_generateVel
-	std::cout<<"rules model: "<<rules.model.goTo.x<<","<<rules.model.goTo.y<<std::endl;//this is the rules model
-	std::cout<<"alice model: "<<model.goTo.x<<","<< model.goTo.y<<std::endl; //this is the alice model (not the same).
-	std::cout<<"to_return.dir: "<<to_return.dir<<std::endl;//this is the rules model
+	std::cout<<"alice executes: "<<rules.model.goTo.x<<","<<rules.model.goTo.y<<std::endl;//this is the rules model
+	std::cout<<"alice executes: "<<model.goTo.x<<","<< model.goTo.y<<std::endl; //this is the alice model (not the same).
 	std::cout<<"=================================================\n";
 #endif
 

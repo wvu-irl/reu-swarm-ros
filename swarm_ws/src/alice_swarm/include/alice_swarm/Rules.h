@@ -41,7 +41,7 @@ public:
 	/*
 	 * Determines which state Alice is in
 	 */
-	void stateLoop(Model &_model);
+	Model stateLoop(Model &_model);
 	/*
 	 * Helper method to find the distance between two points
 	 */
