@@ -9,7 +9,7 @@
 	-->
 
 	<!-- Transform echo -->
-    <node pkg="tf" type="tf_echo" name="tf_listener" args="kinect world" output="screen"/>
+    <node pkg="tf" type="tf_echo" name="tf_listener" args="vicon/kinect_wand_1/kinect_wand_1 world" output="screen"/>
 	
 	<!-- Set up vicon -->
 	<node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
