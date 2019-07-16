@@ -13,7 +13,7 @@ DiffDrive::DiffDrive(void)
     dError=0;
     omega=0;
     kp=1;
-    kd=0;
+    kd=0.07;
     aCommand=90;
     bCommand=-90;
     tStep=.01;
