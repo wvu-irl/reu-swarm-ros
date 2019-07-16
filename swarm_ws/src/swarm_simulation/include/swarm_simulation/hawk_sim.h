@@ -24,6 +24,7 @@ private:
 	//initializer functions
 	void makeChargers(ros::Publisher _pub);
 	void makePriority(ros::Publisher _pub);
+	void makeHealth(ros::Publisher _pub);
 
 public:
 	void run(ros::NodeHandle n);
