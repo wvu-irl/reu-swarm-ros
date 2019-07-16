@@ -43,15 +43,15 @@ void Screen::battStat()
     enum BATT_STATE currentState;
     float voltage = analogRead(BATT) * 0.0011224;
     // TODO: check for charging
-    if (voltage >= 4.15) // If battery voltage is greater than 4.15V then it is effectively full charge: Particle won't bring the pin higher than ~4.19
+    if (voltage >= 4) // If battery voltage is greater than 4.15V then it is effectively full charge: Particle won't bring the pin higher than ~4.19
     {
         currentState = B_HIGH;
     }
-    else if (voltage > 3.4) // If battery voltage is between 4.15 and 3.4 V battery is at safe usage levels
+    else if (voltage > 3.8) // If battery voltage is between 4.15 and 3.8 V battery is at safe usage levels
     {
         currentState = B_MED;
     }
-    else // If battery voltage is less than 3.5 V battery needs charged
+    else // If battery voltage is less than 3.8 V battery needs charged
     {
         currentState = B_LOW;
     }
