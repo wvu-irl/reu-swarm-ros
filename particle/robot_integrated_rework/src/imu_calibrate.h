@@ -18,7 +18,7 @@ public:
     *
     * returns measured yaw rate from imu
     */
-    float getYawRate();
+    float getYawRate(void);
 
 private:
     MPU6050 accelGyro;

@@ -32,7 +32,7 @@ float IMUCalibrate::getIMUHeading(float _otheta)
     return theta;
 }
 
-float IMUCalibrate::getYawRate()
+float IMUCalibrate::getYawRate(void)
 {
    yaw = gz / 131; 
 }

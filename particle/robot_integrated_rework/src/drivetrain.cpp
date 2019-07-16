@@ -13,7 +13,7 @@ DiffDrive::DiffDrive(void)
     dError=0;
     omega=0;
     kp=1;
-    kd=0.07;
+    kd=0.2;
     aCommand=90;
     bCommand=-90;
     tStep=.01;
@@ -40,7 +40,7 @@ void DiffDrive::drive(double _theta, double _speed, float yaw)
         Serial.println(start);
         
         // l =yaw/((bCommand)-(aCommand));
-        l=3.0;
+        l=1.0;
         // if((bCommand-aCommand<.001)){
         //     l=.167;
         // }
@@ -72,18 +72,18 @@ void DiffDrive::drive(double _theta, double _speed, float yaw)
         
         if(_theta<180){
         // aCommand=-(omega*l)+bCommand;
-            aCommand=-(omega*l)+90;
-            bCommand=90;
-            if(abs(aCommand)>90){
-                aCommand= aCommand > 0.0 ? 90.0 : -90.0;
+            aCommand=-(omega*l)+30;
+            bCommand=30;
+            if(abs(aCommand)>30){
+                aCommand= aCommand > 0.0 ? 30.0 : -30.0;
             }
         }
         else{
         // bCommand=(omega*l)+aCommand;
-            bCommand=(omega*l)+90;
-            aCommand=90;
-            if(abs(bCommand)>90){
-                bCommand= bCommand > 0.0 ? 90.0 : -90.0;
+            bCommand=(omega*l)+30;
+            aCommand=30;
+            if(abs(bCommand)>30){
+                bCommand= bCommand > 0.0 ? 30.0 : -30.0;
             }
             
         }
