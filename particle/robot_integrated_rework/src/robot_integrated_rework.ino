@@ -16,6 +16,7 @@ SYSTEM_THREAD(ENABLED)
 #include "drivetrain.h"
 #include "easy_tcp.h"
 #include "imu_calibrate.h"
+#include "charger_status.h"
 #define INTEGRATED_DEBUG 1
 #define COMMAND_DEBUG 0
 // // FOR AN ARGON BOARD
@@ -50,6 +51,10 @@ EasyTCP tcpClient(port, ip, registerString);
   struct command c;
 float theta = -100, pos = 10;
 
+ChargerStatus chargeStat;
+unsigned long lastBattPublish;
+String message;
+
 void setup(void)
 {
     Serial.begin(9600);
@@ -61,6 +66,10 @@ void setup(void)
 
     // Initialize screen
     screenObject.init(registerString);
+
+    //Send it's first battery status then intialize the lastPublish for when it last published status
+    tcpClient.println(chargeStat.checkChargingState());
+    
 
     // Set up pins
     // pinSetup();
@@ -136,7 +145,18 @@ void loop()
     diff_drive.drive(theta, pos, imu.getYawRate());
     Serial.print("Finish drive command check client ");
     Serial.println(millis());
+    
+    message=chargeStat.checkChargingState();
+    if(!message.equals("")) // Send it
+        tcpClient.println(message);
+    if(millis()-lastBattPublish>60000)
+        tcpClient.println(chargeStat.giveBatteryVoltage());
+
+
+    
+
     Particle.process();
+    
 }
 
 void threadOled(void)

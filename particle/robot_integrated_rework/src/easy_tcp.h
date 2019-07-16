@@ -24,6 +24,8 @@ public:
     int available(void);
     bool connected(void);
     int read(uint8_t *_buf, size_t _len, float &_theta, float &_pos);
+    void write(uint8_t *_buf, size_t _len); //UNIMPLEMENTED
+    void println(String _s);
 private:
     TCPClient client;
     const int port = 4321;

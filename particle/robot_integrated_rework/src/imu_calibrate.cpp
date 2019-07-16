@@ -1,7 +1,7 @@
 #include "imu_calibrate.h"
 #include "math.h"
 #define IMU_DEBUG 1
-//hi i'm neel
+
 IMUCalibrate::IMUCalibrate(void)
 {
     yaw = 0;
@@ -35,4 +35,5 @@ float IMUCalibrate::getIMUHeading(float _otheta)
 float IMUCalibrate::getYawRate()
 {
    yaw = gz / 131; 
+   return yaw;
 }
