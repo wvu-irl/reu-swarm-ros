@@ -134,7 +134,6 @@ AliceStructs::pnt Rules::charge()
 	}
 	AliceStructs::pnt go_to;
 	std::cout<<model.closest_pos<<" :closest pos"<<std::endl;
-	//something is either wrong here, or in generate vel.
 	go_to.x = model.rel_chargers.at(model.closest_pos).x;
 	go_to.y = model.rel_chargers.at(model.closest_pos).y;
 
