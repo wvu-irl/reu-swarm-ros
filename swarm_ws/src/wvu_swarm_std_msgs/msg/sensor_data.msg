@@ -1,2 +1,3 @@
 int32 rid
-float32 battery
+float32 battery_level
+int8 battery_state

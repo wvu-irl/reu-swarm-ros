@@ -1,5 +1,12 @@
 #include "screen.h"
 
+const uint8_t lightningBitmap[] = {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1 };
+
 Screen::Screen(void)
 {
     //dummy
@@ -74,23 +81,22 @@ void Screen::battStat()
         {
             oled.fillRect(0, 0, 19, 9, YELLOW);
             oled.drawRect(1, 1, 17, 7, BLACK);
-            oled.fillRect(13, 2, 5, 5, BLACK);
+            oled.fillRect(11, 2, 5, 5, BLACK);
             oled.drawRect(20, 2, 2, 5, YELLOW);
         }
         else if (batteryState == B_LOW)
         {
             oled.fillRect(0, 0, 19, 9, RED);
             oled.drawRect(1, 1, 17, 7, BLACK);
-            oled.fillRect(8, 2, 10, 5, BLACK);
+            oled.fillRect(6, 2, 10, 5, BLACK);
             oled.drawRect(20, 2, 2, 5, RED);
         }
         else // charging
         {
             // TODO: lightning or something
             oled.fillRect(0, 0, 19, 9, YELLOW);
-            oled.drawRect(1, 1, 17, 7, BLACK);
-            oled.fillRect(13, 2, 5, 5, BLACK);
-            oled.drawRect(20, 2, 2, 5, YELLOW);
+            oled.fillRect(1, 1, 17, 7, BLACK);
+            oled.drawBitmap(2, 2, lightningBitmap, 15, 5, YELLOW);
         }
     }
 }

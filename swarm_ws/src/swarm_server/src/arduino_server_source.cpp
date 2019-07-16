@@ -135,14 +135,29 @@ void *runClient(void *args)
 
 	while (exit_condition_callback()) // running until told to stop
 	{
+#if DEBUG_CPP
+            printf("\033[35;1m[Thread: %d] Main loop\033[0m\n", id);
+#endif
 		// Read data from connection into buffer. Continue to loop while message size is >0.
 		int message_size = 0;
 		command *buffer = ((command *) malloc(sizeof(command))); // allocating memory for read buffer
 		//reading the message
-		while ((message_size = read(connection_descriptor, buffer, sizeof(command)))
-				> 0)
+                fd_set rfds;
+                FD_ZERO(&rfds);
+                FD_SET(connection_descriptor, &rfds);
+                
+                struct timeval timeout;
+                timeout.tv_sec = 1;
+                timeout.tv_usec = 0;
+                
+                int recVal = select(connection_descriptor + 2, &rfds, NULL, NULL, &timeout);
+                
+		if (recVal != 0 && recVal != -1 && (message_size = read(connection_descriptor, buffer, sizeof(command)) > 0 && exit_condition_callback()))
 		{
-			// Display if there was an error
+#if DEBUG_CPP
+                     printf("\033[35;1m[Thread: %d] Recieve loop\033[0m\n", id);
+#endif
+                    // Display if there was an error
 			if (message_size == -1)
 			{
 				error_callback("Error receiving message.");
@@ -189,6 +204,9 @@ void *runClient(void *args)
 			else if (sockets->size() > 0
 					&& strstr(buffer->str, "exit") == buffer->str)
 			{
+#if DEBUG_CPP
+                                printf("Exiting connection stored [thread:%d]\n", id);
+#endif
 				ConnectionInfo leaving = sockets->at(id); // getting ConnectionInfo for the connection
 
 				// removing if registered as a robot
@@ -200,7 +218,7 @@ void *runClient(void *args)
 				if (leaving.getRID() == -2)
 				{
 					int erase_id = 0;
-					for (int i = 0; i < monitors->size(); i++)
+					for (int i = 0; i < monitors->size() && exit_condition_callback(); i++)
 					{
 						if (monitors->size() > 0
 								&& monitors->at(i).getConnectionDescriptor()
@@ -223,6 +241,13 @@ void *runClient(void *args)
 
 		free(buffer); // freeing buffer
 	}
+#if DEBUG_CPP
+        printf("\033[1;32mExiting thread: %d -- RID: %d\033[0m\n", id, sockets->at(id).getRID());
+#endif
+        close(connection_descriptor);
+#if DEBUG_CPP
+        printf("\t[thread %d] closed socket descriptor\n", id);
+#endif
 	pthread_exit(0); // exiting the client thread
 }
 
@@ -273,8 +298,15 @@ int beginServer(std::function<void(command, int)> command_callback,
 			sizeof(socket_address)) == -1)
 	{
 		char err[64];
-		sprintf(err, "Error binding to socket (%d) retrying", errno); // making an error message that tells what went wrong
+		sprintf(err, "Error binding to socket (%d)", errno); // making an error message that tells what went wrong
 		// with binding the socket
+#if DEBUG_CPP
+                printf("\033[30;41m");
+                char errno_msg[16];
+                sprintf(errno_msg, "errno %d", errno);
+                system(errno_msg);
+                printf("\033[0m");
+#endif   
 		error_callback(err);
                 g_server_failure = true;
                 return 2;
@@ -359,6 +391,12 @@ int beginServer(std::function<void(command, int)> command_callback,
 		}
 	}
 
+#if DEBUG_CPP
+        puts("\033[1;32mClosing socket\033[0m");
+#endif
+        
+        close(socket_descriptor);
+        
 	// waiting for all client handling to die
 #if DEBUG_CPP
         puts("Waiting for threads to join");
@@ -367,7 +405,7 @@ int beginServer(std::function<void(command, int)> command_callback,
 	{
 		pthread_join(tid, NULL); // waiting for threads to die
 	}
-	close(socket_descriptor);
+	
 	return 0;
 }
 #endif
