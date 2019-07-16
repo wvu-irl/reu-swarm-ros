@@ -45,8 +45,8 @@ IMUCalibrate imu;
 Screen screenObject;
  int port = 4321;
      byte ip[4] = {192, 168, 10, 187};
-String registerString = "DE";
-EasyTCP tcpClient(port, ip, registerString);
+String registerString = "NY";
+EasyTCP tcpClient(port, ip , registerString);
   struct command c;
 float theta = -100, pos = 10;
 
