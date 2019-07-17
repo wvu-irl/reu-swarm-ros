@@ -10,5 +10,8 @@
 	<!-- Launches node to connect to udp and perform transforms -->
 	<node pkg="nuitrack_bridge" type="nuitrack_bridge" name="nui_bridge" output="screen" />
 	
+	<!-- Node to filter nuitrack with a rolling average -->
+	<node pkg="nuitrack_bridge" type="rolling_average" name="roll_avg_filter" output="screen" />
+	
 </launch>
 
