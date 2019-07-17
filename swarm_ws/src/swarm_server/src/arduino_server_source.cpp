@@ -11,8 +11,8 @@
 #include <chrono>
 using namespace std::chrono;
 
-#define PRINTF_TS(form, dat...) (printf("\033[32m[%ld.%09ld] \033[0m"#form"\n",(long) duration_cast<seconds>(high_resolution_clock::now().time_since_epoch()).count(), (long)duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000,dat))
-#define PUTS_TS(form) (printf("\033[32m[%ld.%09ld] \033[0m"#form"\n", (long)duration_cast<seconds>(high_resolution_clock::now().time_since_epoch()).count(), (long)((long)duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000)))
+#define PRINTF_TS(form, dat...) (printf(("\033[32m[%ld.%09ld] \033[0m" + std::string(form) + "\n").c_str(),(long) duration_cast<seconds>(high_resolution_clock::now().time_since_epoch()).count(), (long)duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000,dat))
+#define PUTS_TS(form) (printf(("\033[32m[%ld.%09ld] \033[0m" + std::string(form) + "\n").c_str(), (long)duration_cast<seconds>(high_resolution_clock::now().time_since_epoch()).count(), (long)((long)duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000)))
 #endif
 
 #include "arduino_server.h"
@@ -85,17 +85,18 @@ void sendCommandToRobots(command cmd, int recip_rid)
 	}
 #if DEBUG_CPP || DEBUG_MESSAGE
 	else
-		PRINTF_TS(\033[30;41mCould not locate ConnectionInfo for %02d <-> %s\033[0m,
+		PRINTF_TS(
+				"\033[30;41mCould not locate ConnectionInfo for %02d <-> %s\033[0m",
 				recip_rid, rid_indexing[recip_rid].c_str());
 
 	if (nbytes == COMMAND_SIZE && registry->find(recip_rid) != registry->end())
-		PRINTF_TS(\033[30;42mSERVER: sending message [%02d <-> %s]: %s\t%d\033[0m,
+		PRINTF_TS("\033[30;42mSERVER: sending message [%02d <-> %s]: %s\t%d\033[0m",
 				recip_rid, rid_indexing[recip_rid].c_str(), cmd.str,
 				registry->at(recip_rid).getConnectionDescriptor());
 
 	if (nbytes != COMMAND_SIZE && registry->find(recip_rid) != registry->end())
 		PRINTF_TS(
-				\033[30;43mSERVER: Failed sending message [%02d <-> %s]: %s\t%d\033[0m,
+				"\033[30;43mSERVER: Failed sending message [%02d <-> %s]: %s\t%d\033[0m",
 				recip_rid, rid_indexing[recip_rid].c_str(), cmd.str,
 				registry->at(recip_rid).getConnectionDescriptor());
 #endif
@@ -109,7 +110,7 @@ void sendCommandToRobots(command cmd, int recip_rid)
 				rid_indexing[recip_rid].c_str(), cmd.str);
 		strncpy(cmd.str, mon_str, sizeof(cmd.str)); // safe copy
 #if DEBUG_CPP || DEBUG_MESSAGE
-		PRINTF_TS(\033[37;44mSERVER: sending message to monitor: %s\033[0m,
+		PRINTF_TS("\033[37;44mSERVER: sending message to monitor: %s\033[0m",
 				cmd.str);
 #endif
 		for (ConnectionInfo ci : *monitors) // sending message to all open monitors
@@ -122,7 +123,7 @@ void sendCommandToRobots(command cmd, int recip_rid)
 void* runClient(void *args)
 {
 #if DEBUG_CPP
-	PUTS_TS(Starting client thread);
+	PUTS_TS("Starting client thread");
 #endif
 
 	// getting parameters
@@ -175,147 +176,148 @@ void* runClient(void *args)
 			// checking if the client is registering their RID
 			if (strstr(buffer->str, "register") == buffer->str) // chekcing if the input starts with "register"
 			{
-			try
-			{
-				char num[2];
+				try
+				{
+					char num[2];
 
-				sscanf(buffer->str, "register %s", num); // obtaining the ID
+					sscanf(buffer->str, "register %s", num); // obtaining the ID
 #if DEBUG_CPP
 				printf("\033[34mAttempting to register: \033[37;%dm%s\033[0m\n",
 						rid_map.find(std::string(num))->first == num ? 42 : 41, num);
 #endif
-				int rid =
-				rid_map.find(std::string(num))->first == num ?
-				rid_map.at(std::string(num)) : -1;
+					int rid =
+							rid_map.find(std::string(num))->first == num ?
+									rid_map.at(std::string(num)) : -1;
 
-				sockets->at(id).setRID(rid); // setting the RID of the related object
+					sockets->at(id).setRID(rid); // setting the RID of the related object
 
-				sockets->at(id).setRID(rid);// setting the RID of the related object
-				if (rid == -2)
-				{
-					monitors->push_back(sockets->at(id));
-				}
-				else
-				{
-					//Replace entry if already existing
-					if (registry->find(rid) != registry->end())
-					registry->at(rid) = sockets->at(id);
+					sockets->at(id).setRID(rid); // setting the RID of the related object
+					if (rid == -2)
+					{
+						monitors->push_back(sockets->at(id));
+					}
 					else
-					registry->insert(
-							std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
+					{
+						//Replace entry if already existing
+						if (registry->find(rid) != registry->end())
+							registry->at(rid) = sockets->at(id);
+						else
+							registry->insert(
+									std::pair<int, ConnectionInfo>(rid, sockets->at(id)));
 #if DEBUG_CPP
 					printf("SERVER: Registry size: \033[31m%d\033[0m\n",
 							(int) registry->size());
 #endif
-				}
+					}
 
-				info_callback("Registered %s", (void*) (buffer->str));
+					info_callback("Registered %s", (void*) (buffer->str));
+				} catch (std::exception &oor)
+				{
+					error_callback("Registration failure");
+				}
 			}
-			catch (std::exception &oor)
+			// cheking to see if the exit command was sent
+			else if (sockets->size() > 0
+					&& strstr(buffer->str, "exit") == buffer->str)
 			{
-				error_callback("Registration failure");
-			}
-		}
-		// cheking to see if the exit command was sent
-		else if (sockets->size() > 0 && strstr(buffer->str, "exit") == buffer->str)
-		{
 #if DEBUG_CPP
                                 printf("Exiting connection stored [thread:%d]\n", id);
 #endif
-			ConnectionInfo leaving = sockets->at(id); // getting ConnectionInfo for the connection
+				ConnectionInfo leaving = sockets->at(id); // getting ConnectionInfo for the connection
 
-			// removing if registered as a robot
-			if (registry->find(leaving.getRID())->first == leaving.getRID()
-					&& registry->size() > 0)
-				registry->erase(leaving.getRID());
+				// removing if registered as a robot
+				if (registry->find(leaving.getRID())->first == leaving.getRID()
+						&& registry->size() > 0)
+					registry->erase(leaving.getRID());
 
-			// removing of registered as a monitor
-			if (leaving.getRID() == -2)
-			{
-				int erase_id = 0;
-				for (int i = 0; i < monitors->size() && exit_condition_callback(); i++)
+				// removing of registered as a monitor
+				if (leaving.getRID() == -2)
 				{
-					if (monitors->size() > 0
-							&& monitors->at(i).getConnectionDescriptor()
-									== connection_descriptor) // matching connection descriptor
+					int erase_id = 0;
+					for (int i = 0; i < monitors->size() && exit_condition_callback();
+							i++)
 					{
-						monitors->erase(monitors->begin() + i);
-						break;
+						if (monitors->size() > 0
+								&& monitors->at(i).getConnectionDescriptor()
+										== connection_descriptor) // matching connection descriptor
+						{
+							monitors->erase(monitors->begin() + i);
+							break;
+						}
 					}
 				}
 			}
+			// checking if the connection is doing a latency test
+			else if (strstr(buffer->str, "ping") == buffer->str)
+			{
+				write(connection_descriptor, "pong", 5); // returns pong to sender
+			}
+			else
+				command_callback(*buffer, sockets->at(id).getRID()); // sending message to callback
 		}
-		// checking if the connection is doing a latency test
-		else if (strstr(buffer->str, "ping") == buffer->str)
-		{
-			write(connection_descriptor, "pong", 5); // returns pong to sender
-		}
-		else
-			command_callback(*buffer, sockets->at(id).getRID()); // sending message to callback
-	}
 
-	free (buffer); // freeing buffer
-}
-write(connection_descriptor, "0.000,-1.0,discon", 7);
+		free(buffer); // freeing buffer
+	}
+	write(connection_descriptor, "0.000,-1.0,discon", 7);
 #if DEBUG_CPP
 printf("\033[1;32mExiting thread: %d -- RID: %d\033[0m\n", id, sockets->at(id).getRID());
 #endif
-close (connection_descriptor);
+	close(connection_descriptor);
 #if DEBUG_CPP
         printf("\t[thread %d] closed socket descriptor\n", id);
 #endif
-pthread_exit(0); // exiting the client thread
+	pthread_exit(0); // exiting the client thread
 }
 
 int beginServer(std::function<void(command, int)> command_callback,
-	std::function<void(const char*, void*)> info_callback,
-	std::function<void(const char*)> error_callback,
-	std::function<bool()> exit_condition_callback,
-	std::function<void(const char*)> warn_callback)
+		std::function<void(const char*, void*)> info_callback,
+		std::function<void(const char*)> error_callback,
+		std::function<bool()> exit_condition_callback,
+		std::function<void(const char*)> warn_callback)
 {
 #if DEBUG_CPP
 	puts("SERVER: Getting socket");
 #endif
 
-sockets = new std::vector<ConnectionInfo>();
-monitors = new std::vector<ConnectionInfo>();
-registry = new std::map<int, ConnectionInfo>();
+	sockets = new std::vector<ConnectionInfo>();
+	monitors = new std::vector<ConnectionInfo>();
+	registry = new std::map<int, ConnectionInfo>();
 
 // starting socket
-int socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);
-if (socket_descriptor == -1)
-{
-	error_callback("Error getting socket.");
-	return 1;
-}
+	int socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);
+	if (socket_descriptor == -1)
+	{
+		error_callback("Error getting socket.");
+		return 1;
+	}
 
 // Change receive timeout to 30 seconds.
-struct timeval timeout;
-timeout.tv_sec = 1;
-setsockopt(socket_descriptor, SOL_SOCKET, SO_RCVTIMEO,
-		(struct timeval*) &timeout, sizeof(struct timeval));
+	struct timeval timeout;
+	timeout.tv_sec = 1;
+	setsockopt(socket_descriptor, SOL_SOCKET, SO_RCVTIMEO,
+			(struct timeval*) &timeout, sizeof(struct timeval));
 
-int ttl = 1;
-setsockopt(socket_descriptor, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
+	int ttl = 1;
+	setsockopt(socket_descriptor, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
 
 // Instantiate struct to store socket settings.
-struct sockaddr_in socket_address;
-memset(&socket_address, 0, sizeof(socket_address));
-socket_address.sin_family = AF_INET;
-socket_address.sin_addr.s_addr = INADDR_ANY;
-socket_address.sin_port = htons(SERVER_PORT);
+	struct sockaddr_in socket_address;
+	memset(&socket_address, 0, sizeof(socket_address));
+	socket_address.sin_family = AF_INET;
+	socket_address.sin_addr.s_addr = INADDR_ANY;
+	socket_address.sin_port = htons(SERVER_PORT);
 
 #if DEBUG_CPP
 	puts("SERVER: Binding socket");
 #endif
 
 // Bind to the socket
-if (bind(socket_descriptor, (struct sockaddr*) &socket_address,
-		sizeof(socket_address)) == -1)
-{
-	char err[64];
-	sprintf(err, "Error binding to socket (%d)", errno); // making an error message that tells what went wrong
-	// with binding the socket
+	if (bind(socket_descriptor, (struct sockaddr*) &socket_address,
+			sizeof(socket_address)) == -1)
+	{
+		char err[64];
+		sprintf(err, "Error binding to socket (%d)", errno); // making an error message that tells what went wrong
+		// with binding the socket
 #if DEBUG_CPP
                 printf("\033[30;41m");
                 char errno_msg[16];
@@ -323,54 +325,54 @@ if (bind(socket_descriptor, (struct sockaddr*) &socket_address,
                 system(errno_msg);
                 printf("\033[0m");
 #endif   
-	error_callback(err);
-	g_server_failure = true;
-	return 2;
-}
+		error_callback(err);
+		g_server_failure = true;
+		return 2;
+	}
 #if DEBUG_CPP
 	puts("SERVER: Listening to socket");
 #endif
 // Set socket to listen for connections
-if (listen(socket_descriptor, 3) == -1)
-{
-	error_callback("Error listening for connections.");
-	return 1;
-}
+	if (listen(socket_descriptor, 3) == -1)
+	{
+		error_callback("Error listening for connections.");
+		return 1;
+	}
 
-int connection_descriptor; // variable that will contain the connection_descriptor of the most recent client accept
-struct sockaddr connection_addr;
+	int connection_descriptor; // variable that will contain the connection_descriptor of the most recent client accept
+	struct sockaddr connection_addr;
 
-std::vector < pthread_t > threads; // vector to keep track of thread ids
+	std::vector < pthread_t > threads; // vector to keep track of thread ids
 
 #if DEBUG_CPP
 	puts("SERVER: Starting socket loop");
 #endif
 // Loop to handle connections on the socket
-while (exit_condition_callback())
-{
-	// Specify struct to store information about accepted connection
-	socklen_t connection_addr_size = sizeof(struct sockaddr);
+	while (exit_condition_callback())
+	{
+		// Specify struct to store information about accepted connection
+		socklen_t connection_addr_size = sizeof(struct sockaddr);
 
 #if DEBUG_CPP
 		puts("SERVER: looking for accept");
 #endif
 
-	// Accept connection
-	connection_descriptor = accept(socket_descriptor, &connection_addr,
-			&connection_addr_size);
+		// Accept connection
+		connection_descriptor = accept(socket_descriptor, &connection_addr,
+				&connection_addr_size);
 #if DEBUG_CPP
 		printf("SERVER: accepted \033[31;1m%s\033[0m\n", connection_addr.sa_data);
 #endif
-	if (connection_descriptor > 1)
-	{
+		if (connection_descriptor > 1)
+		{
 #if DEBUG_CPP
                     puts("Adding to connections");
 #endif
-		sockets->push_back(ConnectionInfo(connection_descriptor));
+			sockets->push_back(ConnectionInfo(connection_descriptor));
 #if DEBUG_CPP
                     puts("SERVER: Made connection info object");
 #endif
-	}
+		}
 #if DEBUG_CPP
                 else
                 {
@@ -378,34 +380,34 @@ while (exit_condition_callback())
                 }
 #endif
 
-	if (connection_descriptor == -1)
-	{
+		if (connection_descriptor == -1)
+		{
 //			warn_callback("Error accepting connection.");
-		continue;
-	}
-	else
-	{
+			continue;
+		}
+		else
+		{
 
-		// collecting arguments for client thread
-		struct client_param clinet_args = (struct client_param )
-				{ command_callback, info_callback, error_callback,
-						exit_condition_callback, (int) sockets->size() - 1 };
+			// collecting arguments for client thread
+			struct client_param clinet_args = (struct client_param )
+					{ command_callback, info_callback, error_callback,
+							exit_condition_callback, (int) sockets->size() - 1 };
 
-		pthread_attr_t attr;
-		pthread_attr_init(&attr);
-		pthread_t tid;
+			pthread_attr_t attr;
+			pthread_attr_init(&attr);
+			pthread_t tid;
 
 #if DEBUG_CPP
 			puts("Starting thread");
 #endif
 
-		// starting client thread
-		// this was done so that the server can keep accepting connections
-		// as it is simultainiously communicating with a client
-		pthread_create(&tid, &attr, runClient, &clinet_args);
-		threads.push_back(tid); // keeping track of thread ids
+			// starting client thread
+			// this was done so that the server can keep accepting connections
+			// as it is simultainiously communicating with a client
+			pthread_create(&tid, &attr, runClient, &clinet_args);
+			threads.push_back(tid); // keeping track of thread ids
+		}
 	}
-}
 
 #if DEBUG_CPP
         puts("\033[1;32mClosing socket\033[0m");
@@ -415,12 +417,12 @@ while (exit_condition_callback())
 #if DEBUG_CPP
         puts("Waiting for threads to join");
 #endif
-for (pthread_t tid : threads)
-{
-	pthread_join(tid, NULL); // waiting for threads to die
-}
+	for (pthread_t tid : threads)
+	{
+		pthread_join(tid, NULL); // waiting for threads to die
+	}
 
-close(socket_descriptor);
-return 0;
+	close(socket_descriptor);
+	return 0;
 }
 #endif
