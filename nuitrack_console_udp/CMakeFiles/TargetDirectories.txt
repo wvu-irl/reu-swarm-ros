@@ -1,0 +1,3 @@
+/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/CMakeFiles/edit_cache.dir
+/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/CMakeFiles/rebuild_cache.dir
+/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/CMakeFiles/nuitrack_console_sample.dir
