@@ -207,7 +207,7 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
 // Callback for the gesture data update even
 void onGestUpdate(GestureData::Ptr gestData)
 {
-    std::cout << "Gesture update!" << std::endl;
+    nui.gestureData = gestureType::NONE;
     if (!gestData)
     {
         // No gesture data
@@ -227,7 +227,6 @@ void onGestUpdate(GestureData::Ptr gestData)
     {
         // No right hand
         std::cout << "Gesture not found" << std::endl;
-        nui.gestureData = gestureType::NONE;
     }
     // If hand is found,update its position
     else
@@ -236,24 +235,31 @@ void onGestUpdate(GestureData::Ptr gestData)
         {
             case GESTURE_WAVING:
                 nui.gestureData = gestureType::WAVING;
+                std::cout << "WAVING" << std::endl;
                 break;
             case GESTURE_SWIPE_LEFT:
                 nui.gestureData = gestureType::SWIPE_LEFT;
+                std::cout << "SWIPE_LEFT" << std::endl;
                 break;
             case GESTURE_SWIPE_RIGHT:
                 nui.gestureData = gestureType::SWIPE_RIGHT;
+                std::cout << "SWIPE_RIGHT" << std::endl;
                 break;
             case GESTURE_SWIPE_UP:
                 nui.gestureData = gestureType::SWIPE_UP;
+                std::cout << "SWIPE_UP" << std::endl;
                 break;
             case GESTURE_SWIPE_DOWN:
                 nui.gestureData = gestureType::SWIPE_DOWN;
+                std::cout << "SWIPE_DOWN" << std::endl;
                 break;
             case GESTURE_PUSH:
                 nui.gestureData = gestureType::PUSH;
+                std::cout << "PUSH" << std::endl;
                 break;
             default:
                 nui.gestureData = gestureType::NONE;
+                std::cout << "NONE" << std::endl;
                 break;
         }
     }
@@ -278,6 +284,9 @@ void serverResponse(char rec)
 
     // Reset client address
     memset(&cliaddr, 0, sizeof(cliaddr));
+    
+    // Set gesture to false now that it's been sent
+    nui.gestureData = gestureType::NONE;
 }
 
 // Loop to handle the server asynchronously

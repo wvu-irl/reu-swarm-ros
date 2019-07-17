@@ -4,6 +4,7 @@
 
 // ROS includes
 #include <ros/ros.h>
+#include <nuitrack_bridge/nuitrack_data.h>
 #include <geometry_msgs/Point.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -38,15 +39,12 @@ wvu_swarm_std_msgs::nuitrack_data combineNuiData(wvu_swarm_std_msgs::nuitrack_da
     ret.leftClick = _first.leftClick || _second.leftClick;
     ret.rightClick = _first.rightClick || _second.rightClick;
 
-    if (_first.gestureFound) {
-        ret.gestureFound = true;
+    if (_first.gestureData != (char)gestureType::NONE) {
         ret.gestureData = _first.gestureData;
-    } else if (_second.gestureFound) {
-        ret.gestureFound = true;
+    } else if (_second.gestureData != (char)gestureType::NONE) {
         ret.gestureData = _second.gestureData;
     } else {
-        ret.gestureFound = false;
-        ret.gestureData = '\0';
+        ret.gestureData = (char)gestureType::NONE;
     }
 
     return ret;
@@ -75,7 +73,6 @@ wvu_swarm_std_msgs::nuitrack_data divideNuiData(wvu_swarm_std_msgs::nuitrack_dat
 
     ret.leftClick = _nui.leftClick;
     ret.rightClick = _nui.rightClick;
-    ret.gestureFound = _nui.gestureFound;
     ret.gestureData = _nui.gestureData;
 
     return ret;

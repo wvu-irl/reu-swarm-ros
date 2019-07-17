@@ -8,10 +8,12 @@
 
 #include <contour_node/universe_object.h>
 
+#include <chrono>
 #include <math.h>
+#include <string>
 
 // toggles verbose option
-#define DEBUG 1
+#define DEBUG 0
 
 // toggles if the main loop has a rate
 #define RATE_LIMIT 1
@@ -25,7 +27,7 @@ wvu_swarm_std_msgs::nuitrack_data g_nui;
 geometry_msgs::Point leftProjected, rightProjected;
 levelObject *g_selected = nullptr;
 std::pair<double, double> originOffset(0.0, 0.0); // Move the nuitrack frame if needed
-const double boundsX = 0.0, boundsY = 0.0;
+const double boundsX = 25.0, boundsY = 50.0;
 const double originShift = 0.01; // Rate to move the origin towards user's hand if out of bounds
 
 // Find x,y where the line passing between alpha and beta intercepts an xy plane at z
@@ -146,6 +148,7 @@ int main(int argc, char **argv)
 #endif
 
 	geometry_msgs::Point *anchor = nullptr; // Where did the user's hand start when they grabbed a feature?
+        bool prevGestureFound = false;
 
 	while (ros::ok())
 	{
@@ -159,16 +162,38 @@ int main(int argc, char **argv)
 			std::pair<double, double> leftProjPair(leftProjected.x, leftProjected.y);
                         g_selected = universe.findWithinRadius(leftProjPair, 10.0);
                         
+			// If something is selected, lock hand to it
 			if (g_selected != nullptr)
 			{
-				leftProjected.x = g_selected->getOrigin().first;
-				leftProjected.y = g_selected->getOrigin().second;
+                            leftProjected.x = g_selected->getOrigin().first;
+                            leftProjected.y = g_selected->getOrigin().second;
 			}
+                        // If nothing is selected, check for gestures
+                        else
+                        {
+                            std::cout << (int)g_nui.gestureData << std::endl;
 
-			// If nothing is selected, move points freely
-//                    if(leftProjected.x == 0.0 && leftProjected.y == 0.0 && leftProjected.z == 0.0)
+                            // Add a new feature if PUSH is detected
+                            if(g_nui.gestureData == (char)gestureType::PUSH && !prevGestureFound)
+                            {
+                                std::cout << "ADDING GAUSSIAN" << std::endl;
+                                prevGestureFound = true; // Change flag to prevent duplicates
+
+                                std::string gausName = "nui_" + std::to_string(ros::Time::now().sec); 
+
+                                // Construct new object at right (left) hand
+                                ptr = new gaussianObject(leftProjected.x, leftProjected.y, gausName, 10, 10, 0, 10, map_ns::TARGET);
+                                universe += ptr;
+
+                                std::cout << universe << std::endl;
+                            }
+                            else if(g_nui.gestureData != (char)gestureType::PUSH)
+                            {
+                                prevGestureFound = false;
+                            }
+                        }
+
 			left_pub.publish(leftProjected);
-//                    if(rightProjected.x == 0.0 && rightProjected.y == 0.0 && rightProjected.z == 0.0)
 			right_pub.publish(rightProjected);
 		}
 		// If user's left hand (RIGHT) is closed, maybe modify objects
