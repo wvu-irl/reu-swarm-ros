@@ -103,7 +103,7 @@ void sendCommandToRobots(command cmd, int recip_rid)
 	// checking for monitors
 	if (monitors->size() > 0)
 	{
-		char mon_str[COMMAND_SIZE];
+		char mon_str[COMMAND_SIZE * 2];
 		// creating monitor message
 		sprintf(mon_str, "[%02d / %2s]:\t%s", recip_rid,
 				rid_indexing[recip_rid].c_str(), cmd.str);
