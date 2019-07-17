@@ -211,7 +211,7 @@ void* runClient(void *args)
 
 				info_callback("Registered %s", (void*) (buffer->str));
 			}
-			catch (std::out_of_range &oor)
+			catch (std::exception &oor)
 			{
 				error_callback("Registration failure");
 			}
