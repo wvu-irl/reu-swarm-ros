@@ -66,14 +66,14 @@ void Hawk_Sim::makePriority(ros::Publisher _pub)//creates chargers
 		_pub.publish(temp_priorities);
 	}
 }
-//void Hawk_Sim::makeBatteryLvl(ros::Publisher _pub)
-//{
-//	wvu_swarm_std_msgs::bot_feedback bf_msg;
-//	for(int i = 0; i <NUMBOTS; i ++)
-//	{
-//		bf_msg.battery.push_back(1);
-//	}
-//}
+void Hawk_Sim::makeSensorData(ros::Publisher _pub)
+{
+	wvu_swarm_std_msgs::sensor_data sd_msg;
+
+	sd_msg.rid = 1;
+	_pub.publish(sd_msg);
+
+}
 void Hawk_Sim::makeEnergy(ros::Publisher _pub)
 {
 	if (energy_first)
@@ -103,6 +103,7 @@ void Hawk_Sim::run(ros::NodeHandle n) // begin here
 	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::chargers > ("chargers", 1000); // pub to obstacles
 	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::priorities > ("priority", 1000); // pub to priority.
 	ros::Publisher pub3 = n.advertise < wvu_swarm_std_msgs::energy > ("energy", 1000); // pub to energy.
+	ros::Publisher pub4 = n.advertise < wvu_swarm_std_msgs::sensor_data > ("sensor_data", 1000); // pub to energy.
 
   // subscribers
 	ros::Subscriber sub1 = n.subscribe("chargers", 1000, &Hawk_Sim::chargersCallback,this);
@@ -116,6 +117,7 @@ void Hawk_Sim::run(ros::NodeHandle n) // begin here
 		makeChargers(pub1);
 		makePriority(pub2);
 		makeEnergy(pub3);
+		makeSensorData(pub4);
 		ros::spinOnce(); // spinning callbacks
 //    usleep(10);
 		i++; // incrementing counter
@@ -127,9 +129,10 @@ void Hawk_Sim::run(ros::NodeHandle n) // begin here
 
 	while (ros::ok()) // main loop
 	{
-		makeChargers(pub1); // publishing chargers
-		makePriority(pub2); // publishes priority
-		makeEnergy(pub3);   // publishes energy
+		makeChargers(pub1); // publishing chargers.
+		makePriority(pub2); // publishes priority.
+		makeEnergy(pub3);   // publishes energy.
+		makeSensorData(pub4);//publishes sensor_data.
 		ros::spinOnce(); // spinning callbacks
 		loopRate.sleep();
 	}

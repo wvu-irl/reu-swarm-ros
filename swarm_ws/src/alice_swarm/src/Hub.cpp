@@ -33,9 +33,61 @@ Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reas
 {
 }
 
+void Hub::updateSensorDatas()
+{
+	if(ridOrder.size() != sensor_datas.size())
+	{
+		bool init = false;
+		int i = 0;
+		while(i <sensor_datas.size()) //checks if its in the vector.
+		{
+			if(sensor_data.rid == sensor_datas.at(i).rid)
+			{
+				sensor_datas.at(i) = sensor_data;
+				i = sensor_datas.size() + 1;
+				init = true;
+			}
+			i++;
+		}
+		if(!init)
+		{
+			std::vector<wvu_swarm_std_msgs::sensor_data> temp_sds;
+			for(int i = 0; i < sensor_datas.size(); i ++) //copies sensor_datas.
+			{
+				temp_sds.push_back(sensor_datas.at(i));
+			}
+			sensor_datas.push_back(sensor_data); //makes both vectors the right size.
+			temp_sds.push_back(sensor_data);
+
+			int temp_index = 0;
+			for(int i = 0; i < ridOrder.size(); i ++)//sort in same order as ridOrder.
+			{
+				for(int j = 0; j < temp_sds.size(); j ++)
+				{
+					if(ridOrder.at(i) == temp_sds.at(j).rid)
+					{
+						sensor_datas.at(temp_index) = temp_sds.at(j);
+						temp_index ++;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		for(int i = 0; i < sensor_datas.size(); i++)
+		{
+			if(sensor_datas.at(i).rid == sensor_data.rid)
+			{
+				sensor_datas.at(i) = sensor_data;
+			}
+		}
+	}
+}
+
 void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
 		wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f, wvu_swarm_std_msgs::chargers &_c,
-		wvu_swarm_std_msgs::energy &_e)
+		wvu_swarm_std_msgs::energy &_e, wvu_swarm_std_msgs::sensor_data &_sd)
 {
 	clearHub();
 	viconBotArray = _b;
@@ -44,6 +96,7 @@ void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vi
 	flows = _f;
 	chargers = _c;
 	energy = _e;
+	sensor_data = _sd;
 	processVicon(); //needed cause this data needs to be converted first
 	findNeighbors();
 }
@@ -266,6 +319,9 @@ void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 
 wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relative information for a robot into one msg
 {
+	int cur_sd_index = 0; //fix for sensor data.
+	updateSensorDatas();
+
 	wvu_swarm_std_msgs::alice_mail_array to_return;
 	for (std::vector<int>::iterator it = ridOrder.begin(); it != ridOrder.end(); ++it)
 	{
@@ -285,6 +341,19 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		temp.heading=bots[*it].heading;
 		temp.vision=VISION;
 		temp.energy = energy.energies.at(*it);
+
+		if(sensor_datas.at(cur_sd_index).rid == *it)
+		{
+			temp.sensor_data = sensor_datas.at(cur_sd_index);
+			cur_sd_index++;
+//			std::cout<<"================matched====================== "<<std::endl;
+//			std::cout<<"position: "<<cur_sd_index<<"| for rid:<<sensor_datas.at(cur_sd_index).rid<<", "<<*it<<std::endl;
+		}
+		else
+		{
+//			std::cout<<"++++++++++++++++++++++++++++WAS NOT IN THE ridOrder vector++++++++++++++++++++++++++++++"<<std::endl;
+		}
+
 		to_return.mails.push_back(temp);
 	}
 #if DEBUG_HUB

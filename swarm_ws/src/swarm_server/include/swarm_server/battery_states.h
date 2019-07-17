@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   battery_states.h
  * Author: Henry Vos
  *
@@ -20,4 +20,3 @@ enum BATTERY_STATES
 typedef enum BATTERY_STATES BatState;
 
 #endif /* BATTERY_STATES_H */
-

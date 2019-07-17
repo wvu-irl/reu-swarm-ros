@@ -12,6 +12,7 @@ wvu_swarm_std_msgs::vicon_points temp_target;
 wvu_swarm_std_msgs::flows temp_flow_array;
 wvu_swarm_std_msgs::chargers temp_charger_array;
 wvu_swarm_std_msgs::energy temp_energy;
+wvu_swarm_std_msgs::sensor_data temp_sd;
 bool first = true;
 
 void botCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg)
@@ -36,7 +37,11 @@ void chargerCallback(const wvu_swarm_std_msgs::chargers &msg)
 }
 void energyCallback(const wvu_swarm_std_msgs::energy &msg)
 {
-	temp_energy= msg;
+	temp_energy = msg;
+}
+void sensorCallback(const wvu_swarm_std_msgs::sensor_data &msg)
+{
+	temp_sd = msg;
 }
 
 int main(int argc, char **argv)
@@ -55,6 +60,7 @@ int main(int argc, char **argv)
 	ros::Subscriber sub4 = n.subscribe("virtual_flows", 1000, flowCallback);
 	ros::Subscriber sub5 = n.subscribe("chargers", 1000, chargerCallback);
 	ros::Subscriber sub6 = n.subscribe("energy", 1000, energyCallback);
+	ros::Subscriber sub7 = n.subscribe("sensor_data", 1000, sensorCallback);
 	ros::Rate loopRate(200);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::alice_mail_array> ("alice_mail_array", 1000);
 	Hub alice_hub(0); // Creates a hub for the conversion of absolute to relative info
@@ -63,7 +69,7 @@ int main(int argc, char **argv)
 		auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of hub
 
 		alice_hub.update(temp_bot_array, temp_target, temp_map, temp_flow_array, temp_charger_array,
-				temp_energy); //puts in absolute data from subscribers
+				temp_energy,temp_sd); //puts in absolute data from subscribers
 
 		wvu_swarm_std_msgs::alice_mail_array mail = alice_hub.getAliceMail();
 

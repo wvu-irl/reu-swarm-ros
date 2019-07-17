@@ -12,6 +12,7 @@
 #include <wvu_swarm_std_msgs/chargers.h>
 #include <wvu_swarm_std_msgs/charger.h>
 #include <wvu_swarm_std_msgs/energy.h>
+#include <wvu_swarm_std_msgs/sensor_data.h>
 
 #include "alice_swarm/aliceStructs.h"
 #include <contour_node/level_description.h>
@@ -69,6 +70,8 @@ private:
 	wvu_swarm_std_msgs::flows flows;
 	wvu_swarm_std_msgs::chargers chargers;
 	wvu_swarm_std_msgs::energy energy;
+	wvu_swarm_std_msgs::sensor_data sensor_data;
+	std::vector<wvu_swarm_std_msgs::sensor_data> sensor_datas;
 
 	std::vector<Bot> bots; //holds locations of all of the bots
 	std::vector<std::vector<Bot>> neighbors; //holds locations of all of the closests bots relative to each other
@@ -85,8 +88,10 @@ public:
 	//Adds the msgs gather from various topics to the private fields of Hub
 	void update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
 			wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f, wvu_swarm_std_msgs::chargers &_c,
-			wvu_swarm_std_msgs::energy &_e);
+			wvu_swarm_std_msgs::energy &_e, wvu_swarm_std_msgs::sensor_data &_sd);
 
+
+	void updateSensorDatas(); //updates the sensor_datas vector by adding new elements, replacing old, and keeping order.
 
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
 
