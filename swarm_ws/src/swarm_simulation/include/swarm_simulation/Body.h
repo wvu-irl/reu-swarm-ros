@@ -44,13 +44,17 @@ private:
 		bool applyForce(bool _aorb,float _rel_theta);
 	  //wvu_swarm_std_msgs::vicon_bot_array createMessages(std::vector<Body> _flock);//vector<Body> _flock); //operates on flock
 		//char[2] getID();
+		float l; //distance between wheels
 public:
 		char id [2];
 		wvu_swarm_std_msgs::vicon_points *targets;
 		float heading;
 		int sid;
 		float force;
+		float a;//left wheel speed
+							float b;//right wheel speed
     bool predator;
+    ros::Time curTime;
     Pvector location;
     Pvector prev_location;
     Pvector velocity;
