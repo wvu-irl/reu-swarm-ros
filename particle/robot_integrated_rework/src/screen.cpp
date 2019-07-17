@@ -81,14 +81,14 @@ void Screen::battStat()
         {
             oled.fillRect(0, 0, 19, 9, YELLOW);
             oled.drawRect(1, 1, 17, 7, BLACK);
-            oled.fillRect(11, 2, 5, 5, BLACK);
+            oled.fillRect(11, 2, 6, 5, BLACK);
             oled.drawRect(20, 2, 2, 5, YELLOW);
         }
         else if (batteryState == B_LOW)
         {
             oled.fillRect(0, 0, 19, 9, RED);
             oled.drawRect(1, 1, 17, 7, BLACK);
-            oled.fillRect(6, 2, 10, 5, BLACK);
+            oled.fillRect(6, 2, 11, 5, BLACK);
             oled.drawRect(20, 2, 2, 5, RED);
         }
         else // charging
