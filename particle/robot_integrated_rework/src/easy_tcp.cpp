@@ -14,6 +14,18 @@ EasyTCP::EasyTCP(int _pt, byte _addr[], String _reg) : port(_pt), registerStr(_r
     address[3] = _addr[3];
 }
 
+EasyTCP& EasyTCP::operator=(const EasyTCP& other)
+{
+    client = other.client;
+    port = other.port;
+    registerStr = other.registerStr;
+    address[0] = other.address[0];
+    address[1] = other.address[1];
+    address[2] = other.address[2];
+    address[3] = other.address[3];
+    return *this;
+}
+
 // Handles connection and registration. Returns false for a problem with either.
 bool EasyTCP::init(int _timeout)
 {
