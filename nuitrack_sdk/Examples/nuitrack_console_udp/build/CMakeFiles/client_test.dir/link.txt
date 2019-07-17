@@ -1,1 +1,0 @@
-/usr/bin/g++    -pthread -g3 -gdwarf-2   CMakeFiles/client_test.dir/src/client.cpp.o  -o client_test  -L/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/lib/linux64 -rdynamic 

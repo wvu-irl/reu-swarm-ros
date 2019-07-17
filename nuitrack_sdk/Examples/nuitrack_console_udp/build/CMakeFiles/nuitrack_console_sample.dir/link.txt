@@ -1,1 +1,0 @@
-/usr/bin/g++    -pthread -g3 -gdwarf-2   CMakeFiles/nuitrack_console_sample.dir/src/main.cpp.o  -o nuitrack_console_sample  -L/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/lib/linux64 -rdynamic -lnuitrack -Wl,-rpath,/home/air/reu-swarm-ros/nuitrack_sdk/Examples/nuitrack_console_udp/../../Nuitrack/lib/linux64 
