@@ -151,7 +151,6 @@ wvu_swarm_std_msgs::nuitrack_data nuiToRos(nuiData *_nui)
     ret.leftHand = xyzToPoint(&(_nui->leftHand));
     ret.rightWrist = xyzToPoint(&(_nui->rightWrist));
     ret.rightHand = xyzToPoint(&(_nui->rightHand));
-    ret.gestureFound = _nui->gestureFound;
     ret.gestureData = (char)(_nui->gestureData);
     ret.leftClick = _nui->leftClick;
     ret.rightClick = _nui->rightClick;

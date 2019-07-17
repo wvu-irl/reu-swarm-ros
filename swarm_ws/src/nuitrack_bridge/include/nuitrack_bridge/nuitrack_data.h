@@ -55,7 +55,6 @@ typedef struct nuiData
 {
     nuiData() //Default Constructor
     {
-        gestureFound = false;
         leftFound = false;
         rightFound = false;
         gestureData = gestureType::NONE;
