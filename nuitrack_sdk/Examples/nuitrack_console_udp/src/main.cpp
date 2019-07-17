@@ -37,7 +37,7 @@ struct sockaddr_in servaddr, cliaddr; // netinet/in.h objects
 nuiData nui;
 
 // Global variables for threads
-std::thread g_server, g_hTracker, g_sTracker;
+std::thread g_server, g_hTracker, g_sTracker, g_gRecog;
 bool g_sigint_received = false;
 
 
@@ -100,6 +100,7 @@ void onHandUpdate(HandTrackerData::Ptr handData)
     }
 }
 
+// Callback for the skeleton data update event
 void onSkelUpdate(SkeletonData::Ptr skelData)
 {
     if (!skelData)
@@ -203,6 +204,61 @@ void onSkelUpdate(SkeletonData::Ptr skelData)
     }
 }
 
+// Callback for the gesture data update even
+void onGestUpdate(GestureData::Ptr gestData)
+{
+    std::cout << "Gesture update!" << std::endl;
+    if (!gestData)
+    {
+        // No gesture data
+        std::cout << "No gesture data" << std::endl;
+        return;
+    }
+
+    auto gestures = gestData->getGestures();
+    if (gestures.empty())
+    {
+        // No gestures
+        return;
+    }
+
+    auto thisGesture = gestures[0].type;
+    if (!thisGesture)
+    {
+        // No right hand
+        std::cout << "Gesture not found" << std::endl;
+        nui.gestureData = gestureType::NONE;
+    }
+    // If hand is found,update its position
+    else
+    {
+        switch(thisGesture)
+        {
+            case GESTURE_WAVING:
+                nui.gestureData = gestureType::WAVING;
+                break;
+            case GESTURE_SWIPE_LEFT:
+                nui.gestureData = gestureType::SWIPE_LEFT;
+                break;
+            case GESTURE_SWIPE_RIGHT:
+                nui.gestureData = gestureType::SWIPE_RIGHT;
+                break;
+            case GESTURE_SWIPE_UP:
+                nui.gestureData = gestureType::SWIPE_UP;
+                break;
+            case GESTURE_SWIPE_DOWN:
+                nui.gestureData = gestureType::SWIPE_DOWN;
+                break;
+            case GESTURE_PUSH:
+                nui.gestureData = gestureType::PUSH;
+                break;
+            default:
+                nui.gestureData = gestureType::NONE;
+                break;
+        }
+    }
+}
+
 // Send a reply to the port after receiving rec
 void serverResponse(char rec)
 {
@@ -261,7 +317,7 @@ void serverLoop(void)
             default:
             {
                 // Data is available!
-                std::cout << "Socket is available." << std::endl;
+//                std::cout << "Socket is available." << std::endl;
 
                 int len, n;
                 char rec;
@@ -332,6 +388,29 @@ void skelTrackerLoop(SkeletonTracker::Ptr skelTracker)
     }
 }
 
+// Loop to run gestureRecognizer asynchronously
+void gestRecogLoop(GestureRecognizer::Ptr gestRecog)
+{
+    std::cout << "Entered gesture tracker loop." << std::endl;
+    while (!g_sigint_received)
+    {
+        try
+        {
+            // Wait for new hand tracking data
+            Nuitrack::waitUpdate(gestRecog);
+        }
+        catch (LicenseNotAcquiredException& e)
+        {
+            std::cerr << "LicenseNotAcquired exception (ExceptionType: " << e.type() << ")" << std::endl;
+            break;
+        }
+        catch (const Exception& e)
+        {
+            std::cerr << "Nuitrack update failed (ExceptionType: " << e.type() << ")" << std::endl;
+        }
+    }
+}
+
 int main(int argc, char* argv[])
 {
     /* SERVER SETUP */
@@ -373,10 +452,12 @@ int main(int argc, char* argv[])
     // created automatically
     auto handTracker = HandTracker::create();
     auto skelTracker = SkeletonTracker::create();
+    auto gestRecog = GestureRecognizer::create();
 
     // Connect onHandUpdate callback to receive hand tracking data
     handTracker->connectOnUpdate(onHandUpdate);
     skelTracker->connectOnUpdate(onSkelUpdate);
+    gestRecog->connectOnNewGestures(onGestUpdate);
 
     // Start Nuitrack
     try
@@ -396,11 +477,13 @@ int main(int argc, char* argv[])
     g_server = std::thread(serverLoop);
     g_hTracker = std::thread(handTrackerLoop, handTracker);
     g_sTracker = std::thread(skelTrackerLoop, skelTracker);
+    g_gRecog = std::thread(gestRecogLoop, gestRecog);
 
     // Join threads after exiting from sigint
     g_server.join();
     g_hTracker.join();
     g_sTracker.join();
+    g_gRecog.join();
 
     // Release Nuitrack
     std::cout << "Releasing Nuitrack!" << std::endl;
