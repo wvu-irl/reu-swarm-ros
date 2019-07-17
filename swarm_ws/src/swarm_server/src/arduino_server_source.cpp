@@ -103,9 +103,9 @@ void sendCommandToRobots(command cmd, int recip_rid)
 	// checking for monitors
 	if (monitors->size() > 0)
 	{
-		char mon_str[64];
+		char mon_str[COMMAND_SIZE];
 		// creating monitor message
-		sprintf(mon_str, "[%02d / %s]:\t%s", recip_rid,
+		sprintf(mon_str, "[%02d / %2s]:\t%s", recip_rid,
 				rid_indexing[recip_rid].c_str(), cmd.str);
 		strncpy(cmd.str, mon_str, sizeof(cmd.str)); // safe copy
 #if DEBUG_CPP || DEBUG_MESSAGE
@@ -251,7 +251,7 @@ void* runClient(void *args)
 
 		free(buffer); // freeing buffer
 	}
-	write(connection_descriptor, "discon", 7);
+	write(connection_descriptor, "0.000,-1.0,discon", 7);
 #if DEBUG_CPP
         printf("\033[1;32mExiting thread: %d -- RID: %d\033[0m\n", id, sockets->at(id).getRID());
 #endif

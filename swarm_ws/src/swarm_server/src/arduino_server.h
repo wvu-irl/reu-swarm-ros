@@ -38,7 +38,7 @@
 #include <string>
 
 #define SERVER_PORT 4321 // port number
-#define COMMAND_SIZE 32
+#define COMMAND_SIZE 64
 
 bool g_server_failure = false;
 

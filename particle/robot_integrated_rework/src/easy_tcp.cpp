@@ -75,7 +75,7 @@ bool EasyTCP::connected(void)
 // Tries to read. If it fails, keeps track of time since last success.
 //   Returns 0 if nothing available, -1 if error, # of bytes if success
 // Also changes the vicon heading, passed by reference
-int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
+int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos, char *_sys_comm)
 {
 
     if (readTimer == 0)
@@ -104,8 +104,10 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos)
         readTimer = millis();
 
         bytes = client.read(_buf, _len);
+        
         _pos = (float)strtod(strtok((char *)_buf, ","), NULL); //i dunno how to get a str from _buf
         _theta = (float)strtod(strtok(NULL, ","), NULL);
+        _sys_comm = strtok(NULL, ",");
     }
     // Error case
     else if (bytes < 0)
@@ -149,4 +151,9 @@ void EasyTCP::println(String _s)
 {
     // Literally just a wrapper function
     client.println(_s);
+}
+
+void EasyTCP::disconnect()
+{
+    client.stop();
 }
