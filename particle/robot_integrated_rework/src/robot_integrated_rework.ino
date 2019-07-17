@@ -46,9 +46,18 @@ IMUCalibrate imu;
 Screen screenObject;
  int port = 4321;
      byte ip[4] = {192, 168, 10, 187};
-String registerString = "MA";
-EasyTCP tcpClient(port, ip, registerString);
-  struct command c;
+String registerString = "";
+void nameFinder(const char *topic, const char *data) {
+    //Serial.println("namefinder!");
+    String name = String(data);
+    Serial.println(name);
+    int length=strlen(name);
+    registerString += name[length-2];
+    registerString += name[length-1];
+    registerString += '\0';
+}
+EasyTCP tcpClient;
+struct command c;
 float theta = -100, pos = 10;
 
 ChargerStatus chargeStat;
@@ -56,10 +65,22 @@ unsigned long lastBattPublish;
 String prevMessage;
 String message;
 
+
 void setup(void)
 {
     Serial.begin(9600);
     waitUntil(WiFi.ready);
+    waitUntil(Particle.connected);
+    Serial.println("Connected to Cloud");
+    //Gets device name from cloud and parses string to get the state name
+    Particle.subscribe("particle/device/name", nameFinder);
+    Particle.publish("particle/device/name");
+    // Initialize tcp client
+    while(registerString.equals("")){
+        delay(1000);
+        Serial.println("dont have name");
+    }
+    tcpClient = EasyTCP(port, ip, registerString);
 
 #if INTEGRATED_DEBUG
     Serial.println("Connected to wifi");
@@ -94,7 +115,8 @@ void setup(void)
 
     // TODO: neopixel stuff on hold until i get the reset working
 
-    // Initialize tcp client
+    Serial.println("registerString");
+    Serial.println(registerString);
     while(!tcpClient.init(10000)) tone(A4, 1760, 1000); // screams out an A6 on pin A4 :^)
     oledThread = Thread("oled", threadOled);
 }
@@ -163,8 +185,11 @@ void loop()
     if(!message.equals(prevMessage)) // Send it
         tcpClient.println(message);
         prevMessage=message;
-    if(millis()-lastBattPublish>60000)
+    if(millis()-lastBattPublish>60000){
         tcpClient.println(chargeStat.giveBatteryVoltage());
+        lastBattPublish=millis();
+    }
+        
 
 
     

@@ -20,6 +20,7 @@ class EasyTCP {
 public:
     EasyTCP(void);
     EasyTCP(int _pt, byte _addr[], String _reg);
+    EasyTCP& operator=(const EasyTCP& other);
     bool init(int _timeout = CONN_TIMEOUT_MILLIS);
     int available(void);
     bool connected(void);
@@ -30,8 +31,8 @@ public:
     void disconnect(void);
 private:
     TCPClient client;
-    const int port = 4321;
-     byte address[4] = {192, 168, 10, 187};
+    int port = 4321;
+    byte address[4] = {192, 168, 10, 187};
     String registerStr = "PA";
   
 };
