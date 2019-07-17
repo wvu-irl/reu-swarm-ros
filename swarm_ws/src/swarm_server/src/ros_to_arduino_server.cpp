@@ -107,7 +107,7 @@ void sendToRobotCallback(wvu_swarm_std_msgs::robot_command_array msga)
 		if (!keepAlive())
 			break;
 		command cmd = { { '\0' } }; // creating command
-		sprintf(cmd.str, "%f,%f", msg.r, msg.theta);
+		sprintf(cmd.str, "%f,%f,%s", msg.r, msg.theta, msg.sys_comm.c_str());
 		int id = msg.rid;
 #if DEBUG
 		ROS_INFO(PRINT_HEADER"Constructed command: %02d,\t%s", id, cmd.str);
