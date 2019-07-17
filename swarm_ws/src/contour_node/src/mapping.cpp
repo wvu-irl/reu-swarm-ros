@@ -11,7 +11,7 @@
 #include <math.h>
 
 // toggles verbose option
-#define DEBUG 0
+#define DEBUG 1
 
 // toggles if the main loop has a rate
 #define RATE_LIMIT 1
@@ -24,6 +24,9 @@
 wvu_swarm_std_msgs::nuitrack_data g_nui;
 geometry_msgs::Point leftProjected, rightProjected;
 levelObject *g_selected = nullptr;
+std::pair<double, double> originOffset(0.0, 0.0); // Move the nuitrack frame if needed
+const double boundsX = 0.0, boundsY = 0.0;
+const double originShift = 0.01; // Rate to move the origin towards user's hand if out of bounds
 
 // Find x,y where the line passing between alpha and beta intercepts an xy plane at z
 geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
@@ -75,7 +78,33 @@ void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 
 	// Find projections of hands onto table
 	leftProjected = findZIntercept(g_nui.leftWrist, g_nui.leftHand, 0.0);
+        leftProjected.x += originOffset.first;
+        leftProjected.y += originOffset.second;
 	rightProjected = findZIntercept(g_nui.rightWrist, g_nui.rightHand, 0.0);
+        rightProjected.x += originOffset.first;
+        rightProjected.y += originOffset.second;
+        
+#if DEBUG
+        std::cout << "lx = " << leftProjected.x << "\tly = " << leftProjected.y << std::endl;
+#endif
+        
+        // Check if left hand is out of bounds only if hand is open
+        if(!nui.rightClick)
+        {
+            // If too far in either axis, shift the origin offset towards point
+            if(leftProjected.x < -boundsX)
+                originOffset.first += originShift * (boundsX - leftProjected.x);
+            else if(leftProjected.x > boundsX)
+                originOffset.first -= originShift * (leftProjected.x - boundsX);
+            if(leftProjected.y < -boundsY)
+                originOffset.second += originShift * (boundsX - leftProjected.y);
+            else if(leftProjected.y > boundsY)
+                originOffset.second -= originShift * (leftProjected.y - boundsY);
+#if DEBUG
+            std::cout << "ox = " << originOffset.first << "\toy = " << originOffset.second << std::endl;
+#endif
+            // Don't bother applying shift yet, that will occur next iteration
+        }
 }
 
 
@@ -147,6 +176,7 @@ int main(int argc, char **argv)
 		{
 			ROS_INFO("Hand closed!");
 			// If nothing had been selected before hand was closed, do nothing
+                        // If something was selected, move it
 			if (g_selected != nullptr)
 			{
 				ROS_INFO("%s", g_selected->getName().c_str());
