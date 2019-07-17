@@ -90,7 +90,7 @@ visualization_msgs::Marker xyzToMarker(int _id, xyz *_xyz, double _r, double _g,
 
     ret.header.stamp = ros::Time(); // Metadata
     ret.header.frame_id = "world";
-    ret.ns = "hand";
+    ret.ns = "nui";
     ret.id = _id; // Unique identifier
     ret.type = visualization_msgs::Marker::SPHERE;
     ret.pose.position.x = _xyz->x; // Measured in meters
