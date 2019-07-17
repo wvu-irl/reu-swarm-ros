@@ -131,9 +131,9 @@ int main(int argc, char** argv) {
     ros::NodeHandle n_priv("~"); // private handle
     ros::Publisher pub, pub_vis;
     ros::Subscriber sub;
-    pub = n.advertise<wvu_swarm_std_msgs::nuitrack_data>("nuitrack_bridge/rolling_average", 1000);
-    pub_vis = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge/smoothed_visualization", 1000);
-    sub = n.subscribe("nuitrack_bridge/unfiltered", 10, &msgCallback);
+    pub = n.advertise<wvu_swarm_std_msgs::nuitrack_data>("rolling_average", 1000);
+    pub_vis = n.advertise<visualization_msgs::MarkerArray>("smoothed_visualization", 1000);
+    sub = n.subscribe("unfiltered", 10, &msgCallback);
 
     // Import parameters from launchfile
     int maxSize;
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
     wvu_swarm_std_msgs::nuitrack_data currentState;
 
     while (ros::ok()) {
-        currentState = *(ros::topic::waitForMessage<wvu_swarm_std_msgs::nuitrack_data>("nuitrack_bridge/unfiltered"));
+        currentState = *(ros::topic::waitForMessage<wvu_swarm_std_msgs::nuitrack_data>("unfiltered"));
 
         // Remove a value if queue is too large
         if (memory.size() > maxSize) memory.pop_back();

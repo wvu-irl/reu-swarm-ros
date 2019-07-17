@@ -168,8 +168,8 @@ int main(int argc, char** argv) {
     ros::NodeHandle n_priv("~"); // private handle
     ros::Rate rate(50);
     ros::Publisher pubVis, pubNui;
-    pubVis = n.advertise<visualization_msgs::MarkerArray>("nuitrack_bridge/visualization", 1000);
-    pubNui = n.advertise<wvu_swarm_std_msgs::nuitrack_data>("nuitrack_bridge/unfiltered", 1000);
+    pubVis = n.advertise<visualization_msgs::MarkerArray>("visualization", 1000);
+    pubNui = n.advertise<wvu_swarm_std_msgs::nuitrack_data>("unfiltered", 1000);
 
     // Transform listener
     tf::TransformListener tfLis;
