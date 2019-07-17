@@ -295,7 +295,7 @@ void operator-=(Universe &uni, std::pair<double, double> loc)
 	}
 }
 
-std::ostream& operator<<(Universe &uni, std::ostream &stream)
+std::ostream& operator<<(std::ostream &stream, Universe &uni)
 {
 	// cout operator to print universe to the console
 	std::stringstream ss;
