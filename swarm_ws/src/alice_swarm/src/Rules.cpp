@@ -20,16 +20,20 @@ Rules::Rules(Model _model) :
 	state = REST;
 }
 
-//===================================================================================================================\\
+//===================================================================================================================
 
 Model Rules::stateLoop(Model &_model)
 {
 	model = _model; //do not comment this out. Doing so causes Ragnarok.
+	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
+	model.goTo.x = cur_goTo.first;
+	model.goTo.y = cur_goTo.second;
+
 	if (true) //shouldLoop())
 	{
 		std::vector<AliceStructs::pnt> go_to_list;
 		go_to_list.push_back(goToTar());
-//	go_to_list.push_back(charge());
+//		go_to_list.push_back(charge());
 		// add other rules here
 		float temp = -1;
 		for (auto& rule : go_to_list)
@@ -43,19 +47,19 @@ Model Rules::stateLoop(Model &_model)
 				//std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<std::endl;
 			}
 		}
-		//avoidCollisions();
-		float mag = sqrt(pow(model.goTo.x,2) + pow(model.goTo.y,2));
-		std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<"| "<<mag<<std::endl;
+		avoidCollisions();
+		std::cout << "theta: "<<atan2(model.goTo.y, model.goTo.x) << std::endl;
+		//std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<std::endl;
 		std::cout<<"-----------------------------------"<<std::endl;
 	}
-<<<<<<< HEAD
-=======
 	std::pair<float,float> first_goTo = model.transformCur(model.goTo.x, model.goTo.y); //Shifts the frame of goTo back to the first frame
 	model.goTo.x = first_goTo.first;
 	model.goTo.y = first_goTo.second;
->>>>>>> c0a5e84... charge(), small fires, and energy.
+
 	return model;
 }
+
+//===================================================================================================================
 
 bool Rules::shouldLoop()
 {
@@ -112,147 +116,156 @@ void Rules::explore()
 
 AliceStructs::pnt Rules::charge()
 {
-	AliceStructs::pnt go_to;
 	float dx;
 	float dy;
+
 	float min_sep = 1000.0;
 	float check_sep; //sep distance
 
-	if(model.abs_chargers->size()>0)
+	for (int i=0; i < model.rel_chargers.size(); i++)
 	{
-<<<<<<< HEAD
-		if((!model.abs_chargers->at(i).occupied) || (!model.committed)) //charger is open
-=======
-		if(!model.charge2)//runs code for first stage if 2nd not initiated.
->>>>>>> c0a5e84... charge(), small fires, and energy.
+		if((!model.abs_chargers->at(i).occupied) && (!model.committed)) //charger is open or charger not committed
 		{
-			for (int i=0; i < model.rel_chargers.size(); i++)//checks each charger
-			{
-				if((!model.abs_chargers->at(i).occupied) && (!model.committed)) //charger is open or charger not committed
-				{
-					dx = model.rel_chargers.at(i).target_x;
-					dy = model.rel_chargers.at(i).target_y;
-					check_sep = sqrt(pow(dx,2) + pow(dy,2)); //check separation distance
-					std::cout<<"charger: "<<i<<":"<<"dx,dy: "<<dx<<","<<dy<<"|"<<check_sep<<std::endl;
+			dx = model.rel_chargers.at(i).x;
+			dy = model.rel_chargers.at(i).y;
+			check_sep = sqrt(pow(dx,2) + pow(dy,2)); //check separation distance
 
-					if(check_sep < min_sep) //if the closest
-					{
-						model.closest_pos = i; //saves pos of closest
-						min_sep = check_sep; //updates min_sep
-					}
-				}
-				std::cout<<"why you break? "<<i<<std::endl;
-			}
-			std::cout<<model.closest_pos<<" :closest pos"<<std::endl;
-			go_to.x = model.rel_chargers.at(model.closest_pos).target_x; //sets pos of closest charger as target.
-			go_to.y = model.rel_chargers.at(model.closest_pos).target_y;
+			std::cout<<"charger: "<<i<<":"<<"dx,dy: "<<dx<<","<<dy<<"|"<<check_sep<<std::endl;
 
-			if((pow(go_to.x,2) + pow(go_to.y,2)) < pow(model.SIZE/6,2)) //initiates charge2 after it reaches first waypoint.
+			if(check_sep < min_sep)
 			{
-				model.charge2 = true;
-			}
-			if((model.battery_lvl<0.1)) //assign priority
-			{
-				go_to.z = 2; //given highest priority
-				model.abs_chargers->at(model.closest_pos).occupied = true; //charger is "checked out".
-				model.committed = true;
-				model.rel_chargers.at(model.closest_pos).occupied = true;
-			}else
-			{
-				go_to.z = 0;
+				model.closest_pos = i; //saves pos of closest
+				min_sep = check_sep; //updates min_sep
 			}
 		}
-		else if(model.charge2)//runs code for second waypoint.
-		{
-			std::cout<<"++++++++++++++++++++++++++++++\n";
-			std::cout<<"charge2 activated"<<std::endl;
-			std::cout<<(model.abs_chargers->at(model.closest_pos).occupied ? "true" : "false")<<std::endl;
-			go_to = charge2();
-			if(charged())//resets charging vars, and makes priority of the generated point zero.
-			{
-				go_to.z = 0;
-			}
-		}
+		std::cout<<"why you break? "<<i<<std::endl;
 	}
-	else
-	{
-		go_to.x = 0;
-		go_to.y = 0;
-		go_to.z = 0;
-	}
-	return go_to;
-}
-AliceStructs::pnt Rules::charge2() //phase 2 of the charging sequence.
-{
 	AliceStructs::pnt go_to;
-<<<<<<< HEAD
 	std::cout<<model.closest_pos<<" :closest pos"<<std::endl;
-	//something is either wrong here, or in generate vel.
 	go_to.x = model.rel_chargers.at(model.closest_pos).x;
 	go_to.y = model.rel_chargers.at(model.closest_pos).y;
 
 	if(model.battery_lvl<0.1) //assign priority
-=======
-	if(!model.charging)
->>>>>>> c0a5e84... charge(), small fires, and energy.
 	{
-		go_to.x = model.rel_chargers.at(model.closest_pos).x;
-		go_to.y = model.rel_chargers.at(model.closest_pos).y;
-
-		std::cout<<"charge2 x,y: "<<go_to.x<<","<<go_to.y<<std::endl;
-		std::cout<<"++++++++++++++++++++++++++++++\n";
+		go_to.z = 2; //given highest priority
+		model.abs_chargers->at(model.closest_pos).occupied = true; //charger is "checked out".
+		model.committed = true;
+		model.rel_chargers.at(model.closest_pos).occupied = true;
 	}else
 	{
-		go_to = rest();
+		go_to.z = 0;
 	}
-<<<<<<< HEAD
 
-	std::pair<float,float> temp_pnt = model.transformCur(go_to.x, go_to.y); //transform into first frame of bot (reasons).
-	go_to.x = temp_pnt.first;
-	go_to.y = temp_pnt.second;
+//	std::pair<float,float> temp_pnt = model.transformCur(go_to.x, go_to.y); //transform into first frame of bot (reasons).
+//	go_to.x = temp_pnt.first;
+//	go_to.y = temp_pnt.second;
 
-=======
-	go_to.z = 3;
->>>>>>> c0a5e84... charge(), small fires, and energy.
 	return go_to;
 }
 
-bool Rules::charged()
-{
-	bool return_bool = false;
-	if(model.battery_lvl > 0.8)
-	{
-		return_bool = true;
-		model.charging = false;
-		model.committed = false;
-		model.charge2 = false;
-		model.abs_chargers->at(model.closest_pos).occupied = false;
-	}
-	return return_bool;
-}
 //--------------------Still need implementations-------------------------------------------
 bool Rules::checkCollisions()
 {
 
 }
 
-AliceStructs::pnt Rules::rest() //gives a command to not move.
+void Rules::rest() //gives a command to not move.
 {
-<<<<<<< HEAD
-	std::pair<float,float> do_not = model.transformCur(0,0);
-	model.goTo.x = do_not.first;
-	model.goTo.y = do_not.second;
-=======
 	//std::pair<float,float> do_not = model.transformCur(0,0); //puts null command into first frame (reasons).
 //	model.goTo.x = do_not.first;
 //	model.goTo.y = do_not.second;
-	AliceStructs::pnt go_to;
-	go_to.x = 0;
-	go_to.y = 0;
-	go_to.z = 3;
-	return go_to;
->>>>>>> c0a5e84... charge(), small fires, and energy.
+
+		model.goTo.x = 0;
+		model.goTo.y = 0;
 }
+//-----------------------------------------------------------------------------------------
+//bool Rules::changeState()
+//{ //finds highest priority in list and coorespoinding state.
+//	bool result;
+//	float highest_prior = 0;
+//	int highest_i;
+//	for(int i = 0; i < UNUSED; i ++)
+//	{
+//		if(model.priority->at(i) > highest_prior)
+//		{
+//			highest_prior = model.priority->at(i);
+//			highest_i = i;
+//		}
+//	}
+//
+//#if DEBUG_schange
+//	std::cout<<"==========Pre adjustment===========\n";
+//	std::cout<<"state: "<<(int)state<<std::endl;
+//	std::cout<<"highest_i: "<<highest_i<<std::endl;
+//	std::cout<<"priority:  "<<highest_prior<<std::endl;
+//	std::cout<<"=====================\n";
+//#endif
+//
+//	if(highest_i != (int)state) //if a different state has higher priority
+//	{
+//		result = true;
+//		state = (State)highest_i; //this has been verified to produce the correct output.
+//
+//#if DEBUG_schange
+//		std::cout<<"==========Post adjustment===========\n";
+//		std::cout<<"state: "<<(int)state<<std::endl;
+//		std::cout<<"highest_i: "<<highest_i<<std::endl;
+//		std::cout<<"priority:  "<<highest_prior<<std::endl;
+//		std::cout<<"=====================\n";
+//#endif
+//
+//	}
+//	else
+//	{
+//		result = false;
+//	}
+//	return result;
+//}
+//
+//bool Rules::updateWaypoint() //checks if action should be taken (if near goTo or new rule has higher priority).
+//{//priority received in order {REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}.
+//	std::cout << model.goTo.x << model.goTo.y << std::endl;
+//	bool changed; //tells you if priorities of rules have changed.
+//	bool take_action = false; //only made true if near waypoint, or if state priorities change.
+//
+//	float tolerance = 1; //arbitrary limit of how close the bot needs to get to a waypoint for it to count as reaching it.
+//	std::pair<float,float> waypoint = model.transformFir(model.goTo.x,model.goTo.y);
+//	float r = sqrt(pow(waypoint.first - model.cur_pose.x,2) + pow(waypoint.second - model.cur_pose.y,2));
+//
+//	if(r<tolerance) //if inside
+//	{
+//		changed = changeState();
+//		take_action = true;
+//		std::cout<<(changed? "true" : "false")<<std::endl;
+//	}
+//	else if(changeState())
+//	{
+//		changed = true;
+//		take_action = true;
+//	}
+//	if(take_action)
+//	{
+//		switch((int)state)
+//		{
+//			case 1: charge();
+//			case 2:	findContour();
+//			case 3: goToTar();
+//			case 4: explore();
+//			default: rest();
+//		}
+//	}
+//	return take_action;
+//}
+
+void Rules::updateVel(AliceStructs::vel *_fv) //puts the final_velocity in the frame of the bot.
+{
+	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y);
+	float magnitude = sqrt(pow(cur_goTo.first,2) + pow(cur_goTo.second,2));
+	float direction = atan2(cur_goTo.second,cur_goTo.first);
+	_fv->mag = magnitude;
+	_fv->dir = direction;
+}
+
 
 AliceStructs::pnt Rules::goToTar()
 {
@@ -336,11 +349,12 @@ void Rules::findPath(float tf, std::vector<std::pair<std::pair<float, float>, Al
 	std::vector<std::pair<float, AliceStructs::obj>> left;
 	for (auto& zone : dead_zones)
 	{
+		std::cout << zone.first.first << " - " << zone.first.second << std::endl;
 		if (pow(pow(model.cur_pose.x, 2) + pow(model.cur_pose.y, 2), 0.5) <= // Checks that the obstacle is on the correct side of the bot
 				pow(pow(model.cur_pose.x - model.goTo.x, 2) + pow(model.cur_pose.y - model.goTo.x, 2), 0.5))
 		{
 			std::pair<float, AliceStructs::obj> to_push;
-			if (tf < 0) // Checks which side of the bot the obstacle is on
+			if (abs(tf) < M_PI/2) // Checks which side of the bot the obstacle is on
 			{
 				if (zone.first.first > tf)
 				{
@@ -418,11 +432,63 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 	std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones;
 	for (auto& obs : model.obstacles)
 	{
-		float temp_a_x = model.cur_pose.x - obs.x_off;
-		float temp_a_y = model.cur_pose.y - obs.y_off;
-		std::pair<float, float> aoe = calcQuad(pow(temp_a_x, 2) - pow(obs.x_rad + model.SIZE + model.SAFE_DIS, 2), -2 * temp_a_x * temp_a_y, pow(temp_a_y, 2) - pow(obs.y_rad + model.SIZE + model.SAFE_DIS, 2));
-		aoe.first = atan(aoe.first);
-		aoe.second = atan(aoe.second);
+		//float obs.x_off = model.cur_pose.x - obs.x_off;
+		//float obs.y_off = model.cur_pose.y - obs.y_off;
+		std::pair<float, float> aoe = calcQuad(pow(obs.x_off, 2) - pow(obs.x_rad + model.SIZE + model.SAFE_DIS, 2), -2 * obs.x_off * obs.y_off, pow(obs.y_off, 2) - pow(obs.y_rad + model.SIZE + model.SAFE_DIS, 2));
+		//Unfortunately, trig can't handle quadrents very well, so we have to do it ourselves
+		if (obs.y_off - obs.y_rad - model.SIZE - model.SAFE_DIS < 0)
+		{
+			if (obs.x_off + obs.x_rad + model.SIZE + model.SAFE_DIS < 0)
+			{
+				//std::cout << "top right" << std::endl;
+				aoe.first = M_PI-atan(aoe.first);
+			}
+			else
+			{
+				//std::cout << "top left" << std::endl;
+				aoe.first = -atan(aoe.first);
+			}
+		}
+		else
+		{
+			if (obs.x_off - obs.x_rad - model.SIZE - model.SAFE_DIS< 0)
+			{
+				//std::cout << "bottom right" << std::endl;
+				aoe.first = -M_PI-atan(aoe.first);
+			}
+			else
+			{
+				//std::cout << "bottom left" << std::endl;
+				aoe.first = -atan(aoe.first);
+			}
+		}
+		if (obs.y_off + obs.y_rad + model.SIZE + model.SAFE_DIS < 0)
+		{
+			if (obs.x_off + obs.x_rad + model.SIZE + model.SAFE_DIS > 0)
+			{
+				std::cout << "top right" << std::endl;
+				aoe.second = M_PI-atan(aoe.second);
+			}
+			else
+			{
+				std::cout << "top left" << std::endl;
+				aoe.second = -atan(aoe.second);
+			}
+		}
+		else
+		{
+			if (obs.x_off - obs.x_rad - model.SIZE - model.SAFE_DIS > 0)
+			{
+				std::cout << "bottom right" << std::endl;
+				aoe.second = -M_PI-atan(aoe.second);
+			}
+			else
+			{
+				std::cout << "bottom left" << std::endl;
+				aoe.second = -atan(aoe.second);
+			}
+		}
+		std::cout << aoe.first << " - " << aoe.second << std::endl;
 		std::pair<std::pair<float, float>, AliceStructs::obj> to_push;
 		to_push.first = aoe;
 		to_push.second = obs;

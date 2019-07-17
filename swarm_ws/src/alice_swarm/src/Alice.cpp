@@ -9,7 +9,7 @@
 #include "alice_swarm/aliceStructs.h"
 #include <iostream>
 
-#define DEBUG_generateVel 1
+#define DEBUG_generateVel 0
 
 Alice::Alice()
 {

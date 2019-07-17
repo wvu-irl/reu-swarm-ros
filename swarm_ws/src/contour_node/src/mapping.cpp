@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 	wvu_swarm_std_msgs::ellipse el;
 	el.x_rad = 20;
 	el.y_rad = 5;
-	el.theta_offset = M_PI_4;
+	el.theta_offset = 0;
 
 	wvu_swarm_std_msgs::gaussian gaus;
 	gaus.ellipse = el;

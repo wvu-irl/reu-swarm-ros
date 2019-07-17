@@ -38,54 +38,54 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 //Prevents sudden turns
 
-					flock.flock.at(i).heading = fmod(flock.flock.at(i).heading + 2 * M_PI, 2 * M_PI);
-
-					float a;
-					float b;
-					float temp_r;
-
-					float theta = msg.commands.at(j).theta / 180 * M_PI;
-					float r = msg.commands.at(j).r;
-					if (0 < theta && theta < M_PI)
-					{
-						a = 1;
-						b = r * cos(theta / 2);
-						temp_r = b;
-						flock.flock.at(i).heading += M_PI / 90 * theta;
-					} else if (M_PI < theta && theta < 2 * M_PI)
-					{
-						b = 1;
-						a = -r * cos(theta / 2);
-						temp_r = a;
-						flock.flock.at(i).heading -= M_PI / 90 * (2 * M_PI - theta);
-					} else{
-						temp_r=r;
-					}
-
-					float x = temp_r * cos(flock.flock.at(i).heading);
-					float y = temp_r * sin(flock.flock.at(i).heading);
-
-//					float theta = msg.commands.at(j).theta / 180 * M_PI;
-//					if (theta > M_PI / 24 && theta < M_PI)
-//					{
-//						flock.flock.at(i).velocity.set(0, 0);
-//						flock.flock.at(i).heading += M_PI / 24;
+//					flock.flock.at(i).heading = fmod(flock.flock.at(i).heading + 2 * M_PI, 2 * M_PI);
 //
-//					} else if (theta < 47 * M_PI / 24 && theta > M_PI)
+//					float a;
+//					float b;
+//					float temp_r;
+//
+//					float theta = msg.commands.at(j).theta / 180 * M_PI;
+//					float r = msg.commands.at(j).r;
+//					if (0 < theta && theta < M_PI)
 //					{
-//						flock.flock.at(i).velocity.set(0, 0);
-//						flock.flock.at(i).heading -= M_PI / 24;
-//					} else
+//						a = 1;
+//						b = r * cos(theta / 2);
+//						temp_r = b;
+//						flock.flock.at(i).heading += M_PI / 90 * theta;
+//					} else if (M_PI < theta && theta < 2 * M_PI)
 //					{
-//						flock.flock.at(i).heading += theta;
-//						flock.flock.at(i).velocity.set(1 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
-//								-1 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
+//						b = 1;
+//						a = -r * cos(theta / 2);
+//						temp_r = a;
+//						flock.flock.at(i).heading -= M_PI / 90 * (2 * M_PI - theta);
+//					} else{
+//						temp_r=r;
 //					}
 
+//					float x = temp_r * cos(flock.flock.at(i).heading);
+//					float y = temp_r * sin(flock.flock.at(i).heading);
+
+					float theta = msg.commands.at(j).theta / 180 * M_PI;
+					if (theta > M_PI / 48 && theta < M_PI)
+					{
+						flock.flock.at(i).velocity.set(0, 0);
+						flock.flock.at(i).heading += 0;//M_PI / 96;
+
+					} else if (theta < 95 * M_PI / 48 && theta > M_PI)
+					{
+						flock.flock.at(i).velocity.set(0, 0);
+						flock.flock.at(i).heading -= 0;//M_PI / 96;
+					} else
+					{
+						//flock.flock.at(i).heading += theta/48;
+						flock.flock.at(i).velocity.set(4 * msg.commands.at(j).r * cos(flock.flock.at(i).heading),
+								-4 * msg.commands.at(i).r * sin(flock.flock.at(i).heading));
+					}
+//
 //					if(flock.flock.at(i).collision == false)
 //					{
-					flock.flock.at(i).heading = fmod(flock.flock.at(i).heading, (2 * M_PI));
-					flock.flock.at(i).velocity.set(x, -y);
+//					flock.flock.at(i).heading = fmod(flock.flock.at(i).heading, (2 * M_PI));
+//					flock.flock.at(i).velocity.set(x, -y);
 
 					if (msg.commands.at(j).r < 0.01)
 					{
