@@ -5,8 +5,7 @@ DiffDrive::DiffDrive(void)
 {
     servRight.attach(LEFTPIN);
     servLeft.attach(RIGHTPIN);
-    lv = 3;
-    lw = 2;
+    lw = 25; //the maximum servo speed
 
     error=0;
     oldError=0;
@@ -72,18 +71,18 @@ void DiffDrive::drive(double _theta, double _speed, float yaw)
         
         if(_theta<180){
         // aCommand=-(omega*l)+bCommand;
-            aCommand=-(omega*l)+30;
-            bCommand=30;
-            if(abs(aCommand)>30){
-                aCommand= aCommand > 0.0 ? 30.0 : -30.0;
+            aCommand=-(omega*l)+lw;
+            bCommand=lw;
+            if(abs(aCommand)>lw){
+                aCommand= aCommand > 0.0 ? lw : -lw;
             }
         }
         else{
         // bCommand=(omega*l)+aCommand;
-            bCommand=(omega*l)+30;
-            aCommand=30;
-            if(abs(bCommand)>30){
-                bCommand= bCommand > 0.0 ? 30.0 : -30.0;
+            bCommand=(omega*l)+lw;
+            aCommand=lw;
+            if(abs(bCommand)>lw){
+                bCommand= bCommand > 0.0 ? lw : -lw;
             }
             
         }
@@ -102,13 +101,13 @@ void DiffDrive::drive(double _theta, double _speed, float yaw)
     }
     else if (_theta > 90 && _theta <= 180)
     { //we still want this because we want linear velocity to be non-negative ( change for pd)
-        servLeft.write(90 - 10 * lw);
-        servRight.write(90 - 10 * lw);
+        servLeft.write(90 -  lw);
+        servRight.write(90 - lw);
     }
     else if (_theta > 180 && _theta < 270)
     {
-        servLeft.write(90 + 10 * lw);
-        servRight.write(90 + 10 * lw);
+        servLeft.write(90 + lw);
+        servRight.write(90 + lw);
     }
     else //if somehow the command is invalid
     {
