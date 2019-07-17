@@ -142,11 +142,11 @@ target_link_libraries(nuitrack_bridge
 )
 add_dependencies(nuitrack_bridge ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(hand_pointer src/hand_pointer.cpp)
-target_link_libraries(hand_pointer
+add_executable(rolling_average src/rolling_average.cpp)
+target_link_libraries(rolling_average
   ${catkin_LIBRARIES}
 )
-add_dependencies(hand_pointer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(rolling_average ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
