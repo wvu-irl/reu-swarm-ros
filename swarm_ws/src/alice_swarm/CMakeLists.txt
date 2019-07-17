@@ -30,7 +30,7 @@ add_library(Alice src/Alice.cpp)
 add_library(Model src/Model.cpp)
 
 add_dependencies(Hub wvu_swarm_std_msgs_generate_messages_cpp)
-
+add_dependencies(Model alice_swarm_generate_messages_cpp)
 add_executable(AliceMain src/AliceMain.cpp)
 add_executable(AbsToRel src/AbsToRel.cpp)
 add_executable(InterHub src/InterHub.cpp)
