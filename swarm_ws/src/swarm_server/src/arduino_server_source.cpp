@@ -243,7 +243,7 @@ void* runClient(void *args)
 			// checking if the connection is doing a latency test
 			else if (strstr(buffer->str, "ping") == buffer->str)
 			{
-				write(connection_descriptor, "pong", 4); // returns pong to sender
+				write(connection_descriptor, "pong", 5); // returns pong to sender
 			}
 			else
 				command_callback(*buffer, sockets->at(id).getRID()); // sending message to callback
@@ -251,6 +251,7 @@ void* runClient(void *args)
 
 		free(buffer); // freeing buffer
 	}
+	write(connection_descriptor, "discon", 7);
 #if DEBUG_CPP
         printf("\033[1;32mExiting thread: %d -- RID: %d\033[0m\n", id, sockets->at(id).getRID());
 #endif
@@ -405,7 +406,6 @@ int beginServer(std::function<void(command, int)> command_callback,
         puts("\033[1;32mClosing socket\033[0m");
 #endif
 
-	close(socket_descriptor);
 
 	// waiting for all client handling to die
 #if DEBUG_CPP
@@ -416,6 +416,7 @@ int beginServer(std::function<void(command, int)> command_callback,
 		pthread_join(tid, NULL); // waiting for threads to die
 	}
 
+	close(socket_descriptor);
 	return 0;
 }
 #endif
