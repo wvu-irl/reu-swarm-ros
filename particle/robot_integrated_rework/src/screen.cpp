@@ -52,8 +52,12 @@ void Screen::battStat()
     // Check voltage
     enum BATT_STATE currentState;
     float voltage = analogRead(BATT) * 0.0011224;
-    // TODO: check for charging
-    if (voltage >= 4) // If battery voltage is greater than 4.15V then it is effectively full charge: Particle won't bring the pin higher than ~4.19
+    // Check for charging
+    if(digitalRead(CHG))
+    {
+    	currentState = B_CHARGING;
+    }
+    else if (voltage >= 4) // If battery voltage is greater than 4.15V then it is effectively full charge: Particle won't bring the pin higher than ~4.19
     {
         currentState = B_HIGH;
     }
@@ -91,7 +95,7 @@ void Screen::battStat()
             oled.fillRect(6, 2, 11, 5, BLACK);
             oled.drawRect(20, 2, 2, 5, RED);
         }
-        else // charging
+        else // charging or none
         {
             // TODO: lightning or something
             oled.fillRect(0, 0, 19, 9, YELLOW);
