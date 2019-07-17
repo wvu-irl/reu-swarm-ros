@@ -632,6 +632,7 @@ void Sim::drawChargers() //draws chargers
 		if(chargers.charger.at(i).x > 0){x_adjust = - x_adjust;}
 		if(chargers.charger.at(i).y < 0){y_adjust = - y_adjust;}
 		shape.setPosition(chargers.charger.at(i).x * 3 + 150 + x_adjust, 300 - chargers.charger.at(i).y * 3);
+		shape.setOrigin(0, 6);
 		window.draw(shape);
 	}
 }

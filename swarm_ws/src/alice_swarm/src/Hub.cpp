@@ -34,7 +34,8 @@ Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reas
 }
 
 void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
-		wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f, wvu_swarm_std_msgs::chargers &_c)
+		wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f, wvu_swarm_std_msgs::chargers &_c,
+		wvu_swarm_std_msgs::energy &_e)
 {
 	clearHub();
 	viconBotArray = _b;
@@ -42,6 +43,7 @@ void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vi
 	map = _o;
 	flows = _f;
 	chargers = _c;
+	energy = _e;
 	processVicon(); //needed cause this data needs to be converted first
 	findNeighbors();
 }
@@ -221,15 +223,20 @@ void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 
 	for(int j = 0; j < chargers.charger.size(); j++)
 	{
-		//makes the x coord that of the way point of that charger, for charge() rule. (Needs to be 5 cm in front.
-		std::pair<float, float> temp = {chargers.charger.at(j).x + 5, chargers.charger.at(j).y};
-		std::pair<float, float> temp2 = getSeparation(bots[i], temp);
+		//makes the x coord that of the way point of that charger, for charge() rule. (Needs to be 5 cm in front).
+		std::pair<float, float> temp_t = {chargers.charger.at(j).x + 8, chargers.charger.at(j).y};
+		std::pair<float, float> temp_a = {chargers.charger.at(j).x, chargers.charger.at(j).y};
+		std::pair<float, float> temp2t = getSeparation(bots[i], temp_t);
+		std::pair<float, float> temp2a = getSeparation(bots[i], temp_a);
 
 		wvu_swarm_std_msgs::charger cur_charger;
-		cur_charger.x = temp2.first;
-		cur_charger.y = temp2.second;
+		cur_charger.target_x = temp2t.first;
+		cur_charger.target_y = temp2t.second;
+		cur_charger.x = temp2a.first;
+		cur_charger.y = temp2a.second;
 		cur_charger.occupied = chargers.charger.at(j).occupied;
 		_mail.rel_chargerMail.push_back(cur_charger);
+
 #if DEBUG_ChargerMail
 		std::cout<<"bot #: "<<i<<" abs_charger: "<<chargers.charger.at(j).x<<","<<chargers.charger.at(j).y<<std::endl;
 		std::cout<<"bot #: "<<i<<" target: "<<temp.first<<","<<temp.second<<std::endl;
@@ -277,6 +284,7 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		temp.y=bots[*it].y;
 		temp.heading=bots[*it].heading;
 		temp.vision=VISION;
+		temp.energy = energy.energies.at(*it);
 		to_return.mails.push_back(temp);
 	}
 #if DEBUG_HUB

@@ -75,6 +75,7 @@ public:
 	 */
 	bool checkBattery(std::string state);
 
+	bool charged();
 	/*
 	 * function to check for potential pit falls. Add cases for hard to find bugs.
 	 */
@@ -104,11 +105,14 @@ public:
 	 * Prevents Alice from hitting obstacles or other robots
 	 */
 	void avoidCollisions();
+
+
+	AliceStructs::pnt charge2();
 	//============================================Priority Rules================================================================
 	/*
 	 * Makes Alice stop moving
 	 */
-	void rest();
+	AliceStructs::pnt rest();
 
 	/*
 	 * Makes Alice find a charging station

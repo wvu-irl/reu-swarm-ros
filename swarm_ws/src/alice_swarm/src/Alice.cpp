@@ -74,6 +74,7 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data,
 	mail.vision=_data.vision;
 	mail.time=_data.time;
 	mail.battery_lvl = _data.battery_lvl;
+	mail.energy = _data.energy;
 	//-----------------------------------------
 
 	return mail;
@@ -92,6 +93,7 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_s
 
 AliceStructs::vel Alice::generateVel() //implements the rules set
 {
+<<<<<<< HEAD
 	model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
 	model = rules.stateLoop(model);
 	//std::cout << model.goTo.x << " " << model.cur_pose.x << " - " << model.goTo.y << " " << model.cur_pose.y << std::endl;
@@ -108,5 +110,34 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 #endif
 
 	model.transformCur(model.goTo.x, model.goTo.y); //Shifts the frame go goTo back to the first frame
+=======
+	model = rules.stateLoop(model);
+
+	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame.
+	model.goTo.x = cur_goTo.first;
+	model.goTo.y = cur_goTo.second;
+
+	AliceStructs::vel to_return;
+	to_return.mag = 1;
+
+	if(model.goTo.x == 0 && model.goTo.y == 0)
+	{
+		std::cout<<"===================mag zero================\n";
+		to_return.mag = 0;
+	}
+
+	float theta = atan((model.goTo.y - model.cur_pose.y)/(model.goTo.x - model.cur_pose.x)) - model.cur_pose.heading;
+	to_return.dir = fmod(atan2(model.goTo.y,model.goTo.x),2*M_PI);
+
+#if DEBUG_generateVel
+	std::cout<<"rules model: "<<rules.model.goTo.x<<","<<rules.model.goTo.y<<std::endl;//this is the rules model
+	std::cout<<"alice model: "<<model.goTo.x<<","<< model.goTo.y<<std::endl; //this is the alice model (not the same).
+	std::cout<<"to_return.dir: "<<to_return.dir<<std::endl;//this is the rules model
+	std::cout <<"theta: "<<theta<< std::endl;
+	std::cout <<"mag: "<<to_return.mag<< std::endl;
+	std::cout<<"=================================================\n";
+#endif
+
+>>>>>>> c0a5e84... charge(), small fires, and energy.
 	return to_return;
 }

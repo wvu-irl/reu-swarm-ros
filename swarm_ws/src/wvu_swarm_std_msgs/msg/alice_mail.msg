@@ -8,6 +8,7 @@ float32 x
 float32 y
 float32 heading
 float32 battery_lvl
+float32 energy
 int32 name
 int32 sid
 int32 vision

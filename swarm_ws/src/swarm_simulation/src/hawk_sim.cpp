@@ -12,6 +12,12 @@ void Hawk_Sim::priorityCallback(const wvu_swarm_std_msgs::priorities &msg)
 {
 	temp_priorities = msg;
 }
+
+void Hawk_Sim::energyCallback(const wvu_swarm_std_msgs::energy &msg)
+{
+	temp_energy = msg;
+}
+
 //=====================================================================
 
 //==========================initializer functions=====================================================================
@@ -44,14 +50,13 @@ void Hawk_Sim::makeChargers(ros::Publisher _pub)//creates chargers
 }
 void Hawk_Sim::makePriority(ros::Publisher _pub)//creates chargers
 {
-	int num_bots = 10;
 	if (first)
 	{
 		wvu_swarm_std_msgs::priority priority_msg;
 		priority_msg.priority = {0,10,2,3,4}; //{REST, CHARGE, CONTOUR, TARGET, EXPLORE}
 
 		wvu_swarm_std_msgs::priorities priorities_msg;
-		for(int i = 0; i < num_bots; i ++)
+		for(int i = 0; i < NUMBOTS; i ++)
 		{
 			priorities_msg.priorities.push_back(priority_msg);
 		}
@@ -61,28 +66,56 @@ void Hawk_Sim::makePriority(ros::Publisher _pub)//creates chargers
 		_pub.publish(temp_priorities);
 	}
 }
-void Hawk_Sim::makeHealth(ros::Publisher _pub)
+//void Hawk_Sim::makeBatteryLvl(ros::Publisher _pub)
+//{
+//	wvu_swarm_std_msgs::bot_feedback bf_msg;
+//	for(int i = 0; i <NUMBOTS; i ++)
+//	{
+//		bf_msg.battery.push_back(1);
+//	}
+//}
+void Hawk_Sim::makeEnergy(ros::Publisher _pub)
 {
-
+	if (energy_first)
+	{
+		wvu_swarm_std_msgs::energy energy_msg;
+		for(int i = 0; i <NUMBOTS; i ++)
+		{
+			energy_msg.energies.push_back(100.0);
+		}
+		if(temp_chargers.charger.size() > 0)
+		{
+			energy_first = false;
+		}
+		_pub.publish(energy_msg);
+	}else
+	{
+		_pub.publish(temp_energy);
+	}
 }
 //========================================================================================================================
 
 void Hawk_Sim::run(ros::NodeHandle n) // begin here
 {
+	NUMBOTS = 10;//set the number of bots.
+
 	//Publishers
 	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::chargers > ("chargers", 1000); // pub to obstacles
 	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::priorities > ("priority", 1000); // pub to priority.
+	ros::Publisher pub3 = n.advertise < wvu_swarm_std_msgs::energy > ("energy", 1000); // pub to energy.
 
   // subscribers
 	ros::Subscriber sub1 = n.subscribe("chargers", 1000, &Hawk_Sim::chargersCallback,this);
 	ros::Subscriber sub2 = n.subscribe("priority", 1000, &Hawk_Sim::priorityCallback,this);
+	ros::Subscriber sub3 = n.subscribe("energy", 1000, &Hawk_Sim::energyCallback,this);
 	ros::Rate loopRate(10);
 
 	int i = 0;
-	while (ros::ok() && i < 7000) // setup loop
+	while (ros::ok() && i < 10000) // setup loop
 	{
 		makeChargers(pub1);
 		makePriority(pub2);
+		makeEnergy(pub3);
 		ros::spinOnce(); // spinning callbacks
 //    usleep(10);
 		i++; // incrementing counter
@@ -95,7 +128,8 @@ void Hawk_Sim::run(ros::NodeHandle n) // begin here
 	while (ros::ok()) // main loop
 	{
 		makeChargers(pub1); // publishing chargers
-		makePriority(pub2); //publishes priority
+		makePriority(pub2); // publishes priority
+		makeEnergy(pub3);   // publishes energy
 		ros::spinOnce(); // spinning callbacks
 		loopRate.sleep();
 	}

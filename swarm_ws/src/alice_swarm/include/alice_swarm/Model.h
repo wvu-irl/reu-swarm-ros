@@ -37,10 +37,13 @@ public:
 	bool first;
 	ros::Time time;
 	float vision;
+	float energy;
 
-	//these 4 allow for self charging.
+	//these variables allow for self charging.
 	float prev_highest_i; //rule from last iteration with highest priority
 	float battery_lvl = 0.05;
+	bool charge2 = false;
+	bool charging;
 	bool committed;
 	int closest_pos;
 
