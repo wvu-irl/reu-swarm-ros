@@ -129,10 +129,10 @@ visualization_msgs::MarkerArray nuiToMarkers(nuiData *_nui)
     visualization_msgs::MarkerArray ret;
 
     // Use confidence values as alpha-- less certain joints will be more transparent
-    double leftHandAlpha = _nui->confLH;
-    double leftWristAlpha = _nui->confLW;
-    double rightHandAlpha = _nui->confRH;
-    double rightWristAlpha = _nui->confRW;
+    double leftHandAlpha = 0.5; //_nui->confLH;
+    double leftWristAlpha = 0.5; //_nui->confLW;
+    double rightHandAlpha = 0.5; //_nui->confRH;
+    double rightWristAlpha = 0.5; //_nui->confRW;
 
     ret.markers.push_back(xyzToMarker(1, &(_nui->leftWrist), 1, 0.5, 0, leftWristAlpha));
     ret.markers.push_back(xyzToMarker(2, &(_nui->leftHand), 1, 0, 0, leftHandAlpha, _nui->leftClick ? 6 : 4));
