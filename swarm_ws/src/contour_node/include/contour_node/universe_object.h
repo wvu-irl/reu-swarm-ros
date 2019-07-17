@@ -126,7 +126,7 @@ public:
 	friend void operator-=(Universe&, std::pair<double, double>);
 
 	// print operator
-	friend std::ostream& operator<<(std::ostream&, Universe&);
+	friend std::ostream& operator<<(Universe&, std::ostream&);
 };
 
 #endif
