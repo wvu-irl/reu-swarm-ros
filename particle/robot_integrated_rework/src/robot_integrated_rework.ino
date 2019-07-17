@@ -113,7 +113,8 @@ void loop()
     }
 
     // Read from TCP
-    int temp = tcpClient.read((uint8_t *)(&c), sizeof(struct command), theta, pos); 
+    char sys_comm[16] = {'\0'};
+    int temp = tcpClient.read((uint8_t *)(&c), sizeof(struct command), theta, pos, sys_comm); 
 
     // If got a heading from VICON, just update IMU calibration
     if (temp > 0)
@@ -125,6 +126,13 @@ void loop()
         Serial.print("\tTH: ");
         Serial.print(theta);
 #endif
+        // parsing sys_comm
+        if (strcmp(sys_comm, "discon") == 0) // the call was a disconnection request
+        {
+            tcpClient.disconnect();
+            diff_drive.fullStop();
+            tcpClient.init(10000);
+        }
     }
     // If no data, use IMU estimate
     else if (temp == 0)
