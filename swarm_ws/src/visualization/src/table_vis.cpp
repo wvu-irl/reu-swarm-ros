@@ -393,7 +393,7 @@ int main(int argc, char **argv)
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
 
 	// subscribing to draw the NUI intersect onto the table
-	ros::Subscriber nui_tracking = n.subscribe("/nui_bridge/hand_1", 1000,
+	ros::Subscriber nui_tracking = n.subscribe("hand_1", 1000,
 			nuiUpdate);
 
 	ros::Subscriber map = n.subscribe("/map_data", 1000, updateMap);

@@ -87,13 +87,13 @@ int main(int argc, char **argv)
 	ros::Publisher map_pub = n.advertise < wvu_swarm_std_msgs::map_levels
 			> ("/map_data", 1000);
 	ros::Publisher left_pub = n.advertise < geometry_msgs::Point
-			> ("/nui_bridge/hand_1", 1000);
+			> ("hand_1", 1000);
 	ros::Publisher right_pub = n.advertise < geometry_msgs::Point
-			> ("/nui_bridge/hand_2", 1000);
+			> ("hand_2", 1000);
 
 	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000,
 			additionCallback);
-	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge", 1000, nuiCallback);
+	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge/rolling_average", 1000, nuiCallback);
 
 #if DEBUG
 	std::cout << "Adding equation" << std::endl;
