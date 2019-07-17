@@ -17,7 +17,7 @@ void AlicePOV::mailCallback(const wvu_swarm_std_msgs::alice_mail_array &msg)
 // Construct window using SFML
 AlicePOV::AlicePOV(void)
 {
-	bodiesSize = 7.5;
+	bodiesSize = 10.5;
 	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 	window_height = 600;
 	window_width = 600;
@@ -187,8 +187,8 @@ void AlicePOV::drawMsg(ros::ServiceClient _client)
 			float rad = (360 / quality * i) / (360 / M_PI / 2);
 			float x = 3 * cos(rad) * temp.x_rad;
 			float y = 3 * sin(rad) * temp.y_rad;
-			float newx = x * cos(-map.oheading-temp.theta_offset) - y * sin(-map.oheading-temp.theta_offset);
-			float newy = x * sin(-map.oheading-temp.theta_offset) + y * cos(-map.oheading-temp.theta_offset);
+			float newx = x; //* cos(map.oheading-temp.theta_offset) - y * sin(map.oheading-temp.theta_offset);
+			float newy = y;// * sin(map.oheading-temp.theta_offset) + y * cos(map.oheading-temp.theta_offset);
 			ellipse.setPoint(i, sf::Vector2f(newx, newy));
 		}
 
@@ -221,8 +221,8 @@ void AlicePOV::drawMsg(ros::ServiceClient _client)
 		// Changing the Visual Properties of the contour point
 		shape.setPosition(150 + 3 * (map.ox + cos(map.oheading) * temp.x - sin(map.oheading) * temp.y),
 				300 - 3 * (map.oy + sin(map.oheading) * temp.x + cos(map.oheading) * temp.y));
-		shape.setOrigin(1, 1);
-		shape.setRadius(1);
+		shape.setOrigin(2, 2);
+		shape.setRadius(2);
 		float inten = 10 * map.contMsg.at(j).contVal;
 		if (inten > 255)
 			inten = 255;
