@@ -26,15 +26,15 @@ Body::Body(float x, float y, char _id[2]) //constructor for each of the bodies (
 	velocity = Pvector(0, 0);
 	location = Pvector(x, y);
 	prev_location = Pvector(x, y);
-	maxSpeed = 1;
+	a=0;
+	b=0;
 	maxForce = 0.5;
 	id[0] = _id[0];
 	id[1] = _id[1];
-
+	ros::Time curTime = ros::Time::now();
 	heading = 0;
 	force = 1;
-	updatedCommand = false;
-	updatedPosition = false;
+	l = 10.5; //distance between wheels of robot
 	collision = false;
 }
 
@@ -206,13 +206,19 @@ void Body::update()
 	// Update velocity
 	//velocity.addVector(acceleration);
 	// Limit speed
-	velocity.limit(1);
-	velocity.mulScalar(maxSpeed);
+//	velocity.limit(1);
+//	velocity.mulScalar(maxSpeed);
 	prev_location.set(location.x,location.y);
-	location.addVector(velocity);
+	ros::Time newTime = ros::Time::now();
+	double tstep = newTime.toSec()-curTime.toSec();
+	curTime=newTime;
+	heading +=(b-a)/l*tstep;
+	if (heading>2*M_PI || heading <0) heading=fmod(heading+2*M_PI,2*M_PI);
+	velocity.set((a+b)/2*cos(heading),-(a+b)/2*sin(heading));
+	Pvector temp(velocity);
+	temp.mulScalar(tstep);
+	location.addVector(temp);
 
-	// Reset accelertion to 0 each cycle
-	updatedPosition=true;
 }
 
 // Run flock() on the flock of bodies.
@@ -220,15 +226,15 @@ void Body::update()
 // and corrects bodies which are sitting outside of the SFML window
 void Body::run(vector <Body> v)
 {
-	if (updatedPosition==false)
-	{
+
+
+
 		update();
 		//elasticCollisions(v);
 		inElasticCollisions(v);
 		//seperation(v);
 		borders();
 
-	}
 }
 
 // Applies the three laws to the flock of bodies
@@ -303,7 +309,7 @@ std::pair<float,float> Body::borders(float _fx, float _fy) //applys bounds for t
 void Body::inElasticCollisions(vector<Body> _bodies)
 {
 	//Magnitude of separation between bodies
-	float desiredseparation = 15;
+	float desiredseparation = 21;
 	for (int i = 0; i < _bodies.size(); i++)// For every body in the system, check if it's too close
 	{
 		collision = false;
