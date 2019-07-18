@@ -6,14 +6,19 @@
 
 #include <wvu_swarm_std_msgs/map_levels.h>
 
+#include <contour_node/level_description.h>
+
 #include "visualization_settings.h"
 #include "perspective_transform_gpu.h"
+
+#define USING_LEVEL map_ns::TARGET
 
 namespace interaction
 {
 
-ros::Publisher add_pub, rem_pub;
+ros::Publisher add_pub, rem_pub, loc_pub;
 wvu_swarm_std_msgs::map_levels *universe;
+quadrilateral_t table;
 
 sf::Vector2f getMouseCordinate(sf::Vector2f screen_loc, quadrilateral_t quad);
 
@@ -24,6 +29,8 @@ void mouseReleasedEvent(sf::Event e);
 void mouseMovedEvent(sf::Event e);
 
 void scrollWheelMoved(sf::Event e);
+
+void drawSelection(sf::RenderTexture *window);
 
 } // interaction
 
