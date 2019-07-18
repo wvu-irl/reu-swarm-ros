@@ -34,7 +34,7 @@ public:
 private:
     Servo servLeft, servRight;
     float lv, lw; //defines the nature of the turn, the constants for linear and angular velocity.
-
+    
     float error;
     float oldError;
     float dError;
