@@ -158,7 +158,10 @@ int main(int argc, char **argv)
 			// Reset anchor since nothing is being manipulated
 			anchor = nullptr;
 
-			// Check if something is selected, if so lock point to it
+			// Check if something should be selected.
+                        //   This will return a pointer to a modifiable COPY of the
+                        //   object selected. Be sure to add it back into universe
+                        //   after altering.
 			std::pair<double, double> leftProjPair(leftProjected.x, leftProjected.y);
                         g_selected = universe.findWithinRadius(leftProjPair, 10.0);
                         
@@ -183,7 +186,7 @@ int main(int argc, char **argv)
 
                                 // Construct new object at right (left) hand
                                 ptr = new gaussianObject(leftProjected.x, leftProjected.y, gausName, 10, 10, 0, 10, map_ns::TARGET);
-                                universe += ptr;
+                                universe += ptr; // Add to universe
 
                                 std::cout << universe << std::endl;
                             }
@@ -216,6 +219,8 @@ int main(int argc, char **argv)
 				// Manipulate the object
 				g_selected->nuiManipulate(g_nui.leftHand.x - anchor->x,
                                         g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
+                                universe += g_selected; // Update changes in universe
+                                
                                 ROS_INFO("Moved %s by %03.1f, %03.1f, %03.1f!", g_selected->getName().c_str(),
                                         g_nui.leftHand.x - anchor->x, g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
 
