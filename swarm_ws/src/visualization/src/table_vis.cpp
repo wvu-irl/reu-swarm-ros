@@ -403,7 +403,7 @@ int main(int argc, char **argv)
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
 
 	// subscribing to draw the NUI intersect onto the table
-	ros::Subscriber nui_tracking = n.subscribe("hand_1", 1000, nuiUpdate);
+	ros::Subscriber nui_tracking = n.subscribe("/hand_1", 1000, nuiUpdate);
 
 	ros::Subscriber map = n.subscribe("/map_data", 1000, updateMap);
 
@@ -412,10 +412,12 @@ int main(int argc, char **argv)
 			> ("/add_obstacle", 1000);
 	interaction::rem_pub = n.advertise < std_msgs::String
 			> ("/rem_obstacle", 1000);
+	interaction::loc_pub = n.advertise < geometry_msgs::Point > ("/hand_1", 1000);
 #endif
 
 	// calibrating from file
 	calibrateFromFile(config);
+	interaction::table = g_trap;
 
 	// default color map setup
 	std::vector<double> c_levs;
