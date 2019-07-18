@@ -10,7 +10,7 @@
 Model::Model()
 {
 	first = true;
-	name = 0;
+	name = -1;
 }
 
 Model::Model(int _name)
@@ -18,6 +18,8 @@ Model::Model(int _name)
 	first = true;
 	name = _name;
 	committed = false;
+	//goTo.x=0;
+	//goTo.y=0;
 }
 
 void Model::clear()
@@ -175,6 +177,8 @@ void Model::pass(ros::Publisher _pub)
 {
 	wvu_swarm_std_msgs::map map;
 	map.name = name;
+
+	//For drawing and map sharing purposes, shares their frames.
 	map.x = cur_pose.x;
 	map.y = cur_pose.y;
 	map.heading = cur_pose.heading;
@@ -247,11 +251,9 @@ void Model::pass(ros::Publisher _pub)
 	}
 
 	//passes the goTo point from the first frame
-//	std::pair<float, float> temp = transformCur(goTo.x, goTo.y);
-//	map.goToX = temp.first;
-//	map.goToY = temp.second;
 	map.goToX=goTo.x;
 	map.goToY=goTo.y;
+
 	_pub.publish(map);
 }
 

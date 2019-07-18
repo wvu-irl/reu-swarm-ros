@@ -101,7 +101,7 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 	AliceStructs::vel to_return;
 	to_return.mag = 1;
 
-	if(abs(cur_goTo.first) < 10 && abs(cur_goTo.second) <10) //gives a tolerance range
+	if(rules.calcDis(cur_goTo.first, cur_goTo.second, 0, 0)<model.SIZE/2) //gives a tolerance range
 	{
 #if DEBUG_generateVel
 		std::cout<<"===================mag zero================\n";
