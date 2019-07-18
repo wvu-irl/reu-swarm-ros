@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 	ros::Subscriber sub3 = n.subscribe("map_data",1000,mapCallback);
 	ros::Subscriber sub4 = n.subscribe("virtual_flows", 1000, flowCallback);
 	ros::Subscriber sub5 = n.subscribe("chargers", 1000, chargerCallback);
-	ros::Subscriber sub6 = n.subscribe("energy", 1000, energyCallback);
+//	ros::Subscriber sub6 = n.subscribe("energy", 1000, energyCallback);
 	ros::Subscriber sub7 = n.subscribe("sensor_data", 1000, sensorCallback);
 	ros::Rate loopRate(200);
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::alice_mail_array> ("alice_mail_array", 1000);

@@ -152,7 +152,7 @@ void Hawk_Sim::makeEnergy(ros::Publisher _pub)
 
 void Hawk_Sim::run(ros::NodeHandle n) // begin here
 {
-	NUMBOTS = 10;//set the number of bots.
+	NUMBOTS = 50;//set the number of bots.
 
 	//Publishers
 	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::chargers > ("chargers", 1000); // pub to obstacles

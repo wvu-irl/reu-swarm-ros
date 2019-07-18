@@ -18,8 +18,8 @@ Model::Model(int _name)
 	first = true;
 	name = _name;
 	committed = false;
-	//goTo.x=0;
-	//goTo.y=0;
+	goTo.x = 0;
+	goTo.y = 0;
 }
 
 void Model::clear()
@@ -77,7 +77,7 @@ void Model::archiveAdd(AliceStructs::mail &_toAdd)
 			obstacle.x_off = temp.first;
 			obstacle.y_off = temp.second;
 			obstacle.time = time;
-			obstacle.observer_name = name;
+			//obstacle.observer_name = name;
 			archived_obstacles.push_back(obstacle);
 		}
 
@@ -87,7 +87,7 @@ void Model::archiveAdd(AliceStructs::mail &_toAdd)
 		if (pow(pow(tar.x - _toAdd.xpos, 2) + pow(tar.y - _toAdd.ypos, 2), 0.5) > vision)
 		{
 			tar.time = time;
-			tar.observer_name = name;
+			//tar.observer_name = name;
 			std::pair<float, float> temp = transformCur(tar.x, tar.y);
 			tar.x = temp.first;
 			tar.y = temp.second;
@@ -101,7 +101,7 @@ void Model::archiveAdd(AliceStructs::mail &_toAdd)
 	std::pair<float, float> temp2 = transformCur(0, 0);
 	temp.x = temp2.first;
 	temp.y = temp2.second;
-	temp.observer_name = name;
+	//temp.observer_name = name;
 	temp.time = time;
 	archived_contour.push_back(temp);
 //	}
@@ -190,14 +190,19 @@ void Model::pass(ros::Publisher _pub)
 	for (auto &obstacle : obstacles)
 	{
 		wvu_swarm_std_msgs::obs_msg obs_msg;
+
+		//sets the obstacle's pose in terms of the first frame
 		obs_msg.ellipse.x_rad = obstacle.x_rad;
 		obs_msg.ellipse.y_rad = obstacle.y_rad;
 		obs_msg.ellipse.theta_offset = obstacle.theta_offset - (cur_pose.heading - first_pose.heading);
 		std::pair<float, float> temp = transformCur(obstacle.x_off, obstacle.y_off);
 		obs_msg.ellipse.offset_x = temp.first;
 		obs_msg.ellipse.offset_y = temp.second;
-		obs_msg.time = time;
-		obs_msg.observer = name;
+
+		obs_msg.time = time; //time stamps the obstacles
+
+		obs_msg.observer.push_back(name); //sets itself as the first one to observe this point.
+
 		map.obsMsg.push_back(obs_msg);
 	}
 
@@ -205,13 +210,23 @@ void Model::pass(ros::Publisher _pub)
 	for (auto &obstacle : archived_obstacles)
 	{
 		wvu_swarm_std_msgs::obs_msg obs_msg;
+
+		//sets the obstacle's pose in terms of the first frame
 		obs_msg.ellipse.x_rad = obstacle.x_rad;
 		obs_msg.ellipse.y_rad = obstacle.y_rad;
 		obs_msg.ellipse.theta_offset = obstacle.theta_offset;
 		obs_msg.ellipse.offset_x = obstacle.x_off;
 		obs_msg.ellipse.offset_y = obstacle.y_off;
+
 		obs_msg.time = obstacle.time;
-		obs_msg.observer = obstacle.observer_name;
+
+		//takes the list of previous observers and sets itself as the last one.
+		for (int i = 0; i < obstacle.observer_names.size(); i++)
+		{
+			obs_msg.observer.push_back(obstacle.observer_names.at(i));
+		}
+		obs_msg.observer.push_back(name);
+
 		map.obsMsg.push_back(obs_msg);
 	}
 
@@ -223,7 +238,7 @@ void Model::pass(ros::Publisher _pub)
 		tar_msg.pointMail.x = temp.first;
 		tar_msg.pointMail.y = temp.second;
 		tar_msg.time = time;
-		tar_msg.observer = name;
+		tar_msg.observer.push_back(name);
 		map.tarMsg.push_back(tar_msg);
 	}
 
@@ -234,7 +249,13 @@ void Model::pass(ros::Publisher _pub)
 		tar_msg.pointMail.x = tar.x;
 		tar_msg.pointMail.y = tar.y;
 		tar_msg.time = tar.time;
-		tar_msg.observer = tar.observer_name;
+
+		//takes the list of previous observers and sets itself as the last one.
+		for (int i = 0; i < tar.observer_names.size(); i++)
+		{
+			tar_msg.observer.push_back(tar.observer_names.at(i));
+		}
+		tar_msg.observer.push_back(name);
 		map.tarMsg.push_back(tar_msg);
 	}
 
@@ -246,13 +267,19 @@ void Model::pass(ros::Publisher _pub)
 		cont_msg.pointMail.y = cont.y;
 		cont_msg.contVal = cont.z;
 		cont_msg.time = cont.time;
-		cont_msg.observer = cont.observer_name;
+
+		//takes the list of previous observers and sets itself as the last one.
+		for (int i = 0; i < cont.observer_names.size(); i++)
+		{
+			cont_msg.observer.push_back(cont.observer_names.at(i));
+		}
+		cont_msg.observer.push_back(name);
 		map.contMsg.push_back(cont_msg);
 	}
 
 	//passes the goTo point from the first frame
-	map.goToX=goTo.x;
-	map.goToY=goTo.y;
+	map.goToX = goTo.x;
+	map.goToY = goTo.y;
 
 	_pub.publish(map);
 }
@@ -260,7 +287,7 @@ void Model::pass(ros::Publisher _pub)
 void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<int> &_ids)
 {
 	auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of map
-
+	int max_pass = 3; //maximum amount of information transfers
 	for (int i = 0; i < neighbors.size(); i++) //iterate through neighbors
 	{
 		for (int j = 0; j < _ids.size(); j++) //through id's
@@ -270,25 +297,45 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 				for (int k = 0; k < _maps.at(j).obsMsg.size(); k++) //copy over all of the obstacles
 				{
 					wvu_swarm_std_msgs::obs_msg temp = _maps.at(j).obsMsg.at(k);
-					if (temp.observer != name) //as long as the observer was someone else
+					if (temp.observer.size() < max_pass) // make sure the point hasn't been passed around too much
 					{
-						AliceStructs::obj obstacle;
-						std::pair<float, float> temp2 = transformFtF(temp.ellipse.offset_x, temp.ellipse.offset_y, _maps.at(j).ox,
-								_maps.at(j).oy, _maps.at(j).oheading);
-						obstacle.x_off = temp2.first;
-						obstacle.y_off = temp2.second;
-						obstacle.x_rad = temp.ellipse.x_rad;
-						obstacle.y_rad = temp.ellipse.y_rad;
-						obstacle.theta_offset = temp.ellipse.theta_offset;
-						obstacle.time = temp.time;
-						obstacle.observer_name = temp.observer;
-						archived_obstacles.push_back(obstacle);
+						bool repeat_observer = false; //for finding whether or not this robot has already received this bit of information
+						for (int i = 0; i < temp.observer.size(); i++)
+							if (temp.observer.at(i) == name)
+								repeat_observer = true;
+
+						if (!repeat_observer) //as long as the observer was someone else
+						{
+							AliceStructs::obj obstacle;
+							std::pair<float, float> temp2 = transformFtF(temp.ellipse.offset_x, temp.ellipse.offset_y, _maps.at(j).ox,
+									_maps.at(j).oy, _maps.at(j).oheading);
+							obstacle.x_off = temp2.first;
+							obstacle.y_off = temp2.second;
+							obstacle.x_rad = temp.ellipse.x_rad;
+							obstacle.y_rad = temp.ellipse.y_rad;
+							obstacle.theta_offset = temp.ellipse.theta_offset;
+							obstacle.time = temp.time;
+
+							//copies the list of observers
+							for (int i = 0; i < temp.observer.size(); i++)
+							{
+								obstacle.observer_names.push_back(temp.observer.at(i));
+							}
+							archived_obstacles.push_back(obstacle);
+						}
 					}
 				}
 				for (int k = 0; k < _maps.at(j).tarMsg.size(); k++) //copy over all of the targets
 				{
 					wvu_swarm_std_msgs::tar_msg temp = _maps.at(j).tarMsg.at(k);
-					if (temp.observer != name) //as long as the observer was someone else
+					///if (temp.observer_names.size() < max_pass) // we intend on passing targets as much as it wants
+					//	{
+					bool repeat_observer = false; //for finding whether or not this robot has already received this bit of information
+					for (int i = 0; i < temp.observer.size(); i++)
+						if (temp.observer.at(i) == name)
+							repeat_observer = true;
+
+					if (!repeat_observer) //as long as the observer was someone else
 					{
 						AliceStructs::pnt target;
 						std::pair<float, float> temp2 = transformFtF(temp.pointMail.x, temp.pointMail.y, _maps.at(j).ox,
@@ -296,33 +343,50 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 						target.x = temp2.first;
 						target.y = temp2.second;
 						target.time = temp.time;
-						target.observer_name = temp.observer;
+						//copies the list of observers
+						for (int i = 0; i < temp.observer.size(); i++)
+						{
+							target.observer_names.push_back(temp.observer.at(i));
+						}
 						archived_targets.push_back(target);
 					}
 				}
+				//}
 				for (int k = 0; k < _maps.at(j).contMsg.size(); k++) //copy over known contour points
 				{
+
 					wvu_swarm_std_msgs::cont_msg temp = _maps.at(j).contMsg.at(k);
-					if (temp.observer != name) //as long as the observer was someone else
+					if (temp.observer.size() < max_pass) // make sure the point hasn't been passed around too much
 					{
-						AliceStructs::pose cont;
-						std::pair<float, float> temp2 = transformFtF(temp.pointMail.x, temp.pointMail.y, _maps.at(j).ox,
-								_maps.at(j).oy, _maps.at(j).oheading);
-						cont.x = temp2.first;
-						cont.y = temp2.second;
-						cont.z = temp.contVal;
-						cont.time = temp.time;
-						cont.observer_name = temp.observer;
-						archived_contour.push_back(cont);
+						bool repeat_observer = false; //for finding whether or not this robot has already received this bit of information
+						for (int i = 0; i < temp.observer.size(); i++)
+							if (temp.observer.at(i) == name)
+								repeat_observer = true;
+
+						if (!repeat_observer) //as long as the observer was someone else
+						{
+							AliceStructs::pose cont;
+							std::pair<float, float> temp2 = transformFtF(temp.pointMail.x, temp.pointMail.y, _maps.at(j).ox,
+									_maps.at(j).oy, _maps.at(j).oheading);
+							cont.x = temp2.first;
+							cont.y = temp2.second;
+							cont.z = temp.contVal;
+							cont.time = temp.time;
+							//copies the list of observers
+							for (int i = 0; i < temp.observer.size(); i++)
+							{
+								cont.observer_names.push_back(temp.observer.at(i));
+							}
+							archived_contour.push_back(cont);
+						}
 					}
 				}
 			}
 		}
-
 	}
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
-	//std::cout << "Time taken by srv: " << duration.count() << " microseconds" << std::endl;
+//std::cout << "Time taken by srv: " << duration.count() << " microseconds" << std::endl;
 }
 
 void Model::forget()

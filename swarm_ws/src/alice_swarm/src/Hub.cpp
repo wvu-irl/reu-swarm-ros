@@ -49,14 +49,13 @@ void Hub::updateSensorDatas()
 			}
 			i++;
 		}
-		if(!init && validRID())
+		if(!init)
 		{
 			std::vector<wvu_swarm_std_msgs::sensor_data> temp_sds;
 			for(int i = 0; i < sensor_datas.size(); i ++) //copies sensor_datas.
 			{
 				temp_sds.push_back(sensor_datas.at(i));
 			}
-			//
 			sensor_datas.push_back(sensor_data); //makes both vectors the right size.
 			temp_sds.push_back(sensor_data);
 
@@ -84,18 +83,6 @@ void Hub::updateSensorDatas()
 			}
 		}
 	}
-}
-bool Hub::validRID()
-{
-	bool result = false;
-	for(int i = 0; i < ridOrder.size(); i++)
-	{
-		if(ridOrder.at(i) == sensor_data.rid)
-		{
-			result = true;
-		}
-	}
-	return result;
 }
 
 void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
@@ -353,21 +340,19 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		temp.y=bots[*it].y;
 		temp.heading=bots[*it].heading;
 		temp.vision=VISION;
-		temp.energy = energy.energies.at(*it);
-		if(cur_sd_index <sensor_datas.size())
-		{
-			if(sensor_datas.at(cur_sd_index).rid == *it)
-			{
-				temp.sensor_data = sensor_datas.at(cur_sd_index);
-				cur_sd_index++;
-//				std::cout<<"================matched====================== "<<std::endl;
-//				std::cout<<"position: "<<cur_sd_index<<"| for rid:<<sensor_datas.at(cur_sd_index).rid"<<", "<<*it<<std::endl;
-			}
-			else
-			{
-		//			std::cout<<"++++++++++++++++++++++++++++WAS NOT IN THE ridOrder vector++++++++++++++++++++++++++++++"<<std::endl;
-			}
-		}
+		//temp.energy = energy.energies.at(*it);
+
+//		if(sensor_datas.at(cur_sd_index).rid == *it)
+//		{
+//			temp.sensor_data = sensor_datas.at(cur_sd_index);
+//			cur_sd_index++;
+////			std::cout<<"================matched====================== "<<std::endl;
+////			std::cout<<"position: "<<cur_sd_index<<"| for rid:<<sensor_datas.at(cur_sd_index).rid<<", "<<*it<<std::endl;
+//		}
+//		else
+//		{
+////			std::cout<<"++++++++++++++++++++++++++++WAS NOT IN THE ridOrder vector++++++++++++++++++++++++++++++"<<std::endl;
+//		}
 
 		to_return.mails.push_back(temp);
 	}

@@ -26,7 +26,7 @@ typedef struct
 	float y;
 	float pri;
 	ros::Time time;
-	int observer_name;
+	std::vector<int> observer_names;
 } flow;
 
 /*
@@ -63,7 +63,7 @@ typedef struct
 	float y_off;
 	float theta_offset;
 	ros::Time time;
-	int observer_name;
+	std::vector<int> observer_names;
 } obj;
 
 /*
@@ -75,7 +75,7 @@ typedef struct
 	float y;
 	float z;
 	ros::Time time;
-	int observer_name;
+	std::vector<int> observer_names;
 } pnt;
 
 /*
@@ -88,7 +88,7 @@ typedef struct
 	float z;
 	float heading;
 	ros::Time time;
-	int observer_name;
+	std::vector<int> observer_names;
 } pose;
 
 
