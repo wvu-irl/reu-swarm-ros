@@ -28,20 +28,20 @@ public:
 
 	Rules();
 
-	Rules(Model _model);
+	Rules(Model &_model);
 
 	enum State{REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}; // always keep UNUSED at the back of the array.
 	State state;
 	std::string collision_state;
 	AliceStructs::vel final_vel;
 	std::vector<float> testers;
-	Model model;
-	float margin = 2*model.SIZE + model.SAFE_DIS;
-
+	Model *model;
+	float margin = 4;//2*model.SIZE + model.SAFE_DIS; this won't work the way you want it to, you have it defined before model is initialezed
+	std::pair<float,float> cur_go_to;
 	/*
 	 * Determines which state Alice is in
 	 */
-	Model stateLoop(Model &_model);
+	void stateLoop(Model &_model);
 	/*
 	 * Helper method to find the distance between two points
 	 */
@@ -93,10 +93,7 @@ public:
 	 */
 	std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> findDeadZones();
 
-	/*
-	 * Used to update the distance and direction of the command vector, without changing the true way-point.
-	 */
-	void updateVel(AliceStructs::vel *_fv);
+
 
 	/*
 	 * Avoids other robots dynamically
@@ -129,7 +126,7 @@ public:
 	/*
 	 * Makes Alice go to a target
 	 */
-	AliceStructs::pnt goToTar();
+	AliceStructs::pnt goToTar(Model &_model);
 
 	/*
 	 * Makes Alice explore new territory

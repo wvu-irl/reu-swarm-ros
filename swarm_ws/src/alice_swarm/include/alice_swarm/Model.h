@@ -97,7 +97,7 @@ public:
 	/*
 	 * Passes data to neighbors
 	 */
-	void pass(ros::Publisher _pub); //Exact implementation TBD
+	void pass(ros::Publisher _pub);
 
 
 	/*

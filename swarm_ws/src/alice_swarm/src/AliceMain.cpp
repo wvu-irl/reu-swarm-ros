@@ -62,20 +62,7 @@ int main(int argc, char **argv)
 						temp_mail.abs_chargers, temp_priorities.priorities.at(i).priority);
 		}
 
-		//One alice is selected to send her map out to the rest of them; less robots means a particular robot's map is sent more often
-//		if (alice_map.size() != 0)
-//		{
-//			if (map_it == alice_map.end() )
-//			{
-//				map_it = alice_map.begin();
-//				map_it->second.model.pass(pub2);
-//				map_it++;
-//			} else
-//			{
-//				map_it->second.model.pass(pub2);
-//				map_it++;
-//			}
-//		}
+
 
 
 		//=========Publish to info_map (pub2)==========

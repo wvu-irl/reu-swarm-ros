@@ -7,4 +7,6 @@ float32 heading
 float32 ox
 float32 oy
 float32 oheading
+float32 goToX
+float32 goToY
 int32 name

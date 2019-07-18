@@ -245,7 +245,9 @@ void Model::pass(ros::Publisher _pub)
 		cont_msg.observer = cont.observer_name;
 		map.contMsg.push_back(cont_msg);
 	}
-
+	std::pair<float, float> temp = transformCur(goTo.x,goTo.y);
+	map.goToX=temp.first;
+	map.goToY=temp.second;
 	_pub.publish(map);
 }
 

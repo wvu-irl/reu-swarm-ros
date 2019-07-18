@@ -188,7 +188,7 @@ void AlicePOV::drawMsg(ros::ServiceClient _client)
 			float x = 3 * cos(rad) * temp.x_rad;
 			float y = 3 * sin(rad) * temp.y_rad;
 			float newx = x; //* cos(map.oheading-temp.theta_offset) - y * sin(map.oheading-temp.theta_offset);
-			float newy = y;// * sin(map.oheading-temp.theta_offset) + y * cos(map.oheading-temp.theta_offset);
+			float newy = y; // * sin(map.oheading-temp.theta_offset) + y * cos(map.oheading-temp.theta_offset);
 			ellipse.setPoint(i, sf::Vector2f(newx, newy));
 		}
 
@@ -218,20 +218,34 @@ void AlicePOV::drawMsg(ros::ServiceClient _client)
 	{
 		wvu_swarm_std_msgs::point_mail temp = map.contMsg.at(j).pointMail;
 		sf::CircleShape shape(0);
+
 		// Changing the Visual Properties of the contour point
 		shape.setPosition(150 + 3 * (map.ox + cos(map.oheading) * temp.x - sin(map.oheading) * temp.y),
 				300 - 3 * (map.oy + sin(map.oheading) * temp.x + cos(map.oheading) * temp.y));
 		shape.setOrigin(2, 2);
 		shape.setRadius(2);
+
+		//Turns blue with higher contour values, red at low
 		float inten = 10 * map.contMsg.at(j).contVal;
 		if (inten > 255)
 			inten = 255;
 		shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
+
 		//no outline cause the point is tiny...
 //		shape.setOutlineColor(gray);
 //		shape.setOutlineThickness(1);
 		window2.draw(shape);
 	}
+
+	sf::CircleShape shape(0);
+	// Changing the Visual Properties of the obstacle
+	shape.setPosition(150 + 3 * (map.ox + cos(map.oheading) * map.goToX - sin(map.oheading) * map.goToY),
+			300 - 3 * (map.oy + sin(map.oheading) * map.goToX + cos(map.oheading) * map.goToY));
+	std::cout << map.goToX << " " << map.goToY << std::endl;
+	shape.setOrigin(3, 3);
+	shape.setFillColor(sf::Color::White);
+	shape.setRadius(3);
+	window2.draw(shape);
 
 }
 
@@ -245,6 +259,7 @@ void AlicePOV::Render(ros::ServiceClient _client) //draws changes in simulation 
 	window.display(); //updates display
 	window2.display();
 }
+
 //void Sim::addText() //adds text for the state abbreviations
 //{
 //

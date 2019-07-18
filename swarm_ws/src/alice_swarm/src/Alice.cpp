@@ -73,8 +73,7 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data,
 	mail.name = _data.name;
 	mail.vision=_data.vision;
 	mail.time=_data.time;
-	mail.battery_lvl = _data.sensor_data.battery_level;
-	mail.battery_state = (BatState) _data.sensor_data.battery_state;
+	mail.battery_lvl = _data.battery_lvl;
 	mail.energy = _data.energy;
 	//-----------------------------------------
 
@@ -94,25 +93,7 @@ void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_s
 
 AliceStructs::vel Alice::generateVel() //implements the rules set
 {
-<<<<<<< HEAD
-	model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
-	model = rules.stateLoop(model);
-	//std::cout << model.goTo.x << " " << model.cur_pose.x << " - " << model.goTo.y << " " << model.cur_pose.y << std::endl;
-	AliceStructs::vel to_return;
-	to_return.mag = 1;
-	//std::cout << "x: " << model.goTo.x << "y: " << model.goTo.y << std::endl;
-	to_return.dir = atan2((model.goTo.y),(model.goTo.x));
-	std::cout << to_return.dir << std::endl;
-
-#if DEBUG_generateVel
-	std::cout<<"alice executes: "<<rules.model.goTo.x<<","<<rules.model.goTo.y<<std::endl;//this is the rules model
-	std::cout<<"alice executes: "<<model.goTo.x<<","<< model.goTo.y<<std::endl; //this is the alice model (not the same).
-	std::cout<<"=================================================\n";
-#endif
-
-	model.transformCur(model.goTo.x, model.goTo.y); //Shifts the frame go goTo back to the first frame
-=======
-	model = rules.stateLoop(model);
+	rules.stateLoop(model);
 
 	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame.
 	model.goTo.x = cur_goTo.first;
@@ -121,7 +102,7 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 	AliceStructs::vel to_return;
 	to_return.mag = 1;
 
-	if(model.goTo.x == 0 && model.goTo.y == 0)
+	if(abs(model.goTo.x) < 10 && abs(model.goTo.y) <10) //gives a tolerance range
 	{
 		std::cout<<"===================mag zero================\n";
 		to_return.mag = 0;
@@ -139,6 +120,5 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 	std::cout<<"=================================================\n";
 #endif
 
->>>>>>> c0a5e84... charge(), small fires, and energy.
 	return to_return;
 }
