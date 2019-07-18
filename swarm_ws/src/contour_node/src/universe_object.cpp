@@ -10,6 +10,11 @@ Universe::Universe()
 	// many wow
 }
 
+Universe::Universe(wvu_swarm_std_msgs::map_levels _map)
+{
+	overall_map = _map;
+}
+
 void Universe::addEquation(wvu_swarm_std_msgs::obstacle obs)
 {
 	while (overall_map.levels.size() <= obs.level) // making sure it is safe to add to a level
