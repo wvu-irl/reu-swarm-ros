@@ -29,6 +29,8 @@ float IMUCalibrate::getIMUHeading(float _otheta)
 
     float theta = _otheta - ((yaw + oldYaw) / 2) * timeStep * .001;
     t1 = t2;
+    if (theta>360) theta -= 360;
+    else if(theta<0) theta+=360;
     return theta;
 }
 

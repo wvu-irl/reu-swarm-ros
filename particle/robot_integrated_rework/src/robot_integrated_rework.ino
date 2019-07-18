@@ -36,7 +36,7 @@ SYSTEM_THREAD(ENABLED)
 Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, PIXEL_TYPE);
 
 typedef struct command {
-    char str[32];
+    char str[64];
 } command;
 
 Thread oledThread; //("testThread", threadFunction);
