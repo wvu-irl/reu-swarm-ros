@@ -18,7 +18,7 @@ class Rules
 
 	/*
 	 * TODO
-	 * Implement neighbor collisions. See picture on phone for math. Should be doable.
+	 * Implement neighbor collisions. See picture on phone for math. Should be doable. <- reee
 	 * Simulate
 	 * Implement other rules (should also be doable)
 	 * Document code

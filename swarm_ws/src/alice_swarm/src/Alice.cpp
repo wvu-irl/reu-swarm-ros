@@ -96,26 +96,25 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 	rules.stateLoop(model);
 
 	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame.
-	model.goTo.x = cur_goTo.first;
-	model.goTo.y = cur_goTo.second;
+
 
 	AliceStructs::vel to_return;
 	to_return.mag = 1;
 
-	if(abs(model.goTo.x) < 10 && abs(model.goTo.y) <10) //gives a tolerance range
+	if(abs(cur_goTo.first) < 10 && abs(cur_goTo.second) <10) //gives a tolerance range
 	{
+#if DEBUG_generateVel
 		std::cout<<"===================mag zero================\n";
+#endif
 		to_return.mag = 0;
 	}
 
-	float theta = atan((model.goTo.y - model.cur_pose.y)/(model.goTo.x - model.cur_pose.x)) - model.cur_pose.heading;
-	to_return.dir = fmod(atan2(model.goTo.y,model.goTo.x),2*M_PI);
-
+	to_return.dir = fmod(atan2(cur_goTo.second,cur_goTo.first),2*M_PI);
 #if DEBUG_generateVel
-	std::cout<<"rules model: "<<rules.model.goTo.x<<","<<rules.model.goTo.y<<std::endl;//this is the rules model
-	std::cout<<"alice model: "<<model.goTo.x<<","<< model.goTo.y<<std::endl; //this is the alice model (not the same).
+	std::cout<<"rules model: "<<rules.cur_goTo.x<<","<<rules.cur_goTo.y<<std::endl;//this is the rules model
+	std::cout<<"alice model: "<<cur_goTo.x<<","<< cur_goTo.y<<std::endl; //this is the alice model (not the same).
 	std::cout<<"to_return.dir: "<<to_return.dir<<std::endl;//this is the rules model
-	std::cout <<"theta: "<<theta<< std::endl;
+	std::cout <<"theta: "<<to_return.dir << std::endl;
 	std::cout <<"mag: "<<to_return.mag<< std::endl;
 	std::cout<<"=================================================\n";
 #endif

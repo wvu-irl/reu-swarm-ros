@@ -25,7 +25,7 @@ Rules::Rules(Model &_model) :
 void Rules::stateLoop(Model &_model)
 {
 	model = &_model;
-	cur_go_to = _model.transformFir(_model.goTo.x, _model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
+	//cur_go_to = _model.transformFir(_model.goTo.x, _model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
 
 //	if (true) //shouldLoop())
 	//{

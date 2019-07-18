@@ -241,7 +241,6 @@ void AlicePOV::drawMsg(ros::ServiceClient _client)
 	// Changing the Visual Properties of the obstacle
 	shape.setPosition(150 + 3 * (map.ox + cos(map.oheading) * map.goToX - sin(map.oheading) * map.goToY),
 			300 - 3 * (map.oy + sin(map.oheading) * map.goToX + cos(map.oheading) * map.goToY));
-	std::cout << map.goToX << " " << map.goToY << std::endl;
 	shape.setOrigin(3, 3);
 	shape.setFillColor(sf::Color::White);
 	shape.setRadius(3);

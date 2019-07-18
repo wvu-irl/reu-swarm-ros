@@ -86,7 +86,6 @@ int main(int argc, char **argv)
 				temp.r = 1;
 			else
 				temp.r = tempVel.mag;
-			std::cout << tempVel.dir << std::endl;
 			temp.theta = 180 / M_PI * fmod(2 * M_PI + tempVel.dir, 2 * M_PI);
 			//std::cout << temp.rid << " " << temp.r << " " << temp.theta << std::endl;
 
