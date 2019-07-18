@@ -49,13 +49,14 @@ void Hub::updateSensorDatas()
 			}
 			i++;
 		}
-		if(!init)
+		if(!init && validRID())
 		{
 			std::vector<wvu_swarm_std_msgs::sensor_data> temp_sds;
 			for(int i = 0; i < sensor_datas.size(); i ++) //copies sensor_datas.
 			{
 				temp_sds.push_back(sensor_datas.at(i));
 			}
+			//
 			sensor_datas.push_back(sensor_data); //makes both vectors the right size.
 			temp_sds.push_back(sensor_data);
 
@@ -83,6 +84,18 @@ void Hub::updateSensorDatas()
 			}
 		}
 	}
+}
+bool Hub::validRID()
+{
+	bool result = false;
+	for(int i = 0; i < ridOrder.size(); i++)
+	{
+		if(ridOrder.at(i) == sensor_data.rid)
+		{
+			result = true;
+		}
+	}
+	return result;
 }
 
 void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,

@@ -93,6 +93,8 @@ public:
 
 	void updateSensorDatas(); //updates the sensor_datas vector by adding new elements, replacing old, and keeping order.
 
+	bool validRID(); //helper function for updateSensorDatas.
+
 	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
 
 //	void printAliceMail(wvu_swarm_std_msgs::alice_mail_array _mail); //Prints mail for debug purposes

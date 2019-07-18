@@ -77,6 +77,7 @@ int main(int argc, char **argv)
 //			}
 //		}
 
+
 		//=========Publish to info_map (pub2)==========
 		map_it = alice_map.begin();
 		while(map_it!=alice_map.end())

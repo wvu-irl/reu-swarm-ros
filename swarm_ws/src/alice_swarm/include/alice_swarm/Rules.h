@@ -75,7 +75,9 @@ public:
 	 */
 	bool checkBattery(std::string state);
 
-	bool charged();
+	bool charged(); //checks if bot is charged. resets conditionals if true.
+
+	bool availableChargers(); //checks if chargers are available.
 	/*
 	 * function to check for potential pit falls. Add cases for hard to find bugs.
 	 */

@@ -86,6 +86,8 @@ void Hawk_Sim::makePriority(ros::Publisher _pub)//creates chargers
 void Hawk_Sim::makeSensorData(ros::Publisher _pub)
 {
 	wvu_swarm_std_msgs::sensor_data sd_msg;
+	sd_msg.battery_level = 2;
+	sd_msg.battery_state = GOING;
 
 	if(counter/prev_counter > 1)
 	{
@@ -98,12 +100,11 @@ void Hawk_Sim::makeSensorData(ros::Publisher _pub)
 //		std::cout<<"published to second"<<std::endl;
 		sd_msg.rid = 1;
 	}
-	sd_msg.battery_level = 2;
-	sd_msg.battery_state = GOING;
 
 	if(counter > 10080 && counter < 10150)
 	{
 		sd_msg.battery_state = CHARGING;
+		sd_msg.battery_level = 2;
 	}
 	else if(counter >= 10150)
 	{

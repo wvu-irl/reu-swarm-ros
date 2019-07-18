@@ -8,6 +8,7 @@
 #include <bits/stdc++.h>
 
 #define DEBUG_schange 1
+#define DEBUG_chargeing 1
 
 Rules::Rules()
 {
@@ -51,8 +52,7 @@ Model Rules::stateLoop(Model &_model)
 		//avoidCollisions();
 		float mag = sqrt(pow(model.goTo.x,2) + pow(model.goTo.y,2));
 //		std::cout<<"(x,y): "<<model.goTo.x<<","<<model.goTo.y<<"| "<<mag<<std::endl;
-		
-		std::cout<<"-----------------------------------"<<std::endl;
+//		std::cout<<"-----------------------------------"<<std::endl;
 	}
 	std::pair<float,float> first_goTo = model.transformCur(model.goTo.x, model.goTo.y); //Shifts the frame of goTo back to the first frame
 	model.goTo.x = first_goTo.first;
@@ -120,10 +120,16 @@ AliceStructs::pnt Rules::charge()
 	AliceStructs::pnt go_to;
 	float dx;
 	float dy;
-	float min_sep = 1000.0;
+	float min_sep = model.min_sep;
 	float check_sep; //sep distance
 
-	if(model.abs_chargers->size()>0)
+	bool odd_man_out = false;
+	if(!availableChargers() && !model.committed) //makes this a non op when no chargers available.
+	{
+		odd_man_out = true;
+	}
+
+	if(model.abs_chargers->size()>0 && !odd_man_out)//and available chargers
 	{
 		if(!model.charge2)//runs code for first stage if 2nd not initiated.
 		{
@@ -134,15 +140,15 @@ AliceStructs::pnt Rules::charge()
 					dx = model.rel_chargers.at(i).target_x;
 					dy = model.rel_chargers.at(i).target_y;
 					check_sep = sqrt(pow(dx,2) + pow(dy,2)); //check separation distance
-					std::cout<<"charger: "<<i<<":"<<"dx,dy: "<<dx<<","<<dy<<"|"<<check_sep<<std::endl;
-
+//					std::cout<<"charger: "<<i<<":"<<"dx,dy: "<<dx<<","<<dy<<"|"<<check_sep<<std::endl;
 					if(check_sep < min_sep) //if the closest
 					{
 						model.closest_pos = i; //saves pos of closest
 						min_sep = check_sep; //updates min_sep
+						model.min_sep = min_sep;
 					}
 				}
-				std::cout<<"why you break? "<<i<<std::endl;
+//				std::cout<<"why you break? "<<i<<std::endl;
 			}
 			std::cout<<model.closest_pos<<" :closest pos"<<std::endl;
 			go_to.x = model.rel_chargers.at(model.closest_pos).target_x; //sets pos of closest charger as target.
@@ -152,7 +158,7 @@ AliceStructs::pnt Rules::charge()
 			{
 				model.charge2 = true;
 			}
-			std::cout<<"the battery level is: "<<model.battery_lvl<<std::endl;
+//			std::cout<<"the battery level is: "<<model.battery_lvl<<std::endl;
 			if((model.battery_lvl<3.8)) //assign priority
 			{
 				go_to.z = 2; //given highest priority
@@ -162,8 +168,8 @@ AliceStructs::pnt Rules::charge()
 			}
 			else
 			{
+//				std::cout<<"saftey is running"<<std::endl;
 				//makes sure that the reset sticks. There is lag in reseting these vars sometimes.
-				std::cout<<"saftey is running"<<std::endl;
 				model.abs_chargers->at(model.closest_pos).occupied = false;
 				model.rel_chargers.at(model.closest_pos).occupied = false;
 				model.committed = false;
@@ -172,21 +178,26 @@ AliceStructs::pnt Rules::charge()
 		}
 		else if(model.charge2)//runs code for second waypoint.
 		{
-			std::cout<<"++++++++++++++++++++++++++++++\n";
-			std::cout<<"charge2 activated"<<std::endl;
-			std::cout<<(model.abs_chargers->at(model.closest_pos).occupied ? "true" : "false")<<std::endl;
+#if DEBUG_chargeing
+//			std::cout<<"++++++++++++++++++++++++++++++\n";
+//			std::cout<<"charge2 activated"<<std::endl;
+//			std::cout<<(model.abs_chargers->at(model.closest_pos).occupied ? "true" : "false")<<std::endl;
+//			std::cout<<"charged()"<<(charged() ? "true" : "false")<<std::endl;
+#endif
 			go_to = charge2();
-			std::cout<<"charged()"<<(charged() ? "true" : "false")<<std::endl;
+
 			if(charged())//resets charging vars, and makes priority of the generated point zero.
 			{
-				std::cout<<"************************************************************\n";
-				std::cout<<"HARD RESET TO CHARGING"<<std::endl;
-				if((!model.charging) && (!model.committed) && (!model.charge2) &&
-				(!model.abs_chargers->at(model.closest_pos).occupied) && (!model.rel_chargers.at(model.closest_pos).occupied))
-				{
-					std::cout<<"Reset successful"<<std::endl;
-				}
-				std::cout<<"************************************************************\n";
+#if DEBUG_chargeing
+//				std::cout<<"************************************************************\n";
+//				std::cout<<"HARD RESET TO CHARGING"<<std::endl;
+//				if((!model.charging) && (!model.committed) && (!model.charge2) &&
+//				(!model.abs_chargers->at(model.closest_pos).occupied) && (!model.rel_chargers.at(model.closest_pos).occupied))
+//				{
+//					std::cout<<"Reset successful"<<std::endl;
+//				}
+//				std::cout<<"************************************************************\n";
+#endif
 				go_to.z = 0;
 			}
 		}
@@ -202,14 +213,13 @@ AliceStructs::pnt Rules::charge()
 AliceStructs::pnt Rules::charge2() //phase 2 of the charging sequence.
 {
 	AliceStructs::pnt go_to;
-//	if(!model.charging)
 	if(model.battery_state != CHARGING)
 	{
 		go_to.x = model.rel_chargers.at(model.closest_pos).x;
 		go_to.y = model.rel_chargers.at(model.closest_pos).y;
-
-		std::cout<<"charge2 x,y: "<<go_to.x<<","<<go_to.y<<std::endl;
-		std::cout<<"++++++++++++++++++++++++++++++\n";
+		model.min_sep = sqrt(pow(go_to.x,2) + pow(go_to.y,2));
+//		std::cout<<"charge2 x,y: "<<go_to.x<<","<<go_to.y<<std::endl;
+//		std::cout<<"++++++++++++++++++++++++++++++\n";
 	}else
 	{
 		go_to = rest();
@@ -217,13 +227,11 @@ AliceStructs::pnt Rules::charge2() //phase 2 of the charging sequence.
 	go_to.z = 3;
 	return go_to;
 }
-
 bool Rules::charged()
 {
 	bool return_bool = false;
 //	std::cout<<"the battery level is: "<<model.battery_lvl<<std::endl;
-	std::cout<<"the battery state is: "<<(int)model.battery_state <<std::endl;
-
+//	std::cout<<"the battery state is: "<<(int)model.battery_state <<std::endl;
 //	if(model.battery_lvl > 4.8)
 	if(model.battery_state == CHARGED)
 	{
@@ -233,8 +241,24 @@ bool Rules::charged()
 		model.charge2 = false;
 		model.abs_chargers->at(model.closest_pos).occupied = false;
 		model.rel_chargers.at(model.closest_pos).occupied = false;
+		model.min_sep = 1000.0;
 	}
 	return return_bool;
+}
+bool Rules::availableChargers()
+{
+	bool result = false;
+	int i = 0;
+	while(i < model.rel_chargers.size())
+	{
+		if(!model.rel_chargers.at(i).occupied)
+		{
+			result = true;
+			i = model.rel_chargers.size() + 1;
+		}
+		i++;
+	}
+	return result;
 }
 //--------------------Still need implementations-------------------------------------------
 bool Rules::checkCollisions()

@@ -42,6 +42,7 @@ public:
 	//these variables allow for self charging.
 	float prev_highest_i; //rule from last iteration with highest priority
 	float battery_lvl; //in volts.
+	float min_sep = 1000;
 	BATTERY_STATES battery_state; // enumerator {ERROR = -2, NONE = -1, CHARGED, GOING, CHARGING}
 	bool charge2 = false;
 	bool charging;
