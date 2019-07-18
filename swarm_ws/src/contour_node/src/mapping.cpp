@@ -31,7 +31,7 @@ geometry_msgs::Point leftProjected, rightProjected; // Point for hand on table
 levelObject *g_selected = nullptr; // Object currently selected by user
 std::pair<double, double> originOffset(0.0, 0.0); // Move the nuitrack frame if needed
 const double boundsX = 25.0, boundsY = 50.0; // Bounds before the origin will start moving
-const double originShift = 0.01; // Rate to move the origin towards user's hand if out of bounds
+const double originShift = 0.02; // Rate to move the origin towards user's hand if out of bounds
 
 // Find x,y where the line passing between alpha and beta intercepts an xy plane at z
 geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
@@ -165,61 +165,63 @@ int main(int argc, char **argv)
 	{
 		if (!use_keyboard)
 		{
-			// If user's left hand (RIGHT) is open, points are free to move
-			if (!g_nui.rightClick)
+		// If user's left hand (RIGHT) is open, points are free to move
+		if (!g_nui.rightClick)
+		{
+			// Reset anchor since nothing is being manipulated
+			anchor = nullptr;
+
+			// Check if something should be selected.
+                        //   This will return a pointer to a modifiable COPY of the
+                        //   object selected. Be sure to add it back into universe
+                        //   after altering.
+			std::pair<double, double> leftProjPair(leftProjected.x, leftProjected.y);
+                        g_selected = universe.findWithinRadius(leftProjPair, 10.0);
+                        
+			// If something is selected, lock hand to it
+			if (g_selected != nullptr)
 			{
-				// Reset anchor since nothing is being manipulated
-				anchor = nullptr;
-
-				// Check if something is selected, if so lock point to it
-				std::pair<double, double> leftProjPair(leftProjected.x,
-						leftProjected.y);
-				g_selected = universe.findWithinRadius(leftProjPair, 10.0);
-
-				// If something is selected, lock hand to it
-				if (g_selected != nullptr)
-				{
-					leftProjected.x = g_selected->getOrigin().first;
-					leftProjected.y = g_selected->getOrigin().second;
-				}
-				// If nothing is selected, check for gestures
-				else
-				{
-					std::cout << (int) g_nui.gestureData << std::endl;
-
-					// Add a new feature if PUSH is detected
-					if (g_nui.gestureData == (char) gestureType::PUSH
-							&& !prevGestureFound)
-					{
-						std::cout << "ADDING GAUSSIAN" << std::endl;
-						prevGestureFound = true; // Change flag to prevent duplicates
-
-						std::string gausName = "nui_"
-								+ std::to_string(ros::Time::now().sec);
-
-						// Construct new object at right (left) hand
-						ptr = new gaussianObject(leftProjected.x, leftProjected.y, gausName,
-								10, 10, 0, 10, map_ns::TARGET);
-						universe += ptr;
-
-						std::cout << universe << std::endl;
-					}
-					else if (g_nui.gestureData != (char) gestureType::PUSH)
-					{
-						prevGestureFound = false;
-					}
-				}
-
-				left_pub.publish(leftProjected);
-				right_pub.publish(rightProjected);
+                            leftProjected.x = g_selected->getOrigin().first;
+                            leftProjected.y = g_selected->getOrigin().second;
 			}
-			// If user's left hand (RIGHT) is closed, maybe modify objects
-			else
+                        // If nothing is selected, check for gestures
+                        else
+                        {
+                            std::cout << (int)g_nui.gestureData << std::endl;
+
+                            // Add a new feature if PUSH is detected
+                            if(g_nui.gestureData == (char)gestureType::PUSH && !prevGestureFound)
+                            {
+                                std::cout << "ADDING GAUSSIAN" << std::endl;
+                                prevGestureFound = true; // Change flag to prevent duplicates
+
+                                std::string gausName = "nui_" + std::to_string(ros::Time::now().sec); 
+
+                                // Construct new object at right (left) hand
+                                ptr = new gaussianObject(leftProjected.x, leftProjected.y, gausName, 10, 10, 0, 10, map_ns::TARGET);
+                                universe += ptr; // Add to universe
+
+                                std::cout << universe << std::endl;
+                            }
+                            else if(g_nui.gestureData != (char)gestureType::PUSH)
+                            {
+                                prevGestureFound = false;
+                            }
+                        }
+
+			left_pub.publish(leftProjected);
+			right_pub.publish(rightProjected);
+		}
+		// If user's left hand (RIGHT) is closed, maybe modify objects
+		else
+		{
+			ROS_INFO("Hand closed!");
+			// If nothing had been selected before hand was closed, do nothing
+                        // If something was selected, move it
+			if (g_selected != nullptr)
 			{
-				ROS_INFO("Hand closed!");
-				// If nothing had been selected before hand was closed, do nothing
-				// If something was selected, move it
-				if (g_selected != nullptr)
+				// If object was just grabbed, set the anchor
+				if (anchor == nullptr)
 				{
 					ROS_INFO("%s", g_selected->getName().c_str());
 					// If object was just grabbed, set the anchor
@@ -239,9 +241,22 @@ int main(int argc, char **argv)
 					anchor->x = g_nui.leftHand.x;
 					anchor->y = g_nui.leftHand.y;
 					anchor->z = g_nui.leftHand.z;
-
-					ROS_INFO("Anchor moved!");
+				{
+					anchor = new geometry_msgs::Point;
+					anchor->x = g_nui.leftHand.x;
+					anchor->y = g_nui.leftHand.y;
+					anchor->z = g_nui.leftHand.z;
 				}
+
+				// Manipulate the object
+				g_selected->nuiManipulate(g_nui.leftHand.x - anchor->x,
+                                        g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
+                                universe += g_selected; // Update changes in universe
+                                
+                                ROS_INFO("Moved %s by %03.1f, %03.1f, %03.1f!", g_selected->getName().c_str(),
+                                        g_nui.leftHand.x - anchor->x, g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
+
+				// Update anchor so it's one iteration behind hand
 			}
 		}
 		else // using keyboard
