@@ -23,11 +23,11 @@
 #endif
 
 // Global variables for nuitrack data
-wvu_swarm_std_msgs::nuitrack_data g_nui;
-geometry_msgs::Point leftProjected, rightProjected;
-levelObject *g_selected = nullptr;
+wvu_swarm_std_msgs::nuitrack_data g_nui; // State of the user
+geometry_msgs::Point leftProjected, rightProjected; // Point for hand on table
+levelObject *g_selected = nullptr; // Object currently selected by user
 std::pair<double, double> originOffset(0.0, 0.0); // Move the nuitrack frame if needed
-const double boundsX = 25.0, boundsY = 50.0;
+const double boundsX = 25.0, boundsY = 50.0; // Bounds before the origin will start moving
 const double originShift = 0.01; // Rate to move the origin towards user's hand if out of bounds
 
 // Find x,y where the line passing between alpha and beta intercepts an xy plane at z
