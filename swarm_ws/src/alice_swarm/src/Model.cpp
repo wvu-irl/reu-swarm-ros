@@ -109,6 +109,7 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 {
 	clear();
 	battery_lvl = _toAdd.battery_lvl; //updates battery level.
+	battery_state = _toAdd.battery_state; //updates battery state.
 	energy = _toAdd.energy; //updates energy
 	if (first)
 	{

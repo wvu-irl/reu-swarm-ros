@@ -341,17 +341,19 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		temp.heading=bots[*it].heading;
 		temp.vision=VISION;
 		temp.energy = energy.energies.at(*it);
-
-		if(sensor_datas.at(cur_sd_index).rid == *it)
+		if(cur_sd_index <sensor_datas.size())
 		{
-			temp.sensor_data = sensor_datas.at(cur_sd_index);
-			cur_sd_index++;
-//			std::cout<<"================matched====================== "<<std::endl;
-//			std::cout<<"position: "<<cur_sd_index<<"| for rid:<<sensor_datas.at(cur_sd_index).rid<<", "<<*it<<std::endl;
-		}
-		else
-		{
-//			std::cout<<"++++++++++++++++++++++++++++WAS NOT IN THE ridOrder vector++++++++++++++++++++++++++++++"<<std::endl;
+			if(sensor_datas.at(cur_sd_index).rid == *it)
+			{
+				temp.sensor_data = sensor_datas.at(cur_sd_index);
+				cur_sd_index++;
+//				std::cout<<"================matched====================== "<<std::endl;
+//				std::cout<<"position: "<<cur_sd_index<<"| for rid:<<sensor_datas.at(cur_sd_index).rid"<<", "<<*it<<std::endl;
+			}
+			else
+			{
+		//			std::cout<<"++++++++++++++++++++++++++++WAS NOT IN THE ridOrder vector++++++++++++++++++++++++++++++"<<std::endl;
+			}
 		}
 
 		to_return.mails.push_back(temp);

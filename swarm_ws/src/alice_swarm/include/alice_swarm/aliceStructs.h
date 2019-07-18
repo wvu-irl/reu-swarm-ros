@@ -11,6 +11,7 @@
 #include <list>
 #include <ros/ros.h>
 #include <wvu_swarm_std_msgs/chargers.h>
+#include <swarm_server/battery_states.h>
 
 namespace AliceStructs
 {
@@ -117,6 +118,7 @@ typedef struct
 	int name;
 	float vision;
 	float battery_lvl;
+	BATTERY_STATES battery_state;
 	float energy;
 	ros::Time time;
 } mail;

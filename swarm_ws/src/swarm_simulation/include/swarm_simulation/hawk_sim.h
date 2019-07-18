@@ -4,6 +4,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <math.h>
+#include <swarm_server/battery_states.h>
 #include <wvu_swarm_std_msgs/chargers.h>
 #include <wvu_swarm_std_msgs/priorities.h>
 #include <wvu_swarm_std_msgs/energy.h>
@@ -13,11 +14,16 @@
 class Hawk_Sim
 {
 private:
+	float counter = 0;
+	float prev_counter = 1;
+
 	int NUMBOTS;
 	bool first = true;
 	bool energy_first = true;
+	bool new_chargers;
 	//palce holders for subscription data ---------------
 	wvu_swarm_std_msgs::chargers temp_chargers;
+	wvu_swarm_std_msgs::chargers prev_temp_chargers;
 	wvu_swarm_std_msgs::priorities temp_priorities;
 	wvu_swarm_std_msgs::energy temp_energy;
 	wvu_swarm_std_msgs::sensor_data temp_sd;

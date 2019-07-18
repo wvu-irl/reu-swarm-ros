@@ -6,7 +6,21 @@
 // ================ Callback functions ================================
 void Hawk_Sim::chargersCallback(const wvu_swarm_std_msgs::chargers &msg)
 {
+
 	temp_chargers = msg;
+//	new_chargers = false;
+//	for(int i = 0; i < prev_temp_chargers.charger.size(); i++)
+//	{
+//		if(temp_chargers.charger.at(i).occupied != prev_temp_chargers.charger.at(i).occupied)
+//		{
+//			new_chargers = true;
+//		}
+//	}
+//	if(new_chargers)
+//	{
+//		prev_temp_chargers = temp_chargers;
+//	}
+
 }
 void Hawk_Sim::priorityCallback(const wvu_swarm_std_msgs::priorities &msg)
 {
@@ -42,10 +56,13 @@ void Hawk_Sim::makeChargers(ros::Publisher _pub)//creates chargers
 		if(temp_chargers.charger.size() > 0)
 		{
 			first = false;
+			prev_temp_chargers = temp_chargers;
 		}
 	}else
 	{
-		_pub.publish(temp_chargers);
+//		if(new_chargers)
+//		{}
+			_pub.publish(temp_chargers);
 	}
 }
 void Hawk_Sim::makePriority(ros::Publisher _pub)//creates chargers
@@ -70,7 +87,44 @@ void Hawk_Sim::makeSensorData(ros::Publisher _pub)
 {
 	wvu_swarm_std_msgs::sensor_data sd_msg;
 
-	sd_msg.rid = 1;
+	if(counter/prev_counter > 1)
+	{
+//		std::cout<<"published to first"<<std::endl;
+		sd_msg.rid = 0;
+		prev_counter = counter + 2;
+	}
+	else
+	{
+//		std::cout<<"published to second"<<std::endl;
+		sd_msg.rid = 1;
+	}
+	sd_msg.battery_level = 2;
+	sd_msg.battery_state = GOING;
+
+	if(counter > 10080 && counter < 10150)
+	{
+		sd_msg.battery_state = CHARGING;
+	}
+	else if(counter >= 10150)
+	{
+		sd_msg.battery_level = 5;
+		sd_msg.battery_state = CHARGED;
+	}
+//	ros::Time beginning(0.001);
+//	double secs = ros::Time::now().toSec();
+//	double diff = secs - beginning;
+//	if(diff> 30)
+//	{
+//		std::cout<<"time passed: "<<diff<<std::endl;
+//		sd_msg.battery_level = 5;
+//		sd_msg.battery_state = CHARGED;
+//	}
+//	else if(diff>10)
+//	{
+//		sd_msg.battery_state = CHARGING;
+//	}
+	counter += 1;
+//	std::cout<<"counter "<<counter<<std::endl;
 	_pub.publish(sd_msg);
 
 }

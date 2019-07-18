@@ -4,14 +4,15 @@ project(swarm_simulation)
 set (CMAKE_CXX_STANDARD 11)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs wvu_swarm_std_msgs geometry_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs wvu_swarm_std_msgs geometry_msgs swarm_server)
 
 ## Declare ROS messages and services
 ##add_message_files(FILES )
 
 ## Generate added messages and services
 
-## Declare a catkin package
+## Declare a catkin package contour_node geometry_msgs visualization_msgs)
+
 catkin_package(
 	INCLUDE_DIRS include
 )
@@ -40,6 +41,7 @@ target_link_libraries(Sim ${catkin_LIBRARIES} Flock Body Pvector)
 target_link_libraries(Body ${catkin_LIBRARIES}) 
 target_link_libraries(Flock ${catkin_LIBRARIES})
 target_link_libraries(virtual_objects ${catkin_LIBRARIES})
+
 target_link_libraries(hawk_sim_execute ${catkin_LIBRARIES} Hawk_Sim) ##runs hawk sim stuff
 
 

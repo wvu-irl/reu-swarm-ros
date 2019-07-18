@@ -73,7 +73,8 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data,
 	mail.name = _data.name;
 	mail.vision=_data.vision;
 	mail.time=_data.time;
-	mail.battery_lvl = _data.battery_lvl;
+	mail.battery_lvl = _data.sensor_data.battery_level;
+	mail.battery_state = (BatState) _data.sensor_data.battery_state;
 	mail.energy = _data.energy;
 	//-----------------------------------------
 
