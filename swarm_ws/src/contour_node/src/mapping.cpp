@@ -28,7 +28,7 @@ geometry_msgs::Point leftProjected, rightProjected; // Point for hand on table
 levelObject *g_selected = nullptr; // Object currently selected by user
 std::pair<double, double> originOffset(0.0, 0.0); // Move the nuitrack frame if needed
 const double boundsX = 25.0, boundsY = 50.0; // Bounds before the origin will start moving
-const double originShift = 0.01; // Rate to move the origin towards user's hand if out of bounds
+const double originShift = 0.02; // Rate to move the origin towards user's hand if out of bounds
 
 // Find x,y where the line passing between alpha and beta intercepts an xy plane at z
 geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
@@ -204,7 +204,6 @@ int main(int argc, char **argv)
                         // If something was selected, move it
 			if (g_selected != nullptr)
 			{
-				ROS_INFO("%s", g_selected->getName().c_str());
 				// If object was just grabbed, set the anchor
 				if (anchor == nullptr)
 				{
@@ -216,14 +215,14 @@ int main(int argc, char **argv)
 
 				// Manipulate the object
 				g_selected->nuiManipulate(g_nui.leftHand.x - anchor->x,
-						g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
+                                        g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
+                                ROS_INFO("Moved %s by %03.1f, %03.1f, %03.1f!", g_selected->getName().c_str(),
+                                        g_nui.leftHand.x - anchor->x, g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
 
 				// Update anchor so it's one iteration behind hand
 				anchor->x = g_nui.leftHand.x;
 				anchor->y = g_nui.leftHand.y;
 				anchor->z = g_nui.leftHand.z;
-
-				ROS_INFO("Anchor moved!");
 			}
 		}
 
