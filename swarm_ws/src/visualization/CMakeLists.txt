@@ -34,6 +34,9 @@ find_package(SFML 2 COMPONENTS graphics window system)
 ADD_LIBRARY(color_map ${LIB_TYPE} src/color_map.cpp)
 target_link_libraries(color_map ${catkin_LIBRARIES})
 
+add_library(keyboard ${LIB_TYPE} src/keyboard_managment.cpp)
+target_link_libraries(keyboard ${catkin_LIBRARIES})
+
 
 find_package(CUDA)
 if (CUDA_FOUND)
@@ -56,6 +59,8 @@ if (CUDA_FOUND)
 #	target_link_libraries(calc_surf ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
 	
 	CUDA_ADD_LIBRARY(perspective_tf ${LIB_TYPE} src/transform/perspective_transform_gpu.cu)
+	
+	target_link_libraries(perspective_tf ${catkin_LIBRARIES} ${CUDA_LIBRARIES})
 
 	###################################
 	## catkin specific configuration ##

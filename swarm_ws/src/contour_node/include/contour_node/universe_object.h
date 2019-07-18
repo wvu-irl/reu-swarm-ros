@@ -30,7 +30,7 @@ public:
 	Universe();
 
 	// Constructor to create a map from a map_levels message
-	Universe(wvu_swarm_std_msgs::map_levels _map)
+	Universe(wvu_swarm_std_msgs::map_levels _map);
 
 	/**
 	 * Adds an equation from an obstacle message

@@ -31,7 +31,7 @@ geometry_msgs::Point leftProjected, rightProjected; // Point for hand on table
 levelObject *g_selected = nullptr; // Object currently selected by user
 std::pair<double, double> originOffset(0.0, 0.0); // Move the nuitrack frame if needed
 const double boundsX = 25.0, boundsY = 50.0; // Bounds before the origin will start moving
-const double originShift = 0.01; // Rate to move the origin towards user's hand if out of bounds
+const double originShift = 0.02; // Rate to move the origin towards user's hand if out of bounds
 
 // Find x,y where the line passing between alpha and beta intercepts an xy plane at z
 geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
@@ -112,6 +112,8 @@ void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 	}
 }
 
+
+
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "mapping");
@@ -125,12 +127,12 @@ int main(int argc, char **argv)
 	ros::Publisher map_pub = n.advertise < wvu_swarm_std_msgs::map_levels
 			> ("/map_data", 1000);
 
-	if (!use_keyboard)
-	{
 		ros::Publisher left_pub = n.advertise < geometry_msgs::Point
 				> ("hand_1", 1000);
 		ros::Publisher right_pub = n.advertise < geometry_msgs::Point
 				> ("hand_2", 1000);
+	if (!use_keyboard)
+	{
 		ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge/rolling_average",
 				1000, nuiCallback);
 	}
@@ -157,10 +159,7 @@ int main(int argc, char **argv)
 #endif
 
 	geometry_msgs::Point *anchor = nullptr; // Where did the user's hand start when they grabbed a feature?
-	if (!use_keyboard)
-	{
-		bool prevGestureFound = false;
-	}
+	bool prevGestureFound = false;
 	while (ros::ok())
 	{
 		if (!use_keyboard)
@@ -171,7 +170,10 @@ int main(int argc, char **argv)
 				// Reset anchor since nothing is being manipulated
 				anchor = nullptr;
 
-				// Check if something is selected, if so lock point to it
+				// Check if something should be selected.
+				//   This will return a pointer to a modifiable COPY of the
+				//   object selected. Be sure to add it back into universe
+				//   after altering.
 				std::pair<double, double> leftProjPair(leftProjected.x,
 						leftProjected.y);
 				g_selected = universe.findWithinRadius(leftProjPair, 10.0);
@@ -200,7 +202,7 @@ int main(int argc, char **argv)
 						// Construct new object at right (left) hand
 						ptr = new gaussianObject(leftProjected.x, leftProjected.y, gausName,
 								10, 10, 0, 10, map_ns::TARGET);
-						universe += ptr;
+						universe += ptr; // Add to universe
 
 						std::cout << universe << std::endl;
 					}
@@ -221,7 +223,6 @@ int main(int argc, char **argv)
 				// If something was selected, move it
 				if (g_selected != nullptr)
 				{
-					ROS_INFO("%s", g_selected->getName().c_str());
 					// If object was just grabbed, set the anchor
 					if (anchor == nullptr)
 					{
@@ -234,13 +235,16 @@ int main(int argc, char **argv)
 					// Manipulate the object
 					g_selected->nuiManipulate(g_nui.leftHand.x - anchor->x,
 							g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
+					universe += g_selected; // Update changes in universe
+
+					ROS_INFO("Moved %s by %03.1f, %03.1f, %03.1f!",
+							g_selected->getName().c_str(), g_nui.leftHand.x - anchor->x,
+							g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
 
 					// Update anchor so it's one iteration behind hand
 					anchor->x = g_nui.leftHand.x;
 					anchor->y = g_nui.leftHand.y;
 					anchor->z = g_nui.leftHand.z;
-
-					ROS_INFO("Anchor moved!");
 				}
 			}
 		}
