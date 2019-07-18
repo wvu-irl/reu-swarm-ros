@@ -25,7 +25,7 @@ public:
     int available(void);
     bool connected(void);
       unsigned long readTimer;
-    int read(uint8_t *_buf, size_t _len, float &_theta, float &_pos, char *sys_comm);
+    int read(uint8_t *_buf, size_t _len, float &_theta, float &_pos, char *sys_comm,bool &lat_err);
     void write(uint8_t *_buf, size_t _len); //UNIMPLEMENTED
     void println(String _s);
     void disconnect(void);
