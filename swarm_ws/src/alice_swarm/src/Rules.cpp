@@ -26,7 +26,6 @@ void Rules::stateLoop(Model &_model)
 {
 	model = &_model;
 	cur_go_to = _model.transformFir(_model.goTo.x, _model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
-	std::cout << shouldLoop() << std::endl;
 	if (shouldLoop())
 	{
 		std::vector<AliceStructs::pnt> go_to_list;
