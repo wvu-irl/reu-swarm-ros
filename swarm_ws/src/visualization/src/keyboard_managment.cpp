@@ -8,6 +8,7 @@
 using namespace std::chrono;
 
 #define scale(val, o_min, o_max, n_min, n_max) (((val - o_min) / (o_max - o_min)) * (n_max - n_min) + n_min)
+#define distance(v0, v1) (sqrt(pow(v0.x - v1.x, 2) + pow(v0.y - v1.y, 2)))
 
 static wvu_swarm_std_msgs::obstacle *g_selected;
 static double x, y;
@@ -22,35 +23,13 @@ static MODE editMode = None;
 sf::Vector2f interaction::getMouseCordinate(sf::Vector2f initial,
 		quadrilateral_t trap)
 {
-	int height = HEIGHT;
-	int width = WIDTH;
+	double unified_x = initial.x;
+	double unified_y = initial.y;
 
-	sf::Vector2f top((float) scale(initial.x, 0.0, width, trap.tl.x, trap.tr.x),
-			(float) scale(initial.x, 0.0, width, trap.tl.y, trap.tr.y));
-	sf::Vector2f bottom(
-			(float) scale(initial.x, 0.0, width, trap.bl.x, trap.br.x),
-			(float) scale(initial.x, 0.0, width, trap.bl.y, trap.br.y));
-	sf::Vector2f left((float) scale(initial.y, 0.0, height, trap.bl.x, trap.tl.x),
-			(float) scale(initial.y, 0.0, height, trap.bl.y, trap.tl.y));
-	sf::Vector2f right(
-			(float) scale(initial.y, 0.0, height, trap.br.x, trap.tr.x),
-			(float) scale(initial.y, 0.0, height, trap.br.y, trap.tr.y));
-
-	// linear intersection
-	double m0 = (right.y - left.y) / (right.x - left.x);
-	double m1 = (bottom.y - top.y) / (bottom.x - top.x);
-	double unified_x =
-			top.x != bottom.x && m0 != m1 && left.x != right.x ?
-					(top.y - right.y + right.x * m0 - top.x * m1) / (m0 - m1) : top.x;
-	double unified_y =
-			left.y != right.y ? (m0 * (unified_x - right.x) + right.y) : left.y;
-
-	unified_x *= 200.0 / (double)WIDTH;
-	unified_y *= 100.0 / (double)HEIGHT;
+	unified_x *= 200.0 / (double) WIDTH;
+	unified_y *= 100.0 / (double) HEIGHT;
 	unified_x -= 100;
 	unified_y -= 50;
-	unified_y *= -1;
-//	unified_x *= -1;
 
 	return sf::Vector2f((float) unified_y, (float) unified_x);
 }
@@ -130,7 +109,35 @@ void interaction::keyEvent(sf::Event e)
 
 void interaction::mousePressedEvent(sf::Event e)
 {
+	sf::Vector2f mouse(x, y);
+	wvu_swarm_std_msgs::obstacle *closest =
+			(wvu_swarm_std_msgs::obstacle*) malloc(
+					sizeof(wvu_swarm_std_msgs::obstacle));
+	closest->characteristic = interaction::universe->levels[0].functions[0];
+	closest->level = 0;
+	sf::Vector2f ellip(closest->characteristic.ellipse.offset_x,
+			closest->characteristic.ellipse.offset_y);
+	for (size_t i = 0; i < interaction::universe->levels.size(); i++)
+	{
+		for (size_t j = 0; j < interaction::universe->levels.at(i).functions.size();
+				j++)
+		{
+			sf::Vector2f tst(
+					interaction::universe->levels[i].functions[j].ellipse.offset_x,
+					interaction::universe->levels[i].functions[j].ellipse.offset_y);
+			if (distance(ellip, mouse) > distance(tst, mouse))
+			{
+				closest->characteristic = interaction::universe->levels[i].functions[j];
+				closest->level = j;
+				ellip = sf::Vector2f(closest->characteristic.ellipse.offset_x,
+						closest->characteristic.ellipse.offset_y);
+			}
+		}
+	}
 
+	*g_selected = *closest;
+
+	free(closest);
 }
 
 void interaction::mouseReleasedEvent(sf::Event e)
@@ -152,6 +159,13 @@ void interaction::mouseMovedEvent(sf::Event e)
 	pnt.z = 0;
 
 	interaction::loc_pub.publish(pnt);
+
+	if (g_selected != NULL)
+	{
+		g_selected->characteristic.ellipse.offset_x = x;
+		g_selected->characteristic.ellipse.offset_y = y;
+		interaction::add_pub.publish(*g_selected);
+	}
 }
 
 void interaction::scrollWheelMoved(sf::Event e)
