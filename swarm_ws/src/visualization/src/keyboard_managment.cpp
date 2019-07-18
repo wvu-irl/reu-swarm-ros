@@ -33,7 +33,12 @@ sf::Vector2f interaction::getMouseCordinate(sf::Vector2f initial,
 
 void interaction::keyEvent(sf::Event e)
 {
+	switch (e.key.code)
+	{
+	case sf::Keyboard::Delete:
 
+		break;
+	}
 }
 
 void interaction::mousePressedEvent(sf::Event e)
@@ -47,6 +52,11 @@ void interaction::mouseReleasedEvent(sf::Event e)
 }
 
 void interaction::mouseMovedEvent(sf::Event e)
+{
+
+}
+
+void interaction::scrollWheelMoved(sf::Event e)
 {
 
 }

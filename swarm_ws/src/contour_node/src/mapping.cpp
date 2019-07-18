@@ -1,12 +1,12 @@
 #include <ros/ros.h>
 #include <wvu_swarm_std_msgs/obstacle.h>
 #include <wvu_swarm_std_msgs/map_levels.h>
-#include <contour_node/level_description.h>
 #include <wvu_swarm_std_msgs/nuitrack_data.h>
-#include <nuitrack_bridge/nuitrack_data.h>
+#include <contour_node/level_description.h>
 #include <contour_node/gaussian_object.h>
-
 #include <contour_node/universe_object.h>
+#include <nuitrack_bridge/nuitrack_data.h>
+#include <std_msgs/String.h>
 
 #include <chrono>
 #include <math.h>
@@ -69,11 +69,15 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 	return ret;
 }
 static Universe universe; // creates a universe
-
 // subscriber callback to add things to the universe
 void additionCallback(wvu_swarm_std_msgs::obstacle obs)
 {
 	universe += obs;
+}
+
+void removeCallback(std_msgs::String str)
+{
+	universe -= std::string(str.data);
 }
 
 void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
@@ -112,8 +116,6 @@ void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 	}
 }
 
-
-
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "mapping");
@@ -127,16 +129,17 @@ int main(int argc, char **argv)
 	ros::Publisher map_pub = n.advertise < wvu_swarm_std_msgs::map_levels
 			> ("/map_data", 1000);
 
-		ros::Publisher left_pub = n.advertise < geometry_msgs::Point
-				> ("hand_1", 1000);
-		ros::Publisher right_pub = n.advertise < geometry_msgs::Point
-				> ("hand_2", 1000);
+	ros::Publisher left_pub = n.advertise < geometry_msgs::Point
+			> ("hand_1", 1000);
+	ros::Publisher right_pub = n.advertise < geometry_msgs::Point
+			> ("hand_2", 1000);
 	if (!use_keyboard)
 	{
 		ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge/rolling_average",
 				1000, nuiCallback);
 	}
 	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, additionCallback);
+	ros::Subscriber r_obs = n.subscribe("/rem_obstacle", 1000, removeCallback);
 #if DEBUG
 	std::cout << "Adding equation" << std::endl;
 #endif
