@@ -19,6 +19,8 @@ DiffDrive::DiffDrive(void)
     tstep1=.001;
     start = true;
     l = .01;
+
+    reconnect_servo=false;
 }
 
 void DiffDrive::init(void)
@@ -26,15 +28,21 @@ void DiffDrive::init(void)
     //no-op for now?
 }
 
-void DiffDrive::drive(double _theta, double _speed, float yaw)
+void DiffDrive::drive(double _theta, double _speed, float yaw,bool lat_err)
 {
     // float v = lv * cos(_theta * 3.14 / 180);
     // float w = lw * sin(_theta * 3.14 / 180);
 
-    if ((_theta >= 0 && _theta <= 90) || _theta > 270)
+
+    if(!lat_err && reconnect_servo ){
+        restart();
+        reconnect_servo=false;
+    }
+    else if ((_theta >= 0 && _theta <= 90) || _theta > 270)
     {
         // servLeft.write(90 + 10 * (v - w));
         // servRight.write(90 - 10 * (v + w));
+        
         unsigned long tstep2=millis();
         Serial.println(start);
         
@@ -101,6 +109,7 @@ void DiffDrive::drive(double _theta, double _speed, float yaw)
     }
     else if (_theta > 90 && _theta <= 180)
     { //we still want this because we want linear velocity to be non-negative ( change for pd)
+        
         servLeft.write(90 -  lw);
         servRight.write(90 - lw);
     }
@@ -109,11 +118,17 @@ void DiffDrive::drive(double _theta, double _speed, float yaw)
         servLeft.write(90 + lw);
         servRight.write(90 + lw);
     }
-    else //if somehow the command is invalid
+        else //if somehow the command is invalid
     {
         servLeft.write(90);
         servRight.write(90);
+        //fullStop();
     }
+    if (lat_err){
+        fullStop();
+        reconnect_servo=true;
+    }
+
 }
 
 // Completely disconnects servos to stop

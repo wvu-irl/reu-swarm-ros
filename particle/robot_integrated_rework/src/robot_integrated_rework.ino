@@ -59,6 +59,7 @@ void nameFinder(const char *topic, const char *data) {
 EasyTCP tcpClient;
 struct command c;
 float theta = -100, pos = 10;
+bool latency_timeout = false;
 
 ChargerStatus chargeStat;
 unsigned long lastBattPublish;
@@ -136,7 +137,7 @@ void loop()
 
     // Read from TCP
     char sys_comm[16] = {'\0'};
-    int temp = tcpClient.read((uint8_t *)(&c), sizeof(struct command), theta, pos, sys_comm); 
+    int temp = tcpClient.read((uint8_t *)(&c), sizeof(struct command), theta, pos, sys_comm, latency_timeout); 
 
     // If got a heading from VICON, just update IMU calibration
     if (temp > 0)
@@ -176,7 +177,7 @@ void loop()
     }
     //need to get this from some decision betweeen imu and vicon
    
-    diff_drive.drive(theta, pos, imu.getYawRate());
+    diff_drive.drive(theta, pos, imu.getYawRate(),latency_timeout);
     Serial.print("Finish drive command check client ");
     Serial.println(millis());
     

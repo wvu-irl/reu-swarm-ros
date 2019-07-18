@@ -87,7 +87,7 @@ bool EasyTCP::connected(void)
 // Tries to read. If it fails, keeps track of time since last success.
 //   Returns 0 if nothing available, -1 if error, # of bytes if success
 // Also changes the vicon heading, passed by reference
-int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos, char *_sys_comm)
+int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos, char *_sys_comm,bool &lat_err)
 {
 
     if (readTimer == 0)
@@ -113,6 +113,7 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos, char *
     if (bytes > 0)
     {
         // Update last successful timestamp
+        lat_err=false;
         readTimer = millis();
 
         bytes = client.read(_buf, _len);
@@ -138,7 +139,10 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos, char *
 #if EASY_TCP_DEBUG
             Serial.println("TCP: \t\tRead timeout!");
 #endif
-            _theta = -100; // makes theta invalid
+            lat_err=true;
+            //_theta=1/0;
+            
+            //_theta = -100; // makes theta invalid
             // Disconnect, we'll reconnect afterwards so the drive command actually gets sent...
             //client.stop(); don't do this, our server doesn't handle the reconnection correctly
             //             bool reConn = false;
