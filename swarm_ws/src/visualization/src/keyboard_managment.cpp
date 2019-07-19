@@ -212,6 +212,9 @@ void interaction::mouseReleasedEvent(sf::Event e)
 
 void interaction::mouseMovedEvent(sf::Event e)
 {
+#if DEBUG
+	puts("Mouse moved");
+#endif
 	sf::Vector2f mloc = interaction::getMouseCordinate(
 			sf::Vector2f(e.mouseMove.x, e.mouseMove.y), interaction::table);
 
@@ -255,7 +258,7 @@ void interaction::scrollWheelMoved(sf::Event e)
 			break;
 		case Theta_off:
 			g_selected->characteristic.ellipse.theta_offset +=
-					(double) e.mouseWheelScroll.delta / 100.0;
+					(double) e.mouseWheelScroll.delta / 50.0;
 			break;
 		default:
 			return;
