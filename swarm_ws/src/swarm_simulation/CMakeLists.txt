@@ -35,6 +35,7 @@ add_executable(hawk_sim_execute src/hawk_sim_execute.cpp)   ##runs hawk sim stuf
 add_dependencies(Body wvu_swarm_std_msgs_generate_messages_cpp)
 add_dependencies(Flock wvu_swarm_std_msgs_generate_messages_cpp)
 add_dependencies(virtual_objects wvu_swarm_std_msgs_generate_messages_cpp)
+add_dependencies(Hawk_Sim ${catkin_LIBRARIES} wvu_swarm_std_msgs_generate_messages_cpp)
 
 target_link_libraries(main ${catkin_LIBRARIES} Sim)
 target_link_libraries(Sim ${catkin_LIBRARIES} Flock Body Pvector)

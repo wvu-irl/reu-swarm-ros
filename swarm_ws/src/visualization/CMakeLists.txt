@@ -35,11 +35,13 @@ find_package(SFML 2 COMPONENTS graphics window system)
 
 ADD_LIBRARY(color_map ${LIB_TYPE} src/color_map.cpp)
 ADD_LIBRARY(alice_pov ${LIB_TYPE} src/alice_pov.cpp)
+target_link_libraries(alice_pov ${catkin_LIBRARIES})
+add_dependencies(alice_pov ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} wvu_swarm_std_msgs_generate_messages_cpp)
 target_link_libraries(color_map ${catkin_LIBRARIES})
 
 add_executable(alice_pov_main src/alice_pov_main.cpp)
 	target_link_libraries(alice_pov_main ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES} alice_pov)
-	add_dependencies(alice_pov_main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+	add_dependencies(alice_pov_main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} wvu_swarm_std_msgs_generate_messages_cpp)
 find_package(CUDA)
 if (CUDA_FOUND)
 
