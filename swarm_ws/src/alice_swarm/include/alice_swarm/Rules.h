@@ -121,12 +121,12 @@ public:
 	/*
 	 * Makes Alice seek higher elevations
 	 */
-	void findContour();
+	AliceStructs::pnt findContour();
 
 	/*
 	 * Makes Alice go to a target
 	 */
-	AliceStructs::pnt goToTar(Model &_model);
+	AliceStructs::pnt goToTar();
 
 	/*
 	 * Makes Alice explore new territory
