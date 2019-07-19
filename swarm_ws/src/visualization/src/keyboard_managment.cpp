@@ -10,7 +10,7 @@ using namespace std::chrono;
 #define scale(val, o_min, o_max, n_min, n_max) (((val - o_min) / (o_max - o_min)) * (n_max - n_min) + n_min)
 #define distance(v0, v1) (sqrt(pow(v0.x - v1.x, 2) + pow(v0.y - v1.y, 2)))
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG
 #include <stdio.h>
@@ -103,41 +103,38 @@ void interaction::keyEvent(sf::Event e)
 			break;
 		}
 	}
-	else
+	switch (e.key.code)
 	{
-		switch (e.key.code)
-		{
-		case sf::Keyboard::Key::Return: // adding new function
-			addNewFunk();
-			break;
+	case sf::Keyboard::Key::Return: // adding new function
+		addNewFunk();
+		break;
 
-		case sf::Keyboard::Key::T:
-			editMode = Theta_off;
-			break;
+	case sf::Keyboard::Key::R:
+		editMode = Theta_off;
+		break;
 
-		case sf::Keyboard::Key::Y:
-			editMode = Rad_y;
-			break;
+	case sf::Keyboard::Key::Y:
+		editMode = Rad_y;
+		break;
 
-		case sf::Keyboard::Key::X:
-			editMode = Rad_x;
-			break;
+	case sf::Keyboard::Key::X:
+		editMode = Rad_x;
+		break;
 
-		case sf::Keyboard::Key::A:
-			editMode = Amplitude;
-			break;
+	case sf::Keyboard::Key::A:
+		editMode = Amplitude;
+		break;
 
-		case sf::Keyboard::Key::Space:
-		case sf::Keyboard::Key::Escape:
+	case sf::Keyboard::Key::Space:
+	case sf::Keyboard::Key::Escape:
 #if DEBUG
-			puts("Exiting control");
+		puts("Exiting control");
 #endif
-			editMode = None;
-			if (g_selected != NULL)
-				g_selected->characteristic.selected = false;
-			g_selected = NULL;
-			break;
-		}
+		editMode = None;
+		if (g_selected != NULL)
+			g_selected->characteristic.selected = false;
+		g_selected = NULL;
+		break;
 	}
 }
 
@@ -146,6 +143,14 @@ void interaction::mousePressedEvent(sf::Event e)
 #if DEBUG
 	puts("Mouse pressed");
 #endif
+
+	if (editMode != None && g_selected != NULL)
+	{
+		editMode = None;
+		if (g_selected != NULL)
+			g_selected->characteristic.selected = false;
+		g_selected = NULL;
+	}
 
 	if (g_selected != NULL)
 	{
