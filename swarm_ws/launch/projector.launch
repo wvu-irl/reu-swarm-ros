@@ -11,7 +11,9 @@
             <param name="max_values" value="15" type="int"/>
         </node>
 
-	<node ns="vis" pkg="contour_node" type="mapping" name="map" output="screen"/>
+	<node ns="vis" pkg="contour_node" type="mapping" name="map" output="screen">
+		<param name="use_keyboard" value="true" type="bool"/>
+	</node>
 
 	<node ns="vis" pkg="visualization" type="table_vis" name="table"
 		output="screen">
@@ -32,7 +34,6 @@
 		<param name="num_levels" value="9" type="int"/>
 		<param name="range_top" value="20.0" type="double"/>
 		<param name="range_bottom" value="-20.0" type="double"/>
-                <param name="draw_level" value="1" type="int"/>
 		
 		<rosparam param="color_levels">[-20, -16, -12,  -8,  -4,    0,   4,   8,  12,  16,  20]</rosparam>
 		<rosparam param="color_reds"  >[  0,   0,   0, 127, 127,  255, 255, 255,   0,   0,   0]</rosparam>

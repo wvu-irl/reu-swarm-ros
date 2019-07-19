@@ -18,9 +18,6 @@
 // toggles if the main loop has a rate
 #define RATE_LIMIT 1
 
-// toggles use of NUI track as the interface
-#define USE_TRACKING 0
-
 #if DEBUG
 #include <iostream>
 #endif
