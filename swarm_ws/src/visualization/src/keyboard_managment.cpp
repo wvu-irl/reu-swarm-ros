@@ -10,6 +10,13 @@ using namespace std::chrono;
 #define scale(val, o_min, o_max, n_min, n_max) (((val - o_min) / (o_max - o_min)) * (n_max - n_min) + n_min)
 #define distance(v0, v1) (sqrt(pow(v0.x - v1.x, 2) + pow(v0.y - v1.y, 2)))
 
+#define DEBUG 0
+
+#if DEBUG
+#include <stdio.h>
+#include <iostream>
+#endif
+
 static wvu_swarm_std_msgs::obstacle *g_selected;
 static double x, y;
 
@@ -109,14 +116,30 @@ void interaction::keyEvent(sf::Event e)
 
 void interaction::mousePressedEvent(sf::Event e)
 {
+#if DEBUG
+	puts("Mouse pressed");
+#endif
+
+	if (g_selected != NULL)
+	{
+		free(g_selected);
+	}
+
 	sf::Vector2f mouse(x, y);
+
 	wvu_swarm_std_msgs::obstacle *closest =
 			(wvu_swarm_std_msgs::obstacle*) malloc(
 					sizeof(wvu_swarm_std_msgs::obstacle));
-	closest->characteristic = interaction::universe->levels[0].functions[0];
+
+	closest->characteristic =
+			interaction::universe->levels[map_ns::COMBINED].functions[0];
+
 	closest->level = 0;
-	sf::Vector2f ellip(closest->characteristic.ellipse.offset_x,
-			closest->characteristic.ellipse.offset_y);
+
+	sf::Vector2f ellip(-100000, -100000);
+
+	int level = -1, funk = -1;
+
 	for (size_t i = 0; i < interaction::universe->levels.size(); i++)
 	{
 		for (size_t j = 0; j < interaction::universe->levels.at(i).functions.size();
@@ -125,19 +148,34 @@ void interaction::mousePressedEvent(sf::Event e)
 			sf::Vector2f tst(
 					interaction::universe->levels[i].functions[j].ellipse.offset_x,
 					interaction::universe->levels[i].functions[j].ellipse.offset_y);
-			if (distance(ellip, mouse) > distance(tst, mouse))
+			if (funk == -1 || distance(ellip, mouse) > distance(tst, mouse))
 			{
 				closest->characteristic = interaction::universe->levels[i].functions[j];
-				closest->level = j;
+				closest->level = i;
 				ellip = sf::Vector2f(closest->characteristic.ellipse.offset_x,
 						closest->characteristic.ellipse.offset_y);
+				level = i;
+				funk = j;
 			}
 		}
 	}
-
-	*g_selected = *closest;
-
 	free(closest);
+
+	g_selected = (wvu_swarm_std_msgs::obstacle*) malloc(
+			sizeof(wvu_swarm_std_msgs::obstacle));
+
+#if DEBUG
+	puts("Allocated memory for obstacle");
+	printf("Finding function: LVL:%d, F:%d\n", level, funk);
+#endif
+
+	g_selected->characteristic =
+			interaction::universe->levels[level].functions[funk];
+
+#if DEBUG
+	puts("Set function");
+#endif
+	g_selected->level = level;
 }
 
 void interaction::mouseReleasedEvent(sf::Event e)
@@ -165,6 +203,10 @@ void interaction::mouseMovedEvent(sf::Event e)
 		g_selected->characteristic.ellipse.offset_x = x;
 		g_selected->characteristic.ellipse.offset_y = y;
 		interaction::add_pub.publish(*g_selected);
+
+#if DEBUG
+		printf("Moved %s to (%0.3lf, %0.3lf)\n", g_selected->characteristic.name.c_str(), x, y);
+#endif
 	}
 }
 
