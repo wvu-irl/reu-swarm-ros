@@ -10,7 +10,7 @@ using namespace std::chrono;
 #define scale(val, o_min, o_max, n_min, n_max) (((val - o_min) / (o_max - o_min)) * (n_max - n_min) + n_min)
 #define distance(v0, v1) (sqrt(pow(v0.x - v1.x, 2) + pow(v0.y - v1.y, 2)))
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #include <stdio.h>
@@ -67,6 +67,14 @@ void addNewFunk()
 	interaction::add_pub.publish(n_obs);
 }
 
+void remove()
+{
+	std_msgs::String str;
+	str.data = g_selected->characteristic.name;
+	interaction::rem_pub.publish(str);
+	ROS_INFO("Removed: %s", str.data.c_str());
+}
+
 void interaction::keyEvent(sf::Event e)
 {
 	if (g_selected != NULL)
@@ -74,10 +82,18 @@ void interaction::keyEvent(sf::Event e)
 		switch (e.key.code)
 		{
 		case sf::Keyboard::Delete: // removing selected function
-			std_msgs::String str;
-			str.data = g_selected->characteristic.name;
-			interaction::rem_pub.publish(str);
-			ROS_INFO("Removed: %s", str.data.c_str());
+			remove();
+			break;
+
+		case sf::Keyboard::Key::Space:
+		case sf::Keyboard::Key::Escape:
+#if DEBUG
+			puts("Exiting control");
+#endif
+			editMode = None;
+			if (g_selected != NULL)
+				g_selected->characteristic.selected = false;
+			g_selected = NULL;
 			break;
 		}
 	}
@@ -107,7 +123,12 @@ void interaction::keyEvent(sf::Event e)
 
 		case sf::Keyboard::Key::Space:
 		case sf::Keyboard::Key::Escape:
+#if DEBUG
+			puts("Exiting control");
+#endif
 			editMode = None;
+			if (g_selected != NULL)
+				g_selected->characteristic.selected = false;
 			g_selected = NULL;
 			break;
 		}
@@ -176,11 +197,17 @@ void interaction::mousePressedEvent(sf::Event e)
 	puts("Set function");
 #endif
 	g_selected->level = level;
+	g_selected->characteristic.selected = true;
 }
 
 void interaction::mouseReleasedEvent(sf::Event e)
 {
-
+	if (editMode == None)
+	{
+		if (g_selected != NULL)
+			g_selected->characteristic.selected = false;
+		g_selected = NULL;
+	}
 }
 
 void interaction::mouseMovedEvent(sf::Event e)
@@ -205,17 +232,34 @@ void interaction::mouseMovedEvent(sf::Event e)
 		interaction::add_pub.publish(*g_selected);
 
 #if DEBUG
-		printf("Moved %s to (%0.3lf, %0.3lf)\n", g_selected->characteristic.name.c_str(), x, y);
+		printf("Moved %s to (%0.3lf, %0.3lf)\n",
+				g_selected->characteristic.name.c_str(), x, y);
 #endif
 	}
 }
 
 void interaction::scrollWheelMoved(sf::Event e)
 {
-
-}
-
-void interaction::drawSelection(sf::RenderTexture *window)
-{
-
+	if (g_selected != NULL)
+	{
+		switch (editMode)
+		{
+		case Amplitude:
+			g_selected->characteristic.amplitude += e.mouseWheelScroll.delta;
+			break;
+		case Rad_x:
+			g_selected->characteristic.ellipse.x_rad += e.mouseWheelScroll.delta;
+			break;
+		case Rad_y:
+			g_selected->characteristic.ellipse.y_rad += e.mouseWheelScroll.delta;
+			break;
+		case Theta_off:
+			g_selected->characteristic.ellipse.theta_offset +=
+					(double) e.mouseWheelScroll.delta / 100.0;
+			break;
+		default:
+			return;
+		}
+		interaction::add_pub.publish(*g_selected);
+	}
 }
