@@ -71,6 +71,12 @@ public:
 	 */
 	bool checkCollisions();
 
+	/*
+	 * Checks if the goTo point has not been updated for a set amount of time, and if so, reverses it.
+	 * Meant for error handling bad goTo's and stuck robots.
+	 */
+	void goToTimeout();
+
 	bool shouldLoop();
 
 	/*
@@ -134,7 +140,7 @@ public:
 	/*
 	 * Makes Alice explore new territory
 	 */
-	void explore();
+	AliceStructs::pnt explore();
 	//=========================================================================================================================
 
 };

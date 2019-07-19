@@ -371,7 +371,7 @@ void Model::forget()
 	float TOLERANCE = 5; //objects within this distance in x and y will be simplified to one object
 	forgetObs(TOLERANCE);
 	forgetTargets(TOLERANCE);
-	forgetContour(TOLERANCE);
+	forgetContour(TOLERANCE*1.5); //this is super expensive if the point cloud is dense
 }
 
 void Model::forgetContour(int TOLERANCE) //erases Contours based on time stamp or duplicity.

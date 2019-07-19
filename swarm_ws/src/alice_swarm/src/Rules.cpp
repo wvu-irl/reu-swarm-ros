@@ -26,7 +26,6 @@ void Rules::init(Model &_model)
 	_model.goTo.x = 0;
 	_model.goTo.y = 0;
 	first_time = false;
-	std::cout << "called init" << std::endl;
 }
 //===================================================================================================================
 
@@ -49,10 +48,11 @@ void Rules::stateLoop(Model &_model)
 		std::vector<AliceStructs::pnt> go_to_list;
 
 		// add other rules here
-		//go_to_list.push_back(findContour());
-		go_to_list.push_back(goToTar());
+		//	go_to_list.push_back(findContour());
+		//	go_to_list.push_back(goToTar());
 		//go_to_list.push_back(charge());
 		//go_to_list.push_back(rest());
+		go_to_list.push_back(explore());
 
 		float temp = -1;
 		for (auto &rule : go_to_list)
@@ -64,6 +64,7 @@ void Rules::stateLoop(Model &_model)
 
 				cur_go_to.x = rule.x;
 				cur_go_to.y = rule.y;
+
 //				std::cout << "theta: "<<atan2(model->goTo.y, model->goTo.x) << std::endl;
 //				std::cout<<"(x,y): "<<model->goTo.x<<","<<model->goTo.y<<std::endl;
 			}
@@ -73,16 +74,33 @@ void Rules::stateLoop(Model &_model)
 //			std::cout<<"(x,y): "<<model->goTo.x<<","<<model->goTo.y<<"| "<<mag<<std::endl;
 //			std::cout<<"-----------------------------------"<<std::endl;
 		}
-		if (run)
-		{
-			std::pair<float, float> back_to_fir = _model.transformCur(cur_go_to.x, cur_go_to.y);
-			_model.goTo.x = back_to_fir.first;
-			_model.goTo.y = back_to_fir.second;
-		}
+
+		_model.goTo.time = ros::Time::now(); //time stamps when the goto is created
 	}
+	goToTimeout();
+	std::pair<float, float> back_to_fir = _model.transformCur(cur_go_to.x, cur_go_to.y);
+	_model.goTo.x = back_to_fir.first;
+	_model.goTo.y = back_to_fir.second;
 }
 
 //===================================================================================================================
+void Rules::goToTimeout()
+{
+	if (ros::Time::now().sec - model->goTo.time.sec > 10)
+	{
+
+		float mag = calcDis(cur_go_to.x, cur_go_to.y, 0, 0);
+
+		//for handling bad goTo points (too far)
+		cur_go_to.x *= 30 / mag;
+		cur_go_to.y *= 30 / mag;
+
+		cur_go_to.x *= -1; //flip sign for handling unreachable goTo's
+		cur_go_to.y *= -1;
+		model->goTo.time = ros::Time::now(); //time stamps when the goto is changed
+	}
+
+}
 
 bool Rules::shouldLoop()
 {
@@ -116,23 +134,33 @@ void Rules::avoidCollisions()
 
 //TO USE ANY OF THESE RULES, USE THE MODEL'S POINTER AND CHANGE SYNTAX ACCORDINGLY
 
-//void Rules::explore()
-//{
-//	AliceStructs::pose best;
-//	std::pair<float, float> sum(0,0);
-//	for (auto& contour : model.archived_contour)
-//	{
-//		std::pair<float, float> temp = model.transformFir(contour.x,contour.y); //transforms to the current frame
-//		float dist =  calcDis(0, 0, contour.x, contour.y);
-//		if (dist <model.vision) //simplistic, just adds the vectors together and goes the opposite way
-//		{
-//			sum.first+= temp.first;
-//			sum.second+=temp.second;//some form of priority assigned by confidence TBD
-//		}
-//	}
-//	final_vel.dir = atan2(-sum.second,-sum.first);
-//	final_vel.mag = 1;
-//}
+AliceStructs::pnt Rules::explore()
+{
+	AliceStructs::pose best;
+	std::pair<float, float> sum(0, 0);
+	for (auto &contour : model->archived_contour)
+	{
+		std::pair<float, float> temp = model->transformFir(contour.x, contour.y); //transforms to the current frame
+		float dist = calcDis(0, 0, contour.x, contour.y);
+		if (dist < model->vision) //simplistic, just adds the vectors together and goes the opposite way
+		{
+			sum.first += temp.first;
+			sum.second += temp.second; //some form of priority assigned by confidence TBD
+		}
+	}
+	float mag = calcDis(sum.first, sum.second, 0, 0);
+	if (mag > 1)
+	{
+		sum.first *= 10 / mag;
+		sum.second *= 10 / mag;
+	}
+	AliceStructs::pnt to_return;
+	to_return.x = -sum.first;
+	to_return.y = -sum.second;
+	to_return.z = 3;
+	return to_return;
+
+}
 
 AliceStructs::pnt Rules::charge()
 {
@@ -406,11 +434,15 @@ AliceStructs::pnt Rules::findContour()
 {
 	AliceStructs::pose best;
 	AliceStructs::pnt to_return;
+	to_return.x = 0;
+	to_return.y = 0;
+	to_return.z = 0;
 	float pri = 0; //uses a formula based on distance, recency(confidence), and strength
 	std::pair<float, float> temp = model->transformCur(0, 0); //transforms the cur_pose to the first_pose
-
+	bool init = false;
 	for (auto &contour : model->archived_contour)
 	{
+		init = true;
 		float temp_pri = (contour.z); // - model->cur_pose.z) / (10 + model->time.sec - contour.time.sec)
 		/// pow(calcDis(temp.first, temp.second, contour.x, contour.y), 0.5);
 
@@ -420,10 +452,13 @@ AliceStructs::pnt Rules::findContour()
 			pri = temp_pri;
 		}
 	}
-	std::pair<float, float> go = model->transformCur(best.x, best.y);
-	to_return.x = go.first;
-	to_return.y = go.second;
-	to_return.z = pri;
+	if (init)
+	{
+		std::pair<float, float> go = model->transformFir(best.x, best.y);
+		to_return.x = go.first;
+		to_return.y = go.second;
+		to_return.z = pri;
+	}
 	return to_return;
 }
 
