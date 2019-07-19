@@ -24,6 +24,7 @@ private:
 	//palce holders for subscription data ---------------
 	wvu_swarm_std_msgs::chargers temp_chargers;
 	wvu_swarm_std_msgs::chargers prev_temp_chargers;
+	float prev_rid = -1;
 	wvu_swarm_std_msgs::priorities temp_priorities;
 	wvu_swarm_std_msgs::energy temp_energy;
 	wvu_swarm_std_msgs::sensor_data temp_sd;

@@ -30,14 +30,14 @@ public:
 	/*
 	 * Takes data from messages to structs
 	 */
-	AliceStructs::mail packageData(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_swarm_std_msgs::charger> &_chargers,
+	AliceStructs::mail packageData(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_swarm_std_msgs::charger> *_chargers,
 			std::vector<float> &_priority);
 
 	/*
 	 * Updates the model with new data
 	 */
 	void updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_swarm_std_msgs::map> &_maps,  std::vector<int> &_ids,
-			std::vector<wvu_swarm_std_msgs::charger> &_chargers, std::vector<float> &_priority);
+			std::vector<wvu_swarm_std_msgs::charger> *_chargers, std::vector<float> &_priority);
 
 	/*
 	 * Generates a velocity vector to be sent to the low-level controllers

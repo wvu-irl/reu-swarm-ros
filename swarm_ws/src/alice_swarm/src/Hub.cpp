@@ -9,7 +9,7 @@
 #include <tf/LinearMath/Matrix3x3.h>
 #include <math.h>
 #include <swarm_server/robot_id.h>
-#define DEBUG_HUB 0
+#define DEBUG_HUB 1
 #define DEBUG_ChargerMail 0
 
 std::pair<float, float> Hub::getSeparation(Bot _bot, std::pair<float, float> _obs) //helper function for finding obstacle points.
@@ -285,7 +285,9 @@ void Hub::addContMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Gives each
 
 void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 {//converts each charger into relative coordinates of the current bot. Adds it to mail.
-
+#if DEBUG_ChargerMail
+	std::cout<<"############### FROM THE HUB ################"<<std::endl;
+#endif
 	for(int j = 0; j < chargers.charger.size(); j++)
 	{
 		//makes the x coord that of the way point of that charger, for charge() rule. (Needs to be 5 cm in front).
@@ -303,12 +305,15 @@ void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 		_mail.rel_chargerMail.push_back(cur_charger);
 
 #if DEBUG_ChargerMail
-		std::cout<<"bot #: "<<i<<" abs_charger: "<<chargers.charger.at(j).x<<","<<chargers.charger.at(j).y<<std::endl;
-		std::cout<<"bot #: "<<i<<" target: "<<temp.first<<","<<temp.second<<std::endl;
-		std::cout<<"bot #: "<<i<<" rel_charger: "<<cur_charger.x<<","<<cur_charger.y<<std::endl;
-		std::cout<<"-------------------------------\n";
+		std::cout<<"bot #: "<<i<<" abs_charger: "<<(chargers.charger.at(j).occupied? "true" : "false")<<std::endl;
+//		std::cout<<"bot #: "<<i<<" abs_charger: "<<chargers.charger.at(j).x<<","<<chargers.charger.at(j).y<<std::endl;
+//		std::cout<<"bot #: "<<i<<" target: "<<temp.first<<","<<temp.second<<std::endl;
+//		std::cout<<"bot #: "<<i<<" rel_charger: "<<cur_charger.x<<","<<cur_charger.y<<std::endl;
 #endif
 	}
+#if DEBUG_ChargerMail
+	std::cout<<"##############################################"<<std::endl;
+#endif
 }
 
 //void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail _mail) //Prints mail for debug purposes
@@ -352,7 +357,10 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 		temp.y=bots[*it].y;
 		temp.heading=bots[*it].heading;
 		temp.vision=VISION;
-		temp.energy = energy.energies.at(*it);
+
+		if(*it<energy.energies.size())
+		{temp.energy = energy.energies.at(*it);}
+
 		if(cur_sd_index < sensor_datas.size())
 		{
 			if(sensor_datas.at(cur_sd_index).rid == *it)

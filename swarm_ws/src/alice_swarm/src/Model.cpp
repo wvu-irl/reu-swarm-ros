@@ -143,34 +143,9 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 	{
 		targets.push_back(tar);
 	}
-	//Im pretty sure this does the same as the above loops.
-//	obstacles =  _toAdd.obstacles;
-//	flows =  _toAdd.flows;
-//	neighbors =  _toAdd.neighbors;
-//	targets =  _toAdd.targets;
-
-	abs_chargers = _toAdd.abs_chargers; //pointer to absolute chargers vector
+	abs_chargers = _toAdd.abs_chargers;
 	rel_chargers = _toAdd.rel_chargers; //copy of chargers vector with pos in current frame, not absolute.
 	priority = _toAdd.priority;
-
-//	int i=0;
-//	for (auto& charger : _toAdd.chargers)
-//	{
-//		chargers.push_back(charger);
-//		std::cout<<"==============================\n";
-//		std::cout<<"x,y: "<<chargers.at(i).x<<", "<<chargers.at(i).y<<std::endl;
-//		i++;
-//	}
-//	std::cout<<"==============================\n";
-
-// debugging print statments for chargers data transfer;
-//	for(int i = 0; i < chargers->size(); i++)
-//	{
-//		std::cout<<"==============================\n";
-//		std::cout<<"x,y: "<<chargers->at(i).x<<", "<<chargers->at(i).y<<" | "<<(chargers->at(i).occupied ? "true" : "false")<<std::endl;
-//		std::cout<<"x,y: "<<chargers->at(i).x<<", "<<chargers->at(i).y<<" | "<<(chargers->at(i).occupied ? "true" : "false")<<std::endl;
-//	}
-//	std::cout<<"==============================\n";
 }
 
 void Model::pass(ros::Publisher _pub)

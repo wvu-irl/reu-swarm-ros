@@ -17,7 +17,7 @@ Alice::Alice()
 }
 
 AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data, 
-		std::vector<wvu_swarm_std_msgs::charger> &_chargers, std::vector<float> &_priority)
+		std::vector<wvu_swarm_std_msgs::charger> *_chargers, std::vector<float> &_priority)
 {
 	AliceStructs::mail mail;
 	//------Updates all vectors in mail -----------
@@ -61,7 +61,7 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data,
 	{
 			mail.rel_chargers.push_back(_rel_charger);
 	}
-	mail.abs_chargers = &(_chargers);
+	mail.abs_chargers = _chargers;
 	mail.priority = &(_priority);
 //--------------------------------------------
 
@@ -81,7 +81,7 @@ AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data,
 }
 
 void Alice::updateModel(wvu_swarm_std_msgs::alice_mail &_data, std::vector<wvu_swarm_std_msgs::map> &_maps,  std::vector<int> &_ids,
-		std::vector<wvu_swarm_std_msgs::charger> &_chargers, std::vector<float> &_priority)
+		std::vector<wvu_swarm_std_msgs::charger> *_chargers, std::vector<float> &_priority)
 {
 	name=_data.name;
 	AliceStructs::mail mail = packageData(_data, _chargers, _priority);
@@ -117,7 +117,7 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 //	std::cout<<"to_return.dir: "<<to_return.dir<<std::endl;//this is the rules model
 //	std::cout <<"theta: "<<to_return.dir << std::endl;
 //	std::cout <<"mag: "<<to_return.mag<< std::endl;
-//	std::cout<<"=================================================\n";
+	std::cout<<"=================================================\n";
 #endif
 
 	return to_return;
