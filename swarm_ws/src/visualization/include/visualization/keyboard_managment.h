@@ -11,8 +11,6 @@
 #include "visualization_settings.h"
 #include "perspective_transform_gpu.h"
 
-#define USING_LEVEL map_ns::TARGET
-
 namespace interaction
 {
 

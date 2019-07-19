@@ -62,7 +62,7 @@ void addNewFunk()
 
 	wvu_swarm_std_msgs::obstacle n_obs;
 	n_obs.characteristic = charac;
-	n_obs.level = USING_LEVEL;
+	n_obs.level = map_ns::TARGET;
 
 	interaction::add_pub.publish(n_obs);
 }
