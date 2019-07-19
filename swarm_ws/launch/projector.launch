@@ -12,11 +12,13 @@
         </node>
 
 	<node ns="vis" pkg="contour_node" type="mapping" name="map" output="screen">
-		<param name="use_keyboard" value="false" type="bool"/>
+		<param name="use_keyboard" value="true" type="bool"/>
 	</node>
 
 	<node ns="vis" pkg="visualization" type="table_vis" name="table"
 		output="screen">
+
+		<param name="use_keyboard" value="true" type="bool"/>
 
 		<!-- Location of assets and config files respectively -->
 		<param name="asset_path"

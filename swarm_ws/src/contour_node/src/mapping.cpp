@@ -70,7 +70,8 @@ static Universe universe; // creates a universe
 void additionCallback(wvu_swarm_std_msgs::obstacle obs)
 {
 #if DEBUG
-	std::cout << "Adding: " << obs.characteristic << " , " << obs.level << std::endl;
+	std::cout << "Adding: " << obs.characteristic << " , " << obs.level
+			<< std::endl;
 #endif
 	universe += obs;
 }
@@ -94,7 +95,8 @@ void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 	rightProjected.y += originOffset.second;
 
 #if DEBUG
-        std::cout << "lx = " << leftProjected.x << "\tly = " << leftProjected.y << std::endl;
+	std::cout << "lx = " << leftProjected.x << "\tly = " << leftProjected.y
+			<< std::endl;
 #endif
 
 	// Check if left hand is out of bounds only if hand is open
@@ -110,7 +112,8 @@ void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 		else if (leftProjected.y > boundsY)
 			originOffset.second -= originShift * (leftProjected.y - boundsY);
 #if DEBUG
-            std::cout << "ox = " << originOffset.first << "\toy = " << originOffset.second << std::endl;
+		std::cout << "ox = " << originOffset.first << "\toy = "
+				<< originOffset.second << std::endl;
 #endif
 		// Don't bother applying shift yet, that will occur next iteration
 	}
@@ -133,11 +136,8 @@ int main(int argc, char **argv)
 			> ("hand_1", 1000);
 	ros::Publisher right_pub = n.advertise < geometry_msgs::Point
 			> ("hand_2", 1000);
-	if (!use_keyboard)
-	{
-		ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge/rolling_average",
-				1000, nuiCallback);
-	}
+	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge/rolling_average", 1000,
+			nuiCallback);
 	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, additionCallback);
 	ros::Subscriber r_obs = n.subscribe("/rem_obstacle", 1000, removeCallback);
 #if DEBUG
@@ -165,11 +165,8 @@ int main(int argc, char **argv)
 	bool prevGestureFound = false;
 	while (ros::ok())
 	{
+
 		if (!use_keyboard)
-		{
-#if DEBUG
-                    std::cout << "nui running" << std::endl;
-#endif
 			// If user's left hand (RIGHT) is open, points are free to move
 			if (!g_nui.rightClick)
 			{
@@ -210,7 +207,7 @@ int main(int argc, char **argv)
 								10, 10, 0, 10, map_ns::TARGET);
 						universe += ptr; // Add to universe
 
-						std::cout << universe << std::endl;
+//					std::cout << universe << std::endl;
 					}
 					else if (g_nui.gestureData != (char) gestureType::PUSH)
 					{
@@ -253,11 +250,6 @@ int main(int argc, char **argv)
 					anchor->z = g_nui.leftHand.z;
 				}
 			}
-		}
-		else // using keyboard
-		{
-			// TODO implement this
-		}
 		map_pub.publish(universe.getPublishable());
 
 		ros::spinOnce();

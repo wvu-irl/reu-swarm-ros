@@ -39,8 +39,6 @@ static int g_draw_level;
 // turns on verbose mode
 #define TAB_DEBUG 0
 
-#define USE_KEYBOARD_INPUT 0
-
 ContourMap *cont; // contour plot pointer
 
 // sprite that is drawn to screen
@@ -94,6 +92,7 @@ sf::Vector2f convertCoordinate(sf::Vector2f a)
 
 void nuiUpdate(geometry_msgs::Point msg)
 {
+	ROS_INFO("Got point: (%lf, %lf)", msg.x, msg.y);
 	nui_points.clear();
 	nui_points.push_back(convertCoordinate(sf::Vector2f(msg.x, msg.y)));
 }
@@ -367,6 +366,7 @@ int main(int argc, char **argv)
 	ros::Rate rate(50);
 
 	std::string assets, config;
+	bool use_keyboard;
 
 	// getting parameters from launch file to get asset and config locations
 	n_priv.param < std::string
@@ -379,6 +379,7 @@ int main(int argc, char **argv)
 	n_priv.param<int>("table_height", g_table_height, 100);
 	n_priv.param<int>("robot_diameter", g_robot_diameter, 5);
 	n_priv.param<int>("draw_level", g_draw_level, map_ns::COMBINED);
+	n_priv.param<bool>("use_keyboard", use_keyboard, false);
 
 	// setting origin
 	table_origin = sf::Vector2f(g_table_width / 2, g_table_height / 2);
@@ -403,17 +404,19 @@ int main(int argc, char **argv)
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
 
 	// subscribing to draw the NUI intersect onto the table
-	ros::Subscriber nui_tracking = n.subscribe("/hand_1", 1000, nuiUpdate);
+	ros::Subscriber nui_tracking = n.subscribe("hand_1", 1000, nuiUpdate);
 
 	ros::Subscriber map = n.subscribe("/map_data", 1000, updateMap);
 
-#if USE_KEYBOARD_INPUT
-	interaction::add_pub = n.advertise < wvu_swarm_std_msgs::obstacle
-			> ("/add_obstacle", 1000);
-	interaction::rem_pub = n.advertise < std_msgs::String
-			> ("/rem_obstacle", 1000);
-	interaction::loc_pub = n.advertise < geometry_msgs::Point > ("/hand_1", 1000);
-#endif
+	if (use_keyboard)
+	{
+		interaction::add_pub = n.advertise < wvu_swarm_std_msgs::obstacle
+				> ("/add_obstacle", 1000);
+		interaction::rem_pub = n.advertise < std_msgs::String
+				> ("/rem_obstacle", 1000);
+		interaction::loc_pub = n.advertise < geometry_msgs::Point
+				> ("hand_1", 1000);
+	}
 
 	// calibrating from file
 	calibrateFromFile(config);
@@ -530,27 +533,30 @@ int main(int argc, char **argv)
 				window.close();
 				break;
 
-#if USE_KEYBOARD_INPUT
 			case sf::Event::KeyReleased:
-				interaction::keyEvent(event);
+				if (use_keyboard)
+					interaction::keyEvent(event);
 				break;
 
 			case sf::Event::MouseButtonPressed:
-				interaction::mousePressedEvent(event);
+				if (use_keyboard)
+					interaction::mousePressedEvent(event);
 				break;
 
 			case sf::Event::MouseButtonReleased:
-				interaction::mouseReleasedEvent(event);
+				if (use_keyboard)
+					interaction::mouseReleasedEvent(event);
 				break;
 
 			case sf::Event::MouseMoved:
-				interaction::mouseMovedEvent(event);
+				if (use_keyboard)
+					interaction::mouseMovedEvent(event);
 				break;
 
-			case sf::Event::MouseWheelScrolled: // TODO this may need to be changed for older versions of SFML
-				interaction::scrollWheelMoved(event);
+			case sf::Event::MouseWheelScrolled:
+				if (use_keyboard)
+					interaction::scrollWheelMoved(event);
 				break;
-#endif
 			}
 		}
 
