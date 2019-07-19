@@ -72,6 +72,9 @@ static Universe universe; // creates a universe
 // subscriber callback to add things to the universe
 void additionCallback(wvu_swarm_std_msgs::obstacle obs)
 {
+#if DEBUG
+	std::cout << "Adding: " << obs.characteristic << " , " << obs.level << std::endl;
+#endif
 	universe += obs;
 }
 
