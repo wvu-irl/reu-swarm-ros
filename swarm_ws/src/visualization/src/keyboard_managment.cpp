@@ -69,10 +69,16 @@ void addNewFunk()
 
 void remove()
 {
-	std_msgs::String str;
-	str.data = g_selected->characteristic.name;
-	interaction::rem_pub.publish(str);
-	ROS_INFO("Removed: %s", str.data.c_str());
+	if (g_selected != NULL)
+	{
+		std_msgs::String str;
+		str.data = g_selected->characteristic.name;
+#if DEBUG
+		ROS_INFO("Removing: %s", str.data.c_str());
+#endif
+		interaction::rem_pub.publish(str);
+		ROS_INFO("Removed: %s", str.data.c_str());
+	}
 }
 
 void interaction::keyEvent(sf::Event e)

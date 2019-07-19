@@ -3,6 +3,7 @@
 #include <contour_node/level_description.h>
 
 #include <sstream>
+#include <vector>
 
 Universe::Universe()
 {
@@ -253,52 +254,50 @@ void operator-=(Universe &uni, std::string name)
 {
 	// finds object like before
 	wvu_swarm_std_msgs::map_levels &overall_map = uni.getPublishable();
-	bool found = false;
-	size_t i = 0;
-	size_t j = 0;
-	for (; i < overall_map.levels.size() && !found; i++)
+	std::vector<int> found_levs, found_funks;
+	for (size_t i = 0; i < overall_map.levels.size(); i++)
 	{
-		for (; j < overall_map.levels[i].functions.size(); j++)
+		for (size_t j = 0; j < overall_map.levels[i].functions.size(); j++)
 		{
 			if (overall_map.levels[i].functions[j].name.compare(name) == 0)
 			{
-				found = true;
+				found_levs.push_back(i);
+				found_funks.push_back(j);
 			}
 		}
 	}
-	if (found)
-	{
-		// erasing from map
-		overall_map.levels[i].functions.erase(
-				overall_map.levels[i].functions.begin() + j);
-	}
 
+	for (size_t i = 0; i < found_levs.size(); i++)
+	{
+		overall_map.levels[found_levs[i]].functions.erase(
+				overall_map.levels[found_levs[i]].functions.begin() + found_funks[i]);
+	}
 }
 
 void operator-=(Universe &uni, std::pair<double, double> loc)
 {
 	// copy paste of ^^
 	wvu_swarm_std_msgs::map_levels &overall_map = uni.getPublishable();
-	bool found = false;
-	size_t i = 0;
-	size_t j = 0;
-	for (; i < overall_map.levels.size() && !found; i++)
+	std::vector<int> found_levs, found_funks;
+	for (size_t i = 0; i < overall_map.levels.size(); i++)
 	{
-		for (; j < overall_map.levels[i].functions.size(); j++)
+		for (size_t j = 0; j < overall_map.levels[i].functions.size(); j++)
 		{
 			std::pair<double, double> orig;
 			orig.first = overall_map.levels[i].functions[j].ellipse.offset_x;
 			orig.second = overall_map.levels[i].functions[j].ellipse.offset_y;
 			if (orig == loc)
 			{
-				found = true;
+				found_levs.push_back(i);
+				found_funks.push_back(j);
 			}
 		}
 	}
-	if (found)
+
+	for (size_t i = 0; i < found_levs.size(); i++)
 	{
-		overall_map.levels[i].functions.erase(
-				overall_map.levels[i].functions.begin() + j);
+		overall_map.levels[found_levs[i]].functions.erase(
+				overall_map.levels[found_levs[i]].functions.begin() + found_funks[i]);
 	}
 }
 

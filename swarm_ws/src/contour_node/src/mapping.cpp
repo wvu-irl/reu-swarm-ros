@@ -78,6 +78,9 @@ void additionCallback(wvu_swarm_std_msgs::obstacle obs)
 
 void removeCallback(std_msgs::String str)
 {
+#if DEBUG
+	ROS_INFO("CB Removing: %s", str.data.c_str());
+#endif
 	universe -= std::string(str.data);
 }
 
@@ -138,8 +141,8 @@ int main(int argc, char **argv)
 			> ("hand_2", 1000);
 	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge/rolling_average", 1000,
 			nuiCallback);
-	ros::Subscriber n_obs = n.subscribe("/add_obstacle", 1000, additionCallback);
-	ros::Subscriber r_obs = n.subscribe("/rem_obstacle", 1000, removeCallback);
+	ros::Subscriber n_obs = n.subscribe("add_obstacle", 1000, additionCallback);
+	ros::Subscriber r_obs = n.subscribe("rem_obstacle", 1000, removeCallback);
 #if DEBUG
 	std::cout << "Adding equation" << std::endl;
 #endif

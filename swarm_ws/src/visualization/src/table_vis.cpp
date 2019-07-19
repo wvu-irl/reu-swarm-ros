@@ -411,9 +411,9 @@ int main(int argc, char **argv)
 	if (use_keyboard)
 	{
 		interaction::add_pub = n.advertise < wvu_swarm_std_msgs::obstacle
-				> ("/add_obstacle", 1000);
+				> ("add_obstacle", 1000);
 		interaction::rem_pub = n.advertise < std_msgs::String
-				> ("/rem_obstacle", 1000);
+				> ("rem_obstacle", 1000);
 		interaction::loc_pub = n.advertise < geometry_msgs::Point
 				> ("hand_1", 1000);
 	}
