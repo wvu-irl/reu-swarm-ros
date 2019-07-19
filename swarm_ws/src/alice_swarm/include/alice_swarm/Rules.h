@@ -71,7 +71,7 @@ public:
 	bool shouldLoop();
 
 	/*
-	 * Checks that the battery is not bellow acceptable levels.
+	 * Checks that the battery is not below acceptable levels.
 	 */
 	bool checkBattery(std::string state);
 
@@ -88,7 +88,7 @@ public:
 	/*
 	 * Finds an adjusted angle to drive at given a set of blocked zones
 	 */
-	void findPath(float tf, std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones);
+	AliceStructs::pnt findPath(AliceStructs::pnt waypnt, std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones);
 
 	/*
 	 * Finds the set of angles at which the robot will collide with an obstacle
