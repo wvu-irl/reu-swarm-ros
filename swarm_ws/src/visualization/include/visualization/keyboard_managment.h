@@ -30,8 +30,6 @@ void mouseMovedEvent(sf::Event e);
 
 void scrollWheelMoved(sf::Event e);
 
-void drawSelection(sf::RenderTexture *window);
-
 } // interaction
 
 #endif /* KEY_MGR_H */
