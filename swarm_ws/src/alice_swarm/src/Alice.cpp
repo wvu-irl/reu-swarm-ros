@@ -14,6 +14,7 @@
 Alice::Alice()
 {
 	name = 0;
+	model = Model();
 }
 
 AliceStructs::mail Alice::packageData(wvu_swarm_std_msgs::alice_mail &_data, 
@@ -101,8 +102,8 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 	AliceStructs::vel to_return;
 	to_return.mag = 1;
 
-//	if(rules.calcDis(cur_goTo.first, cur_goTo.second, 0, 0)<model.SIZE/2) //gives a tolerance range
-	if(cur_go_to.first == 0 && cur_go_to.second == 0) //gives a tolerance range
+	if(rules.calcDis(cur_go_to.first, cur_go_to.second, 0, 0)<1) //gives a tolerance range
+	//if(cur_go_to.first == 0 && cur_go_to.second == 0) //gives a tolerance range
 	{
 #if DEBUG_generateVel
 		std::cout<<"===================mag zero================\n";

@@ -15,6 +15,9 @@
 
 class Rules
 {
+private:
+	bool first_time=true; //We need this because sometimes somehow the goTo is initialized with a bullshit value
+	void init(Model &_model);
 
 	/*
 	 * TODO

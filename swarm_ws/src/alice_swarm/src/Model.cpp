@@ -11,6 +11,8 @@ Model::Model()
 {
 	first = true;
 	name = -1;
+	goTo.x = 0;
+		goTo.y = 0;
 }
 
 Model::Model(int _name)
