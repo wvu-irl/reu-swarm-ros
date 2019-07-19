@@ -14,7 +14,7 @@
 #include "alice_swarm/aliceStructs.h"
 #include "math.h"
 
-static const float ROBOT_SIZE = 5; //Size of the physical robot, in centimeters.
+static const float ROBOT_SIZE = 7; //Size of the physical robot, in centimeters.
 
 class Rules
 {

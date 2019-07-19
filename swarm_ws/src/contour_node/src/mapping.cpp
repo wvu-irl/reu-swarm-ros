@@ -13,7 +13,7 @@
 #include <string>
 
 // toggles verbose option
-#define DEBUG 0
+#define DEBUG 1
 
 // toggles if the main loop has a rate
 #define RATE_LIMIT 1
@@ -167,6 +167,9 @@ int main(int argc, char **argv)
 	{
 		if (!use_keyboard)
 		{
+#if DEBUG
+                    std::cout << "nui running" << std::endl;
+#endif
 			// If user's left hand (RIGHT) is open, points are free to move
 			if (!g_nui.rightClick)
 			{

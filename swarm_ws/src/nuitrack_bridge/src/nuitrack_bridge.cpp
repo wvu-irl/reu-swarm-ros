@@ -37,6 +37,9 @@
 
 #if OUTPUT_TO_CSV
 #include <fstream>
+#include <chrono>
+
+using namespace std::chrono;
 #endif
 
 bool g_sigint_received = false;
@@ -294,13 +297,15 @@ int main(int argc, char **argv)
 		file.open("/home/air/tracking_log.csv", std::ios::out | std::ios::app);
 		// writing to file
 		// line order
-		// [Left wrist x, y, z], [Left hand x, y, z], [Right wrist x, y, z], [Right hand x, y, z]
+		// [Left wrist x, y, z], [Left hand x, y, z], [Right wrist x, y, z], [Right hand x, y, z], timestamp
+                // left_wrist_x,left_wrist_y,left_wrist_z,left_hand_x,left_hand_y,left_hand_z,right_wrist_x,right_wrist_y,right_wrist_z,right_hand_x,right_hand_y,right_hand_z,timestamp
 		file << nuiOut.leftWrist.x << "," << nuiOut.leftWrist.y << ","
 				<< nuiOut.leftWrist.z << "," << nuiOut.leftHand.x << ","
 				<< nuiOut.leftHand.y << "," << nuiOut.leftHand.z << ","
 				<< nuiOut.rightWrist.x << "," << nuiOut.rightWrist.y << ","
 				<< nuiOut.rightWrist.z << "," << nuiOut.rightHand.x << ","
-				<< nuiOut.rightHand.y << "," << nuiOut.rightHand.z << std::endl;
+				<< nuiOut.rightHand.y << "," << nuiOut.rightHand.z << "," 
+                                << (long)duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count() << std::endl;
 		file.close();
 #endif
 		ros::spinOnce();
