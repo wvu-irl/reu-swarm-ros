@@ -39,7 +39,7 @@ static int g_draw_level;
 // turns on verbose mode
 #define TAB_DEBUG 0
 
-#define USE_KEYBOARD_INPUT 1
+#define USE_KEYBOARD_INPUT 0
 
 ContourMap *cont; // contour plot pointer
 

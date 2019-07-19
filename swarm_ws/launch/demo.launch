@@ -20,12 +20,12 @@
 	
 	<!-- Launches node to interpret vicon bridge and follow a figure 8 -->
 	<node pkg="vicon_demo" type="tracking_demo" name="tracker" output="screen">
-        <param name="vicon_array_topic" value="/vicon_array" type="str" />
-        <param name="advertise_topic" value="final_execute" type="str" />
-        <param name="transform_prefix" value="swarmbot_" type="str" />
-        <param name="lemniscate_constant" value="50" type="int" />
-        <param name="lemniscate_interval" value="90" type="int" />
-        <param name="cutoff_radius" value="5" type="int" />
+            <param name="vicon_array_topic" value="/vicon_array" type="str" />
+            <param name="advertise_topic" value="final_execute" type="str" />
+            <param name="transform_prefix" value="swarmbot_" type="str" />
+            <param name="lemniscate_constant" value="50" type="int" />
+            <param name="lemniscate_interval" value="5" type="int" />
+            <param name="cutoff_radius" value="5" type="int" />
 	</node>
 	
 	<!-- Launching processor node -->

@@ -19,6 +19,9 @@
 #include "robot_id.h"
 #include <thread>
 
+#define DEBUG 0
+#include <iostream>
+
 bool g_charging = false;
 
 std::thread cinLooper;
@@ -247,6 +250,10 @@ double processBot(wvu_swarm_std_msgs::robot_command_array &outputMsg, std::strin
     rid2[1] = bot.botId[1];
     std::string idStr(rid);
     int idNum = rid_map[idStr];
+    
+#if DEBUG
+    std::cout << "\033[32;1mGot id string: " << idStr << " converts to : " << rid_map[idStr] << "\033[0m" << std::endl;
+#endif
     
     // Build a string for the robot's transformation
     std::string transformString = "vicon/";
