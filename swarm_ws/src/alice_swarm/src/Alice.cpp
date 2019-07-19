@@ -95,13 +95,14 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 {
 	rules.stateLoop(model);
 
-	std::pair<float,float> cur_goTo = model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame.
+	std::pair<float,float> cur_go_to = model.transformFir(model.goTo.x, model.goTo.y); //Shifts the frame of goTo to the current frame.
 
 
 	AliceStructs::vel to_return;
 	to_return.mag = 1;
 
-	if(rules.calcDis(cur_goTo.first, cur_goTo.second, 0, 0)<model.SIZE/2) //gives a tolerance range
+//	if(rules.calcDis(cur_goTo.first, cur_goTo.second, 0, 0)<model.SIZE/2) //gives a tolerance range
+	if(cur_go_to.first == 0 && cur_go_to.second == 0) //gives a tolerance range
 	{
 #if DEBUG_generateVel
 		std::cout<<"===================mag zero================\n";
@@ -109,14 +110,14 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 		to_return.mag = 0;
 	}
 
-	to_return.dir = fmod(atan2(cur_goTo.second,cur_goTo.first),2*M_PI);
+	to_return.dir = fmod(atan2(cur_go_to.second,cur_go_to.first),2*M_PI);
 #if DEBUG_generateVel
-	std::cout<<"rules model: "<<rules.cur_goTo.x<<","<<rules.cur_goTo.y<<std::endl;//this is the rules model
-	std::cout<<"alice model: "<<cur_goTo.x<<","<< cur_goTo.y<<std::endl; //this is the alice model (not the same).
-	std::cout<<"to_return.dir: "<<to_return.dir<<std::endl;//this is the rules model
-	std::cout <<"theta: "<<to_return.dir << std::endl;
-	std::cout <<"mag: "<<to_return.mag<< std::endl;
-	std::cout<<"=================================================\n";
+//	std::cout<<"rules model: "<<rules.cur_go_to.first<<","<<rules.cur_go_to.second<<std::endl;//this is the rules model
+//	std::cout<<"alice model: "<<cur_go_to.first<<","<< cur_go_to.second<<std::endl; //this is the alice model (not the same).
+//	std::cout<<"to_return.dir: "<<to_return.dir<<std::endl;//this is the rules model
+//	std::cout <<"theta: "<<to_return.dir << std::endl;
+//	std::cout <<"mag: "<<to_return.mag<< std::endl;
+//	std::cout<<"=================================================\n";
 #endif
 
 	return to_return;

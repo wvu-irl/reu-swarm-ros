@@ -75,6 +75,8 @@ public:
 	 */
 	bool checkBattery(std::string state);
 
+	AliceStructs::pnt charge2(); //carries out code for second waypoint.
+
 	bool charged(); //checks if bot is charged. resets conditionals if true.
 
 	bool availableChargers(); //checks if chargers are available.
@@ -105,8 +107,6 @@ public:
 	 */
 	void avoidCollisions();
 
-
-	AliceStructs::pnt charge2();
 	//============================================Priority Rules================================================================
 	/*
 	 * Makes Alice stop moving
