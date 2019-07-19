@@ -10,6 +10,11 @@ Universe::Universe()
 	// many wow
 }
 
+Universe::Universe(wvu_swarm_std_msgs::map_levels _map)
+{
+	overall_map = _map;
+}
+
 void Universe::addEquation(wvu_swarm_std_msgs::obstacle obs)
 {
 	while (overall_map.levels.size() <= obs.level) // making sure it is safe to add to a level
@@ -158,14 +163,15 @@ levelObject* Universe::findByLocation(std::pair<double, double> loc)
 	return obj;
 }
 
-levelObject* Universe::findWithinRadius(std::pair<double, double> loc, double radius)
+levelObject* Universe::findWithinRadius(std::pair<double, double> loc,
+		double radius)
 {
 	bool found = false;
-        radius *= radius; // Square now to not need sqrt later
-        double shortestDistance = radius;
+	radius *= radius; // Square now to not need sqrt later
+	double shortestDistance = radius;
 	wvu_swarm_std_msgs::gaussian *gaus;
 	map_ns::LEVEL lev = map_ns::NONE;
-        
+
 	for (size_t i = 0; i < overall_map.levels.size() && !found; i++)
 	{
 		for (size_t j = 0; j < overall_map.levels[i].functions.size(); j++)
@@ -173,12 +179,13 @@ levelObject* Universe::findWithinRadius(std::pair<double, double> loc, double ra
 			std::pair<double, double> orig;
 			orig.first = overall_map.levels[i].functions[j].ellipse.offset_x;
 			orig.second = overall_map.levels[i].functions[j].ellipse.offset_y;
-                        
-                        double distance = pow(orig.first - loc.first, 2) + pow(orig.second - loc.second, 2);
-                        
+
+			double distance = pow(orig.first - loc.first, 2)
+					+ pow(orig.second - loc.second, 2);
+
 			if (distance < shortestDistance)
 			{
-                                shortestDistance = distance;
+				shortestDistance = distance;
 				found = true;
 				gaus = &overall_map.levels[i].functions[j];
 				lev = (map_ns::LEVEL) i;
@@ -186,18 +193,18 @@ levelObject* Universe::findWithinRadius(std::pair<double, double> loc, double ra
 		}
 	}
 
-        if(found)
-        {
-            wvu_swarm_std_msgs::obstacle obs;
-            obs.characteristic = *gaus;
-            obs.level = lev;
-            gaussianObject *obj = new gaussianObject(obs);
-            return obj;
-        }
-        else
-        {
-            return nullptr;
-        }
+	if (found)
+	{
+		wvu_swarm_std_msgs::obstacle obs;
+		obs.characteristic = *gaus;
+		obs.level = lev;
+		gaussianObject *obj = new gaussianObject(obs);
+		return obj;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 wvu_swarm_std_msgs::map_levels& Universe::getPublishable()

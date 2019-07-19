@@ -1,17 +1,26 @@
 #include <ros/ros.h>
+
 #include <wvu_swarm_std_msgs/vicon_point.h>
 #include <wvu_swarm_std_msgs/vicon_points.h>
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
+#include <wvu_swarm_std_msgs/map_levels.h>
+#include <wvu_swarm_std_msgs/obstacle.h>
+
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Point.h>
 
-#include <boost/array.hpp>
+#include <std_msgs/String.h>
+
 #include <visualization/contour.h>
-#include <wvu_swarm_std_msgs/map_levels.h>
+#include <visualization/perspective_transform_gpu.h>
+#include <visualization/visualization_settings.h>
+#include <visualization/keyboard_managment.h>
+
 #include <contour_node/level_description.h>
-#include "transform/perspective_transform_gpu.h"
+
+#include <SFML/Config.hpp>
 
 #include <math.h>
 #include <unistd.h>
@@ -27,10 +36,10 @@ static int g_table_width, g_table_height;
 static int g_robot_diameter;
 static int g_draw_level;
 
-#include <visualization/visualization_settings.h>
-
 // turns on verbose mode
 #define TAB_DEBUG 0
+
+#define USE_KEYBOARD_INPUT 1
 
 ContourMap *cont; // contour plot pointer
 
@@ -92,6 +101,7 @@ void nuiUpdate(geometry_msgs::Point msg)
 void updateMap(wvu_swarm_std_msgs::map_levels _map)
 {
 	map = _map;
+	interaction::universe = &map;
 }
 
 // Subscription callback for goals
@@ -393,13 +403,21 @@ int main(int argc, char **argv)
 	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
 
 	// subscribing to draw the NUI intersect onto the table
-	ros::Subscriber nui_tracking = n.subscribe("hand_1", 1000,
-			nuiUpdate);
+	ros::Subscriber nui_tracking = n.subscribe("/hand_1", 1000, nuiUpdate);
 
 	ros::Subscriber map = n.subscribe("/map_data", 1000, updateMap);
 
+#if USE_KEYBOARD_INPUT
+	interaction::add_pub = n.advertise < wvu_swarm_std_msgs::obstacle
+			> ("/add_obstacle", 1000);
+	interaction::rem_pub = n.advertise < std_msgs::String
+			> ("/rem_obstacle", 1000);
+	interaction::loc_pub = n.advertise < geometry_msgs::Point > ("/hand_1", 1000);
+#endif
+
 	// calibrating from file
 	calibrateFromFile(config);
+	interaction::table = g_trap;
 
 	// default color map setup
 	std::vector<double> c_levs;
@@ -511,6 +529,28 @@ int main(int argc, char **argv)
 			case sf::Event::Closed: // close window event
 				window.close();
 				break;
+
+#if USE_KEYBOARD_INPUT
+			case sf::Event::KeyReleased:
+				interaction::keyEvent(event);
+				break;
+
+			case sf::Event::MouseButtonPressed:
+				interaction::mousePressedEvent(event);
+				break;
+
+			case sf::Event::MouseButtonReleased:
+				interaction::mouseReleasedEvent(event);
+				break;
+
+			case sf::Event::MouseMoved:
+				interaction::mouseMovedEvent(event);
+				break;
+
+			case sf::Event::MouseWheelScrolled: // TODO this may need to be changed for older versions of SFML
+				interaction::scrollWheelMoved(event);
+				break;
+#endif
 			}
 		}
 
