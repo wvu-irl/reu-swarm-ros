@@ -5,6 +5,7 @@
 		of ALIC++ when coupled with VICON data.
 	-->
 
+	
 	<!-- Launching vicon bridge node -->
 	<node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
 		<param name="stream_mode" value="ClientPull" type="str" />
@@ -17,14 +18,22 @@
 
 		<param name="swarmbot_prefix" value="swarmbot_" type="str" />
 	</node>
-
-	<!-- A placeholder virtual obstacle -->
-	<node pkg="swarm_simulation"  type="virtual_objects" name="virtual_obstacle" output="screen"/>
+	
+	
+	<!-- Launching hawk sim node -->
+	<node pkg="swarm_simulation"  type="hawk_sim_execute" name="hawk_simulation" output="screen"/>
 		
-	<!-- Launch ALICE node -->
- 	<node pkg="alice_swarm" type="AliceMain" name="alice" output="screen">							
-	</node>
+	<!-- Launching virtual obstacle node -->
+	<node pkg="swarm_simulation"  type="virtual_objects" name="virtual_objects" output="screen"/>
+	
+	<!-- TODO launch ALICE nodes -->
+	<node pkg="alice_swarm" type="AbsToRel" name="hub" output="screen"/>
+ 	<node pkg="alice_swarm" type="AliceMain" name="alice" output="screen"/>
+ 	<node pkg="alice_swarm" type="InterHub" name="inter_hub" output="screen"/>
 
+	<node pkg="visualization"  type="alice_pov_main" name="map_debug" output="screen"/>
+	<node pkg="contour_node" type="mapping" name="contour_map" output="screen"/>
+	
 	<!-- Launching server node -->
 	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server" output="screen"/>
 	
