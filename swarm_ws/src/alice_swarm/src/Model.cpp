@@ -111,24 +111,25 @@ void Model::archiveAdd(AliceStructs::mail &_toAdd)
 
 void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 {
-	clear();
+	clear(); //clear pointers before filling them again
 	battery_lvl = _toAdd.battery_lvl; //updates battery level.
 	battery_state = _toAdd.battery_state; //updates battery state.
 	energy = _toAdd.energy; //updates energy
-	if (first)
+	if (first) //stores the first pose recorded
 	{
 		first_pose.x = _toAdd.xpos;
 		first_pose.y = _toAdd.ypos;
 		first_pose.heading = _toAdd.heading;
 		first = false;
 	}
-	cur_pose.x = _toAdd.xpos;
+	cur_pose.x = _toAdd.xpos; //update the current pose
 	cur_pose.y = _toAdd.ypos;
 	cur_pose.z = _toAdd.contVal;
 	cur_pose.heading = _toAdd.heading;
 	name = _toAdd.name;
 	time = _toAdd.time;
 
+	//fill in the vectors with the various entities
 	for (auto &obstacle : _toAdd.obstacles)
 	{
 		obstacles.push_back(obstacle);

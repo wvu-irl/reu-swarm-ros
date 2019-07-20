@@ -37,6 +37,11 @@ void Hawk_Sim::energyCallback(const wvu_swarm_std_msgs::energy &msg)
 	temp_energy = msg;
 }
 
+void Hawk_Sim::botCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg)
+{
+	temp_bots = msg;
+}
+
 //=====================================================================
 
 //==========================initializer functions=====================================================================
@@ -125,22 +130,25 @@ void Hawk_Sim::makeSensorData(ros::Publisher _pub)
 }
 void Hawk_Sim::makeEnergy(ros::Publisher _pub)
 {
-	if (energy_first)
-	{
-		wvu_swarm_std_msgs::energy energy_msg;
-		for(int i = 0; i <NUMBOTS; i ++)
-		{
-			energy_msg.energies.push_back(100.0);
-		}
-		if(temp_chargers.charger.size() > 0)
-		{
-			energy_first = false;
-		}
-		_pub.publish(energy_msg);
-	}else
-	{
-		_pub.publish(temp_energy);
-	}
+	//I think what you tried here is to send out the energy once and have it loop afterwards, but energy doesn't seem like the thing the robot's decide for themselves
+//	if (energy_first)
+//	{
+//		wvu_swarm_std_msgs::energy energy_msg;
+//		for(int i = 0; i <NUMBOTS; i ++)
+//		{
+//			energy_msg.energies.push_back(100.0);
+//		}
+//		if(temp_chargers.charger.size() > 0)
+//		{
+//			energy_first = false;
+//		}
+//		_pub.publish(energy_msg);
+//	}else
+//	{
+//		_pub.publish(temp_energy);
+//	}
+
+
 }
 //========================================================================================================================
 
@@ -151,24 +159,28 @@ void Hawk_Sim::run(ros::NodeHandle n) // begin here
 	//Publishers
 	ros::Publisher pub1 = n.advertise < wvu_swarm_std_msgs::chargers > ("chargers", 1000); // pub to obstacles
 	ros::Publisher pub2 = n.advertise < wvu_swarm_std_msgs::priorities > ("priority", 1000); // pub to priority.
-	ros::Publisher pub3 = n.advertise < wvu_swarm_std_msgs::energy > ("energy", 1000); // pub to energy.
+
+	//ros::Publisher pub3 = n.advertise < wvu_swarm_std_msgs::energy > ("energy", 1000); // pub to energy.
+	//Ideally energy would come from here. However I have chosen the practical+nonideal implementation of simply
+	//keeping energy contained and updated within each robot. No passing to worry about this way.
+
 	ros::Publisher pub4 = n.advertise < wvu_swarm_std_msgs::sensor_data > ("sensor_data", 1000); // pub to energy.
 
   // subscribers
 	ros::Subscriber sub1 = n.subscribe("chargers", 1000, &Hawk_Sim::chargersCallback,this);
 	ros::Subscriber sub2 = n.subscribe("priority", 1000, &Hawk_Sim::priorityCallback,this);
 	ros::Subscriber sub3 = n.subscribe("energy", 1000, &Hawk_Sim::energyCallback,this);
+	ros::Subscriber sub4 = n.subscribe("vicon_array", 1000, &Hawk_Sim::botCallback,this);
 	ros::Rate loopRate(10);
 
 	int i = 0;
-	while (ros::ok() && i < 10000) // setup loop
+	while (ros::ok() && i < 1000) // setup loop
 	{
 		makeChargers(pub1);
 		makePriority(pub2);
-		makeEnergy(pub3);
+		//makeEnergy(pub3);
 		makeSensorData(pub4);
 		ros::spinOnce(); // spinning callbacks
-//    usleep(10);
 		i++; // incrementing counter
 	}
 	#if VOBJ_DEBUG
@@ -179,7 +191,7 @@ void Hawk_Sim::run(ros::NodeHandle n) // begin here
 	{
 		makeChargers(pub1); // publishing chargers.
 		makePriority(pub2); // publishes priority.
-		makeEnergy(pub3);   // publishes energy.
+		//makeEnergy(pub3);   // publishes energy.
 		makeSensorData(pub4);//publishes sensor_data.
 		ros::spinOnce(); // spinning callbacks
 		loopRate.sleep();

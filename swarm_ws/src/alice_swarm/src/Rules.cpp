@@ -40,17 +40,12 @@ void Rules::stateLoop(Model &_model)
 	bool run = shouldLoop();
 	if (run)
 	{
-		//DO NOT CHANGE THIS OR U BRING RAGNAROK
-//		std::pair<float,float> cur_temp = _model.transformFir(_model.goTo.x, _model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
-//				cur_go_to.x=cur_temp.first;
-//				cur_go_to.y=cur_temp.second;
-
 		std::vector<AliceStructs::pnt> go_to_list;
 
 		// add other rules here
-		//	go_to_list.push_back(findContour());
- go_to_list.push_back(goToTar());
-//		go_to_list.push_back(charge());
+			go_to_list.push_back(findContour());
+// go_to_list.push_back(goToTar());
+//	go_to_list.push_back(charge());
 //		go_to_list.push_back(rest());
 	//	go_to_list.push_back(explore());
 
@@ -86,7 +81,7 @@ void Rules::stateLoop(Model &_model)
 //===================================================================================================================
 void Rules::goToTimeout()
 {
-	if (ros::Time::now().sec - model->goTo.time.sec > 10)
+	if (ros::Time::now().sec - model->goTo.time.sec > 20) //if it's been more than 20 seconds, move goTo
 	{
 
 		float mag = calcDis(cur_go_to.x, cur_go_to.y, 0, 0);
@@ -105,7 +100,7 @@ void Rules::goToTimeout()
 bool Rules::shouldLoop()
 {
 	bool result = false;
-	if (calcDis(cur_go_to.x, cur_go_to.y, 0, 0) < model->SIZE / 2)
+	if (calcDis(cur_go_to.x, cur_go_to.y, 0, 0) < model->SIZE / 2) //if the bot has made it to the way point
 	{
 		result = true;
 	} /* to implement

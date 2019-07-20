@@ -9,6 +9,7 @@
 #include <wvu_swarm_std_msgs/priorities.h>
 #include <wvu_swarm_std_msgs/energy.h>
 #include <wvu_swarm_std_msgs/sensor_data.h>
+#include <wvu_swarm_std_msgs/vicon_bot_array.h>
 
 
 class Hawk_Sim
@@ -28,12 +29,14 @@ private:
 	wvu_swarm_std_msgs::priorities temp_priorities;
 	wvu_swarm_std_msgs::energy temp_energy;
 	wvu_swarm_std_msgs::sensor_data temp_sd;
+	wvu_swarm_std_msgs::vicon_bot_array temp_bots;
 	//---------------------------------------------------
 
 	//callback functions
 	void chargersCallback(const wvu_swarm_std_msgs::chargers &msg);
 	void priorityCallback(const wvu_swarm_std_msgs::priorities &msg);
 	void energyCallback(const wvu_swarm_std_msgs::energy &msg);
+	void botCallback(const wvu_swarm_std_msgs::vicon_bot_array &msg);
 
 	//initializer functions
 	void makeChargers(ros::Publisher _pub);
