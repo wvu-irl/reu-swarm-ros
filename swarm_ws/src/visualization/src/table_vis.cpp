@@ -34,10 +34,9 @@
 static std::string g_background;
 static int g_table_width, g_table_height;
 static int g_robot_diameter;
-static int g_draw_level;
 
 // turns on verbose mode
-#define TAB_DEBUG 0
+#define TAB_DEBUG 1
 
 ContourMap *cont; // contour plot pointer
 
@@ -226,7 +225,7 @@ void tick()
 		{
 #if TAB_DEBUG
 		std::cout << "Starting contour calc" << std::endl;
-		std::cout << "\nDrawing level:\n" << map.levels[g_draw_level] << std::endl;
+		std::cout << "\nDrawing level:" << g_draw_level << "\n" << map.levels[g_draw_level] << std::endl;
 #endif
 			cont->resemble(map.levels[g_draw_level]);
 #if TAB_DEBUG
