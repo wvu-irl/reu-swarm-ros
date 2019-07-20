@@ -32,7 +32,10 @@ find_package(SFML)
 if (SFML_FOUND)
 	find_package(SFML 2 COMPONENTS graphics window system)
 	
-	ADD_LIBRARY(color_map ${LIB_TYPE} src/color_map.cpp)
+
+	find_package(CUDA)
+	if (CUDA_FOUND)
+			ADD_LIBRARY(color_map ${LIB_TYPE} src/color_map.cpp)
 	target_link_libraries(color_map ${catkin_LIBRARIES})
 	
 	add_library(keyboard ${LIB_TYPE} src/keyboard_managment.cpp)
@@ -43,9 +46,6 @@ if (SFML_FOUND)
 	target_link_libraries(calibrate_tab ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${catkin_LIBRARIES})
 	add_dependencies(calibrate_tab ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 	
-	find_package(CUDA)
-	if (CUDA_FOUND)
-		
 		list(APPEND sms 30 35 37 50 52 60 61 70)
 		foreach(sm IN LISTS sms)
 			set(ARCH_SMS "${ARCH_SMS} -gencode arch=compute_${sm},code=sm_${sm}")

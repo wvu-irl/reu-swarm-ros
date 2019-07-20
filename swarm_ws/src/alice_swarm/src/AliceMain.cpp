@@ -51,23 +51,24 @@ int main(int argc, char **argv)
 		auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of Alice
 
 		aliceBrain.update(temp_bot_array, temp_target, temp_obs_array, temp_flow_array); //puts in absolute data from subscribers
-		for (int i = 0; i < temp_bot_array.poseVect.size(); i++)
+		for (int i = 0; i < aliceBrain.ridOrder.size(); i++)
 		{
-
-			aliceMap[i].receiveMsg(aliceBrain.getAliceMail(i)); //gives each robot the relative data it needs
+			aliceMap[aliceBrain.ridOrder.at(i)].receiveMsg(aliceBrain.getAliceMail(i)); //gives each robot the relative data it needs
 		}
+
 		std::vector<AliceStructs::ideal> all_ideals; //Creates a vector that stores the robot's initial ideal vectors
 		for (std::map<int, Robot>::iterator it = aliceMap.begin(); it != aliceMap.end(); ++it) //eventually run this part asynchronously
 		{
-
 			all_ideals.push_back(it->second.generateIdeal()); //Adds the ideals to the vector
 		}
+
 		wvu_swarm_std_msgs::robot_command_array execute;
 		for (std::map<int, Robot>::iterator it = aliceMap.begin(); it != aliceMap.end(); ++it) //eventually run this part asynchronously
 		{
 			wvu_swarm_std_msgs::robot_command temp;
 			AliceStructs::vel tempVel = it->second.generateComp(all_ideals); //Uses all of the ideals to generate compromises
-			temp.rid = it->second.name;
+			temp.rid = it->first;
+
 
 			if (tempVel.mag > 1) //caps the speed
 				temp.r = 1;
@@ -86,6 +87,7 @@ int main(int argc, char **argv)
 		//std::cout << "Time taken by Alice: " << duration.count() << " microseconds" << std::endl;
 		//is_updated = true;
 		ros::spinOnce();
+
 		loopRate.sleep();
 
 	}
