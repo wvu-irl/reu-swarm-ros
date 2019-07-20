@@ -117,7 +117,7 @@ private:
 	/*
 	 * Information about Alice herself
 	 */
-//	int name;
+	int name;
 };
 
 #endif /* MODEL_H */
