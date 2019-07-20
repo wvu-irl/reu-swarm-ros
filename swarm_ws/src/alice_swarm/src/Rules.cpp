@@ -49,9 +49,9 @@ void Rules::stateLoop(Model &_model)
 
 		// add other rules here
 		//	go_to_list.push_back(findContour());
-		//	go_to_list.push_back(goToTar());
-		//go_to_list.push_back(charge());
-		//go_to_list.push_back(rest());
+//		go_to_list.push_back(goToTar());
+//		go_to_list.push_back(charge());
+//		go_to_list.push_back(rest());
 		go_to_list.push_back(explore());
 
 		float temp = -1;
@@ -200,7 +200,7 @@ AliceStructs::pnt Rules::charge()
 			go_to.x = model->rel_chargers.at(model->closest_pos).target_x; //sets pos of closest charger as target.
 			go_to.y = model->rel_chargers.at(model->closest_pos).target_y;
 
-			if ((pow(go_to.x, 2) + pow(go_to.y, 2)) < pow(model->SIZE / 6, 2) && (model->committed)) //initiates charge2 after it reaches first waypoint.
+			if ((pow(go_to.x, 2) + pow(go_to.y, 2)) < pow(model->SIZE/5, 2) && (model->committed)) //initiates charge2 after it reaches first waypoint.
 			{
 				model->charge2 = true;
 			}
@@ -257,6 +257,7 @@ AliceStructs::pnt Rules::charge()
 AliceStructs::pnt Rules::charge2() //phase 2 of the charging sequence.
 {
 	AliceStructs::pnt go_to;
+//	std::cout<<"the battery level is: "<<model->battery_lvl<<std::endl;
 	if (model->battery_state != CHARGING)
 	{
 		go_to.x = model->rel_chargers.at(model->closest_pos).x;
@@ -274,7 +275,7 @@ AliceStructs::pnt Rules::charge2() //phase 2 of the charging sequence.
 bool Rules::charged()
 {
 	bool return_bool = false;
-//	std::cout<<"the battery level is: "<<model.battery_lvl<<std::endl;
+//	std::cout<<"the battery level is: "<<model->battery_lvl<<std::endl;
 //	std::cout<<"the battery state is: "<<(int)model.battery_state <<std::endl;
 //	if(model.battery_lvl > 4.8)
 	if (model->battery_state == CHARGED)

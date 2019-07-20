@@ -14,6 +14,9 @@
 
 wvu_swarm_std_msgs::alice_mail_array temp_mail;
 wvu_swarm_std_msgs::priorities temp_priorities;
+wvu_swarm_std_msgs::chargers prev_chargers;
+bool first = true;
+bool same;
 
 void aliceCallback(const wvu_swarm_std_msgs::alice_mail_array &msg)
 {
@@ -23,6 +26,36 @@ void aliceCallback(const wvu_swarm_std_msgs::alice_mail_array &msg)
 void prioritiesCallback(const wvu_swarm_std_msgs::priorities &msg)
 {
 	temp_priorities = msg;
+}
+
+void checkForUpdatedChargers()
+{
+	if(first)
+	{
+		prev_chargers.charger = temp_mail.abs_chargers;
+		first = false;
+	}
+	else
+	{
+		int i = 0;
+		same = true;
+		while(i < prev_chargers.charger.size() && same)
+		{
+			if(prev_chargers.charger.at(i).occupied != temp_mail.abs_chargers.at(i).occupied)
+			{
+				same = false;
+			}
+			i++;
+		}
+		if(same)
+		{
+
+		}
+		else
+		{
+			temp_mail.abs_chargers = prev_chargers.charger;
+		}
+	}
 }
 
 int main(int argc, char **argv)
@@ -44,6 +77,8 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{
+		checkForUpdatedChargers(); //what it sounds like ###################
+
 		// it!=mymap.end(); ++it)
 		auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of Alice
 		alice_swarm::get_maps srv;
@@ -60,7 +95,7 @@ int main(int argc, char **argv)
 		for (int i = 0; i < temp_mail.mails.size(); i++) //sends each bot its new info.
 		{
 			//==gives each robot the relative data it needs, whilst also creating the alice's
-			alice_map[temp_mail.mails.at(i).name].updateModel(temp_mail.mails.at(i), maps, ids, temp_mail.abs_chargers,
+			alice_map[temp_mail.mails.at(i).name].updateModel(temp_mail.mails.at(i), maps, ids, &temp_mail.abs_chargers,
 					temp_priorities.priorities.at(i).priority);
 			wvu_swarm_std_msgs::robot_command temp;
 						AliceStructs::vel tempVel = alice_map[temp_mail.mails.at(i).name].generateVel();
@@ -76,9 +111,6 @@ int main(int argc, char **argv)
 
 						execute.commands.push_back(temp); //adds vector to published vector
 		}
-
-
-
 
 		//=========Publish to info_map (pub2)==========
 		map_it = alice_map.begin();
@@ -99,6 +131,7 @@ int main(int argc, char **argv)
 		chargers_to_publish.charger = temp_mail.abs_chargers;
 		if (temp_mail.abs_chargers.size() > 0) //publishes when there is actually stuff to publish.
 		{
+			prev_chargers.charger = temp_mail.abs_chargers;
 			pub3.publish(chargers_to_publish);
 		}
 //	==========================================
@@ -120,7 +153,7 @@ int main(int argc, char **argv)
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
 
-		std::cout << "Time taken by Alice: " << duration.count() << " microseconds" << std::endl;
+		//std::cout << "Time taken by Alice: " << duration.count() << " microseconds" << std::endl;
 		//is_updated = true;
 		ros::spinOnce();
 		loopRate.sleep();
