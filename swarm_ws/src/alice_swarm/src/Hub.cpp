@@ -41,6 +41,7 @@ AliceStructs::obj Hub::getSeparation(Bot _bot, std::pair<float, float> _obs, flo
 
 Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reasons?
 {
+
 }
 
 void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
@@ -60,6 +61,7 @@ void Hub::processVicon() //Fills in bots[]
 
 	for (size_t i = 0; i < viconBotArray.poseVect.size(); i++)
 	{
+
 		//This char bs-ery is for converting the state initials to numbers in our map
 		char bid[3] =
 		{ '\0' };
@@ -76,12 +78,29 @@ void Hub::processVicon() //Fills in bots[]
 		double roll, pitch, yaw;
 
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-		bots.push_back(
-				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1));
-		std::vector<Bot> temp;
-		ridOrder.push_back(numID); //storing the order of insertion
-		neighbors.push_back(temp); //adds an empty vector to neighbors for future use
+		bool foundID = false;
+		int j;
+		for (j = 0; j < ridOrder.size(); j++)
+		{
+			if (ridOrder.at(j) == numID)
+			{
+				foundID = true;
+				break;
+			}
+		}
+		if (foundID)
+		{
+			bots.at(j) = Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
+					viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1);
+		} else
+		{
+			bots.push_back(
+					Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
+							viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1));
+			ridOrder.push_back(numID); //storing the order of insertion
+
+		}
+
 	}
 }
 
@@ -92,9 +111,13 @@ void Hub::processVicon() //Fills in bots[]
  */
 void Hub::findNeighbors()
 {
-	for (int botIndex = 0; botIndex < viconBotArray.poseVect.size(); botIndex++)
+	for (int i = 0; i<ridOrder.size();i++){
+	std::vector<Bot> temp;
+			neighbors.push_back(temp); //adds an empty vector to neighbors for future use
+	}
+	for (int botIndex = 0; botIndex < ridOrder.size(); botIndex++)
 	{
-		for (int curIndex = 0; curIndex < viconBotArray.poseVect.size(); curIndex++)
+		for (int curIndex = 0; curIndex < ridOrder.size(); curIndex++)
 		{
 			if (botIndex == curIndex) // Check for duplicates
 			{
@@ -203,8 +226,10 @@ void Hub::addObsPointMail(int i, AliceStructs::mail &_mail) //Adds obstacles wit
 		{
 			o.push_back(temp2);
 		}
+
 	}
 	_mail.obstacles = o;
+
 }
 
 void Hub::printAliceMail(AliceStructs::mail _mail) //Prints mail for debug purposes
@@ -227,6 +252,7 @@ void Hub::printAliceMail(AliceStructs::mail _mail) //Prints mail for debug purpo
 
 AliceStructs::mail Hub::getAliceMail(int i) //Gathers all the relative information for a robot into one struct
 {
+
 	AliceStructs::mail temp;
 	addObsPointMail(i, temp);
 	addNeighborMail(i, temp);
@@ -243,6 +269,7 @@ AliceStructs::mail Hub::getAliceMail(int i) //Gathers all the relative informati
 
 void Hub::clearHub() //Clears information about the robots
 {
-	bots.clear();
+	//bots.clear(); DO NOT
 	neighbors.clear();
+
 }

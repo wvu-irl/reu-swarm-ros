@@ -62,12 +62,14 @@ private:
 
 	std::vector<Bot> bots; //holds locations of all of the bots
 	std::vector<std::vector<Bot>> neighbors; //holds locations of all of the closests bots relative to each other
-	std::vector<int> ridOrder; //holds the order of the id's of the bots
 
 	//Finds the distance between a bot and some object
 	AliceStructs::obj getSeparation(Bot _bot, std::pair<float, float> _obs, float _tolerance);
 	void processVicon(); //Fills in bots[], converst vicon to just the pose data needed
 public:
+
+	std::vector<int> ridOrder; //holds the order of the id's of the bots
+
 	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?
 
 	//Adds the msgs gathere from various topics to the private fields of Hub

@@ -47,6 +47,7 @@ private:
 		float l; //distance between wheels
 public:
 		char id [2];
+		int numid;
 		wvu_swarm_std_msgs::vicon_points *targets;
 		float heading;
 		int sid;
@@ -67,7 +68,7 @@ public:
 
 
     Body() {}
-    Body(float x, float y, char _id[2]);
+    Body(float x, float y, char _id[2], int _numid);
     Body(float x, float y, bool predCheck);
     //void applyForce(Pvector force);
     // Three Laws that bodies follow
