@@ -274,7 +274,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handles input to the graphi
 		bool found = false; //sentinel for finding a selected bot.
 		float mX = event.mouseButton.x; //mouse x pos
 		float mY = event.mouseButton.y; //mouse y pos
-		bool pauseSim = false; //pause boolean.
+		pauseSim = false; //pause boolean.
 
 		//---------- Pressing the escape key will close the program
 		if ((event.type == sf::Event::Closed)
@@ -284,11 +284,18 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)		//handles input to the graphi
 		} //------------------------<swarm_simulation/Sim.h>-----------------------------------
 
 		//------------------allows for pause. Press the Pause button.-----------
+<<<<<<< HEAD
 		pauseSim = pause(event.type == sf::Event::KeyPressed, event.key.code == sf::Keyboard::Space, pauseSim, &window,
 				event);
 
 		clickNdragBots(&_pI, mX, mY, event);      //runs click and drag for bots
 		clickNdragTarget(&_pI, mX, mY, event);    //runs click and drag for targets.
+=======
+		pause(event.type == sf::Event::KeyPressed,
+				event.key.code == sf::Keyboard::Space, pauseSim, &window, event);
+ 		clickNdragBots(&_pI, mX, mY, event); //runs click and drag for bots
+		clickNdragTarget(&_pI, mX, mY, event); //runs click and drag for targets.
+>>>>>>> 99f1457... sorta clock
 		clickNdragObstacles(&_pI, mX, mY, event); //allows for click and drag on obstacles
 	}
 	return _pI; //tracks state of dragging (see sim.h)
@@ -517,11 +524,17 @@ void Sim::clickNdragTarget(PrevIteration *_pI, float _mX, float _mY, sf::Event _
 	}
 }
 
+<<<<<<< HEAD
 bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event)
+=======
+bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool &_pause_sim,
+		sf::RenderWindow *win, sf::Event _event)
+>>>>>>> 99f1457... sorta clock
 { //checks if pause pressed. Inf loop if so.
 	if ((_key_pressed) && (_pause_pressed))
 	{
 		_pause_sim = true;
+		for (int i=0; i<flock.flock.size();i++) flock.flock.at(i).bodyPause=_pause_sim;//need to actually stop the bodies from calculating further positions.
 		std::cout << "paused" << std::endl;
 	}
 	while (_pause_sim == true) //runs while pause in effect.
@@ -531,6 +544,7 @@ bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::Ren
 			if ((_event.type == sf::Event::KeyPressed) && (_event.key.code == sf::Keyboard::Space))
 			{ //allows for unpause.
 				_pause_sim = false;
+
 				std::cout << "unpaused" << std::endl;
 			}
 			if ((_event.type == sf::Event::Closed)

@@ -28,6 +28,7 @@ Body::Body(float x, float y, char _id[2]) //constructor for each of the bodies (
 	prev_location = Pvector(x, y);
 	a=0;
 	b=0;
+	bodyPause=false;
 	maxForce = 0.5;
 	id[0] = _id[0];
 	id[1] = _id[1];
@@ -212,6 +213,11 @@ void Body::update()
 	ros::Time newTime = ros::Time::now();
 	double tstep = newTime.toSec()-curTime.toSec();
 	curTime=newTime;
+	if (bodyPause) {
+		bodyPause=false;
+		return;
+	}
+
 	heading +=(b-a)/l*tstep;
 	if (heading>2*M_PI || heading <0) heading=fmod(heading+2*M_PI,2*M_PI);
 	velocity.set((a+b)/2*cos(heading),-(a+b)/2*sin(heading));

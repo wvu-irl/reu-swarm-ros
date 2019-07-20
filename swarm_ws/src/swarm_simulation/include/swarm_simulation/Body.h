@@ -46,6 +46,7 @@ private:
 		//char[2] getID();
 		float l; //distance between wheels
 public:
+		bool bodyPause;
 		char id [2];
 		int numid;
 		wvu_swarm_std_msgs::vicon_points *targets;

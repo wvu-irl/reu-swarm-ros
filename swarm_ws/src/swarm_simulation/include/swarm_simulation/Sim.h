@@ -35,7 +35,7 @@ private:
 	sf::RenderWindow window;
 	int window_width;
 	int window_height;
-
+	bool pauseSim;
 	Flock flock;
 	vector<sf::CircleShape> shapes;
 	vector<sf::RectangleShape> lines;
@@ -60,7 +60,7 @@ private:
 	void clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _event);
 	void clickNdragTarget(PrevIteration *_pI,float _mX, float _mY, sf::Event _event);
 	void clickNdragObstacles(PrevIteration *_pI, float _mX, float _mY, sf::Event _event);
-	bool pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim, sf::RenderWindow* win, sf::Event _event);
+	bool pause(bool _key_pressed, bool _pause_pressed, bool &_pause_sim, sf::RenderWindow* win, sf::Event _event);
 
 	//subscriber input handleing
 	void vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg); //processes info from final_execute
