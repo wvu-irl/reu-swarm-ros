@@ -110,7 +110,6 @@ void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vi
 	//sensor_data = _sd;
 	processVicon(); //needed cause this data needs to be converted first
 	findNeighbors();
-	//std::cout << "yo"<<std::endl;
 }
 
 void Hub::processVicon() //Fills in bots[]
@@ -157,7 +156,6 @@ void Hub::processVicon() //Fills in bots[]
 							viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, numID % 2 + 1,
 							viconBotArray.poseVect[i].botPose.header.stamp));
 			ridOrder.push_back(numID); //storing the order of insertion
-			std::cout << "yo" <<std::endl;
 		}
 	}
 }

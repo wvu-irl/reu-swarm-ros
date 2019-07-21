@@ -34,6 +34,8 @@ public:
 	AliceStructs::pose cur_pose;
 	AliceStructs::pose first_pose;
 
+	std::vector<AliceStructs::pnt> neighbor_go_to; //stores the neighbors' goTo's in this robots' first frame.
+
 	bool first;
 	ros::Time time;
 	float vision;
@@ -48,6 +50,7 @@ public:
 	bool charging;
 	bool committed;
 	int closest_pos;
+
 
 	std::vector<AliceStructs::neighbor> neighbors;
 	std::vector<AliceStructs::flow> flows;
