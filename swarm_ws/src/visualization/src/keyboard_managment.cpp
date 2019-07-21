@@ -106,25 +106,6 @@ void interaction::keyEvent(sf::Event e)
 	switch (e.key.code)
 	{
 
-#define NUM_KEY_CASE(num) \
-	{\
-	case sf::Keyboard::Key::Num##num:\
-		if (interaction::universe->levels.size() > num)\
-		{\
-			g_draw_level = num;\
-			printf("Setting level to : %d -- %d\n", num, g_draw_level);\
-		}\
-		break;\
-	}\
-
-	NUM_KEY_CASE(0);
-	NUM_KEY_CASE(1);
-	NUM_KEY_CASE(2);
-	NUM_KEY_CASE(3);
-	NUM_KEY_CASE(4);
-	NUM_KEY_CASE(5);
-
-
 	case sf::Keyboard::Key::Return: // adding new function
 		addNewFunk();
 		break;
