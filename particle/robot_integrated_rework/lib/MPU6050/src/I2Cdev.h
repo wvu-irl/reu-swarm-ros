@@ -90,7 +90,7 @@ THE SOFTWARE.
 #endif
 
 // 1000ms default read timeout (modify with "I2Cdev::readTimeout = [ms];")
-#define I2CDEV_DEFAULT_READ_TIMEOUT     1000
+#define I2CDEV_DEFAULT_READ_TIMEOUT     100
 
 class I2Cdev {
     public:

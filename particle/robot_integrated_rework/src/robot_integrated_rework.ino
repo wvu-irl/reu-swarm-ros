@@ -1,8 +1,8 @@
 #include <neopixel.h>
-#include <MPU6050.h>
+#include <MPU6050/MPU6050.h>
 #include <Adafruit_mfGFX.h>
 #include <Adafruit_SSD1351_Photon.h>
-
+#include <I2Cdev.h>
 SYSTEM_THREAD(ENABLED)
 
 #include <stdlib.h>
@@ -59,8 +59,9 @@ void nameFinder(const char *topic, const char *data) {
 EasyTCP tcpClient;
 struct command c;
 float theta = -100, pos = 10;
+float prevtheta=theta;
 bool latency_timeout = false;
-
+unsigned long system_timeout;
 ChargerStatus chargeStat;
 unsigned long lastBattPublish;
 String prevMessage;
@@ -69,6 +70,7 @@ String message;
 
 void setup(void)
 {
+    
     Serial.begin(9600);
     waitUntil(WiFi.ready);
     waitUntil(Particle.connected);
@@ -112,7 +114,7 @@ void setup(void)
     diff_drive.init();
 
     // Initialize IMU
-    imu.init();
+    //imu.init();
 
     // TODO: neopixel stuff on hold until i get the reset working
 
@@ -120,10 +122,12 @@ void setup(void)
     Serial.println(registerString);
     while(!tcpClient.init(10000)) tone(A4, 1760, 1000); // screams out an A6 on pin A4 :^)
     oledThread = Thread("oled", threadOled);
+    system_timeout=millis();
 }
 
 void loop()
 {
+    
     if (!tcpClient.connected()) {
         // Stop moving
         diff_drive.fullStop();
@@ -178,8 +182,8 @@ void loop()
     //need to get this from some decision betweeen imu and vicon
    
     diff_drive.drive(theta, pos, imu.getYawRate(),latency_timeout);
-    Serial.print("Finish drive command check client ");
-    Serial.println(millis());
+   // Serial.print("Finish drive command check client ");
+    //Serial.println(millis());
     
     message=chargeStat.checkChargingState();
     if(!message.equals(prevMessage)) // Send it
@@ -189,13 +193,13 @@ void loop()
         tcpClient.println(chargeStat.giveBatteryVoltage());
         lastBattPublish=millis();
     }
-        
-
-
-    
-
+    if (theta != prevtheta){
+        prevtheta=theta;
+        system_timeout =millis();
+    }else if (millis()-system_timeout >3000) {
+        System.reset();
+    }
     Particle.process();
-    
 }
 
 void threadOled(void)
