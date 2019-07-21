@@ -139,6 +139,7 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos, char *
 #if EASY_TCP_DEBUG
             Serial.println("TCP: \t\tRead timeout!");
 #endif
+
             lat_err=true;
             //_theta=1/0;
             
@@ -153,6 +154,7 @@ int EasyTCP::read(uint8_t *_buf, size_t _len, float &_theta, float &_pos, char *
             //                 if (!reConn)
             //                     Serial.println(reConn ? "TCP: Reconnected." : "TCP: Reconnect timeout!");
             // #endif
+            if (millis() - readTimer >= READ_TIMEOUT_MILLIS*3)System.reset();
         }
     }
     return bytes;
