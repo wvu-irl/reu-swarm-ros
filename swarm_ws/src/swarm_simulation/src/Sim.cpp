@@ -17,7 +17,7 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 		for (int j = 0; j < msg.commands.size(); j++)
 		{
-			if (msg.commands.at(j).rid == flock.flock.at(i).numid)
+			if (msg.commands.at(j).rid == i)
 			{
 
 				/*
@@ -128,9 +128,7 @@ void Sim::Run(ros::NodeHandle _n)
 			'O', 'K', 'N', 'M', 'A', 'Z', 'A', 'K', 'H', 'I' };
 
 	int x = 50; //x initial positions for the bots.
-
-	for (int i = 0; i < NUMBOTS; i+=1)
-
+	for (int i = 0; i < 10; i++)//set the number of bots to be run in hawk_sim here.
 	{
 		char temp[2] =
 		{ letters[2 * i], letters[2 * i + 1] };
@@ -139,7 +137,7 @@ void Sim::Run(ros::NodeHandle _n)
 //		std::cout<<"----Bot ID: "<<temp[0]<<temp[1]<<"-------\n";
 //		std::cout<<"x,y: "<<x<<","<<y<<"\n";
 
-		Body b(x, y, temp,i); // Starts all bodies in the center of the screen
+		Body b(x, y, temp); // Starts all bodies in the center of the screen
 		b.sid = i % 2 + 1;
 		sf::CircleShape shape(0);
 
@@ -262,7 +260,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)	//handles input to the graphic
 		bool found = false; //sentinel for finding a selected bot.
 		float mX = event.mouseButton.x; //mouse x pos
 		float mY = event.mouseButton.y; //mouse y pos
-		pauseSim = false; //pause boolean.
+		bool pauseSim = false; //pause boolean.
 
 		//---------- Pressing the escape key will close the program
 		if ((event.type == sf::Event::Closed)
@@ -273,9 +271,10 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)	//handles input to the graphic
 		} //------------------------<swarm_simulation/Sim.h>-----------------------------------
 
 		//------------------allows for pause. Press the Pause button.-----------
-		pause(event.type == sf::Event::KeyPressed,
+		pauseSim = pause(event.type == sf::Event::KeyPressed,
 				event.key.code == sf::Keyboard::Space, pauseSim, &window, event);
- 		clickNdragBots(&_pI, mX, mY, event); //runs click and drag for bots
+
+		clickNdragBots(&_pI, mX, mY, event); //runs click and drag for bots
 		clickNdragTarget(&_pI, mX, mY, event); //runs click and drag for targets.
 		clickNdragObstacles(&_pI, mX, mY, event); //allows for click and drag on obstacles
 	}
@@ -521,13 +520,12 @@ void Sim::clickNdragTarget(PrevIteration *_pI, float _mX, float _mY,
 	}
 }
 
-bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool &_pause_sim,
+bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool _pause_sim,
 		sf::RenderWindow *win, sf::Event _event)
 { //checks if pause pressed. Inf loop if so.
 	if ((_key_pressed) && (_pause_pressed))
 	{
 		_pause_sim = true;
-		for (int i=0; i<flock.flock.size();i++) flock.flock.at(i).bodyPause=_pause_sim;//need to actually stop the bodies from calculating further positions.
 		std::cout << "paused" << std::endl;
 	}
 	while (_pause_sim == true) //runs while pause in effect.
@@ -538,7 +536,6 @@ bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool &_pause_sim,
 					&& (_event.key.code == sf::Keyboard::Space))
 			{ //allows for unpause.
 				_pause_sim = false;
-
 				std::cout << "unpaused" << std::endl;
 			}
 			if ((_event.type == sf::Event::Closed)

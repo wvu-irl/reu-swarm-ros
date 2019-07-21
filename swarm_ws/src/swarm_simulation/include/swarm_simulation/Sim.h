@@ -41,7 +41,7 @@ private:
 	vector<sf::CircleShape> shapes;
 	vector<sf::RectangleShape> lines;
 	vector<sf::Text> texts;
-	//vector<wvu_swarm_std_msgs::vicon_point> obstacles;
+	wvu_swarm_std_msgs::vicon_point num_bots;
 	wvu_swarm_std_msgs::vicon_points obstacles;
 	wvu_swarm_std_msgs::vicon_points targets;
 	wvu_swarm_std_msgs::chargers chargers;
@@ -69,6 +69,7 @@ private:
 	void targetCallback(const wvu_swarm_std_msgs::vicon_points &msg);   //processes info from virtual_targets
 	void flowCallback(const wvu_swarm_std_msgs::flows &msg);         //processes info from virtual_flows
 	void chargerCallback(const wvu_swarm_std_msgs::chargers &msg);   //processes info from chargers
+	void numBotsCallback(const wvu_swarm_std_msgs::vicon_point &msg); //gets number of bots in the sim.
 
 	//Specific objects to be rendered.
 	void drawObstacles();
