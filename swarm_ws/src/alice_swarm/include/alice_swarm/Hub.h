@@ -80,8 +80,8 @@ private:
 	std::pair<float,float> getSeparation(Bot _bot, std::pair<float, float> _obs);
 	void processVicon(); //Fills in bots[], converst vicon to just the pose data needed
 public:
-
 	std::vector<int> ridOrder; //holds the order of the id's of the bots
+
 
 	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?
 

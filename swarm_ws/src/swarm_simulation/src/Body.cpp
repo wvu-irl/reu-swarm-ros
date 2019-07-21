@@ -20,8 +20,9 @@ const int window_width = desktopTemp.width;
 // Body Functions from Body.h
 // ----------------------------
 
-Body::Body(float x, float y, char _id[2]) //constructor for each of the bodies (represent bots).
+Body::Body(float x, float y, char _id[2], int _numid) //constructor for each of the bodies (represent bots).
 {
+	numid=_numid;
 	acceleration = Pvector(0, 0);
 	velocity = Pvector(0, 0);
 	location = Pvector(x, y);

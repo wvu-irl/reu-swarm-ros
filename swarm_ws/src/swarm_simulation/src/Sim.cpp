@@ -17,7 +17,7 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 
 		for (int j = 0; j < msg.commands.size(); j++)
 		{
-			if (msg.commands.at(j).rid == i)
+			if (msg.commands.at(j).rid == flock.flock.at(i).numid)
 			{
 
 				/*
@@ -129,7 +129,7 @@ void Sim::Run(ros::NodeHandle _n)
 
 	int x = 50; //x initial positions for the bots.
 
-	for (int i = 0; i < NUMBOTS; i++)
+	for (int i = 0; i < NUMBOTS; i+=1)
 
 	{
 		char temp[2] =
@@ -139,7 +139,7 @@ void Sim::Run(ros::NodeHandle _n)
 //		std::cout<<"----Bot ID: "<<temp[0]<<temp[1]<<"-------\n";
 //		std::cout<<"x,y: "<<x<<","<<y<<"\n";
 
-		Body b(x, y, temp); // Starts all bodies in the center of the screen
+		Body b(x, y, temp,i); // Starts all bodies in the center of the screen
 		b.sid = i % 2 + 1;
 		sf::CircleShape shape(0);
 

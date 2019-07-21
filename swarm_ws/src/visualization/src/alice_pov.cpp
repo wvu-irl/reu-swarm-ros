@@ -77,6 +77,7 @@ void AlicePOV::drawMail()
 		{
 			for (int j = 0; j < mail.mails.at(i).obsMail.size(); j++)
 			{
+				std::cout << "oy" << std::endl;
 				wvu_swarm_std_msgs::ellipse temp = mail.mails.at(i).obsMail.at(j);
 				unsigned short quality = 70;
 				sf::ConvexShape ellipse;
@@ -105,9 +106,11 @@ void AlicePOV::drawMail()
 				// Changing the Visual Properties of the (neighboring) robot
 				shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
 				shape.setOrigin(bodiesSize, bodiesSize);
-				float inten = 10 * mail.mails.at(temp.name).contVal;
-				if (inten > 255)
-					inten = 255;
+				float inten = 0;
+				//unused:
+				//10 * mail.mails.at(temp.name).contVal;
+				//				if (inten > 255)
+				//					inten = 255;
 				shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
 				shape.setOutlineColor(sf::Color::White);
 				shape.setOutlineThickness(1);

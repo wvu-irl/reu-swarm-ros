@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 					temp_priorities.priorities.at(i).priority);
 			wvu_swarm_std_msgs::robot_command temp;
 						AliceStructs::vel tempVel = alice_map[temp_mail.mails.at(i).name].generateVel();
-						temp.rid = alice_map[temp_mail.mails.at(i).name].name;
+						temp.rid = temp_mail.mails.at(i).name;
 
 						if (tempVel.mag > 1) //caps the speed
 							temp.r = 1;

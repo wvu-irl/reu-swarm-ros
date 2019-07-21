@@ -48,7 +48,6 @@ private:
 public:
 		bool bodyPause;
 		char id [2];
-		int numid;
 		wvu_swarm_std_msgs::vicon_points *targets;
 		float heading;
 		int sid;
@@ -56,6 +55,7 @@ public:
 		float a;//left wheel speed
 							float b;//right wheel speed
     bool predator;
+    int numid;
     ros::Time curTime;
     Pvector location;
     Pvector prev_location;
@@ -70,7 +70,7 @@ public:
 
     Body() {}
     Body(float x, float y, char _id[2], int _numid);
-    Body(float x, float y, bool predCheck);
+ //   Body(float x, float y, bool predCheck);
     //void applyForce(Pvector force);
     // Three Laws that bodies follow
     Pvector Separation(vector<Body> Bodies);
