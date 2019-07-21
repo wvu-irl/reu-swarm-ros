@@ -36,7 +36,7 @@ static int g_table_width, g_table_height;
 static int g_robot_diameter;
 
 // turns on verbose mode
-#define TAB_DEBUG 1
+#define TAB_DEBUG 0
 
 ContourMap *cont; // contour plot pointer
 
