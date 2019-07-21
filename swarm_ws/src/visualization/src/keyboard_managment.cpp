@@ -35,8 +35,8 @@ sf::Vector2f interaction::getMouseCordinate(sf::Vector2f initial,
 
 	unified_x *= 200.0 / (double) WIDTH;
 	unified_y *= 100.0 / (double) HEIGHT;
-	unified_x -= 100;
-	unified_y -= 50;
+	unified_x -= 200.0 / 2.0;
+	unified_y -= 100.0 / 2.0;
 
 	return sf::Vector2f((float) unified_y, (float) unified_x);
 }
@@ -62,7 +62,7 @@ void addNewFunk()
 
 	wvu_swarm_std_msgs::obstacle n_obs;
 	n_obs.characteristic = charac;
-	n_obs.level = map_ns::TARGET;
+	n_obs.level = g_draw_level;
 
 	interaction::add_pub.publish(n_obs);
 }
@@ -105,6 +105,7 @@ void interaction::keyEvent(sf::Event e)
 	}
 	switch (e.key.code)
 	{
+
 	case sf::Keyboard::Key::Return: // adding new function
 		addNewFunk();
 		break;
