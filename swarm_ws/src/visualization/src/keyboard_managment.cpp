@@ -7,7 +7,6 @@
 
 using namespace std::chrono;
 
-#define scale(val, o_min, o_max, n_min, n_max) (((val - o_min) / (o_max - o_min)) * (n_max - n_min) + n_min)
 #define distance(v0, v1) (sqrt(pow(v0.x - v1.x, 2) + pow(v0.y - v1.y, 2)))
 
 #define DEBUG 0
