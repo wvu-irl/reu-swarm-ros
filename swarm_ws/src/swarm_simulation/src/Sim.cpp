@@ -12,14 +12,13 @@
 bool update;
 void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 {
-	for (int i = 0; i < flock.flock.size(); i++)
+	for (int i = 0; i < flock.bodies.size(); i++)
 	{
 
 		for (int j = 0; j < msg.commands.size(); j++)
 		{
-			if (msg.commands.at(j).rid == flock.flock.at(i).numid)
+			if (msg.commands.at(j).rid == flock.bodies.at(i).numid)
 			{
-
 				/*
 				 * Assumptions of simulation drive compared to irl:
 				 * Velocity commands sent to servos are linear.
@@ -38,40 +37,38 @@ void Sim::vectorCallback(const wvu_swarm_std_msgs::robot_command_array &msg)
 				{
 					if (theta < M_PI)
 					{
-						flock.flock.at(i).a = speed - omega;
-						if (abs(flock.flock.at(i).a) > speed)
-							flock.flock.at(i).a = flock.flock.at(i).a > 0.0 ? speed : -speed;
+						flock.bodies.at(i).a = speed - omega;
+						if (abs(flock.bodies.at(i).a) > speed)
+							flock.bodies.at(i).a = flock.bodies.at(i).a > 0.0 ? speed : -speed;
 
-						flock.flock.at(i).b = speed;
+						flock.bodies.at(i).b = speed;
 					} else
 					{
-						flock.flock.at(i).a = speed;
-						flock.flock.at(i).b = speed - omega;
-						if (abs(flock.flock.at(i).b) > speed)
-							flock.flock.at(i).b = flock.flock.at(i).b > 0.0 ? speed : -speed;
+						flock.bodies.at(i).a = speed;
+						flock.bodies.at(i).b = speed - omega;
+						if (abs(flock.bodies.at(i).b) > speed)
+							flock.bodies.at(i).b = flock.bodies.at(i).b > 0.0 ? speed : -speed;
 					}
 				} else if (theta > M_PI && theta <= 3 * M_PI_2)
 				{
-					flock.flock.at(i).a = speed;
-					flock.flock.at(i).b = -speed;
+					flock.bodies.at(i).a = speed;
+					flock.bodies.at(i).b = -speed;
 				} else if (theta <= M_PI && theta >= M_PI_2)
 				{
-					flock.flock.at(i).a = -speed;
-					flock.flock.at(i).b = speed;
+					flock.bodies.at(i).a = -speed;
+					flock.bodies.at(i).b = speed;
 				} else //error case
 				{
-					flock.flock.at(i).a = 0;
-					flock.flock.at(i).b = 0;
+					flock.bodies.at(i).a = 0;
+					flock.bodies.at(i).b = 0;
 				}
 				if (r < 0.1)
 				{
-					flock.flock.at(i).a = 0;
-					flock.flock.at(i).b = 0;
+					flock.bodies.at(i).a = 0;
+					flock.bodies.at(i).b = 0;
 				}
-
 			}
 		}
-
 	}
 }
 void Sim::obsCallback(const wvu_swarm_std_msgs::vicon_points &msg)
@@ -227,7 +224,6 @@ void Sim::Run(ros::NodeHandle _n)
 
 PrevIteration Sim::HandleInput(PrevIteration _pI)	//handles input to the graphics window
 {
-
 	sf::Event event;
 	while (window.pollEvent(event))
 	{
@@ -287,7 +283,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)	//handles input to the graphic
 void Sim::Render() //draws changes in simulation states to the window.
 {
 	window.clear();
-	flock.flocking(&targets);
+	flock.applyPhysics(&targets);
 	drawObstacles();
 	drawTargets();
 	drawFlows();
@@ -299,14 +295,13 @@ void Sim::Render() //draws changes in simulation states to the window.
 		shapes[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 		lines[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
 
-		float theta = 180.0 / M_PI * (flock.flock.at(i).heading);
+		float theta = 180.0 / M_PI * (flock.bodies.at(i).heading);
 		shapes[i].setRotation(90 - theta); //aligns body with direction of motion
 		lines[i].setRotation(-theta); //aligns line with direction of motion
 		//^for some reason, sfml has clockwise as +theta direction.
 
 		window.draw(shapes[i]);
 		window.draw(lines[i]);
-
 	}
 	addText();
 	window.display(); //updates display
@@ -398,8 +393,8 @@ void Sim::clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _ev
 	//----------Allows for click and drag for bots. ------------------------------
 	if (_pI->dragging == true && _pI->bot == true)
 	{
-		flock.flock.at(_pI->botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
-		flock.flock.at(_pI->botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
+		flock.bodies.at(_pI->botId).location.x = sf::Mouse::getPosition(window).x; //event.mouseButton.x;
+		flock.bodies.at(_pI->botId).location.y = sf::Mouse::getPosition(window).y; //event.mouseButton.y;
 	}
 	if (_event.type == sf::Event::MouseButtonPressed && _event.mouseButton.button == sf::Mouse::Left
 			&& _pI->prevClick == true && _pI->bot == true)
@@ -413,15 +408,15 @@ void Sim::clickNdragBots(PrevIteration *_pI, float _mX, float _mY, sf::Event _ev
 	{
 		while (found != true)
 		{
-			if (((flock.flock.at(i).location.x > _mX - bodiesSize) && (flock.flock.at(i).location.x < _mX + bodiesSize))
-					&& ((flock.flock.at(i).location.y > _mY - bodiesSize) && (flock.flock.at(i).location.y < _mY + bodiesSize)))
+			if (((flock.bodies.at(i).location.x > _mX - bodiesSize) && (flock.bodies.at(i).location.x < _mX + bodiesSize))
+					&& ((flock.bodies.at(i).location.y > _mY - bodiesSize) && (flock.bodies.at(i).location.y < _mY + bodiesSize)))
 			{
 				found = true;
 				_pI->botId = i;
 				_pI->dragging = true;
 				_pI->prevClick = true;
 				_pI->bot = true;
-			} else if (i == flock.flock.size() - 1)
+			} else if (i == flock.bodies.size() - 1)
 			{
 				found = true;
 			}
@@ -472,8 +467,8 @@ bool Sim::pause(bool _key_pressed, bool _pause_pressed, bool &_pause_sim, sf::Re
 	if ((_key_pressed) && (_pause_pressed))
 	{
 		_pause_sim = true;
-		for (int i = 0; i < flock.flock.size(); i++)
-			flock.flock.at(i).bodyPause = _pause_sim; //need to actually stop the bodies from calculating further positions.
+		for (int i = 0; i < flock.bodies.size(); i++)
+			flock.bodies.at(i).bodyPause = _pause_sim; //need to actually stop the bodies from calculating further positions.
 		std::cout << "paused" << std::endl;
 	}
 	while (_pause_sim == true) //runs while pause in effect.
@@ -594,4 +589,5 @@ void Sim::drawChargers() //draws chargers
 		window.draw(shape);
 	}
 }
+
 //-----------------------------------------------------------------------------------

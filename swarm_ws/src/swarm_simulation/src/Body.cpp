@@ -40,29 +40,6 @@ Body::Body(float x, float y, char _id[2], int _numid) //constructor for each of 
 	collision = false;
 }
 
-//Body::Body(float x, float y, bool predCheck)
-//{
-//    predator = predCheck;
-//    if (predCheck == true) {
-//        maxSpeed = 2.0;
-//        maxForce = 0.5;
-//        velocity = Pvector(rand()%3 - 1, rand()%3 - 1);
-//    } else {
-//        maxSpeed = 1.5;
-//        maxForce = 0.5;
-//        velocity = Pvector(rand()%3 - 2, rand()%3 - 2);
-//    }
-//    acceleration = Pvector(0, 0);
-//    location = Pvector(x, y);
-//}
-
-// Adds force Pvector to current force Pvector
-
-//void Body::applyForce(Pvector force) //this is the old applyForce
-//{
-//    acceleration.addVector(force);
-//}
-
 //--------Helper Functions for the Physics engine-----------
 float Body::angleConvert(float _x) //scales all angles to vals [0,2*pi].
 {
@@ -233,15 +210,11 @@ void Body::update()
 // and corrects bodies which are sitting outside of the SFML window
 void Body::run(vector <Body> v)
 {
-
-
-
 		update();
 		//elasticCollisions(v);
 		inElasticCollisions(v);
 		//seperation(v);
 		borders();
-
 }
 
 // Applies the three laws to the flock of bodies
@@ -313,7 +286,7 @@ std::pair<float,float> Body::borders(float _fx, float _fy) //applys bounds for t
 	return that;
 }
 
-void Body::inElasticCollisions(vector<Body> _bodies)
+void Body::inElasticCollisions(vector<Body> _bodies) //for collisions between bots, and also the puck.
 {
 	//Magnitude of separation between bodies
 	float desiredseparation = 21;
@@ -369,8 +342,6 @@ void Body::inElasticCollisions(vector<Body> _bodies)
 				fy = -fy;
 			}
 			float mag = sqrt(pow(fx,2) + pow(fy,2));
-			//fx = fx/mag; //scaled to unit vectors
-			//fy = fy/mag;
 			std::pair<float,float> forces = borders(fx,fy);
 			fx = forces.first;
 			fy = forces.second;
@@ -463,10 +434,8 @@ void Body::targetCollision(int i,float _t_sep)
 
 	}
 }
-// Calculates the angle for the velocity of a body which allows the visual
-// image to rotate in the direction that it is going in.
 
-void Body::targetInElastic(int i, float _t_sep)
+void Body::targetInElastic(int i, float _t_sep) //Collision between bots and puck. Not truely elastic or inelastic.
 {
 	if(_t_sep<= 17.5)
 	{
@@ -485,9 +454,7 @@ void Body::targetInElastic(int i, float _t_sep)
 		float sep_a = angleConvert(angle(Pvector(dx,dy)));
 #if BOD_DEBUG
 		std::cout<<"seperation angle: "<<sep_a*180/M_PI<<std::endl;
-
 		std::cout<<"abs_theta: "<<abs_theta*180/M_PI<<std::endl;
-
 		std::cout<<"phi: "<<phi*180/M_PI<<std::endl;
 #endif
 		//calculates force to be applied by the bot
@@ -544,8 +511,5 @@ float Body::angle(Pvector v)
 {
 	// From the definition of the dot product. negated to transform to first quadrant from 4th.
 	float angle = -1*(float)(atan2(v.y,v.x) );
-
-	//float angle = (float)(atan2(v.x, -v.y) );
-	//^ the way this was written before. Saved it just in case.
 	return angle;
 }

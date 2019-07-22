@@ -6,55 +6,53 @@
 
 int Flock::getSize()
 {
-	return flock.size();
+    return bodies.size();
 }
 
 Body Flock::getBody(int i)
 {
-	return flock[i];
+    return bodies[i];
 }
 
-wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages(
-		wvu_swarm_std_msgs::vicon_bot_array real_bots) //generates an array of vicon_bot msgs.
+void Flock::addBody(Body b)
 {
-	wvu_swarm_std_msgs::vicon_bot_array vb_array = real_bots;
-	for (int i = 0; i < flock.size(); i++)
-	{
-		// filtering out real robots
-		bool virt = true;
-		do
-		{
-			virt = true;
-			for (size_t j = 0; j < real_bots.poseVect.size(); j++)
-			{
-				if (real_bots.poseVect[j].botId[0] == flock[i].id[0]
-						&& real_bots.poseVect[j].botId[1] == flock[i].id[1])
-				{
-					i++;
-					virt = false;
-				}
-			}
-		} while (!virt);
-		if (i > flock.size()) // safety
-			break;
+	bodies.push_back(b);
+}
 
+// Runs the run function for every body in the flock checking against the flock
+// itself. Which in turn applies all the rules to the flock.
+void Flock::applyPhysics(wvu_swarm_std_msgs::vicon_points *_targets)
+{
+    for (int i = 0; i < bodies.size(); i++)
+    {
+    	bodies[i].targets = _targets;
+    	bodies[i].run(bodies);
+    }
+}
+
+wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages() //generates an array of vicon_bot msgs.
+{
+	wvu_swarm_std_msgs::vicon_bot_array vb_array;
+	for (int i = 0; i < bodies.size();i++)
+	{
 		//initializes necessary variables for each iteration.
 		wvu_swarm_std_msgs::vicon_bot this_bot;
 		geometry_msgs::TransformStamped this_bot_msg;
 		tf2::Quaternion q;
-		Body cur = flock.at(i); //current body being looked at.
+		Body cur = bodies.at(i); //current body being looked at.
 
 		float mag = cur.velocity.magnitude(); // r, the mag of the velocity
 
 		//add negative sign to cur.angle ############################
 
-		q.setRPY(0, 0, cur.heading); // Create this quaternion from roll=0/pitch=0/ yaw (in radians)
+		q.setRPY( 0, 0, cur.heading); // Create this quaternion from roll=0/pitch=0/ yaw (in radians)
 		//q.setRPY( 0, 0, cur.angle(cur.velocity));
 		//^will have to be changed for a holonomic (apparently direction and heading are different).
 		q.normalize(); // normalizes the quaternion.
 
+
 		//translational information
-		this_bot_msg.transform.translation.x = cur.location.x * 0.3333 - 50; //scales info for table
+		this_bot_msg.transform.translation.x = cur.location.x * 0.3333 - 50;  //scales info for table
 		this_bot_msg.transform.translation.y = -cur.location.y * 0.3333 + 100; //scales info for table
 		this_bot_msg.transform.translation.z = 0;
 
@@ -83,35 +81,14 @@ wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages(
 }
 
 void Flock::printMessage(wvu_swarm_std_msgs::vicon_bot_array _vb_array)
-{ //prints the frame_id, ID, and translational info of each bot's message.
-	for (int i = 0; i < flock.size(); i++)
+{//prints the frame_id, ID, and translational info of each bot's message.
+	for (int i = 0; i < bodies.size(); i ++)
 	{
-		std::cout << "frame_id: "
-				<< _vb_array.poseVect.at(i).botPose.header.frame_id << std::endl;
-		std::cout << "x: "
-				<< _vb_array.poseVect.at(i).botPose.transform.translation.x << "\n";
-		std::cout << "y: "
-				<< _vb_array.poseVect.at(i).botPose.transform.translation.y << "\n";
-		std::cout << "z: "
-				<< _vb_array.poseVect.at(i).botPose.transform.translation.z << "\n";
-		std::cout << "ID: " << _vb_array.poseVect.at(i).botId[0]
-				<< _vb_array.poseVect.at(i).botId[1] << "\n";
-		std::cout << "------------------------------------------\n";
-	}
-}
-
-void Flock::addBody(Body b)
-{
-	flock.push_back(b);
-}
-
-// Runs the run function for every body in the flock checking against the flock
-// itself. Which in turn applies all the rules to the flock.
-void Flock::flocking(wvu_swarm_std_msgs::vicon_points *_targets)
-{
-	for (int i = 0; i < flock.size(); i++)
-	{
-		flock[i].targets = _targets;
-		flock[i].run(flock);
+		std::cout<<"frame_id: "<<_vb_array.poseVect.at(i).botPose.header.frame_id<<std::endl;
+		std::cout<<"x: "<<_vb_array.poseVect.at(i).botPose.transform.translation.x<<"\n";
+		std::cout<<"y: "<<_vb_array.poseVect.at(i).botPose.transform.translation.y<<"\n";
+		std::cout<<"z: "<<_vb_array.poseVect.at(i).botPose.transform.translation.z<<"\n";
+		std::cout<<"ID: "<<_vb_array.poseVect.at(i).botId[0]<<_vb_array.poseVect.at(i).botId[1]<<"\n";
+		std::cout<<"------------------------------------------\n";
 	}
 }

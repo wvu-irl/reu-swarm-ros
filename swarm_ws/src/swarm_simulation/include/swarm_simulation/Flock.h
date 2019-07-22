@@ -29,15 +29,17 @@ class Flock {
 public:
 	  wvu_swarm_std_msgs::vicon_bot_array createMessages(wvu_swarm_std_msgs::vicon_bot_array);//vector<Body> _flock); //operates on flock
 	  void printMessage(wvu_swarm_std_msgs::vicon_bot_array _vb_array);
-	  vector<Body> flock;
+	  vector<Body> bodies;
     //Constructors
     Flock() {}
+
     // Accessor functions
     int getSize();
     Body getBody(int i);
+
     // Mutator Functions
     void addBody(Body b);
-    void flocking(wvu_swarm_std_msgs::vicon_points *_targets);
+    void applyPhysics(wvu_swarm_std_msgs::vicon_points *_targets);
 };
 
 #endif

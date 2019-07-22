@@ -18,9 +18,8 @@
 // model to compute the next step in the stimulation, and handles all of the
 // program's interaction with SFML.
 
-struct PrevIteration
+struct PrevIteration //struct created solely for click and drag of bots, targets, and obstacles.
 {
-
 	bool dragging;
 	int botId;
 	bool prevClick;
@@ -31,8 +30,9 @@ struct PrevIteration
 
 class Sim
 {
+
 private:
-	int NUMBOTS = 10;
+	int NUMBOTS = 1; //number of bots in the simulation; the WHOLE simulation (hub & alice), not just this file.
 	sf::RenderWindow window;
 	int window_width;
 	int window_height;
@@ -41,8 +41,7 @@ private:
 	vector<sf::CircleShape> shapes;
 	vector<sf::RectangleShape> lines;
 	vector<sf::Text> texts;
-	//vector<wvu_swarm_std_msgs::vicon_point> obstacles;
-	wvu_swarm_std_msgs::vicon_bot_array real_bots;
+	wvu_swarm_std_msgs::vicon_point num_bots;
 	wvu_swarm_std_msgs::vicon_points obstacles;
 	wvu_swarm_std_msgs::vicon_points targets;
 	wvu_swarm_std_msgs::chargers chargers;
@@ -70,7 +69,7 @@ private:
 	void targetCallback(const wvu_swarm_std_msgs::vicon_points &msg);   //processes info from virtual_targets
 	void flowCallback(const wvu_swarm_std_msgs::flows &msg);         //processes info from virtual_flows
 	void chargerCallback(const wvu_swarm_std_msgs::chargers &msg);   //processes info from chargers
-	void realBotCallback(const wvu_swarm_std_msgs::vicon_bot_array &robots); // processes info about real robots so that sim can mix
+	void numBotsCallback(const wvu_swarm_std_msgs::vicon_point &msg); //gets number of bots in the sim.
 
 	//Specific objects to be rendered.
 	void drawObstacles();

@@ -36,15 +36,15 @@
 class Body {
 
 private:
+		float l; //distance between wheels
+		bool applyForce(bool _aorb,float _rel_theta);
+
+		//Physics helper functions.
 		float angleConvert(float _x);
 		int quadrant(float phi);
 		bool aboveOrBelow(float _dx, float _dy, int _Q);
 		float getRelTheta(float _abs_theta, float _phi, int _Q);
 
-		bool applyForce(bool _aorb,float _rel_theta);
-	  //wvu_swarm_std_msgs::vicon_bot_array createMessages(std::vector<Body> _flock);//vector<Body> _flock); //operates on flock
-		//char[2] getID();
-		float l; //distance between wheels
 public:
 		bool bodyPause;
 		char id [2];
@@ -53,7 +53,7 @@ public:
 		int sid;
 		float force;
 		float a;//left wheel speed
-							float b;//right wheel speed
+		float b;//right wheel speed
     bool predator;
     int numid;
     ros::Time curTime;
@@ -71,11 +71,12 @@ public:
     Body() {}
     Body(float x, float y, char _id[2], int _numid);
  //   Body(float x, float y, bool predCheck);
-    //void applyForce(Pvector force);
+
     // Three Laws that bodies follow
     Pvector Separation(vector<Body> Bodies);
     Pvector Alignment(vector<Body> Bodies);
     Pvector Cohesion(vector<Body> Bodies);
+
     //Functions involving SFML and visualisation linking
     Pvector seek(Pvector v);
     void run(vector <Body> v);
