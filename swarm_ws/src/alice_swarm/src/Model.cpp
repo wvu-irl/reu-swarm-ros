@@ -13,7 +13,7 @@ Model::Model()
 	first = true;
 	name = -1;
 	goTo.x = 0;
-		goTo.y = 0;
+	goTo.y = 0;
 }
 
 Model::Model(int _name)
@@ -115,13 +115,28 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 	clear(); //clear pointers before filling them again
 	battery_lvl = _toAdd.battery_lvl; //updates battery level.
 	battery_state = _toAdd.battery_state; //updates battery state.
-	energy = _toAdd.energy; //updates energy
+	//energy = _toAdd.energy; //updates energy, not implemented
+
 	if (first) //stores the first pose recorded
 	{
 		first_pose.x = _toAdd.xpos;
 		first_pose.y = _toAdd.ypos;
 		first_pose.heading = _toAdd.heading;
 		first = false;
+		energy = 1; //initializes energy on the first pose recorded.
+	} else
+	{
+		//bandaging method, instead of passing this value through the software, for simplicity we just keep energy updated here only.
+		if (energy > 0)//only update if the bot isn't dead
+		{
+			energy -= (float) (_toAdd.time.toSec() - time.toSec()) * 0.05;//sets the rate of energy decrease. Consider making this scale with the contour value.
+			for (auto &tar : _toAdd.targets){
+
+			}
+			if (energy > 1)
+				energy = 1; //caps energy at 1.
+		}
+		std::cout << energy << std::endl;
 	}
 	cur_pose.x = _toAdd.xpos; //update the current pose
 	cur_pose.y = _toAdd.ypos;
@@ -275,10 +290,11 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 			if (_ids.at(j) == neighbors.at(i).name) //to find matching id's, we can only use the information provided by neighbors
 			{
 				//adds the neighbor's waypoint, transformed to its' own first frame.
-				std::pair<float,float> n_go_to=transformFtF(_maps.at(j).goToX,_maps.at(j).goToY,_maps.at(j).ox,_maps.at(j).oy,_maps.at(j).oheading);
-						AliceStructs::pnt n_pnt;
-				n_pnt.x=n_go_to.first;
-				n_pnt.y=n_go_to.second;
+				std::pair<float, float> n_go_to = transformFtF(_maps.at(j).goToX, _maps.at(j).goToY, _maps.at(j).ox,
+						_maps.at(j).oy, _maps.at(j).oheading);
+				AliceStructs::pnt n_pnt;
+				n_pnt.x = n_go_to.first;
+				n_pnt.y = n_go_to.second;
 				n_pnt.observer_names.push_back(neighbors.at(i).name);
 				neighbor_go_to.push_back(n_pnt);
 
@@ -382,7 +398,7 @@ void Model::forget()
 	float TOLERANCE = 5; //objects within this distance in x and y will be simplified to one object
 	forgetObs(TOLERANCE);
 	forgetTargets(TOLERANCE);
-	forgetContour(TOLERANCE*1.5); //this is super expensive if the point cloud is dense
+	forgetContour(TOLERANCE * 1.5); //this is super expensive if the point cloud is dense
 }
 
 void Model::forgetContour(int TOLERANCE) //erases Contours based on time stamp or duplicity.

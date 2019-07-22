@@ -46,10 +46,12 @@ void Rules::stateLoop(Model &_model)
 			go_to_list.push_back(findContour());
 // go_to_list.push_back(goToTar());
 //	go_to_list.push_back(charge());
-//		go_to_list.push_back(rest());
-	//	go_to_list.push_back(explore());
 
+		//go_to_list.push_back(explore());
+		//go_to_list.push_back(rest());
 		float temp = -1;
+		int rulenum=-1;
+		int rulenum2=0;
 		for (auto &rule : go_to_list)
 		{
 //			std::cout<<"the rule z is: "<<rule.z<<std::endl;
@@ -59,7 +61,7 @@ void Rules::stateLoop(Model &_model)
 
 				cur_go_to.x = rule.x;
 				cur_go_to.y = rule.y;
-
+				rulenum=rulenum2;
 //				std::cout << "theta: "<<atan2(model->goTo.y, model->goTo.x) << std::endl;
 //				std::cout<<"(x,y): "<<model->goTo.x<<","<<model->goTo.y<<std::endl;
 			}
@@ -68,8 +70,9 @@ void Rules::stateLoop(Model &_model)
 //			float mag = sqrt(pow(model->goTo.x,2) + pow(model->goTo.y,2));
 //			std::cout<<"(x,y): "<<model->goTo.x<<","<<model->goTo.y<<"| "<<mag<<std::endl;
 //			std::cout<<"-----------------------------------"<<std::endl;
+			rulenum2++;
 		}
-
+		std::cout << "using rule " <<rulenum <<std::endl;
 		_model.goTo.time = ros::Time::now(); //time stamps when the goto is created
 	}
 	goToTimeout();
@@ -81,14 +84,14 @@ void Rules::stateLoop(Model &_model)
 //===================================================================================================================
 void Rules::goToTimeout()
 {
-	if (ros::Time::now().sec - model->goTo.time.sec > 20) //if it's been more than 20 seconds, move goTo
+	if (ros::Time::now().sec - model->goTo.time.sec > 5) //if it's been more than 5 seconds, move goTo
 	{
 
 		float mag = calcDis(cur_go_to.x, cur_go_to.y, 0, 0);
 
 		//for handling bad goTo points (too far)
-		cur_go_to.x *= 30 / mag;
-		cur_go_to.y *= 30 / mag;
+		cur_go_to.x *= 20 / mag;
+		cur_go_to.y *= 20 / mag;
 
 		cur_go_to.x *= -1; //flip sign for handling unreachable goTo's
 		cur_go_to.y *= -1;
@@ -132,7 +135,7 @@ void Rules::avoidCollisions()
 AliceStructs::pnt Rules::explore()
 {
 	AliceStructs::pose best;
-	std::pair<float, float> sum(0, 0);
+	std::pair<float, float> sum(-10, 0); //adds tendency for robot to go forward
 	for (auto &contour : model->archived_contour)
 	{
 		std::pair<float, float> temp = model->transformFir(contour.x, contour.y); //transforms to the current frame
@@ -144,15 +147,16 @@ AliceStructs::pnt Rules::explore()
 		}
 	}
 	float mag = calcDis(sum.first, sum.second, 0, 0);
-	if (mag > 1)
+	if (mag > 0.001) // set the magnitude to 10 unless the vector is 0 (or very close).
 	{
 		sum.first *= 10 / mag;
 		sum.second *= 10 / mag;
 	}
+
 	AliceStructs::pnt to_return;
 	to_return.x = -sum.first;
 	to_return.y = -sum.second;
-	to_return.z = 3;
+	to_return.z = 0.99/pow(1+model->archived_contour.size(),0.5); //robot desires exploration when its' map is empty.
 	return to_return;
 
 }
@@ -312,7 +316,8 @@ AliceStructs::pnt Rules::rest() //gives a command to not move.
 	AliceStructs::pnt go_to;
 	go_to.x = 0;
 	go_to.y = 0;
-	go_to.z = 3;
+	if (model->energy<=0) go_to.z=1;
+	else go_to.z=0;
 	return go_to;
 }
 //-----------------------------------------------------------------------------------------
@@ -453,7 +458,8 @@ AliceStructs::pnt Rules::findContour()
 		std::pair<float, float> go = model->transformFir(best.x, best.y);
 		to_return.x = go.first;
 		to_return.y = go.second;
-		to_return.z = pri;
+		if(1-model->energy >= 1) to_return.z = 0.999;
+		else to_return.z = 1-model->energy;
 	}
 	return to_return;
 }

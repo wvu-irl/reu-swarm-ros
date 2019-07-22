@@ -32,7 +32,7 @@ struct PrevIteration
 class Sim
 {
 private:
-	int NUMBOTS = 10;
+	int NUMBOTS = 1;
 	sf::RenderWindow window;
 	int window_width;
 	int window_height;
@@ -77,10 +77,6 @@ private:
 	void updateTargetPos();
 	void drawFlows();
 	void drawChargers(); //draws chargers
-
-	//hockey sim specific
-	void drawGoals();
-	void winCheck(int i);
 
 public:
 	Sim();

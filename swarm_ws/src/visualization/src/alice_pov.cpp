@@ -77,7 +77,6 @@ void AlicePOV::drawMail()
 		{
 			for (int j = 0; j < mail.mails.at(i).obsMail.size(); j++)
 			{
-				std::cout << "oy" << std::endl;
 				wvu_swarm_std_msgs::ellipse temp = mail.mails.at(i).obsMail.at(j);
 				unsigned short quality = 70;
 				sf::ConvexShape ellipse;
@@ -261,35 +260,3 @@ void AlicePOV::Render(ros::ServiceClient _client) //draws changes in simulation 
 	window.display(); //updates display
 	window2.display();
 }
-
-//void Sim::addText() //adds text for the state abbreviations
-//{
-//
-//	sf::Font font;
-//	font.loadFromMemory(&ComicSansMS3_ttf, ComicSansMS3_ttf_len);
-//
-//	for (int i = 0; i < shapes.size(); i++)
-//	{
-//
-//		//creates text on the bodies
-//
-//		sf::Text text;
-//		text.setFont(font);
-//		text.setCharacterSize(10);
-//		text.setColor(sf::Color::Red);
-//
-//		std::string temp(flock.getBody(i).id);
-//		text.setString(temp.substr(0, 2));
-//		text.setStyle(sf::Text::Bold);
-//		text.setOrigin(7.5, 7.5);
-//
-//		texts.push_back(text);
-//
-//		window.draw(text);
-//
-//		window.draw(texts[i]);
-//
-//		texts[i].setPosition(flock.getBody(i).location.x, flock.getBody(i).location.y);
-//	}
-//}
-
