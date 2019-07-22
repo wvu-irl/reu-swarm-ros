@@ -54,7 +54,6 @@ void Rules::stateLoop(Model &_model)
 		int rulenum2=0;
 		for (auto &rule : go_to_list)
 		{
-			std::cout<<"the rule z is: "<<rule.z<<std::endl;
 			if (rule.z > temp)
 			{
 				temp = rule.z;

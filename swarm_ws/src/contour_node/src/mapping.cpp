@@ -53,14 +53,14 @@ int main(int argc, char **argv)
 #if TEST_EQU
 	wvu_swarm_std_msgs::ellipse el;
 	el.x_rad = 20;
-	el.y_rad = 5;
+	el.y_rad = 50;
 	el.theta_offset = 0;
 
 	wvu_swarm_std_msgs::gaussian gaus;
 	gaus.ellipse = el;
 	gaus.ellipse.offset_x = 0;
 	gaus.ellipse.offset_y = 0;
-	gaus.amplitude = 20;
+	gaus.amplitude = 1;
 
 	wvu_swarm_std_msgs::obstacle obs;
 	obs.characteristic = gaus;

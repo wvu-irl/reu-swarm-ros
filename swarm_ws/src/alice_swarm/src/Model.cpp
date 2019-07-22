@@ -129,7 +129,8 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 		//bandaging method, instead of passing this value through the software, for simplicity we just keep energy updated here only.
 		if (energy > 0)//only update if the bot isn't dead
 		{
-			energy -= (float) (_toAdd.time.toSec() - time.toSec()) * 0.02;//sets the rate of energy decrease. Consider making this scale with the contour value.
+			if (_toAdd.contVal< 0.0001) energy -= (float) (_toAdd.time.toSec() - time.toSec()) * 0.02;//sets the rate of energy decrease constant
+			else energy -= (float) (_toAdd.time.toSec() - time.toSec()) * (-0.005*log10(_toAdd.contVal));//sets the rate of energy decrease, scaled with the contour value.
 			for (auto &tar : _toAdd.targets){
 					if (pow(pow(tar.x,2)+pow(tar.y,2),0.5)<5){ //if in eating distance,
 						energy+=(float) (_toAdd.time.toSec() - time.toSec())*1;//eats food much faster than the rate of energy decrease.

@@ -271,7 +271,7 @@ PrevIteration Sim::HandleInput(PrevIteration _pI)	//handles input to the graphic
 				event.key.code == sf::Keyboard::Space, pauseSim, &window, event);
 
 		clickNdragBots(&_pI, mX, mY, event); //runs click and drag for bots
-		clickNdragTarget(&_pI, mX, mY, event); //runs click and drag for targets.
+//		clickNdragTarget(&_pI, mX, mY, event); //runs click and drag for targets.
 		clickNdragObstacles(&_pI, mX, mY, event); //allows for click and drag on obstacles
 	}
 	return _pI; //tracks state of dragging (see sim.h)

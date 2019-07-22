@@ -323,13 +323,13 @@ void Body::inElasticCollisions(vector<Body> _bodies)
 		// Calculate distance from current body to body we're looking at
 		float d = location.distance(_bodies.at(i).location);
 		float target_sep;
-		if(i<targets->point.size())
-		{
-			target_sep = targetSeperation(targets->point.at(i));
-//	    		 targetCollision(i,target_sep);
-			targetInElastic(i,target_sep);
-
-		}
+//		if(i<targets->point.size())
+//		{
+//			target_sep = targetSeperation(targets->point.at(i));
+////	    		 targetCollision(i,target_sep);
+//			targetInElastic(i,target_sep);
+//
+//		}
 		// If this is a fellow body and it's too close, move away from it
 		if ((d <= desiredseparation) && !((id[0] ==_bodies.at(i).id[0]) && (id[1] ==_bodies.at(i).id[1])))// (&&d>0))
 		{
