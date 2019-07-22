@@ -32,7 +32,7 @@ struct PrevIteration
 class Sim
 {
 private:
-	int NUMBOTS = 1;
+	int NUMBOTS = 10;
 	sf::RenderWindow window;
 	int window_width;
 	int window_height;

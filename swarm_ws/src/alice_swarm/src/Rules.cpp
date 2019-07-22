@@ -43,23 +43,24 @@ void Rules::stateLoop(Model &_model)
 		std::vector<AliceStructs::pnt> go_to_list;
 
 		// add other rules here
-//		 go_to_list.push_back(findContour());
-//		 go_to_list.push_back(goToTar());
-		 go_to_list.push_back(charge());
-//		 go_to_list.push_back(rest());
-		 go_to_list.push_back(explore());
+		go_to_list.push_back(findContour());
+		go_to_list.push_back(goToTar());
+		//go_to_list.push_back(charge());
+		go_to_list.push_back(rest());
+		go_to_list.push_back(explore());
 
 		float temp = -1;
+		int rulenum = -1;
+		int rulenum2 = 0;
 		for (auto &rule : go_to_list)
 		{
-//			std::cout<<"the rule z is: "<<rule.z<<std::endl;
 			if (rule.z > temp)
 			{
 				temp = rule.z;
 
 				cur_go_to.x = rule.x;
 				cur_go_to.y = rule.y;
-
+				rulenum = rulenum2;
 //				std::cout << "theta: "<<atan2(model->goTo.y, model->goTo.x) << std::endl;
 //				std::cout<<"(x,y): "<<model->goTo.x<<","<<model->goTo.y<<std::endl;
 			}
@@ -69,8 +70,9 @@ void Rules::stateLoop(Model &_model)
 //			std::cout<<"(x,y): "<<model->goTo.x<<","<<model->goTo.y<<"| "<<mag<<std::endl;
 //			std::cout<<"priority "<<temp<<std::endl;
 //			std::cout<<"-----------------------------------"<<std::endl;
+			rulenum2++;
 		}
-
+		std::cout << "using rule " << rulenum << std::endl;
 		_model.goTo.time = ros::Time::now(); //time stamps when the goto is created
 	}
 	goToTimeout();
@@ -82,14 +84,14 @@ void Rules::stateLoop(Model &_model)
 //===================================================================================================================
 void Rules::goToTimeout()
 {
-	if (ros::Time::now().sec - model->goTo.time.sec > 20) //if it's been more than 20 seconds, move goTo
+	if (ros::Time::now().sec - model->goTo.time.sec > 8) //if it's been more than 8 seconds, move goTo
 	{
 
 		float mag = calcDis(cur_go_to.x, cur_go_to.y, 0, 0);
 
 		//for handling bad goTo points (too far)
-		cur_go_to.x *= 30 / mag;
-		cur_go_to.y *= 30 / mag;
+		cur_go_to.x *= 10 / mag;
+		cur_go_to.y *= 10 / mag;
 
 		cur_go_to.x *= -1; //flip sign for handling unreachable goTo's
 		cur_go_to.y *= -1;
@@ -127,13 +129,12 @@ void Rules::avoidCollisions()
 	//checker = avoidNeighbors();
 	//}
 }
-
-//TO USE ANY OF THESE RULES, USE THE MODEL'S POINTER AND CHANGE SYNTAX ACCORDINGLY
-
+//------------------Basic Rules------------------------------------------
 AliceStructs::pnt Rules::explore()
 {
 	AliceStructs::pose best;
-	std::pair<float, float> sum(0, 0);
+	float ran = static_cast <float>(rand())/static_cast <float>(RAND_MAX); //random float from 0 to 1
+	std::pair<float, float> sum(-1, 2*ran-1); //adds tendency for robot to go forward with a slight tilt, just found useful.
 	for (auto &contour : model->archived_contour)
 	{
 		std::pair<float, float> temp = model->transformFir(contour.x, contour.y); //transforms to the current frame
@@ -145,7 +146,7 @@ AliceStructs::pnt Rules::explore()
 		}
 	}
 	float mag = calcDis(sum.first, sum.second, 0, 0);
-	if (mag > 1)
+	if (mag > 0.001) // set the magnitude to 10 unless the vector is 0 (or very close).
 	{
 		sum.first *= 10 / mag;
 		sum.second *= 10 / mag;
@@ -153,11 +154,97 @@ AliceStructs::pnt Rules::explore()
 	AliceStructs::pnt to_return;
 	to_return.x = -sum.first;
 	to_return.y = -sum.second;
-	to_return.z = 3;
+	to_return.z = 0.99 / pow(1 + model->archived_contour.size(), 0.5); //robot desires exploration when its' map is empty.
 	return to_return;
 
 }
+AliceStructs::pnt Rules::rest() //gives a command to not move.
+{
+	//returns its' own location with a set priority
+	AliceStructs::pnt go_to;
+	go_to.x = 0;
+	go_to.y = 0;
+	if (model->energy <= 0)
+		go_to.z = 1;
+	else
+		go_to.z = 0;
+	return go_to;
+}
+AliceStructs::pnt Rules::goToTar()
+{
+	float temp = 10000;
+	AliceStructs::pnt to_return;
+	to_return.x = 0;
+	to_return.y = 0;
+	to_return.z = 0; //if no target is in range.
+	if (model->energy > 0.8)
+		return to_return; //if not hungry simply return
+	for (auto &tar : model->targets) //check immediate vision
+	{
+		float check = calcDis(tar.x, tar.y, 0, 0);
+		if (check < temp)
+		{
+			temp = check;
+			to_return = tar;
+			to_return.z = 0.999; //if there's food, the robot goes there unless it's dead
+		}
+	}
+	for (auto &tar : model->archived_targets) //check archives
+	{
+		std::pair<float, float> temppos = model->transformFir(tar.x, tar.y);
+		float check = calcDis(temppos.first, temppos.second, 0, 0);
+		if (check < temp)
+		{
+			temp = check;
 
+			to_return.x = temppos.first;
+			to_return.y = temppos.second;
+			to_return.z = 0.999; //if there's food, the robot goes there unless it's dead
+		}
+	}
+	return to_return;
+}
+AliceStructs::pnt Rules::findContour()
+{
+	AliceStructs::pose best;
+	AliceStructs::pnt to_return;
+	to_return.x = 0;
+	to_return.y = 0;
+	to_return.z = 0;
+	float pri = 0; //uses a formula based on distance, recency(confidence), and strength
+	std::pair<float, float> temp = model->transformCur(0, 0); //transforms the cur_pose to the first_pose
+	bool init = false;
+	for (auto &contour : model->archived_contour)
+	{
+		init = true;
+		float temp_pri = (contour.z); // - model->cur_pose.z) / (10 + model->time.sec - contour.time.sec)
+		/// pow(calcDis(temp.first, temp.second, contour.x, contour.y), 0.5);
+
+		if (temp_pri > pri)
+		{
+			best = contour;
+			pri = temp_pri;
+		}
+	}
+	int crowding = 1;		//intended on telling if the contour area is already crowded
+
+	if (init)
+	{
+		std::pair<float, float> go = model->transformFir(best.x, best.y);
+		to_return.x = go.first;
+		to_return.y = go.second;
+
+		to_return.z = 1 - model->energy;		//sets the initial priority to its' hunger
+
+		to_return.z /= crowding; //divide by the number of robots crowding the area
+		to_return.z *= (log10(best.z / model->cur_pose.z));//scale by the appreciable change in the contour.
+		if (to_return.z >= 0.9)
+			to_return.z = 0.9;
+	}
+
+	return to_return;
+}
+//-------------------Charging related rules----------------------------------
 AliceStructs::pnt Rules::charge()
 {
 	AliceStructs::pnt go_to;
@@ -175,17 +262,16 @@ AliceStructs::pnt Rules::charge()
 	}
 #endif
 
-	if((!availableChargers() && !model->committed) || (model->battery_state == CHARGED
-			&& model->battery_lvl == 0)) //makes this a non op when no chargers available.
+	if ((!availableChargers() && !model->committed) || (model->battery_state == CHARGED && model->battery_lvl == 0)) //makes this a non op when no chargers available.
 	{
 		odd_man_out = true;
 	}
 
-	if(model->abs_chargers->size()>0 && !odd_man_out)
+	if (model->abs_chargers->size() > 0 && !odd_man_out)
 	{
 //		std::cout<<"OP for bot: "<<model->name<<std::endl;
 //		std::cout<<"availableChargers(): "<<(availableChargers() ? "true" : "false")<<std::endl;
-		if(!model->charge2)//runs code for first stage if 2nd not initiated.
+		if (!model->charge2) //runs code for first stage if 2nd not initiated.
 		{
 			for (int i = 0; i < model->rel_chargers.size(); i++) //checks each charger
 			{
@@ -193,9 +279,9 @@ AliceStructs::pnt Rules::charge()
 				{
 					dx = model->rel_chargers.at(i).target_x;
 					dy = model->rel_chargers.at(i).target_y;
-					check_sep = sqrt(pow(dx,2) + pow(dy,2)); //check separation distance
+					check_sep = sqrt(pow(dx, 2) + pow(dy, 2)); //check separation distance
 //					std::cout<<"charger: "<<i<<":"<<"dx,dy: "<<dx<<","<<dy<<"|"<<check_sep<<std::endl;
-					if(check_sep < min_sep) //if the closest
+					if (check_sep < min_sep) //if the closest
 					{
 						model->closest_pos = i; //saves pos of closest
 						min_sep = check_sep; //updates min_sep
@@ -208,12 +294,12 @@ AliceStructs::pnt Rules::charge()
 			go_to.x = model->rel_chargers.at(model->closest_pos).target_x; //sets pos of closest charger as target.
 			go_to.y = model->rel_chargers.at(model->closest_pos).target_y;
 
-			if ((pow(go_to.x, 2) + pow(go_to.y, 2)) < pow(model->SIZE/5, 2) && (model->committed)) //initiates charge2 after it reaches first waypoint.
+			if ((pow(go_to.x, 2) + pow(go_to.y, 2)) < pow(model->SIZE / 5, 2) && (model->committed)) //initiates charge2 after it reaches first waypoint.
 			{
 				model->charge2 = true;
 			}
 //			std::cout<<"the battery level is: "<<model->battery_lvl<<std::endl;
-			if((model->battery_lvl<3.8)) //assign priority
+			if ((model->battery_lvl < 3.8)) //assign priority
 			{
 				go_to.z = 2; //given highest priority
 				model->abs_chargers->at(model->closest_pos).occupied = true; //charger is "checked out".
@@ -303,12 +389,14 @@ bool Rules::charged()
 	return return_bool;
 }
 bool Rules::availableChargers()
+
+
 {
 	bool result = false;
 	int i = 0;
-	while(i < model->abs_chargers->size())
+	while (i < model->abs_chargers->size())
 	{
-		if(!model->abs_chargers->at(i).occupied)
+		if (!model->abs_chargers->at(i).occupied)
 		{
 			result = true;
 			i = model->abs_chargers->size() + 1;
@@ -321,16 +409,6 @@ bool Rules::availableChargers()
 bool Rules::checkCollisions()
 {
 	cur_go_to = findPath(cur_go_to, findDeadZones());
-}
-
-AliceStructs::pnt Rules::rest() //gives a command to not move.
-{
-	//returns its' own location with a set priority
-	AliceStructs::pnt go_to;
-	go_to.x = 0;
-	go_to.y = 0;
-	go_to.z = 3;
-	return go_to;
 }
 //-----------------------------------------------------------------------------------------
 //bool Rules::changeState()
@@ -410,25 +488,6 @@ AliceStructs::pnt Rules::rest() //gives a command to not move.
 //	}
 //	return take_action;
 //}
-AliceStructs::pnt Rules::goToTar()
-{
-	float temp = 10000;
-	AliceStructs::pnt to_return;
-	to_return.x = 0;
-	to_return.y = 0;
-	to_return.z = 0;
-	for (auto &tar : model->targets)
-	{
-		float check = calcDis(tar.x, tar.y, 0, 0);
-		if (check < temp)
-		{
-			temp = check;
-			to_return = tar;
-			to_return.z = 1;
-		}
-	}
-	return to_return;
-}
 
 float Rules::calcDis(float _x1, float _y1, float _x2, float _y2)
 {
@@ -443,37 +502,7 @@ std::pair<float, float> Rules::calcQuad(float a, float b, float c)
 	return to_return;
 }
 
-AliceStructs::pnt Rules::findContour()
-{
-	AliceStructs::pose best;
-	AliceStructs::pnt to_return;
-	to_return.x = 0;
-	to_return.y = 0;
-	to_return.z = 0;
-	float pri = 0; //uses a formula based on distance, recency(confidence), and strength
-	std::pair<float, float> temp = model->transformCur(0, 0); //transforms the cur_pose to the first_pose
-	bool init = false;
-	for (auto &contour : model->archived_contour)
-	{
-		init = true;
-		float temp_pri = (contour.z); // - model->cur_pose.z) / (10 + model->time.sec - contour.time.sec)
-		/// pow(calcDis(temp.first, temp.second, contour.x, contour.y), 0.5);
 
-		if (temp_pri > pri)
-		{
-			best = contour;
-			pri = temp_pri;
-		}
-	}
-	if (init)
-	{
-		std::pair<float, float> go = model->transformFir(best.x, best.y);
-		to_return.x = go.first;
-		to_return.y = go.second;
-		to_return.z = pri;
-	}
-	return to_return;
-}
 
 /*
  bool Rules::checkBlocked()

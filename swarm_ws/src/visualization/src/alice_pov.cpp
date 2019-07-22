@@ -152,7 +152,7 @@ void AlicePOV::drawMail()
 			// Changing the Visual Properties of the robot
 			shape.setPosition(300, 300); // Sets position of shape to the middle
 			shape.setOrigin(bodiesSize, bodiesSize);
-			float inten = 10 * mail.mails.at(name).contVal;
+			float inten = 255 * mail.mails.at(name).contVal;
 			if (inten > 255)
 				inten = 255;
 			shape.setFillColor(sf::Color(255 - (int) inten, 0, (int) inten, 255));
