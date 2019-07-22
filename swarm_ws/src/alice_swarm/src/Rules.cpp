@@ -258,7 +258,7 @@ AliceStructs::pnt Rules::charge()
 	} else
 	{
 //		std::cout<<"No Op for bot"<<std::endl;
-		std::cout<<"No Op for bot: "<<model->name<<std::endl;
+//		std::cout<<"No Op for bot: "<<model->name<<std::endl;
 		model->min_sep = 1000.0;
 		go_to.x = 0;
 		go_to.y = 0;
