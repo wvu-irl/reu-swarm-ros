@@ -16,8 +16,10 @@
 #include <visualization/contour.h>
 #include <visualization/perspective_transform_gpu.h>
 #include <visualization/visualization_settings.h>
+#define USE_KEYBOARD 0
+#if USE_KEYBOARD
 #include <visualization/keyboard_managment.h>
-
+#endif
 #include <contour_node/level_description.h>
 
 #include <SFML/Config.hpp>
@@ -99,7 +101,9 @@ void nuiUpdate(geometry_msgs::Point msg)
 void updateMap(wvu_swarm_std_msgs::map_levels _map)
 {
 	map = _map;
-	interaction::universe = &map;
+#if USE_KEYBOARD
+	interaction::updateUni(&map);
+#endif
 }
 
 // Subscription callback for goals
@@ -405,22 +409,21 @@ int main(int argc, char **argv)
 	// subscribing to draw the NUI intersect onto the table
 	ros::Subscriber nui_tracking = n.subscribe("hand_1", 1000, nuiUpdate);
 
-	ros::Subscriber map = n.subscribe("/map_data", 1000, updateMap);
+	ros::Subscriber map_sub = n.subscribe("/map_data", 1000, updateMap);
 
-	if (use_keyboard)
-	{
-		interaction::add_pub = n.advertise < wvu_swarm_std_msgs::obstacle
-				> ("add_obstacle", 1000);
-		interaction::rem_pub = n.advertise < std_msgs::String
-				> ("rem_obstacle", 1000);
-		interaction::loc_pub = n.advertise < geometry_msgs::Point
-				> ("hand_1", 1000);
-	}
+#if USE_KEYBOARD
+	ros::Publisher a_p = n.advertise < wvu_swarm_std_msgs::obstacle
+			> ("add_obstacle", 1000);
+	ros::Publisher r_p = n.advertise < std_msgs::String > ("rem_obstacle", 1000);
+	ros::Publisher l_p = n.advertise < geometry_msgs::Point > ("hand_1", 1000);
 
 	// calibrating from file
 	calibrateFromFile(config);
-	interaction::table = g_trap;
-
+	if (use_keyboard)
+	{
+		interaction::init(&a_p, &r_p, &l_p, &map, g_trap);
+	}
+#endif
 	// default color map setup
 	std::vector<double> c_levs;
 	c_levs.push_back(0);
@@ -531,7 +534,7 @@ int main(int argc, char **argv)
 			case sf::Event::Closed: // close window event
 				window.close();
 				break;
-
+#if USE_KEYBOARD
 			case sf::Event::KeyReleased:
 				if (use_keyboard)
 					interaction::keyEvent(event);
@@ -556,6 +559,7 @@ int main(int argc, char **argv)
 				if (use_keyboard)
 					interaction::scrollWheelMoved(event);
 				break;
+#endif
 			}
 		}
 
