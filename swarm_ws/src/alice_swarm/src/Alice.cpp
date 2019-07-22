@@ -102,8 +102,8 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 	AliceStructs::vel to_return;
 	to_return.mag = 1;
 
-	if(rules.calcDis(cur_go_to.first, cur_go_to.second, 0, 0)<0.9) //gives a tolerance range
-//	if(cur_go_to.first == 0 && cur_go_to.second == 0) //gives a tolerance range
+//	if(rules.calcDis(cur_go_to.first, cur_go_to.second, 0, 0)<0.9) //gives a tolerance range
+	if(cur_go_to.first == 0 && cur_go_to.second == 0) //gives a tolerance range
 	{
 #if DEBUG_generateVel
 		std::cout<<"===================mag zero================\n";
@@ -115,9 +115,8 @@ AliceStructs::vel Alice::generateVel() //implements the rules set
 #if DEBUG_generateVel
 //	std::cout<<"rules model: "<<rules.cur_go_to.first<<","<<rules.cur_go_to.second<<std::endl;//this is the rules model
 //	std::cout<<"alice model: "<<cur_go_to.first<<","<< cur_go_to.second<<std::endl; //this is the alice model (not the same).
-//	std::cout<<"to_return.dir: "<<to_return.dir<<std::endl;//this is the rules model
-//	std::cout <<"theta: "<<to_return.dir << std::endl;
-//	std::cout <<"mag: "<<to_return.mag<< std::endl;
+	std::cout<<"to_return.dir: "<<to_return.dir<<std::endl;//this is the rules model
+	std::cout <<"mag: "<<to_return.mag<< std::endl;
 //	std::cout<<"=================================================\n";
 #endif
 
