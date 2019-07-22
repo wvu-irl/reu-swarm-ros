@@ -194,6 +194,8 @@ void Sim::Run(ros::NodeHandle _n)
 			this); //gets virtual targets
 	ros::Subscriber sub5 = _n.subscribe("chargers", 1000, &Sim::chargerCallback,
 			this); //gets virtual targets
+
+	// gets vicon input for mixed sim and real
 	_n.subscribe("real_locations_array", 1000, &Sim::realBotCallback, this);
 	ros::Rate loopRate(20);
 

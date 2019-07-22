@@ -20,6 +20,7 @@ wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages(
 	wvu_swarm_std_msgs::vicon_bot_array vb_array = real_bots;
 	for (int i = 0; i < flock.size(); i++)
 	{
+		// filtering out real robots
 		bool virt = true;
 		do
 		{
@@ -34,6 +35,8 @@ wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages(
 				}
 			}
 		} while (!virt);
+		if (i > flock.size()) // safety
+			break;
 
 		//initializes necessary variables for each iteration.
 		wvu_swarm_std_msgs::vicon_bot this_bot;
