@@ -45,8 +45,8 @@ typedef struct
 {
 	float x;
 	float y;
-	float tar_x;
-	float tar_y;
+	float tar_x;//unused
+	float tar_y;//unused
 	float ang;
 	int name;
 	int sid;

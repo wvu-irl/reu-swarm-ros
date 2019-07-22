@@ -129,9 +129,11 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 		//bandaging method, instead of passing this value through the software, for simplicity we just keep energy updated here only.
 		if (energy > 0)//only update if the bot isn't dead
 		{
-			energy -= (float) (_toAdd.time.toSec() - time.toSec()) * 0.05;//sets the rate of energy decrease. Consider making this scale with the contour value.
+			energy -= (float) (_toAdd.time.toSec() - time.toSec()) * 0.02;//sets the rate of energy decrease. Consider making this scale with the contour value.
 			for (auto &tar : _toAdd.targets){
-
+					if (pow(pow(tar.x,2)+pow(tar.y,2),0.5)<5){ //if in eating distance,
+						energy+=(float) (_toAdd.time.toSec() - time.toSec())*1;//eats food much faster than the rate of energy decrease.
+					}
 			}
 			if (energy > 1)
 				energy = 1; //caps energy at 1.
@@ -332,8 +334,8 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 				for (int k = 0; k < _maps.at(j).tarMsg.size(); k++) //copy over all of the targets
 				{
 					wvu_swarm_std_msgs::tar_msg temp = _maps.at(j).tarMsg.at(k);
-					///if (temp.observer_names.size() < max_pass) // we intend on passing targets as much as it wants
-					//	{
+					if (temp.observer.size() < 0) // we intend on not passing around targets (the food)
+						{
 					bool repeat_observer = false; //for finding whether or not this robot has already received this bit of information
 					for (int i = 0; i < temp.observer.size(); i++)
 						if (temp.observer.at(i) == name)
@@ -355,12 +357,12 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 						archived_targets.push_back(target);
 					}
 				}
-				//}
+				}
 				for (int k = 0; k < _maps.at(j).contMsg.size(); k++) //copy over known contour points
 				{
 
 					wvu_swarm_std_msgs::cont_msg temp = _maps.at(j).contMsg.at(k);
-					if (temp.observer.size() < max_pass) // make sure the point hasn't been passed around too much
+					if (temp.observer.size() < 1) // can only see from neighbors
 					{
 						bool repeat_observer = false; //for finding whether or not this robot has already received this bit of information
 						for (int i = 0; i < temp.observer.size(); i++)
@@ -398,7 +400,7 @@ void Model::forget()
 	float TOLERANCE = 5; //objects within this distance in x and y will be simplified to one object
 	forgetObs(TOLERANCE);
 	forgetTargets(TOLERANCE);
-	forgetContour(TOLERANCE * 1.5); //this is super expensive if the point cloud is dense
+	forgetContour(TOLERANCE); //this is super expensive if the point cloud is dense
 }
 
 void Model::forgetContour(int TOLERANCE) //erases Contours based on time stamp or duplicity.
@@ -406,7 +408,7 @@ void Model::forgetContour(int TOLERANCE) //erases Contours based on time stamp o
 	std::vector<AliceStructs::pose>::iterator it = archived_contour.begin();
 	while (it != archived_contour.end())
 	{
-		if (time.sec - it->time.sec > 10) //if the data is old, delete it
+		if (time.sec - it->time.sec > 15) //if the data is old, delete it
 		{
 			it = archived_contour.erase(it);
 		} else
@@ -436,7 +438,7 @@ void Model::forgetTargets(int TOLERANCE) //erases targets based on time stamp or
 	{
 		std::pair<float, float> temp = transformFir(it->x, it->y);
 
-		if (time.sec - it->time.sec > 10) //if the data is old, delete it
+		if (time.sec - it->time.sec > 15) //if the data is old, delete it
 		{
 			it = archived_targets.erase(it);
 		} else if (pow(pow(temp.first, 2) + pow(temp.second, 2), 0.5) < vision) //if the object should be visible from current position but isn't, delete it
@@ -468,7 +470,7 @@ void Model::forgetObs(int TOLERANCE) //erases obstacles based on time stamp or d
 	while (it != archived_obstacles.end())
 	{
 		std::pair<float, float> temp = transformFir(it->x_off, it->y_off);
-		if (time.sec - it->time.sec > 10) //if the data is old, delete it
+		if (time.sec - it->time.sec > 15) //if the data is old, delete it
 		{
 			it = archived_obstacles.erase(it);
 		} else if (pow(pow(temp.first, 2) + pow(temp.second, 2), 0.5) < vision) //if the object should be visible from current position but isn't, delete it

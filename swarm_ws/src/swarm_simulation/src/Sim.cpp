@@ -86,11 +86,7 @@ void Sim::chargerCallback(const wvu_swarm_std_msgs::chargers &msg)
 
 void Sim::targetCallback(const wvu_swarm_std_msgs::vicon_points &msg)
 {
-	if (!update)
-	{
 		targets = msg;
-		update = true;
-	}
 }
 void Sim::flowCallback(const wvu_swarm_std_msgs::flows &msg)
 {

@@ -43,18 +43,18 @@ void Rules::stateLoop(Model &_model)
 		std::vector<AliceStructs::pnt> go_to_list;
 
 		// add other rules here
-			go_to_list.push_back(findContour());
-// go_to_list.push_back(goToTar());
+		//	go_to_list.push_back(findContour());
+ go_to_list.push_back(goToTar());
 //	go_to_list.push_back(charge());
 
-		//go_to_list.push_back(explore());
+		go_to_list.push_back(explore());
 		//go_to_list.push_back(rest());
 		float temp = -1;
 		int rulenum=-1;
 		int rulenum2=0;
 		for (auto &rule : go_to_list)
 		{
-//			std::cout<<"the rule z is: "<<rule.z<<std::endl;
+			std::cout<<"the rule z is: "<<rule.z<<std::endl;
 			if (rule.z > temp)
 			{
 				temp = rule.z;
@@ -84,14 +84,14 @@ void Rules::stateLoop(Model &_model)
 //===================================================================================================================
 void Rules::goToTimeout()
 {
-	if (ros::Time::now().sec - model->goTo.time.sec > 5) //if it's been more than 5 seconds, move goTo
+	if (ros::Time::now().sec - model->goTo.time.sec > 8) //if it's been more than 8 seconds, move goTo
 	{
 
 		float mag = calcDis(cur_go_to.x, cur_go_to.y, 0, 0);
 
 		//for handling bad goTo points (too far)
-		cur_go_to.x *= 20 / mag;
-		cur_go_to.y *= 20 / mag;
+		cur_go_to.x *= 10 / mag;
+		cur_go_to.y *= 10 / mag;
 
 		cur_go_to.x *= -1; //flip sign for handling unreachable goTo's
 		cur_go_to.y *= -1;
@@ -135,7 +135,7 @@ void Rules::avoidCollisions()
 AliceStructs::pnt Rules::explore()
 {
 	AliceStructs::pose best;
-	std::pair<float, float> sum(-10, 0); //adds tendency for robot to go forward
+	std::pair<float, float> sum(-1, 0.1); //adds tendency for robot to go forward with a slight tilt, just found useful.
 	for (auto &contour : model->archived_contour)
 	{
 		std::pair<float, float> temp = model->transformFir(contour.x, contour.y); //transforms to the current frame
@@ -404,17 +404,31 @@ AliceStructs::pnt Rules::goToTar()
 	AliceStructs::pnt to_return;
 	to_return.x = 0;
 	to_return.y = 0;
-	to_return.z = 0;
-	for (auto &tar : model->targets)
+	to_return.z = 0; //if no target is in range.
+	if (model->energy >0.8) return to_return;//if not hungry simply return
+	for (auto &tar : model->targets) //check immediate vision
 	{
 		float check = calcDis(tar.x, tar.y, 0, 0);
 		if (check < temp)
 		{
 			temp = check;
 			to_return = tar;
-			to_return.z = 1;
+			to_return.z = 0.999;//if there's food, the robot goes there unless it's dead
 		}
 	}
+	for (auto &tar : model->archived_targets) //check archives
+		{
+			std::pair<float,float> temppos=model->transformFir(tar.x,tar.y);
+			float check = calcDis(temppos.first, temppos.second, 0, 0);
+			if (check < temp)
+			{
+				temp = check;
+
+				to_return.x=temppos.first;
+				to_return.y=temppos.second;
+				to_return.z = 0.999;//if there's food, the robot goes there unless it's dead
+			}
+		}
 	return to_return;
 }
 

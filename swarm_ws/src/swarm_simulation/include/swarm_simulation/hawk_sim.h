@@ -10,7 +10,7 @@
 #include <wvu_swarm_std_msgs/energy.h>
 #include <wvu_swarm_std_msgs/sensor_data.h>
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
-
+#include <wvu_swarm_std_msgs/vicon_points.h>
 
 class Hawk_Sim
 {
@@ -22,6 +22,7 @@ private:
 	bool first = true;
 	bool energy_first = true;
 	bool new_chargers;
+	std::vector<std::pair<float, wvu_swarm_std_msgs::vicon_point>> food_targets;//creates a vector with food locations and amounts
 	//palce holders for subscription data ---------------
 	wvu_swarm_std_msgs::chargers temp_chargers;
 	wvu_swarm_std_msgs::chargers prev_temp_chargers;
@@ -30,6 +31,7 @@ private:
 	wvu_swarm_std_msgs::energy temp_energy;
 	wvu_swarm_std_msgs::sensor_data temp_sd;
 	wvu_swarm_std_msgs::vicon_bot_array temp_bots;
+	ros::Time time;
 	//---------------------------------------------------
 
 	//callback functions
@@ -43,6 +45,8 @@ private:
 	void makePriority(ros::Publisher _pub);
 	void makeEnergy(ros::Publisher _pub);
 	void makeSensorData(ros::Publisher _pub);
+	void makeTargets(ros::Publisher _pub);
+
 
 public:
 	void run(ros::NodeHandle n);
