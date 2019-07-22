@@ -139,7 +139,7 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 			if (energy > 1)
 				energy = 1; //caps energy at 1.
 		}
-		std::cout << energy << std::endl;
+//		std::cout << energy << std::endl;
 	}
 	cur_pose.x = _toAdd.xpos; //update the current pose
 	cur_pose.y = _toAdd.ypos;

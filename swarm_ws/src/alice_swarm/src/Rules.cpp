@@ -43,11 +43,11 @@ void Rules::stateLoop(Model &_model)
 		std::vector<AliceStructs::pnt> go_to_list;
 
 		// add other rules here
-//			go_to_list.push_back(findContour());
-		  go_to_list.push_back(goToTar());
-			go_to_list.push_back(charge());
-//		go_to_list.push_back(rest());
-//	go_to_list.push_back(explore());
+//		 go_to_list.push_back(findContour());
+//		 go_to_list.push_back(goToTar());
+		 go_to_list.push_back(charge());
+//		 go_to_list.push_back(rest());
+		 go_to_list.push_back(explore());
 
 		float temp = -1;
 		for (auto &rule : go_to_list)
@@ -180,7 +180,7 @@ AliceStructs::pnt Rules::charge()
 	{
 		odd_man_out = true;
 	}
-	
+
 	if(model->abs_chargers->size()>0 && !odd_man_out)
 	{
 //		std::cout<<"OP for bot: "<<model->name<<std::endl;
@@ -258,7 +258,7 @@ AliceStructs::pnt Rules::charge()
 	} else
 	{
 //		std::cout<<"No Op for bot"<<std::endl;
-//		std::cout<<"No Op for bot: "<<model->name<<std::endl;
+		std::cout<<"No Op for bot: "<<model->name<<std::endl;
 		model->min_sep = 1000.0;
 		go_to.x = 0;
 		go_to.y = 0;
