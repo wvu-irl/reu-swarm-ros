@@ -9,7 +9,7 @@ using namespace std::chrono;
 
 #define distance(v0, v1) (sqrt(pow(v0.x - v1.x, 2) + pow(v0.y - v1.y, 2)))
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #include <stdio.h>
@@ -81,7 +81,7 @@ void addNewFunk()
 
 	wvu_swarm_std_msgs::obstacle n_obs;
 	n_obs.characteristic = charac;
-	n_obs.level = g_draw_level;
+	n_obs.level = WORKING_LEVEL;
 
 	add_pub->publish(n_obs);
 }

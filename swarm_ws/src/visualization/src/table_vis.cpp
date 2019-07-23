@@ -289,12 +289,12 @@ void render(sf::RenderWindow *window)
 
 	// draw targets
 	sf::CircleShape tar;
-	tar.setRadius(4);
+	tar.setRadius(8);
 	tar.scale(1, 1.25);
 	tar.setFillColor(sf::Color::Green);
 	for (size_t i = 0; i < targets.size(); i++)
 	{
-		tar.setPosition(targets.at(i) - sf::Vector2f(2, 2));
+		tar.setPosition(targets.at(i) - sf::Vector2f(4, 4));
 		disp.draw(tar);
 	}
 
@@ -317,6 +317,8 @@ void render(sf::RenderWindow *window)
 	bot.setRadius(radius);
 	bot.scale(1, 1.25); // scaling to  do a 2:1 screen
 	bot.setFillColor(sf::Color::Yellow);
+	bot.setOutlineColor(sf::Color::Black);
+	bot.setOutlineThickness(1);
 	for (size_t i = 0; i < bots_pos.size(); i++)
 	{
 		bot.setPosition(
@@ -325,7 +327,8 @@ void render(sf::RenderWindow *window)
 
 		rid_disp.setString(bot_ids.at(i).c_str());
 		rid_disp.setPosition(
-				sf::Vector2f(bots_pos[i].x + radius, bots_pos[i].y - radius));
+				sf::Vector2f(bots_pos[i].x - rid_disp.getLocalBounds().width / 2,
+						bots_pos[i].y - rid_disp.getLocalBounds().height / 2));
 		disp.draw(rid_disp);
 	}
 
@@ -397,9 +400,9 @@ int main(int argc, char **argv)
 	// subscribing to have bot locations
 	ros::Subscriber robots = n.subscribe("/vicon_array", 1000, drawBots);
 	// subscribing for other objects
-	ros::Subscriber obstacles = n.subscribe("virtual_obstacles", 1000,
+	ros::Subscriber obstacles = n.subscribe("/virtual_obstacles", 1000,
 			drawObstacles);
-	ros::Subscriber goals = n.subscribe("virtual_targets", 1000, drawGoals);
+	ros::Subscriber goals = n.subscribe("/virtual_targets", 1000, drawGoals);
 
 	// subscribing to draw the NUI intersect onto the table
 	ros::Subscriber nui_tracking = n.subscribe("hand_1", 1000, nuiUpdate);
