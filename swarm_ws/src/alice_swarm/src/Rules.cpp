@@ -34,7 +34,8 @@ void Rules::stateLoop(Model &_model)
 	if (first_time)
 		init(_model); //need this to solve the ghost of random goto initialization
 	model = &_model;
-	std::pair<float, float> cur_temp = _model.transformFir(_model.goTo.x, _model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
+	std::pair<float, float> cur_temp = _model.transformFir(_model.goTo.x,
+			_model.goTo.y); //Shifts the frame of goTo to the current frame for calculations
 	cur_go_to.x = cur_temp.first;
 	cur_go_to.y = cur_temp.second;
 	bool run = shouldLoop();
@@ -76,7 +77,8 @@ void Rules::stateLoop(Model &_model)
 		_model.goTo.time = ros::Time::now(); //time stamps when the goto is created
 	}
 	goToTimeout();
-	std::pair<float, float> back_to_fir = _model.transformCur(cur_go_to.x, cur_go_to.y);
+	std::pair<float, float> back_to_fir = _model.transformCur(cur_go_to.x,
+			cur_go_to.y);
 	_model.goTo.x = back_to_fir.first;
 	_model.goTo.y = back_to_fir.second;
 }
@@ -133,8 +135,8 @@ void Rules::avoidCollisions()
 AliceStructs::pnt Rules::explore()
 {
 	AliceStructs::pose best;
-	float ran = static_cast <float>(rand())/static_cast <float>(RAND_MAX); //random float from 0 to 1
-	std::pair<float, float> sum(-1, 2*ran-1); //adds tendency for robot to go forward with a slight tilt, just found useful.
+	float ran = static_cast<float>(rand()) / static_cast<float>(RAND_MAX); //random float from 0 to 1
+	std::pair<float, float> sum(-1, 2 * ran - 1); //adds tendency for robot to go forward with a slight tilt, just found useful.
 	for (auto &contour : model->archived_contour)
 	{
 		std::pair<float, float> temp = model->transformFir(contour.x, contour.y); //transforms to the current frame
@@ -148,8 +150,8 @@ AliceStructs::pnt Rules::explore()
 	float mag = calcDis(sum.first, sum.second, 0, 0);
 	if (mag > 0.001) // set the magnitude to 10 unless the vector is 0 (or very close).
 	{
-		sum.first *= 20 / mag;
-		sum.second *= 20 / mag;
+		sum.first *= 10 / mag;
+		sum.second *= 10 / mag;
 	}
 	AliceStructs::pnt to_return;
 	to_return.x = -sum.first;
@@ -226,7 +228,7 @@ AliceStructs::pnt Rules::findContour()
 			pri = temp_pri;
 		}
 	}
-	int crowding = 1;		//intended on telling if the contour area is already crowded
+	int crowding = 1;	//intended on telling if the contour area is already crowded
 
 	if (init)
 	{
@@ -234,10 +236,10 @@ AliceStructs::pnt Rules::findContour()
 		to_return.x = go.first;
 		to_return.y = go.second;
 
-		to_return.z = 1 - model->energy;		//sets the initial priority to its' hunger
+		to_return.z = 1 - model->energy;	//sets the initial priority to its' hunger
 
 		to_return.z /= crowding; //divide by the number of robots crowding the area
-		to_return.z *= (log10(best.z / model->cur_pose.z));//scale by the appreciable change in the contour.
+		to_return.z *= (log10(best.z / model->cur_pose.z)); //scale by the appreciable change in the contour.
 		if (to_return.z >= 0.9)
 			to_return.z = 0.9;
 	}
@@ -262,7 +264,8 @@ AliceStructs::pnt Rules::charge()
 	}
 #endif
 
-	if ((!availableChargers() && !model->committed) || (model->battery_state == CHARGED && model->battery_lvl == 0)) //makes this a non op when no chargers available.
+	if ((!availableChargers() && !model->committed)
+			|| (model->battery_state == CHARGED && model->battery_lvl == 0)) //makes this a non op when no chargers available.
 	{
 		odd_man_out = true;
 	}
@@ -294,7 +297,8 @@ AliceStructs::pnt Rules::charge()
 			go_to.x = model->rel_chargers.at(model->closest_pos).target_x; //sets pos of closest charger as target.
 			go_to.y = model->rel_chargers.at(model->closest_pos).target_y;
 
-			if ((pow(go_to.x, 2) + pow(go_to.y, 2)) < pow(model->SIZE / 5, 2) && (model->committed)) //initiates charge2 after it reaches first waypoint.
+			if ((pow(go_to.x, 2) + pow(go_to.y, 2)) < pow(model->SIZE / 5, 2)
+					&& (model->committed)) //initiates charge2 after it reaches first waypoint.
 			{
 				model->charge2 = true;
 			}
@@ -305,7 +309,8 @@ AliceStructs::pnt Rules::charge()
 				model->abs_chargers->at(model->closest_pos).occupied = true; //charger is "checked out".
 				model->committed = true;
 				model->rel_chargers.at(model->closest_pos).occupied = true;
-			} else
+			}
+			else
 			{
 //				std::cout<<"saftey is running"<<std::endl;
 //				//makes sure that the reset sticks. There is lag in reseting these vars sometimes.
@@ -315,7 +320,8 @@ AliceStructs::pnt Rules::charge()
 				model->charge2 = false;
 				go_to.z = 0;
 			}
-		} else if (model->charge2) //runs code for second waypoint.
+		}
+		else if (model->charge2) //runs code for second waypoint.
 		{
 #if DEBUG_charging
 			std::cout<<"++++++++++++++++++++++++++++++\n";
@@ -341,7 +347,8 @@ AliceStructs::pnt Rules::charge()
 				go_to.z = 0;
 			}
 		}
-	} else
+	}
+	else
 	{
 //		std::cout<<"No Op for bot"<<std::endl;
 //		std::cout<<"No Op for bot: "<<model->name<<std::endl;
@@ -363,7 +370,8 @@ AliceStructs::pnt Rules::charge2() //phase 2 of the charging sequence.
 		model->min_sep = sqrt(pow(go_to.x, 2) + pow(go_to.y, 2));
 //		std::cout<<"charge2 x,y: "<<go_to.x<<","<<go_to.y<<std::endl;
 //		std::cout<<"++++++++++++++++++++++++++++++\n";
-	} else
+	}
+	else
 	{
 		go_to = rest();
 	}
@@ -389,7 +397,6 @@ bool Rules::charged()
 	return return_bool;
 }
 bool Rules::availableChargers()
-
 
 {
 	bool result = false;
@@ -502,8 +509,6 @@ std::pair<float, float> Rules::calcQuad(float a, float b, float c)
 	return to_return;
 }
 
-
-
 /*
  bool Rules::checkBlocked()
  {
@@ -540,20 +545,24 @@ AliceStructs::pnt Rules::findPath(AliceStructs::pnt waypnt,
 	for (auto &zone : dead_zones)
 	{
 		//std::cout << "found a zone" << std::endl;
-		if (pow(pow(zone.second.x_off, 2) + pow(zone.second.y_off, 2), 0.5) - zone.second.x_rad < pow(pow(waypnt.x, 2) + pow(waypnt.y, 2), 0.5))
+		if (pow(pow(zone.second.x_off, 2) + pow(zone.second.y_off, 2), 0.5)
+				< pow(pow(waypnt.x, 2) + pow(waypnt.y, 2), 0.5))
 		{
 			//std::cout << "it's on the proper side of me" << std::endl;
 			//std::cout << fabs(tf) << " first " << fabs(zone.first.first) << " second " << fabs(zone.first.second) << std::endl;
-			if (((zone.first.first < tf && tf < zone.first.second) || (zone.first.second < tf && tf < zone.first.first))
+			if (((zone.first.first < tf && tf < zone.first.second)
+					|| (zone.first.second < tf && tf < zone.first.first))
 					|| ((fabs(zone.first.first - zone.first.second) > M_PI / 2)
-							&& ((fabs(tf) + M_PI / 12 > fabs(zone.first.first)) && (fabs(tf) + M_PI / 12 > fabs(zone.first.second)))))
+							&& ((fabs(tf) + M_PI / 12 > fabs(zone.first.first))
+									&& (fabs(tf) + M_PI / 12 > fabs(zone.first.second)))))
 			{
 				std::cout << "it's in my way" << std::endl;
 				blockers.push_back(zone);
 			}
 		}
 	}
-	std::pair<std::pair<float, AliceStructs::obj>, std::pair<float, AliceStructs::obj>> angles;
+	std::pair<std::pair<float, AliceStructs::obj>,
+			std::pair<float, AliceStructs::obj>> angles;
 	angles.first.first = 0;
 	angles.second.first = 0;
 	for (auto &blocker : blockers)
@@ -574,7 +583,8 @@ AliceStructs::pnt Rules::findPath(AliceStructs::pnt waypnt,
 				angles.second.first = blocker.first.second;
 				angles.second.second = blocker.second;
 			}
-		} else
+		}
+		else
 		{
 			std::cout << "Second is greater" << std::endl;
 			if (blocker.first.second > angles.first.first)
@@ -592,34 +602,41 @@ AliceStructs::pnt Rules::findPath(AliceStructs::pnt waypnt,
 	std::pair<float, AliceStructs::obj> final;
 	angles.first.first += tf;
 	angles.second.first += tf;
-	std::cout << "first " << angles.first.first << " second " << angles.second.first << " tf " << tf << std::endl;
-	if (fabs(fabs(angles.first.first) - fabs(tf)) < fabs(fabs(angles.second.first) - fabs(tf)))
+	std::cout << "first " << angles.first.first << " second "
+			<< angles.second.first << " tf " << tf << std::endl;
+	if (fabs(fabs(angles.first.first) - fabs(tf))
+			< fabs(fabs(angles.second.first) - fabs(tf)))
 	{
 		final = angles.first;
-	} else
+	}
+	else
 	{
 		final = angles.second;
 	}
 	std::cout << final.first << std::endl;
-	std::cout << "x: " << final.second.x_off << " y: " << final.second.y_off << std::endl;
-	std::cout << "q: " << final.second.x_rad << " p: " << final.second.y_rad << std::endl;
+	std::cout << "x: " << final.second.x_off << " y: " << final.second.y_off
+			<< std::endl;
+	std::cout << "q: " << final.second.x_rad << " p: " << final.second.y_rad
+			<< std::endl;
 	if (final.first != tf)
 	{
 		float m = tan(final.first);
 		std::cout << "m: " << m << std::endl;
-		to_return.x =
-				0.5
-						* (2 * final.second.x_off / pow(final.second.x_rad, 2)
-								+ 2 * final.second.y_off * m / pow(final.second.y_rad, 2))
-						/ (1 / pow(final.second.x_rad, 2) + pow(m, 2) / pow(final.second.y_rad, 2));
+		to_return.x = 0.5
+				* (2 * final.second.x_off / pow(final.second.x_rad, 2)
+						+ 2 * final.second.y_off * m / pow(final.second.y_rad, 2))
+				/ (1 / pow(final.second.x_rad, 2)
+						+ pow(m, 2) / pow(final.second.y_rad, 2));
 		to_return.y = 0.5
 				* (2 * final.second.y_off / pow(final.second.y_rad, 2)
 						+ 2 * final.second.x_off / (m * pow(final.second.x_rad, 2)))
-				/ (1 / pow(final.second.y_rad, 2) + 1 / (pow(m, 2) * pow(final.second.x_rad, 2)));
+				/ (1 / pow(final.second.y_rad, 2)
+						+ 1 / (pow(m, 2) * pow(final.second.x_rad, 2)));
 		std::cout << "test: " << (2 * final.second.y_off * m) << std::endl;
 		std::cout << "x: " << to_return.x << " y: " << to_return.y << std::endl;
 		std::cout << atan2(to_return.y, to_return.x) << std::endl;
-	} else
+	}
+	else
 	{
 		to_return = model->goTo;
 	}
@@ -633,8 +650,10 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 	{
 		//float obs.x_off = model->cur_pose.x - obs.x_off;
 		//float obs.y_off = model->cur_pose.y - obs.y_off;
-		std::pair<float, float> aoe = calcQuad(pow(obs.x_off, 2) - pow(obs.x_rad + model->SIZE + model->SAFE_DIS, 2),
-				-2 * obs.x_off * obs.y_off, pow(obs.y_off, 2) - pow(obs.y_rad + model->SIZE + model->SAFE_DIS, 2));
+		std::pair<float, float> aoe = calcQuad(
+				pow(obs.x_off, 2) - pow(obs.x_rad + model->SIZE + model->SAFE_DIS, 2),
+				-2 * obs.x_off * obs.y_off,
+				pow(obs.y_off, 2) - pow(obs.y_rad + model->SIZE + model->SAFE_DIS, 2));
 		//Unfortunately, trig can't handle quadrents very well, so we have to do it ourselves
 		if (obs.y_off - obs.y_rad - model->SIZE - model->SAFE_DIS < 0)
 		{
@@ -642,18 +661,21 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 			{
 				//std::cout << "top right" << std::endl;
 				aoe.first = -M_PI + atan(aoe.first);
-			} else
+			}
+			else
 			{
 				//std::cout << "top left" << std::endl;
 				aoe.first = atan(aoe.first);
 			}
-		} else
+		}
+		else
 		{
 			if (obs.x_off - obs.x_rad - model->SIZE - model->SAFE_DIS < 0)
 			{
 				//std::cout << "bottom right" << std::endl;
 				aoe.first = M_PI + atan(aoe.first);
-			} else
+			}
+			else
 			{
 				//std::cout << "bottom left" << std::endl;
 				aoe.first = atan(aoe.first);
@@ -665,24 +687,28 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 			{
 				//std::cout << "top right" << std::endl;
 				aoe.second = -M_PI + atan(aoe.second);
-			} else
+			}
+			else
 			{
 				//std::cout << "top left" << std::endl;
 				aoe.second = atan(aoe.second);
 			}
-		} else
+		}
+		else
 		{
 			if (obs.x_off + obs.x_rad + model->SIZE + model->SAFE_DIS < 0)
 			{
 				//std::cout << "bottom right" << std::endl;
 				aoe.second = M_PI + atan(aoe.second);
-			} else
+			}
+			else
 			{
 				//std::cout << "bottom left" << std::endl;
 				aoe.second = atan(aoe.second);
 			}
 		}
-		std::cout << "dead zones: " << aoe.first << " - " << aoe.second << std::endl;
+		std::cout << "dead zones: " << aoe.first << " - " << aoe.second
+				<< std::endl;
 		std::pair<std::pair<float, float>, AliceStructs::obj> to_push;
 		to_push.first = aoe;
 		to_push.second = obs;
@@ -691,51 +717,82 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 	return dead_zones;
 }
 
+struct vector_2f
+{
+	double x, y;
+	double dx, dy;
+};
+typedef vector_2f vector2f_t;
+
+#include <math.h>
+
+#define magnitude(a) ((double) sqrt(pow(a.dx - a.x,2) + pow(a.dy - a.y, 2)))
+#define getUVect(a) (magnitude(a) != 0 ? (vector2f_t){a.x,a.y,a.dx / magnitude(a), a.dy / magnitude(a)} : (vector2f_t){0,0,0,0})
+
+vector2f_t findIntersect(vector2f_t a, vector2f_t b)
+{
+	double slope = (a.dy * b.dx) / (a.dx * b.dy);
+	double x_intercept = (slope * a.x - b.x) / (slope - 1);
+	vector2f_t vect;
+	vect.x = x_intercept;
+	vect.y = (a.dy / a.dx) * (x_intercept - a.x) + a.y;
+	vect.dx = 0;
+	vect.dy = 0;
+	return vect;
+}
+
 bool Rules::avoidNeighbors()
 {
 	bool to_return = false;
 	for (auto &bot : model->neighbors)
 	{
-		float x_int = ((bot.y - bot.tar_y) / (bot.x - bot.tar_x) * bot.x
-				- (model->cur_pose.y - model->goTo.y) / (model->cur_pose.x - model->goTo.y) * model->cur_pose.x - bot.y
-				+ model->cur_pose.y)
-				/ ((bot.y - bot.tar_y) / (bot.x - bot.tar_x)
-						- (model->cur_pose.y - model->goTo.y) / (model->cur_pose.x - model->goTo.x));
-		float y_int = ((bot.x - bot.tar_x) / (bot.y - bot.tar_y) * bot.y
-				- (model->cur_pose.x - model->goTo.x) / (model->cur_pose.y - model->goTo.y) * model->cur_pose.y
-				+ model->cur_pose.x - bot.x)
-				/ ((bot.x - bot.tar_x) / (bot.y - bot.tar_y)
-						- (model->cur_pose.x - model->goTo.x) / (model->cur_pose.y - model->goTo.y));
-		float self_tti = (model->cur_pose.heading - atan2(model->goTo.y, model->goTo.x) / model->MAX_AV
-				+ calcDis(x_int, y_int, model->cur_pose.x, model->cur_pose.y) / model->MAX_LV);
-		float bot_tti = (bot.ang - atan2(bot.tar_y, bot.tar_x) / model->MAX_AV
-				+ calcDis(x_int, y_int, bot.x, bot.y) / model->MAX_LV);
-		if (abs(self_tti - bot_tti) < checkTiming(x_int, y_int, bot) / model->MAX_LV)
+		vector2f_t vec_bot = (vector2f_t ) { bot.x, bot.y, bot.tar_x, bot.tar_y };
+		vector2f_t vec_crr = (vector2f_t ) { model->cur_pose.x, model->cur_pose.y,
+						model->goTo.x, model->goTo.y };
+		vec_bot = getUVect(vec_bot);
+		vec_crr = getUVect(vec_crr);
+		vector2f_t circle_center = findIntersect(vec_bot, vec_crr);
+
+		double self_tti = circle_center.x / vec_crr.dx;
+		double bot_tti = circle_center.x / vec_bot.dx;
+
+		if (abs(self_tti - bot_tti)
+				< checkTiming(circle_center.x, circle_center.y, bot) / model->MAX_LV)
 		{
-			std::pair<float, float> slopes = calcQuad(pow(model->cur_pose.x - x_int, 2) - pow(margin, 2),
-					2 * (model->cur_pose.x - x_int) * (model->cur_pose.y - y_int),
-					pow(model->cur_pose.y - y_int, 2) - pow(margin, 2));
+			std::pair<float, float> slopes = calcQuad(
+					pow(model->cur_pose.x - circle_center.x, 2) - pow(margin, 2),
+					2 * (model->cur_pose.x - circle_center.x)
+							* (model->cur_pose.y - circle_center.y),
+					pow(model->cur_pose.y - circle_center.y, 2) - pow(margin, 2));
+
+#define genTarget(pair, pair_pos) \
+		pair.first = (slopes.pair_pos * model->cur_pose.x - model->cur_pose.y\
+							+ circle_center.x / slopes.pair_pos + circle_center.y)\
+							/ (1 / slopes.pair_pos + slopes.pair_pos);\
+		pair.second = (slopes.pair_pos * circle_center.y + circle_center.x\
+							+ model->cur_pose.y / slopes.pair_pos - model->cur_pose.x)\
+							/ (1 / slopes.pair_pos + slopes.pair_pos);\
+
 			std::pair<float, float> new_tar_1;
-			new_tar_1.first = (slopes.first * model->cur_pose.x - model->cur_pose.y + x_int / slopes.first + y_int)
-					/ (1 / slopes.first + slopes.first);
-			new_tar_1.second = (slopes.first * y_int + x_int + model->cur_pose.y / slopes.first - model->cur_pose.x)
-					/ (1 / slopes.first + slopes.first);
+			genTarget(new_tar_1, first);
+
 			std::pair<float, float> new_tar_2;
-			new_tar_2.first = (slopes.second * model->cur_pose.x - model->cur_pose.y + x_int / slopes.second + y_int)
-					/ (1 / slopes.second + slopes.second);
-			new_tar_2.second = (slopes.second * y_int + x_int + model->cur_pose.y / slopes.second - model->cur_pose.x)
-					/ (1 / slopes.second + slopes.second);
+			genTarget(new_tar_2, second);
+
 			std::pair<float, float> new_tar;
 			if (calcDis(new_tar_1.first, new_tar_1.second, bot.x, bot.y)
 					< calcDis(new_tar_2.first, new_tar_2.second, bot.x, bot.y))
 			{
 				new_tar = new_tar_1;
-			} else
+			}
+			else
 			{
 				new_tar = new_tar_2;
 			}
-			if (calcDis(new_tar.first, new_tar.second, model->cur_pose.x, model->cur_pose.y)
-					< calcDis(model->goTo.x, model->goTo.y, model->cur_pose.x, model->cur_pose.y))
+			if (calcDis(new_tar.first, new_tar.second, model->cur_pose.x,
+					model->cur_pose.y)
+					< calcDis(model->goTo.x, model->goTo.y, model->cur_pose.x,
+							model->cur_pose.y))
 			{
 				model->goTo.x = new_tar.first;
 				model->goTo.y = new_tar.second;
@@ -748,21 +805,31 @@ bool Rules::avoidNeighbors()
 
 float Rules::checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot)
 {
-	float tcpx = -pow(pow(margin, 2) / (pow((bot.tar_x - bot.x) / (bot.y - bot.tar_y), 2) + 1), 0.5) + _x_int;
-	float tcpy = -pow(pow(margin, 2) / (pow((bot.y - bot.tar_y) / (bot.tar_x - bot.x), 2) + 1), 0.5) + _y_int;
-	float adj_x_int = (-(model->cur_pose.y - model->goTo.y) / (model->cur_pose.x - model->goTo.x) * model->cur_pose.x
-			+ model->cur_pose.y + (bot.y - bot.tar_y) / (bot.x - bot.tar_x) * tcpx - tcpy)
+	float tcpx = -pow(
+			pow(margin, 2) / (pow((bot.tar_x - bot.x) / (bot.y - bot.tar_y), 2) + 1),
+			0.5) + _x_int;
+	float tcpy = -pow(
+			pow(margin, 2) / (pow((bot.y - bot.tar_y) / (bot.tar_x - bot.x), 2) + 1),
+			0.5) + _y_int;
+	float adj_x_int = (-(model->cur_pose.y - model->goTo.y)
+			/ (model->cur_pose.x - model->goTo.x) * model->cur_pose.x
+			+ model->cur_pose.y + (bot.y - bot.tar_y) / (bot.x - bot.tar_x) * tcpx
+			- tcpy)
 			/ ((bot.y - bot.tar_y) / (bot.x - bot.tar_x)
-					- (model->cur_pose.y - model->goTo.y) / (model->cur_pose.x - model->goTo.x));
+					- (model->cur_pose.y - model->goTo.y)
+							/ (model->cur_pose.x - model->goTo.x));
 	float adj_y_int = (-(bot.x - bot.tar_x) / (bot.y - bot.tar_y) * tcpy + tcpx
-			+ (model->cur_pose.x - model->goTo.x) / (model->cur_pose.y - model->goTo.y) * model->cur_pose.y
+			+ (model->cur_pose.x - model->goTo.x)
+					/ (model->cur_pose.y - model->goTo.y) * model->cur_pose.y
 			- model->cur_pose.x)
-			/ ((model->cur_pose.x - model->goTo.x) / (model->cur_pose.y - model->goTo.y)
+			/ ((model->cur_pose.x - model->goTo.x)
+					/ (model->cur_pose.y - model->goTo.y)
 					- (bot.x - bot.tar_x) / (bot.y - bot.tar_y));
 	if ((bot.y - bot.tar_y) / (bot.x - bot.tar_x) > 0)
 	{
 		return -calcDis(adj_x_int, adj_y_int, _x_int, _y_int);
-	} else
+	}
+	else
 	{
 		return calcDis(adj_x_int, adj_y_int, _x_int, _y_int);
 	}
