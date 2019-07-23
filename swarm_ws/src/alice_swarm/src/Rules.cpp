@@ -717,18 +717,6 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 	return dead_zones;
 }
 
-struct vector_2f
-{
-	double x, y;
-	double dx, dy;
-};
-typedef vector_2f vector2f_t;
-
-#include <math.h>
-
-#define magnitude(a) ((double) sqrt(pow(a.dx - a.x,2) + pow(a.dy - a.y, 2)))
-#define getUVect(a) (magnitude(a) != 0 ? (vector2f_t){a.x,a.y,a.dx / magnitude(a), a.dy / magnitude(a)} : (vector2f_t){0,0,0,0})
-
 vector2f_t findIntersect(vector2f_t a, vector2f_t b)
 {
 	double slope = (a.dy * b.dx) / (a.dx * b.dy);
@@ -746,9 +734,9 @@ bool Rules::avoidNeighbors()
 	bool to_return = false;
 	for (auto &bot : model->neighbors)
 	{
-		vector2f_t vec_bot = (vector2f_t ) { bot.x, bot.y, bot.tar_x, bot.tar_y };
-		vector2f_t vec_crr = (vector2f_t ) { model->cur_pose.x, model->cur_pose.y,
-						model->goTo.x, model->goTo.y };
+		vector2f_t vec_bot = { bot.x, bot.y, bot.tar_x, bot.tar_y };
+		vector2f_t vec_crr = { model->cur_pose.x, model->cur_pose.y, model->goTo.x,
+				model->goTo.y };
 		vec_bot = getUVect(vec_bot);
 		vec_crr = getUVect(vec_crr);
 		vector2f_t circle_center = findIntersect(vec_bot, vec_crr);
@@ -757,7 +745,7 @@ bool Rules::avoidNeighbors()
 		double bot_tti = circle_center.x / vec_bot.dx;
 
 		if (abs(self_tti - bot_tti)
-				< checkTiming(circle_center.x, circle_center.y, bot) / model->MAX_LV)
+				< checkTiming(circle_center, vec_bot) / model->MAX_LV)
 		{
 			std::pair<float, float> slopes = calcQuad(
 					pow(model->cur_pose.x - circle_center.x, 2) - pow(margin, 2),
@@ -803,50 +791,26 @@ bool Rules::avoidNeighbors()
 	return to_return;
 }
 
-float Rules::checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot)
+float Rules::checkTiming(vector2f_t center, vector2f_t bot)
 {
-//	float tcpx = -pow(
-//			pow(margin, 2) / (pow((bot.tar_x - bot.x) / (bot.y - bot.tar_y), 2) + 1),
-//			0.5) + _x_int;
-//	float tcpy = -pow(
-//			pow(margin, 2) / (pow((bot.y - bot.tar_y) / (bot.tar_x - bot.x), 2) + 1),
-//			0.5) + _y_int;
-#define getTCPComp(comp, other) (-pow(\
-	pow(margin, 2) / (pow((bot.tar_##comp - bot.comp) / (bot.other - bot.tar_##other), 2) + 1),\
-	0.5) + _##comp##_int)
+	vector2f_t conjunct = { center.x, center.y, -bot.dy, bot.dx }; // same point in perpendicular direction
+	conjunct = getUVect(conjunct);
+	vector2f_t new_center = { conjunct.dx * margin + conjunct.x, conjunct.dy
+			* margin + conjunct.y, 0, 0 };
 
-	float tcpx = getTCPComp(x, y);
-	float tcpy = getTCPComp(y, x);
+	vector2f_t parallel = { new_center.x, new_center.y, center.dx, center.dy };
+	vector2f_t vec_crr = { model->cur_pose.x, model->cur_pose.y, model->goTo.x,
+			model->goTo.y };
+	vec_crr = getUVect(vec_crr);
 
-	float adj_x_int = (-(model->cur_pose.y - model->goTo.y)
-			/ (model->cur_pose.x - model->goTo.x) * model->cur_pose.x
-			+ model->cur_pose.y + (bot.y - bot.tar_y) / (bot.x - bot.tar_x) * tcpx
-			- tcpy)
-			/ ((bot.y - bot.tar_y) / (bot.x - bot.tar_x)
-					- (model->cur_pose.y - model->goTo.y)
-							/ (model->cur_pose.x - model->goTo.x));
-	float adj_y_int = (-(bot.x - bot.tar_x) / (bot.y - bot.tar_y) * tcpy + tcpx
-			+ (model->cur_pose.x - model->goTo.x)
-					/ (model->cur_pose.y - model->goTo.y) * model->cur_pose.y
-			- model->cur_pose.x)
-			/ ((model->cur_pose.x - model->goTo.x)
-					/ (model->cur_pose.y - model->goTo.y)
-					- (bot.x - bot.tar_x) / (bot.y - bot.tar_y));
-	if ((bot.y - bot.tar_y) / (bot.x - bot.tar_x) > 0)
+	vector2f_t adj = findIntersect(vec_crr, parallel);
+
+	if (bot.dy > 0)
 	{
-		return -calcDis(adj_x_int, adj_y_int, _x_int, _y_int);
+		return -calcDis(adj.x, adj.y, center.x, center.y);
 	}
 	else
 	{
-		return calcDis(adj_x_int, adj_y_int, _x_int, _y_int);
+		return calcDis(adj.x, adj.y, center.x, center.y);
 	}
 }
-/*
- void Rules::checkForProblems()
- {
- if (model.priority->size() != (int) UNUSED)
- {
- std::cout << "--------------ERROR: priority vector from <hawk_sim> does not have "
- "the priorities for each state in <enum State>------------------" << std::endl;
- }
- }*/

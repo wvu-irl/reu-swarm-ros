@@ -14,6 +14,18 @@
 #include "Model.h"
 
 
+struct vector_2f
+{
+	double x, y;
+	double dx, dy;
+};
+typedef vector_2f vector2f_t;
+
+#include <math.h>
+
+#define magnitude(a) ((double) sqrt(pow(a.dx - a.x,2) + pow(a.dy - a.y, 2)))
+#define getUVect(a) (magnitude(a) != 0 ? (vector2f_t){a.x,a.y,a.dx / magnitude(a), a.dy / magnitude(a)} : (vector2f_t){0,0,0,0})
+
 class Rules
 {
 private:
@@ -64,7 +76,7 @@ public:
 	/*
 	* Checks whether two robots will collide
 	*/
-	float checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot);
+	float checkTiming(vector2f_t center, vector2f_t bot);
 
 	/*
 	 * The part of obstacle avoidance that always runs. Checks if any part of the environment has changed enough (or the robot's divergence from the predicted path)
