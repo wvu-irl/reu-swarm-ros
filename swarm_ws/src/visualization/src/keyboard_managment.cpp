@@ -16,6 +16,10 @@ using namespace std::chrono;
 #include <iostream>
 #endif
 
+ros::Publisher *add_pub, *rem_pub, *loc_pub;
+wvu_swarm_std_msgs::map_levels *universe;
+quadrilateral_t table;
+
 static wvu_swarm_std_msgs::obstacle *g_selected;
 static double x, y;
 
@@ -25,6 +29,22 @@ enum MODE
 };
 
 static MODE editMode = None;
+
+void interaction::init(ros::Publisher *_add_pub, ros::Publisher *_rem_pub,
+		ros::Publisher *_loc_pub, wvu_swarm_std_msgs::map_levels *_universe,
+		quadrilateral_t _table)
+{
+	add_pub = _add_pub;
+	rem_pub = _rem_pub;
+	loc_pub = _loc_pub;
+	universe = _universe;
+	table = _table;
+}
+
+void interaction::updateUni(wvu_swarm_std_msgs::map_levels *_universe)
+{
+	universe = _universe;
+}
 
 sf::Vector2f interaction::getMouseCordinate(sf::Vector2f initial,
 		quadrilateral_t trap)
@@ -63,7 +83,7 @@ void addNewFunk()
 	n_obs.characteristic = charac;
 	n_obs.level = g_draw_level;
 
-	interaction::add_pub.publish(n_obs);
+	add_pub->publish(n_obs);
 }
 
 void remove()
@@ -75,7 +95,7 @@ void remove()
 #if DEBUG
 		ROS_INFO("Removing: %s", str.data.c_str());
 #endif
-		interaction::rem_pub.publish(str);
+		rem_pub->publish(str);
 		ROS_INFO("Removed: %s", str.data.c_str());
 	}
 }
@@ -164,7 +184,7 @@ void interaction::mousePressedEvent(sf::Event e)
 					sizeof(wvu_swarm_std_msgs::obstacle));
 
 	closest->characteristic =
-			interaction::universe->levels[map_ns::COMBINED].functions[0];
+			universe->levels[map_ns::COMBINED].functions[0];
 
 	closest->level = 0;
 
@@ -172,17 +192,17 @@ void interaction::mousePressedEvent(sf::Event e)
 
 	int level = -1, funk = -1;
 
-	for (size_t i = 0; i < interaction::universe->levels.size(); i++)
+	for (size_t i = 0; i < universe->levels.size(); i++)
 	{
-		for (size_t j = 0; j < interaction::universe->levels.at(i).functions.size();
+		for (size_t j = 0; j < universe->levels.at(i).functions.size();
 				j++)
 		{
 			sf::Vector2f tst(
-					interaction::universe->levels[i].functions[j].ellipse.offset_x,
-					interaction::universe->levels[i].functions[j].ellipse.offset_y);
+					universe->levels[i].functions[j].ellipse.offset_x,
+					universe->levels[i].functions[j].ellipse.offset_y);
 			if (funk == -1 || distance(ellip, mouse) > distance(tst, mouse))
 			{
-				closest->characteristic = interaction::universe->levels[i].functions[j];
+				closest->characteristic = universe->levels[i].functions[j];
 				closest->level = i;
 				ellip = sf::Vector2f(closest->characteristic.ellipse.offset_x,
 						closest->characteristic.ellipse.offset_y);
@@ -202,7 +222,7 @@ void interaction::mousePressedEvent(sf::Event e)
 #endif
 
 	g_selected->characteristic =
-			interaction::universe->levels[level].functions[funk];
+			universe->levels[level].functions[funk];
 
 #if DEBUG
 	puts("Set function");
@@ -227,7 +247,7 @@ void interaction::mouseMovedEvent(sf::Event e)
 	puts("Mouse moved");
 #endif
 	sf::Vector2f mloc = interaction::getMouseCordinate(
-			sf::Vector2f(e.mouseMove.x, e.mouseMove.y), interaction::table);
+			sf::Vector2f(e.mouseMove.x, e.mouseMove.y), table);
 
 	x = mloc.x;
 	y = mloc.y;
@@ -237,13 +257,13 @@ void interaction::mouseMovedEvent(sf::Event e)
 	pnt.y = y;
 	pnt.z = 0;
 
-	interaction::loc_pub.publish(pnt);
+	loc_pub->publish(pnt);
 
 	if (g_selected != NULL)
 	{
 		g_selected->characteristic.ellipse.offset_x = x;
 		g_selected->characteristic.ellipse.offset_y = y;
-		interaction::add_pub.publish(*g_selected);
+		add_pub->publish(*g_selected);
 
 #if DEBUG
 		printf("Moved %s to (%0.3lf, %0.3lf)\n",
@@ -274,6 +294,6 @@ void interaction::scrollWheelMoved(sf::Event e)
 		default:
 			return;
 		}
-		interaction::add_pub.publish(*g_selected);
+		add_pub->publish(*g_selected);
 	}
 }
