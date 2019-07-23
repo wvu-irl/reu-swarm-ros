@@ -31,13 +31,44 @@
 	<node pkg="alice_swarm" type="InterHub" name="inter_hub"
 		output="screen" />
 
-	<node pkg="contour_node" type="mapping" name="contour_map"
-		output="screen" />
 	<node pkg="visualization" type="alice_pov_main" name="map_debug"
 		output="screen" />
 
 	<!-- Launching server node -->
 	<node pkg="swarm_server" name="ard_serv"
 		type="ros_to_arduino_server" output="screen" />
+		
+	<node ns="vis" pkg="contour_node" type="mapping" name="map" output="screen">
+		<param name="use_keyboard" value="true" type="bool"/>
+	</node>
+
+	<node ns="vis" pkg="visualization" type="table_vis" name="table"
+		output="screen">
+
+		<param name="use_keyboard" value="true" type="bool"/>
+
+		<!-- Location of assets and config files respectively -->
+		<param name="asset_path"
+			value="/home/the_pun_king/git/reu-swarm-ros/swarm_ws/src/visualization/assets"
+			type="str" />
+		<param name="config_path"
+			value="/home/the_pun_king/git/reu-swarm-ros/swarm_ws/src/visualization/cfg/calib.config"
+			type="str" />
+
+		<!-- Background - setting to "None" will not draw a background - setting 
+			to "Contour" will draw a contour map - setting to a file path will draw the 
+			image in the path -->
+		<param name="background" value="Contour" type="str" />
+		
+		<param name="num_levels" value="9" type="int"/>
+		<param name="range_top" value="20.0" type="double"/>
+		<param name="range_bottom" value="-20.0" type="double"/>
+		
+		<rosparam param="color_levels">[-20, -16, -12,  -8,  -4,    0,   4,   8,  12,  16,  20]</rosparam>
+		<rosparam param="color_reds"  >[  0,   0,   0, 127, 127,  255, 255, 255,   0,   0,   0]</rosparam>
+		<rosparam param="color_greens">[  0, 127, 127, 127,   0,  255,   0, 255, 255, 255,   0]</rosparam>
+		<rosparam param="color_blues" >[127, 127,   0,   0,   0,  255,   0,   0,   0, 255, 255]</rosparam>
+		
+	</node>
 
 </launch>
