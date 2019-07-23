@@ -805,12 +805,19 @@ bool Rules::avoidNeighbors()
 
 float Rules::checkTiming(float _x_int, float _y_int, AliceStructs::neighbor bot)
 {
-	float tcpx = -pow(
-			pow(margin, 2) / (pow((bot.tar_x - bot.x) / (bot.y - bot.tar_y), 2) + 1),
-			0.5) + _x_int;
-	float tcpy = -pow(
-			pow(margin, 2) / (pow((bot.y - bot.tar_y) / (bot.tar_x - bot.x), 2) + 1),
-			0.5) + _y_int;
+//	float tcpx = -pow(
+//			pow(margin, 2) / (pow((bot.tar_x - bot.x) / (bot.y - bot.tar_y), 2) + 1),
+//			0.5) + _x_int;
+//	float tcpy = -pow(
+//			pow(margin, 2) / (pow((bot.y - bot.tar_y) / (bot.tar_x - bot.x), 2) + 1),
+//			0.5) + _y_int;
+#define getTCPComp(comp, other) (-pow(\
+	pow(margin, 2) / (pow((bot.tar_##comp - bot.comp) / (bot.other - bot.tar_##other), 2) + 1),\
+	0.5) + _##comp##_int)
+
+	float tcpx = getTCPComp(x, y);
+	float tcpy = getTCPComp(y, x);
+
 	float adj_x_int = (-(model->cur_pose.y - model->goTo.y)
 			/ (model->cur_pose.x - model->goTo.x) * model->cur_pose.x
 			+ model->cur_pose.y + (bot.y - bot.tar_y) / (bot.x - bot.tar_x) * tcpx
