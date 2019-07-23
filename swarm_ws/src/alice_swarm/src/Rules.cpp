@@ -10,6 +10,14 @@
 #define DEBUG_schange 0
 #define DEBUG_charging 0
 
+typedef AliceStructs::vector_2f vector2f_t;
+
+#define CURR_VECT ((vector2f_t) { model->cur_pose.x, model->cur_pose.y, model->goTo.x,\
+				model->goTo.y })
+
+#define magnitude(a) ((double) sqrt(pow(a.dx - a.x,2) + pow(a.dy - a.y, 2)))
+#define getUVect(a) (magnitude(a) != 0 ? (vector2f_t){a.x,a.y,a.dx / magnitude(a), a.dy / magnitude(a)} : (vector2f_t){0,0,0,0})
+
 Rules::Rules()
 {
 	state = REST;
@@ -418,83 +426,6 @@ bool Rules::checkCollisions()
 	cur_go_to = findPath(cur_go_to, findDeadZones());
 }
 //-----------------------------------------------------------------------------------------
-//bool Rules::changeState()
-//{ //finds highest priority in list and coorespoinding state.
-//	bool result;
-//	float highest_prior = 0;
-//	int highest_i;
-//	for(int i = 0; i < UNUSED; i ++)
-//	{
-//		if(model.priority->at(i) > highest_prior)
-//		{
-//			highest_prior = model.priority->at(i);
-//			highest_i = i;
-//		}
-//	}
-//
-//#if DEBUG_schange
-//	std::cout<<"==========Pre adjustment===========\n";
-//	std::cout<<"state: "<<(int)state<<std::endl;
-//	std::cout<<"highest_i: "<<highest_i<<std::endl;
-//	std::cout<<"priority:  "<<highest_prior<<std::endl;
-//	std::cout<<"=====================\n";
-//#endif
-//
-//	if(highest_i != (int)state) //if a different state has higher priority
-//	{
-//		result = true;
-//		state = (State)highest_i; //this has been verified to produce the correct output.
-//
-//#if DEBUG_schange
-//		std::cout<<"==========Post adjustment===========\n";
-//		std::cout<<"state: "<<(int)state<<std::endl;
-//		std::cout<<"highest_i: "<<highest_i<<std::endl;
-//		std::cout<<"priority:  "<<highest_prior<<std::endl;
-//		std::cout<<"=====================\n";
-//#endif
-//
-//	}
-//	else
-//	{
-//		result = false;
-//	}
-//	return result;
-//}
-//
-//bool Rules::updateWaypoint() //checks if action should be taken (if near goTo or new rule has higher priority).
-//{//priority received in order {REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}.
-//	std::cout << model.goTo.x << model.goTo.y << std::endl;
-//	bool changed; //tells you if priorities of rules have changed.
-//	bool take_action = false; //only made true if near waypoint, or if state priorities change.
-//
-//	float tolerance = 1; //arbitrary limit of how close the bot needs to get to a waypoint for it to count as reaching it.
-//	std::pair<float,float> waypoint = model.transformFir(model.goTo.x,model.goTo.y);
-//	float r = sqrt(pow(waypoint.first - model.cur_pose.x,2) + pow(waypoint.second - model.cur_pose.y,2));
-//
-//	if(r<tolerance) //if inside
-//	{
-//		changed = changeState();
-//		take_action = true;
-//		std::cout<<(changed? "true" : "false")<<std::endl;
-//	}
-//	else if(changeState())
-//	{
-//		changed = true;
-//		take_action = true;
-//	}
-//	if(take_action)
-//	{
-//		switch((int)state)
-//		{
-//			case 1: charge();
-//			case 2:	findContour();
-//			case 3: goToTar();
-//			case 4: explore();
-//			default: rest();
-//		}
-//	}
-//	return take_action;
-//}
 
 float Rules::calcDis(float _x1, float _y1, float _x2, float _y2)
 {
@@ -509,30 +440,6 @@ std::pair<float, float> Rules::calcQuad(float a, float b, float c)
 	return to_return;
 }
 
-/*
- bool Rules::checkBlocked()
- {
- for (auto &zone : findDeadZones())
- {
- if (zone.first.first < atan2(model.goTo.y, model.goTo.x) < zone.first.second
- || zone.first.first > atan2(model.goTo.y, model.goTo.x) > zone.first.second)
- {
- return true;
- }
- }
- return false;
- }
-
- //std::string Rules::checkBattery(std::string state)
- //{
- //	float acceptable_lvl = model.battery_lvl * 0.2;
- //	if(model.battery_lvl < acceptable_lvl && state != "charging")
- //	{
- //		state = "needs_charging";
- //	}
- //	return state;
- //}
- */
 AliceStructs::pnt Rules::findPath(AliceStructs::pnt waypnt,
 		std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones)
 {
@@ -735,8 +642,7 @@ bool Rules::avoidNeighbors()
 	for (auto &bot : model->neighbors)
 	{
 		vector2f_t vec_bot = { bot.x, bot.y, bot.tar_x, bot.tar_y };
-		vector2f_t vec_crr = { model->cur_pose.x, model->cur_pose.y, model->goTo.x,
-				model->goTo.y };
+		vector2f_t vec_crr = CURR_VECT;
 		vec_bot = getUVect(vec_bot);
 		vec_crr = getUVect(vec_crr);
 		vector2f_t circle_center = findIntersect(vec_bot, vec_crr);
@@ -747,43 +653,19 @@ bool Rules::avoidNeighbors()
 		if (abs(self_tti - bot_tti)
 				< checkTiming(circle_center, vec_bot) / model->MAX_LV)
 		{
-			std::pair<float, float> slopes = calcQuad(
-					pow(model->cur_pose.x - circle_center.x, 2) - pow(margin, 2),
-					2 * (model->cur_pose.x - circle_center.x)
-							* (model->cur_pose.y - circle_center.y),
-					pow(model->cur_pose.y - circle_center.y, 2) - pow(margin, 2));
+			vector2f_t conjunct = { circle_center.x, circle_center.y, -vec_bot.dy,
+					vec_bot.dx }; // same point in perpendicular direction
+			conjunct = getUVect(conjunct);
+			vector2f_t new_center = { conjunct.dx * margin + conjunct.x, conjunct.dy
+					* margin + conjunct.y, 0, 0 };
 
-#define genTarget(pair, pair_pos) \
-		pair.first = (slopes.pair_pos * model->cur_pose.x - model->cur_pose.y\
-							+ circle_center.x / slopes.pair_pos + circle_center.y)\
-							/ (1 / slopes.pair_pos + slopes.pair_pos);\
-		pair.second = (slopes.pair_pos * circle_center.y + circle_center.x\
-							+ model->cur_pose.y / slopes.pair_pos - model->cur_pose.x)\
-							/ (1 / slopes.pair_pos + slopes.pair_pos);\
-
-			std::pair<float, float> new_tar_1;
-			genTarget(new_tar_1, first);
-
-			std::pair<float, float> new_tar_2;
-			genTarget(new_tar_2, second);
-
-			std::pair<float, float> new_tar;
-			if (calcDis(new_tar_1.first, new_tar_1.second, bot.x, bot.y)
-					< calcDis(new_tar_2.first, new_tar_2.second, bot.x, bot.y))
-			{
-				new_tar = new_tar_1;
-			}
-			else
-			{
-				new_tar = new_tar_2;
-			}
-			if (calcDis(new_tar.first, new_tar.second, model->cur_pose.x,
+			if (calcDis(new_center.x, new_center.y, model->cur_pose.x,
 					model->cur_pose.y)
 					< calcDis(model->goTo.x, model->goTo.y, model->cur_pose.x,
 							model->cur_pose.y))
 			{
-				model->goTo.x = new_tar.first;
-				model->goTo.y = new_tar.second;
+				model->goTo.x = new_center.x;
+				model->goTo.y = new_center.y;
 				to_return = true;
 			}
 		}
@@ -799,8 +681,7 @@ float Rules::checkTiming(vector2f_t center, vector2f_t bot)
 			* margin + conjunct.y, 0, 0 };
 
 	vector2f_t parallel = { new_center.x, new_center.y, center.dx, center.dy };
-	vector2f_t vec_crr = { model->cur_pose.x, model->cur_pose.y, model->goTo.x,
-			model->goTo.y };
+	vector2f_t vec_crr = CURR_VECT;
 	vec_crr = getUVect(vec_crr);
 
 	vector2f_t adj = findIntersect(vec_crr, parallel);

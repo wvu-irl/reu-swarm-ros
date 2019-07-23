@@ -4,7 +4,6 @@
  * A finite state machine that takes data from the model and outputs vectors.
  *
  * Author: Casey Edmonds-Estes
- * If you have questions, email me: cedmonds2018@gmail.com
  */
 
 #ifndef RULES_H
@@ -13,23 +12,10 @@
 #include "aliceStructs.h"
 #include "Model.h"
 
-
-struct vector_2f
-{
-	double x, y;
-	double dx, dy;
-};
-typedef vector_2f vector2f_t;
-
-#include <math.h>
-
-#define magnitude(a) ((double) sqrt(pow(a.dx - a.x,2) + pow(a.dy - a.y, 2)))
-#define getUVect(a) (magnitude(a) != 0 ? (vector2f_t){a.x,a.y,a.dx / magnitude(a), a.dy / magnitude(a)} : (vector2f_t){0,0,0,0})
-
 class Rules
 {
 private:
-	bool first_time=true; //We need this because sometimes somehow the goTo is initialized with a bullshit value
+	bool first_time = true; //We need this because sometimes somehow the goTo is initialized with a bullshit value
 	void init(Model &_model);
 
 	/*
@@ -46,14 +32,17 @@ public:
 
 	Rules(Model &_model);
 
-	enum State{REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED}; // always keep UNUSED at the back of the array.
+	enum State
+	{
+		REST, CHARGE, CONTOUR, TARGET, EXPLORE, UNUSED
+	}; // always keep UNUSED at the back of the array.
 	State state;
 	std::string collision_state;
 	AliceStructs::vel final_vel;
 	std::vector<float> testers;
 	Model *model;
-	float margin = 4;//2*model.SIZE + model.SAFE_DIS; this won't work the way you want it to, you have it defined before model is initialezed
-	std::pair<float,float> cur_go_to;
+	float margin = 4; //2*model.SIZE + model.SAFE_DIS; this won't work the way you want it to, you have it defined before model is initialezed
+	AliceStructs::pnt cur_go_to;
 	/*
 	 * Determines which state Alice is in
 	 */
@@ -74,9 +63,9 @@ public:
 	bool checkBlocked();
 
 	/*
-	* Checks whether two robots will collide
-	*/
-	float checkTiming(vector2f_t center, vector2f_t bot);
+	 * Checks whether two robots will collide
+	 */
+	float checkTiming(struct AliceStructs::vector_2f center, struct AliceStructs::vector_2f bot);
 
 	/*
 	 * The part of obstacle avoidance that always runs. Checks if any part of the environment has changed enough (or the robot's divergence from the predicted path)
@@ -110,14 +99,13 @@ public:
 	/*
 	 * Finds an adjusted angle to drive at given a set of blocked zones
 	 */
-	AliceStructs::pnt findPath(AliceStructs::pnt waypnt, std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones);
+	AliceStructs::pnt findPath(AliceStructs::pnt waypnt,
+			std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> dead_zones);
 
 	/*
 	 * Finds the set of angles at which the robot will collide with an obstacle
 	 */
 	std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> findDeadZones();
-
-
 
 	/*
 	 * Avoids other robots dynamically

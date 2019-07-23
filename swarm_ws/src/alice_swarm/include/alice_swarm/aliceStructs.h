@@ -16,6 +16,12 @@
 namespace AliceStructs
 {
 
+struct vector_2f
+{
+	double x, y;
+	double dx, dy;
+};
+
 /*
  * A vector for Alice to follow
  */
