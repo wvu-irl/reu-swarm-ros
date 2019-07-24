@@ -540,7 +540,7 @@ AliceStructs::pnt Rules::findPath(AliceStructs::pnt waypnt,
 	for (auto &zone : dead_zones)
 	{
 		//std::cout << "found a zone" << std::endl;
-		if (pow(pow(zone.second.x_off, 2) + pow(zone.second.y_off, 2), 0.5) < pow(pow(waypnt.x, 2) + pow(waypnt.y, 2), 0.5))
+		if (pow(pow(zone.second.x_off, 2) + pow(zone.second.y_off, 2), 0.5) - zone.second.x_rad < pow(pow(waypnt.x, 2) + pow(waypnt.y, 2), 0.5))
 		{
 			//std::cout << "it's on the proper side of me" << std::endl;
 			//std::cout << fabs(tf) << " first " << fabs(zone.first.first) << " second " << fabs(zone.first.second) << std::endl;
