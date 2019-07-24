@@ -7,16 +7,42 @@
 #include <iostream>
 #include <bits/stdc++.h>
 
+#define DEBUG_NEI_AVD 1
+#if DEBUG_NEI_AVD
+#include <chrono>
+using namespace std::chrono;
+
+#include <string.h>
+
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+#define PRINTF_DBG(form, dat...) \
+	printf(("[%d.%09d] (%s:%d) " + std::string(form) + "\n").c_str(),\
+			duration_cast<seconds>(high_resolution_clock::now().time_since_epoch()).count(),\
+			duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000\
+			, __FILENAME__, __LINE__, dat\
+			)
+
+#define PRINT_DBG(form) \
+	printf(("[%d.%09d] (%s:%d) " + std::string(form) + "\n").c_str(),\
+			duration_cast<seconds>(high_resolution_clock::now().time_since_epoch()).count(),\
+			duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000\
+			, __FILENAME__, __LINE__\
+			)
+#endif
+
 #define DEBUG_schange 0
 #define DEBUG_charging 0
 
 typedef AliceStructs::vector_2f vector2f_t;
 
-#define CURR_VECT ((vector2f_t) { model->cur_pose.x, model->cur_pose.y, model->goTo.x,\
-				model->goTo.y })
+#define CURR_VECT ((vector2f_t) { model->cur_pose.x, model->cur_pose.y, model->goTo.x - model->cur_pose.x,\
+				model->goTo.y - model->cur_pose.y, true})
+
+#define FAIL_VECT ((vector2f_t){0,0,0,0,false})
 
 #define magnitude(a) ((double) sqrt(pow(a.dx - a.x,2) + pow(a.dy - a.y, 2)))
-#define getUVect(a) (magnitude(a) != 0 ? (vector2f_t){a.x,a.y,a.dx / magnitude(a), a.dy / magnitude(a)} : (vector2f_t){0,0,0,0})
+#define getUVect(a) (magnitude(a) != 0 ? (vector2f_t){a.x,a.y,a.dx / magnitude(a), a.dy / magnitude(a), true} : (vector2f_t){0,0,0,0, false})
 
 Rules::Rules()
 {
@@ -51,12 +77,18 @@ void Rules::stateLoop(Model &_model)
 	{
 		std::vector<AliceStructs::pnt> go_to_list;
 
+		////////////////////////////////////////////////////////////////////////////////////////
+		//                           RULES, THIS IS WHERE TEHY GO                             //
+		////////////////////////////////////////////////////////////////////////////////////////
+
 		// add other rules here
 		go_to_list.push_back(findContour());
 		go_to_list.push_back(goToTar());
 		//go_to_list.push_back(charge());
 		go_to_list.push_back(rest());
 		go_to_list.push_back(explore());
+
+		////////////////////////////////////////////////////////////////////////////////////////
 
 		float temp = -1;
 		int rulenum = -1;
@@ -81,10 +113,11 @@ void Rules::stateLoop(Model &_model)
 //			std::cout<<"-----------------------------------"<<std::endl;
 			rulenum2++;
 		}
-		std::cout << "using rule " << rulenum << std::endl;
+//		std::cout << "using rule " << rulenum << std::endl;
 		_model.goTo.time = ros::Time::now(); //time stamps when the goto is created
 	}
 	goToTimeout();
+	avoidNeighbors();
 	std::pair<float, float> back_to_fir = _model.transformCur(cur_go_to.x,
 			cur_go_to.y);
 	_model.goTo.x = back_to_fir.first;
@@ -626,26 +659,67 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 
 vector2f_t findIntersect(vector2f_t a, vector2f_t b)
 {
-	double slope = (a.dy * b.dx) / (a.dx * b.dy);
-	double x_intercept = (slope * a.x - b.x) / (slope - 1);
+	double x_intercept;
 	vector2f_t vect;
+	if (a.dx == 0 && b.dx == 0)
+	{
+		return FAIL_VECT;
+	}
+	else if (a.dx == 0)
+	{
+		x_intercept = a.x;
+		vect.y = (b.dy / b.dx) * (x_intercept - b.x) + b.y;
+	}
+	else if (b.dx == 0)
+	{
+		x_intercept = b.x;
+		vect.y = (a.dy / a.dx) * (x_intercept - a.x) + a.y;
+	}
+	else
+	{
+		double m0 = a.dy / a.dx;
+		double m1 = b.dy / b.dx;
+
+		if (m0 == m1)
+		{
+			return FAIL_VECT;
+		}
+
+		x_intercept = (b.y - a.y + a.x * m0 - b.x * m1) / (m0 - m1);
+		vect.y = (a.dy / a.dx) * (x_intercept - a.x) + a.y;
+	}
+
 	vect.x = x_intercept;
-	vect.y = (a.dy / a.dx) * (x_intercept - a.x) + a.y;
 	vect.dx = 0;
 	vect.dy = 0;
+	vect.valid = true;
 	return vect;
 }
 
 bool Rules::avoidNeighbors()
 {
 	bool to_return = false;
-	for (auto &bot : model->neighbors)
+	for (size_t i = 0; i < model->neighbors.size(); i++)
 	{
-		vector2f_t vec_bot = { bot.x, bot.y, bot.tar_x, bot.tar_y };
+		AliceStructs::neighbor &bot = model->neighbors[i];
+		struct AliceStructs::vector_2f vec_bot;
+		vec_bot.x = bot.x;
+		vec_bot.y = bot.y;
+		vec_bot.dx = (double) bot.tar_x - (double) bot.x;
+		vec_bot.dy = (double) bot.tar_y - (double) bot.y;
+		vec_bot.valid = true;
 		vector2f_t vec_crr = CURR_VECT;
 		vec_bot = getUVect(vec_bot);
 		vec_crr = getUVect(vec_crr);
 		vector2f_t circle_center = findIntersect(vec_bot, vec_crr);
+
+		if (!circle_center.valid)
+		{
+#if DEBUG_NEI_AVD
+			PRINT_DBG("invalid");
+#endif
+			continue;
+		}
 
 		double self_tti = circle_center.x / vec_crr.dx;
 		double bot_tti = circle_center.x / vec_bot.dx;
@@ -653,19 +727,30 @@ bool Rules::avoidNeighbors()
 		if (abs(self_tti - bot_tti)
 				< checkTiming(circle_center, vec_bot) / model->MAX_LV)
 		{
+			// TODO reverse the order of these to make the parallel
+			// parallel to the curr not the bot
 			vector2f_t conjunct = { circle_center.x, circle_center.y, -vec_bot.dy,
-					vec_bot.dx }; // same point in perpendicular direction
+					vec_bot.dx, true }; // same point in perpendicular direction
 			conjunct = getUVect(conjunct);
-			vector2f_t new_center = { conjunct.dx * margin + conjunct.x, conjunct.dy
-					* margin + conjunct.y, 0, 0 };
+			vector2f_t new_center = { conjunct.dx * -margin + conjunct.x, conjunct.dy
+					* -margin + conjunct.y, 0, 0, true };
 
+			///
 			if (calcDis(new_center.x, new_center.y, model->cur_pose.x,
 					model->cur_pose.y)
 					< calcDis(model->goTo.x, model->goTo.y, model->cur_pose.x,
 							model->cur_pose.y))
 			{
-				model->goTo.x = new_center.x;
-				model->goTo.y = new_center.y;
+				vector2f_t parallel = { new_center.x, new_center.y, center.dx,
+						center.dy, true };
+
+				vector2f_t adj = findIntersect(vec_bot, parallel);
+				model->goTo.x = adj.x;
+				model->goTo.y = adj.y;
+#if DEBUG_NEI_AVD
+				PRINTF_DBG("Got nieghbor %d -- %d", i, model->neighbors.size() - 1);
+				PRINTF_DBG("New waypoint: (%lf, %lf)", new_center.x, new_center.y);
+#endif
 				to_return = true;
 			}
 		}
@@ -677,10 +762,11 @@ float Rules::checkTiming(vector2f_t center, vector2f_t bot)
 {
 	vector2f_t conjunct = { center.x, center.y, -bot.dy, bot.dx }; // same point in perpendicular direction
 	conjunct = getUVect(conjunct);
-	vector2f_t new_center = { conjunct.dx * margin + conjunct.x, conjunct.dy
-			* margin + conjunct.y, 0, 0 };
+	vector2f_t new_center = { conjunct.dx * -margin + conjunct.x, conjunct.dy
+			* -margin + conjunct.y, 0, 0, true };
 
-	vector2f_t parallel = { new_center.x, new_center.y, center.dx, center.dy };
+	vector2f_t parallel =
+			{ new_center.x, new_center.y, center.dx, center.dy, true };
 	vector2f_t vec_crr = CURR_VECT;
 	vec_crr = getUVect(vec_crr);
 

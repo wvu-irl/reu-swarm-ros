@@ -40,8 +40,10 @@ std::pair<float, float> Model::transformCur(float _x, float _y) //goes from cur 
 	float abs_y = _x * sin(cur_pose.heading) + _y * cos(cur_pose.heading);
 	abs_x = abs_x + cur_pose.x - first_pose.x;
 	abs_y = abs_y + cur_pose.y - first_pose.y;
-	to_return.first = abs_x * cos(-first_pose.heading) + abs_y * -sin(-first_pose.heading);
-	to_return.second = abs_x * sin(-first_pose.heading) + abs_y * cos(-first_pose.heading);
+	to_return.first = abs_x * cos(-first_pose.heading)
+			+ abs_y * -sin(-first_pose.heading);
+	to_return.second = abs_x * sin(-first_pose.heading)
+			+ abs_y * cos(-first_pose.heading);
 	return to_return;
 }
 
@@ -52,19 +54,24 @@ std::pair<float, float> Model::transformFir(float _x, float _y) //goes from firs
 	float abs_y = _x * sin(first_pose.heading) + _y * cos(first_pose.heading);
 	abs_x = abs_x - cur_pose.x + first_pose.x;
 	abs_y = abs_y - cur_pose.y + first_pose.y;
-	to_return.first = abs_x * cos(-cur_pose.heading) + abs_y * -sin(-cur_pose.heading);
-	to_return.second = abs_x * sin(-cur_pose.heading) + abs_y * cos(-cur_pose.heading);
+	to_return.first = abs_x * cos(-cur_pose.heading)
+			+ abs_y * -sin(-cur_pose.heading);
+	to_return.second = abs_x * sin(-cur_pose.heading)
+			+ abs_y * cos(-cur_pose.heading);
 	return to_return;
 }
-std::pair<float, float> Model::transformFtF(float _x, float _y, float _ox, float _oy, float _oheading)
+std::pair<float, float> Model::transformFtF(float _x, float _y, float _ox,
+		float _oy, float _oheading)
 { //convert specified frame to first frame.
 	std::pair<float, float> to_return;
 	float abs_x = _x * cos(_oheading) + _y * -sin(_oheading);
 	float abs_y = _x * sin(_oheading) + _y * cos(_oheading);
 	abs_x = abs_x - first_pose.x + _ox;
 	abs_y = abs_y - first_pose.y + _oy;
-	to_return.first = abs_x * cos(-first_pose.heading) + abs_y * -sin(-first_pose.heading);
-	to_return.second = abs_x * sin(-first_pose.heading) + abs_y * cos(-first_pose.heading);
+	to_return.first = abs_x * cos(-first_pose.heading)
+			+ abs_y * -sin(-first_pose.heading);
+	to_return.second = abs_x * sin(-first_pose.heading)
+			+ abs_y * cos(-first_pose.heading);
 	return to_return;
 }
 
@@ -74,9 +81,12 @@ void Model::archiveAdd(AliceStructs::mail &_toAdd)
 	//placing objects that exited fov
 	for (auto &obstacle : obstacles)
 	{
-		if (pow(pow(obstacle.x_off - _toAdd.xpos, 2) + pow(obstacle.y_off - _toAdd.ypos, 2), 0.5) > vision)
+		if (pow(
+				pow(obstacle.x_off - _toAdd.xpos, 2)
+						+ pow(obstacle.y_off - _toAdd.ypos, 2), 0.5) > vision)
 		{
-			std::pair<float, float> temp = transformCur(obstacle.x_off, obstacle.y_off);
+			std::pair<float, float> temp = transformCur(obstacle.x_off,
+					obstacle.y_off);
 			obstacle.x_off = temp.first;
 			obstacle.y_off = temp.second;
 			obstacle.time = time;
@@ -87,7 +97,8 @@ void Model::archiveAdd(AliceStructs::mail &_toAdd)
 	}
 	for (auto &tar : targets)
 	{
-		if (pow(pow(tar.x - _toAdd.xpos, 2) + pow(tar.y - _toAdd.ypos, 2), 0.5) > vision)
+		if (pow(pow(tar.x - _toAdd.xpos, 2) + pow(tar.y - _toAdd.ypos, 2), 0.5)
+				> vision)
 		{
 			tar.time = time;
 			//tar.observer_name = name;
@@ -124,22 +135,31 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 		first_pose.heading = _toAdd.heading;
 		first = false;
 		energy = 1; //initializes energy on the first pose recorded.
-	} else
+	}
+	else
 	{
 		//bandaging method, instead of passing this value through the software, for simplicity we just keep energy updated here only.
-		if (energy > 0)//only update if the bot isn't dead
+		if (energy > 0) //only update if the bot isn't dead
 		{
-			if (_toAdd.contVal< 0.0001) energy -= (float) (_toAdd.time.toSec() - time.toSec()) * 0.05;//sets the rate of energy decrease constant
-			else energy -= (float) (_toAdd.time.toSec() - time.toSec()) * (-0.01-0.01*log10(_toAdd.contVal));//sets the rate of energy decrease, scaled with the contour value.
-			for (auto &tar : _toAdd.targets){
-					if (pow(pow(tar.x,2)+pow(tar.y,2),0.5)<5){ //if in eating distance,
-						energy+=(float) (_toAdd.time.toSec() - time.toSec())*1;//eats food much faster than the rate of energy decrease.
-					}
+			if (_toAdd.contVal < 0.0001)
+				energy -= (float) (_toAdd.time.toSec() - time.toSec()) * 0.05; //sets the rate of energy decrease constant
+			else
+				energy -= (float) (_toAdd.time.toSec() - time.toSec())
+						* (-0.01 - 0.01 * log10(_toAdd.contVal)); //sets the rate of energy decrease, scaled with the contour value.
+			for (auto &tar : _toAdd.targets)
+			{
+				if (pow(pow(tar.x, 2) + pow(tar.y, 2), 0.5) < 5)
+				{ //if in eating distance,
+					energy += (float) (_toAdd.time.toSec() - time.toSec()) * 1; //eats food much faster than the rate of energy decrease.
+				}
 			}
 			if (energy > 1)
 				energy = 1; //caps energy at 1.
 		}
-	std::cout << energy << std::endl;
+//		std::cout << name << " NRG: " << energy << std::endl;
+
+		if (name == 0)
+			energy = 0;
 	}
 	cur_pose.x = _toAdd.xpos; //update the current pose
 	cur_pose.y = _toAdd.ypos;
@@ -191,7 +211,8 @@ void Model::pass(ros::Publisher _pub)
 		//sets the obstacle's pose in terms of the first frame
 		obs_msg.ellipse.x_rad = obstacle.x_rad;
 		obs_msg.ellipse.y_rad = obstacle.y_rad;
-		obs_msg.ellipse.theta_offset = obstacle.theta_offset - (cur_pose.heading - first_pose.heading);
+		obs_msg.ellipse.theta_offset = obstacle.theta_offset
+				- (cur_pose.heading - first_pose.heading);
 		std::pair<float, float> temp = transformCur(obstacle.x_off, obstacle.y_off);
 		obs_msg.ellipse.offset_x = temp.first;
 		obs_msg.ellipse.offset_y = temp.second;
@@ -281,9 +302,11 @@ void Model::pass(ros::Publisher _pub)
 	_pub.publish(map);
 }
 
-void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<int> &_ids)
+void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps,
+		std::vector<int> &_ids)
 {
 	auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of map
+	neighbor_go_to.clear(); //for now, reset the goto's every run around, no memory
 	int max_pass = 3; //maximum amount of information transfers
 	for (int i = 0; i < neighbors.size(); i++) //iterate through neighbors
 	{
@@ -292,10 +315,14 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 			if (_ids.at(j) == neighbors.at(i).name) //to find matching id's, we can only use the information provided by neighbors
 			{
 				//adds the neighbor's waypoint, transformed to its' own first frame.
-				std::pair<float, float> n_go_to = transformFtF(_maps.at(j).goToX, _maps.at(j).goToY, _maps.at(j).ox,
-						_maps.at(j).oy, _maps.at(j).oheading);
-				neighbors.at(i).tar_x=n_go_to.first;
-				neighbors.at(i).tar_y=n_go_to.second;
+				std::pair<float, float> n_go_to = transformFtF(_maps.at(j).goToX,
+						_maps.at(j).goToY, _maps.at(j).ox, _maps.at(j).oy,
+						_maps.at(j).oheading);
+				AliceStructs::pnt n_pnt;
+				n_pnt.x = n_go_to.first;
+				n_pnt.y = n_go_to.second;
+				n_pnt.observer_names.push_back(neighbors.at(i).name);
+				neighbor_go_to.push_back(n_pnt);
 
 				for (int k = 0; k < _maps.at(j).obsMsg.size(); k++) //copy over all of the obstacles
 				{
@@ -310,7 +337,8 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 						if (!repeat_observer) //as long as the observer was someone else
 						{
 							AliceStructs::obj obstacle;
-							std::pair<float, float> temp2 = transformFtF(temp.ellipse.offset_x, temp.ellipse.offset_y, _maps.at(j).ox,
+							std::pair<float, float> temp2 = transformFtF(
+									temp.ellipse.offset_x, temp.ellipse.offset_y, _maps.at(j).ox,
 									_maps.at(j).oy, _maps.at(j).oheading);
 							obstacle.x_off = temp2.first;
 							obstacle.y_off = temp2.second;
@@ -332,28 +360,29 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 				{
 					wvu_swarm_std_msgs::tar_msg temp = _maps.at(j).tarMsg.at(k);
 					if (temp.observer.size() < 0) // we intend on not passing around targets (the food)
-						{
-					bool repeat_observer = false; //for finding whether or not this robot has already received this bit of information
-					for (int i = 0; i < temp.observer.size(); i++)
-						if (temp.observer.at(i) == name)
-							repeat_observer = true;
-
-					if (!repeat_observer) //as long as the observer was someone else
 					{
-						AliceStructs::pnt target;
-						std::pair<float, float> temp2 = transformFtF(temp.pointMail.x, temp.pointMail.y, _maps.at(j).ox,
-								_maps.at(j).oy, _maps.at(j).oheading);
-						target.x = temp2.first;
-						target.y = temp2.second;
-						target.time = temp.time;
-						//copies the list of observers
+						bool repeat_observer = false; //for finding whether or not this robot has already received this bit of information
 						for (int i = 0; i < temp.observer.size(); i++)
+							if (temp.observer.at(i) == name)
+								repeat_observer = true;
+
+						if (!repeat_observer) //as long as the observer was someone else
 						{
-							target.observer_names.push_back(temp.observer.at(i));
+							AliceStructs::pnt target;
+							std::pair<float, float> temp2 = transformFtF(temp.pointMail.x,
+									temp.pointMail.y, _maps.at(j).ox, _maps.at(j).oy,
+									_maps.at(j).oheading);
+							target.x = temp2.first;
+							target.y = temp2.second;
+							target.time = temp.time;
+							//copies the list of observers
+							for (int i = 0; i < temp.observer.size(); i++)
+							{
+								target.observer_names.push_back(temp.observer.at(i));
+							}
+							archived_targets.push_back(target);
 						}
-						archived_targets.push_back(target);
 					}
-				}
 				}
 				for (int k = 0; k < _maps.at(j).contMsg.size(); k++) //copy over known contour points
 				{
@@ -369,8 +398,9 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 						if (!repeat_observer) //as long as the observer was someone else
 						{
 							AliceStructs::pose cont;
-							std::pair<float, float> temp2 = transformFtF(temp.pointMail.x, temp.pointMail.y, _maps.at(j).ox,
-									_maps.at(j).oy, _maps.at(j).oheading);
+							std::pair<float, float> temp2 = transformFtF(temp.pointMail.x,
+									temp.pointMail.y, _maps.at(j).ox, _maps.at(j).oy,
+									_maps.at(j).oheading);
 							cont.x = temp2.first;
 							cont.y = temp2.second;
 							cont.z = temp.contVal;
@@ -388,7 +418,8 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 		}
 	}
 	auto stop = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast < std::chrono::microseconds > (stop - start);
+	auto duration = std::chrono::duration_cast < std::chrono::microseconds
+			> (stop - start);
 //std::cout << "Time taken by srv: " << duration.count() << " microseconds" << std::endl;
 }
 
@@ -408,7 +439,8 @@ void Model::forgetContour(int TOLERANCE) //erases Contours based on time stamp o
 		if (time.sec - it->time.sec > 15) //if the data is old, delete it
 		{
 			it = archived_contour.erase(it);
-		} else
+		}
+		else
 		{
 			std::vector<AliceStructs::pose>::iterator iit = it; //second iterator for comparisons
 			iit++;
@@ -420,7 +452,8 @@ void Model::forgetContour(int TOLERANCE) //erases Contours based on time stamp o
 						std::swap(*iit, *it); //takes the newer data
 					iit = archived_contour.erase(iit);
 
-				} else
+				}
+				else
 					iit++;
 			}
 			it++;
@@ -438,10 +471,12 @@ void Model::forgetTargets(int TOLERANCE) //erases targets based on time stamp or
 		if (time.sec - it->time.sec > 15) //if the data is old, delete it
 		{
 			it = archived_targets.erase(it);
-		} else if (pow(pow(temp.first, 2) + pow(temp.second, 2), 0.5) < vision) //if the object should be visible from current position but isn't, delete it
+		}
+		else if (pow(pow(temp.first, 2) + pow(temp.second, 2), 0.5) < vision) //if the object should be visible from current position but isn't, delete it
 		{
 			it = archived_targets.erase(it);
-		} else
+		}
+		else
 		{
 			std::vector<AliceStructs::pnt>::iterator iit = it; //second iterator for comparisons
 			iit++;
@@ -453,7 +488,8 @@ void Model::forgetTargets(int TOLERANCE) //erases targets based on time stamp or
 						std::swap(*iit, *it); //takes the newer data
 					iit = archived_targets.erase(iit);
 
-				} else
+				}
+				else
 					iit++;
 			}
 			it++;
@@ -470,22 +506,26 @@ void Model::forgetObs(int TOLERANCE) //erases obstacles based on time stamp or d
 		if (time.sec - it->time.sec > 15) //if the data is old, delete it
 		{
 			it = archived_obstacles.erase(it);
-		} else if (pow(pow(temp.first, 2) + pow(temp.second, 2), 0.5) < vision) //if the object should be visible from current position but isn't, delete it
+		}
+		else if (pow(pow(temp.first, 2) + pow(temp.second, 2), 0.5) < vision) //if the object should be visible from current position but isn't, delete it
 		{
 			it = archived_obstacles.erase(it);
-		} else
+		}
+		else
 		{
 			std::vector<AliceStructs::obj>::iterator iit = it; //second iterator for comparisons
 			iit++;
 			while (iit != archived_obstacles.end()) //checks for repeat elements within the given tolerance
 			{
-				if (abs(iit->x_off - it->x_off) < TOLERANCE && abs(iit->y_off - it->y_off) < TOLERANCE)
+				if (abs(iit->x_off - it->x_off) < TOLERANCE
+						&& abs(iit->y_off - it->y_off) < TOLERANCE)
 				{
 					if (time.sec - it->time.sec > 1 && iit->time > it->time)
 						std::swap(*iit, *it); //takes the newer data
 					iit = archived_obstacles.erase(iit);
 
-				} else
+				}
+				else
 					iit++;
 			}
 			it++;

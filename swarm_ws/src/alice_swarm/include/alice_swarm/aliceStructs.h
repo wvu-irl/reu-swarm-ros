@@ -20,6 +20,7 @@ struct vector_2f
 {
 	double x, y;
 	double dx, dy;
+	bool valid;
 };
 
 /*
