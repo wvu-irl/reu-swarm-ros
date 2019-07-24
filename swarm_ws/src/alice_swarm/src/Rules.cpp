@@ -7,7 +7,7 @@
 #include <iostream>
 #include <bits/stdc++.h>
 
-#define DEBUG_NEI_AVD 1
+#define DEBUG_NEI_AVD 0
 #if DEBUG_NEI_AVD
 #include <chrono>
 using namespace std::chrono;
