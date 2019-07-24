@@ -29,6 +29,8 @@ using namespace std::chrono;
 			duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count() % 1000000000\
 			, __FILENAME__, __LINE__\
 			)
+
+#define PRINT_VEC(vec) PRINTF_DBG((std::string(#vec) + ": (%lf, %lf, %lf, %lf) : %d").c_str(), vec.x, vec.y, vec.dx, vec.dy, vec.valid)
 #endif
 
 #define DEBUG_schange 0
@@ -699,32 +701,46 @@ vector2f_t findIntersect(vector2f_t a, vector2f_t b)
 bool Rules::avoidNeighbors()
 {
 	bool to_return = false;
+	double close_dist = -1;
 	for (size_t i = 0; i < model->neighbors.size(); i++)
 	{
 		AliceStructs::neighbor &bot = model->neighbors[i];
-		vector2f_t vec_bot = { bot.x, bot.y, bot.tar_x, bot.tar_y , true};
-#if DEBUG_NEI_AVD
-		PRINTF_DBG("bot: ict: (%lf, %lf, %lf, %lf)", bot.x, bot.y, (double)bot.tar_x, (double)bot.tar_y);
-#endif
+		vector2f_t vec_bot = { bot.x, bot.y, bot.tar_x, bot.tar_y, true };
+
+		if (close_dist >= 0
+				&& calcDis(bot.x, bot.y, model->cur_pose.x, model->cur_pose.y)
+						> close_dist)
+			continue;
+
+		close_dist = calcDis(bot.x, bot.y, model->cur_pose.x, model->cur_pose.y);
+
 		vector2f_t vec_crr = CURR_VECT;
 		vec_bot = getUVect(vec_bot);
 		vec_crr = getUVect(vec_crr);
-		vector2f_t circle_center = findIntersect(vec_bot, vec_crr);
+		vector2f_t circle_center = findIntersect(vec_crr, vec_bot);
 
 		double self_tti = (circle_center.x - vec_crr.x) / vec_crr.dx;
 		double bot_tti = (circle_center.x - vec_bot.x) / vec_bot.dx;
 
 #if DEBUG_NEI_AVD
+		PRINT_VEC(vec_crr);
+		PRINTF_DBG("bot: (%lf, %lf, %lf, %lf)", bot.x, bot.y, (double )bot.tar_x,
+				(double )bot.tar_y);
+		PRINT_VEC(vec_bot);
+
+		PRINT_VEC(circle_center);
 		PRINTF_DBG("Bot: %i - tti_val: %lf < tim: %lf", model->name,
 				abs(self_tti - bot_tti),
 				checkTiming(circle_center, vec_bot) / model->MAX_LV);
 #endif
 
-		if (abs(self_tti - bot_tti)
-				< checkTiming(circle_center, vec_bot) / model->MAX_LV)
+		if (circle_center.valid
+				&& abs(self_tti - bot_tti)
+						< checkTiming(circle_center, vec_bot) / model->MAX_LV)
 		{
 #if DEBUG_NEI_AVD
-			PRINT_DBG("Avoiding");
+			PRINTF_DBG("Avoiding N:%d", i);
+			PRINTF_DBG("Margin %f", margin);
 #endif
 			vector2f_t conjunct = { circle_center.x, circle_center.y, -vec_bot.dy,
 					vec_bot.dx }; // same point in perpendicular direction
@@ -732,35 +748,49 @@ bool Rules::avoidNeighbors()
 			vector2f_t new_center = { conjunct.dx * -margin + conjunct.x, conjunct.dy
 					* -margin + conjunct.y, 0, 0 };
 
-			if (calcDis(new_center.x, new_center.y, model->cur_pose.x,
-					model->cur_pose.y)
-					< calcDis(model->goTo.x, model->goTo.y, model->cur_pose.x,
-							model->cur_pose.y))
-			{
-				model->goTo.x = new_center.x;
-				model->goTo.y = new_center.y;
-				to_return = true;
-			}
+			model->goTo.x = new_center.x;
+			model->goTo.y = new_center.y;
+#if DEBUG_NEI_AVD
+			PRINT_VEC(new_center);
+
+#endif
+			to_return = true;
 		}
+#if DEBUG_NEI_AVD
+		puts("");
+#endif
 	}
+#if DEBUG_NEI_AVD
+	puts("\n");
+#endif
 	return to_return;
 }
 
 float Rules::checkTiming(vector2f_t center, vector2f_t bot)
 {
-	vector2f_t conjunct = { center.x, center.y, -bot.dy, bot.dx }; // same point in perpendicular direction
-	conjunct = getUVect(conjunct);
+	vector2f_t conjunct = { center.x, center.y, -bot.dy, bot.dx, true }; // same point in perpendicular direction
+//	conjunct = getUVect(conjunct);
 	vector2f_t new_center = { conjunct.dx * -margin + conjunct.x, conjunct.dy
-			* -margin + conjunct.y, 0, 0 };
+			* -margin + conjunct.y, 0, 0, true };
 
-	vector2f_t parallel = { new_center.x, new_center.y, center.dx, center.dy };
+	vector2f_t parallel = { new_center.x, new_center.y, bot.dx, bot.dy, true };
 	vector2f_t vec_crr = CURR_VECT;
 	vec_crr = getUVect(vec_crr);
 
 	vector2f_t adj = findIntersect(vec_crr, parallel);
 
 #if DEBUG_NEI_AVD
-	PRINTF_DBG("Checking timing: ict: (%lf, %lf, %lf, %lf):%d", adj.x, adj.y, adj.dx, adj.dy, adj.valid);
+	if (adj.valid && center.valid)
+	{
+		printf("\033[35m");
+		PRINT_VEC(center);
+		PRINT_VEC(bot);
+		PRINT_VEC(conjunct);
+		PRINT_VEC(new_center);
+		PRINT_VEC(parallel);
+		PRINT_VEC(adj);
+		printf("\033[0m");
+	}
 #endif
 
 	if (bot.dy > 0)
