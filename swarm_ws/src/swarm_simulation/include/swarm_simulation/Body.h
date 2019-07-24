@@ -81,7 +81,6 @@ public:
     Pvector seek(Pvector v);
     void run(vector <Body> v);
     void update();
-    void flock(vector <Body> v);
     void borders();
     std::pair<float,float> borders(float _fx, float _fy);
     void seperation(vector<Body> _bodies);

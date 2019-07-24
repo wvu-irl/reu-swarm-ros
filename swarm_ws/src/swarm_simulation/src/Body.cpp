@@ -217,22 +217,6 @@ void Body::run(vector <Body> v)
 		borders();
 }
 
-// Applies the three laws to the flock of bodies
-void Body::flock(vector<Body> v)
-{
-//    Pvector sep = Separation(v);
-//    Pvector ali = Alignment(v);
-//    Pvector coh = Cohesion(v);
-//    // Arbitrarily weight these forces
-//    sep.mulScalar(1.5);
-//    ali.mulScalar(1.0); // Might need to alter weights for different characteristics
-//    coh.mulScalar(1.0);
-//    // Add the force vectors to acceleration
-//    applyForce(sep);
-//    applyForce(ali);
-//    applyForce(coh);
-}
-
 // Checks if bodies go out of the window and if so, wraps them around to
 // the other side.
 void Body::borders()
