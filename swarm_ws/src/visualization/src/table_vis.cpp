@@ -127,6 +127,7 @@ void drawObstacles(wvu_swarm_std_msgs::vicon_points points)
 void drawBots(wvu_swarm_std_msgs::vicon_bot_array bots)
 {
 	bots_pos.clear();
+	bot_ids.clear();
 	for (size_t i = 0; i < bots.poseVect.size(); i++)
 	{
 		// getting pose
