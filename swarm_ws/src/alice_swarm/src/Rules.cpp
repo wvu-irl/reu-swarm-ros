@@ -108,7 +108,7 @@ void Rules::stateLoop(Model &_model)
 //				std::cout<<"(x,y): "<<model->goTo.x<<","<<model->goTo.y<<std::endl;
 			}
 			//}
-			//	avoidCollisions();
+//				avoidCollisions();
 //			float mag = sqrt(pow(model->goTo.x,2) + pow(model->goTo.y,2));
 //			std::cout<<"(x,y): "<<model->goTo.x<<","<<model->goTo.y<<"| "<<mag<<std::endl;
 //			std::cout<<"priority "<<temp<<std::endl;
@@ -119,7 +119,7 @@ void Rules::stateLoop(Model &_model)
 		_model.goTo.time = ros::Time::now(); //time stamps when the goto is created
 	}
 	goToTimeout();
-	avoidNeighbors();
+	avoidCollisions();
 	std::pair<float, float> back_to_fir = _model.transformCur(cur_go_to.x,
 			cur_go_to.y);
 	_model.goTo.x = back_to_fir.first;
@@ -168,11 +168,11 @@ bool Rules::shouldLoop()
 void Rules::avoidCollisions()
 {
 	bool checker = true;
-	//while (checker)
-	//{
-	model->goTo = findPath(model->goTo, findDeadZones());
-	//checker = avoidNeighbors();
-	//}
+	while (checker && ros::ok())
+	{
+//		cur_go_to = findPath(cur_go_to, findDeadZones());
+		checker = avoidNeighbors();
+	}
 }
 //------------------Basic Rules------------------------------------------
 AliceStructs::pnt Rules::explore()
@@ -700,6 +700,13 @@ vector2f_t findIntersect(vector2f_t a, vector2f_t b)
 
 bool Rules::avoidNeighbors()
 {
+	margin = 2 * model->SIZE + model->SAFE_DIS;
+#if DEBUG_NEI_AVD
+	PRINT_DBG("Setting magin");
+	PRINTF_DBG("Size: %f , SAFE_DIS: %f --> M: %f", model->SIZE, model->SAFE_DIS,
+			margin);
+#endif
+
 	bool to_return = false;
 	double close_dist = -1;
 	for (size_t i = 0; i < model->neighbors.size(); i++)
@@ -737,7 +744,6 @@ bool Rules::avoidNeighbors()
 		PRINTF_DBG("Bot: %i - tti_val: %lf < tim: %lf", model->name,
 				abs(self_tti - bot_tti),
 				checkTiming(circle_center, vec_bot) / model->MAX_LV);
-		PRINTF_DBG("MAX_LV: %f", model->MAX_LV);
 #endif
 
 		if (circle_center.valid
@@ -753,13 +759,25 @@ bool Rules::avoidNeighbors()
 			vector2f_t new_center = { conjunct.dx * -margin + conjunct.x, conjunct.dy
 					* -margin + conjunct.y, 0, 0 };
 
-			model->goTo.x = new_center.x;
-			model->goTo.y = new_center.y;
-#if DEBUG_NEI_AVD
-			PRINT_VEC(conjunct);
-			PRINT_VEC(new_center);
+			vector2f_t parallel = { new_center.x, new_center.y, vec_bot.dx,
+					vec_bot.dy, true };
+			vector2f_t isct = findIntersect(parallel, vec_crr);
 
+			new_center.x = (new_center.x + isct.x) / 2;
+			new_center.y = (new_center.y + isct.y) / 2;
+
+			if (calcDis(new_center.x, new_center.y, vec_crr.x, vec_crr.y)
+					< calcDis(cur_go_to.x, cur_go_to.y, vec_crr.x, vec_crr.y))
+			{
+				cur_go_to.x = new_center.x;
+				cur_go_to.y = new_center.y;
+#if DEBUG_NEI_AVD
+				printf("\033[32m");
+				PRINT_VEC(conjunct);
+				PRINT_VEC(new_center);
+				printf("\033[0m");
 #endif
+			}
 			to_return = true;
 		}
 #if DEBUG_NEI_AVD
@@ -799,7 +817,7 @@ float Rules::checkTiming(vector2f_t center, vector2f_t bot)
 
 	if (bot.dy > 0)
 	{
-		return -calcDis(adj.x, adj.y, center.x, center.y);
+		return -1;
 	}
 	else
 	{
