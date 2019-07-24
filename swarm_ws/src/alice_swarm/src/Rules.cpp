@@ -44,7 +44,7 @@ void Rules::stateLoop(Model &_model)
 
 		// add other rules here
 		go_to_list.push_back(findContour());
-		//go_to_list.push_back(goToTar());
+		go_to_list.push_back(goToTar());
 		//go_to_list.push_back(charge());
 		go_to_list.push_back(rest());
 		go_to_list.push_back(explore());
@@ -65,13 +65,13 @@ void Rules::stateLoop(Model &_model)
 //				std::cout<<"(x,y): "<<model->goTo.x<<","<<model->goTo.y<<std::endl;
 			}
 			//}
+			//	avoidCollisions();
 //			float mag = sqrt(pow(model->goTo.x,2) + pow(model->goTo.y,2));
 //			std::cout<<"(x,y): "<<model->goTo.x<<","<<model->goTo.y<<"| "<<mag<<std::endl;
 //			std::cout<<"priority "<<temp<<std::endl;
 //			std::cout<<"-----------------------------------"<<std::endl;
 			rulenum2++;
 		}
-		avoidCollisions();
 		std::cout << "using rule " << rulenum << std::endl;
 		_model.goTo.time = ros::Time::now(); //time stamps when the goto is created
 	}
@@ -125,7 +125,7 @@ void Rules::avoidCollisions()
 	bool checker = true;
 	//while (checker)
 	//{
-	cur_go_to = findPath(cur_go_to, findDeadZones());
+	model->goTo = findPath(model->goTo, findDeadZones());
 	//checker = avoidNeighbors();
 	//}
 }
@@ -148,8 +148,8 @@ AliceStructs::pnt Rules::explore()
 	float mag = calcDis(sum.first, sum.second, 0, 0);
 	if (mag > 0.001) // set the magnitude to 10 unless the vector is 0 (or very close).
 	{
-		sum.first *= 50 / mag;
-		sum.second *= 50 / mag;
+		sum.first *= 20 / mag;
+		sum.second *= 20 / mag;
 	}
 	AliceStructs::pnt to_return;
 	to_return.x = -sum.first;
@@ -533,38 +533,25 @@ AliceStructs::pnt Rules::findPath(AliceStructs::pnt waypnt,
 {
 	float tf = atan2(waypnt.y, waypnt.x);
 	AliceStructs::pnt to_return;
-	to_return.x = cur_go_to.x;
-	to_return.y = cur_go_to.y;
+	to_return.x = model->goTo.x;
+	to_return.y = model->goTo.y;
 	std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> blockers;
-	//std::cout << "finding path" << std::endl;
-	for (auto& zone : dead_zones)
+	std::cout << "finding path" << std::endl;
+	for (auto &zone : dead_zones)
 	{
-		//std::cout << zone.second.x_off << " " << zone.second.y_off << std::endl;
 		//std::cout << "found a zone" << std::endl;
 		if (pow(pow(zone.second.x_off, 2) + pow(zone.second.y_off, 2), 0.5) < pow(pow(waypnt.x, 2) + pow(waypnt.y, 2), 0.5))
 		{
 			//std::cout << "it's on the proper side of me" << std::endl;
-			//std::cout << tf << " first " << zone.first.first << " second " << zone.first.second << std::endl;
-			if ((fabs(zone.first.first - zone.first.second) < M_PI) && (
-					(zone.first.first < tf && tf < zone.first.second && zone.first.first < zone.first.second)
-				|| (zone.first.second < tf && tf < zone.first.first && zone.first.second < zone.first.first)))
+			//std::cout << fabs(tf) << " first " << fabs(zone.first.first) << " second " << fabs(zone.first.second) << std::endl;
+			if (((zone.first.first < tf && tf < zone.first.second) || (zone.first.second < tf && tf < zone.first.first))
+					|| ((fabs(zone.first.first - zone.first.second) > M_PI / 2)
+							&& ((fabs(tf) + M_PI / 12 > fabs(zone.first.first)) && (fabs(tf) + M_PI / 12 > fabs(zone.first.second)))))
 			{
 				std::cout << "it's in my way" << std::endl;
 				blockers.push_back(zone);
 			}
-			else if
-			((fabs(zone.first.first - zone.first.second) > M_PI) &&
-					 ((zone.first.first < zone.first.second && (zone.first.second < tf || zone.first.first > tf))
-				|| (zone.first.second < zone.first.first && (zone.first.second > tf || zone.first.first < tf))))
-			{
-				std::cout << "it's behind me" << std::endl;
-				blockers.push_back(zone);
-			}
 		}
-	}
-	if (blockers.size() == 0)
-	{
-		return waypnt;
 	}
 	std::pair<std::pair<float, AliceStructs::obj>, std::pair<float, AliceStructs::obj>> angles;
 	angles.first.first = 0;
@@ -576,31 +563,27 @@ AliceStructs::pnt Rules::findPath(AliceStructs::pnt waypnt,
 		//voltron(blocker)
 		if (blocker.first.first > blocker.first.second)
 		{
-			//std::cout << "First is greater" << std::endl;
-			if (fabs(blocker.first.first) > fabs(angles.first.first))
+			std::cout << "First is greater" << std::endl;
+			if (blocker.first.first > angles.first.first)
 			{
-				std::cout << "1 added properly" << std::endl;
 				angles.first.first = blocker.first.first;
 				angles.first.second = blocker.second;
 			}
-			if (fabs(blocker.first.second) > fabs(angles.second.first))
+			if (blocker.first.second < angles.second.first)
 			{
-				std::cout << "2 added properly" << std::endl;
 				angles.second.first = blocker.first.second;
 				angles.second.second = blocker.second;
 			}
 		} else
 		{
-			//std::cout << "Second is greater" << std::endl;
-			if (fabs(blocker.first.second) > fabs(angles.first.first))
+			std::cout << "Second is greater" << std::endl;
+			if (blocker.first.second > angles.first.first)
 			{
-				std::cout << "1 added properly" << std::endl;
 				angles.second.first = blocker.first.second;
 				angles.second.second = blocker.second;
 			}
-			if (fabs(blocker.first.first) > fabs(angles.second.first))
+			if (blocker.first.first < angles.second.first)
 			{
-				std::cout << "2 added properly" << std::endl;
 				angles.first.first = blocker.first.first;
 				angles.first.second = blocker.second;
 			}
@@ -620,17 +603,26 @@ AliceStructs::pnt Rules::findPath(AliceStructs::pnt waypnt,
 	std::cout << final.first << std::endl;
 	std::cout << "x: " << final.second.x_off << " y: " << final.second.y_off << std::endl;
 	std::cout << "q: " << final.second.x_rad << " p: " << final.second.y_rad << std::endl;
-	float m = tan(final.first);
-	//std::cout << "m: " << m << std::endl;
-	to_return.x = 0.5*(2*final.second.x_off/pow(final.second.x_rad, 2) + 2*final.second.y_off*m/pow(final.second.y_rad, 2))/
-			(1/pow(final.second.x_rad, 2) + pow(m, 2)/pow(final.second.y_rad, 2));
-	to_return.y = 0.5*(2*final.second.y_off/pow(final.second.y_rad, 2) + 2*final.second.x_off/(m*pow(final.second.x_rad, 2)))/
-			(1/pow(final.second.y_rad, 2) + 1/(pow(m, 2) * pow(final.second.x_rad, 2)));
-	/*=std::cout << "test: " << (2*final.second.y_off*m) << std::endl; */
-	//std::cout << to_add << std::endl;
-	to_return.x += cos(final.first) * final.second.x_rad;
-	to_return.y += sin(final.first) * final.second.y_rad;
-	std::cout << atan2(to_return.y, to_return.x) << std::endl;
+	if (final.first != tf)
+	{
+		float m = tan(final.first);
+		std::cout << "m: " << m << std::endl;
+		to_return.x =
+				0.5
+						* (2 * final.second.x_off / pow(final.second.x_rad, 2)
+								+ 2 * final.second.y_off * m / pow(final.second.y_rad, 2))
+						/ (1 / pow(final.second.x_rad, 2) + pow(m, 2) / pow(final.second.y_rad, 2));
+		to_return.y = 0.5
+				* (2 * final.second.y_off / pow(final.second.y_rad, 2)
+						+ 2 * final.second.x_off / (m * pow(final.second.x_rad, 2)))
+				/ (1 / pow(final.second.y_rad, 2) + 1 / (pow(m, 2) * pow(final.second.x_rad, 2)));
+		std::cout << "test: " << (2 * final.second.y_off * m) << std::endl;
+		std::cout << "x: " << to_return.x << " y: " << to_return.y << std::endl;
+		std::cout << atan2(to_return.y, to_return.x) << std::endl;
+	} else
+	{
+		to_return = model->goTo;
+	}
 	return to_return;
 }
 
@@ -641,7 +633,6 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 	{
 		//float obs.x_off = model->cur_pose.x - obs.x_off;
 		//float obs.y_off = model->cur_pose.y - obs.y_off;
-		//std::cout << "x: " << obs.x_off << " y: " << obs.y_off << std::endl;
 		std::pair<float, float> aoe = calcQuad(pow(obs.x_off, 2) - pow(obs.x_rad + model->SIZE + model->SAFE_DIS, 2),
 				-2 * obs.x_off * obs.y_off, pow(obs.y_off, 2) - pow(obs.y_rad + model->SIZE + model->SAFE_DIS, 2));
 		//Unfortunately, trig can't handle quadrents very well, so we have to do it ourselves
@@ -649,22 +640,22 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 		{
 			if (obs.x_off + obs.x_rad + model->SIZE + model->SAFE_DIS < 0)
 			{
-				std::cout << "top right" << std::endl;
+				//std::cout << "top right" << std::endl;
 				aoe.first = -M_PI + atan(aoe.first);
 			} else
 			{
-				std::cout << "top left" << std::endl;
+				//std::cout << "top left" << std::endl;
 				aoe.first = atan(aoe.first);
 			}
 		} else
 		{
 			if (obs.x_off - obs.x_rad - model->SIZE - model->SAFE_DIS < 0)
 			{
-				std::cout << "bottom right" << std::endl;
+				//std::cout << "bottom right" << std::endl;
 				aoe.first = M_PI + atan(aoe.first);
 			} else
 			{
-				std::cout << "bottom left" << std::endl;
+				//std::cout << "bottom left" << std::endl;
 				aoe.first = atan(aoe.first);
 			}
 		}
@@ -672,27 +663,26 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 		{
 			if (obs.x_off - obs.x_rad - model->SIZE - model->SAFE_DIS < 0)
 			{
-				std::cout << "top right" << std::endl;
+				//std::cout << "top right" << std::endl;
 				aoe.second = -M_PI + atan(aoe.second);
 			} else
 			{
-				std::cout << "top left" << std::endl;
+				//std::cout << "top left" << std::endl;
 				aoe.second = atan(aoe.second);
 			}
 		} else
 		{
 			if (obs.x_off + obs.x_rad + model->SIZE + model->SAFE_DIS < 0)
 			{
-				std::cout << "bottom right" << std::endl;
+				//std::cout << "bottom right" << std::endl;
 				aoe.second = M_PI + atan(aoe.second);
 			} else
 			{
-				std::cout << "bottom left" << std::endl;
+				//std::cout << "bottom left" << std::endl;
 				aoe.second = atan(aoe.second);
 			}
 		}
 		std::cout << "dead zones: " << aoe.first << " - " << aoe.second << std::endl;
-		//std::cout << "obj data: " << obs.x_off << " - " << obs.y_off << std::endl;
 		std::pair<std::pair<float, float>, AliceStructs::obj> to_push;
 		to_push.first = aoe;
 		to_push.second = obs;
@@ -700,7 +690,6 @@ std::vector<std::pair<std::pair<float, float>, AliceStructs::obj>> Rules::findDe
 	}
 	return dead_zones;
 }
-
 
 bool Rules::avoidNeighbors()
 {

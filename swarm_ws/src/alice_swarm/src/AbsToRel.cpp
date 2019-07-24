@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 
 	ros::Publisher pub = n.advertise < wvu_swarm_std_msgs::alice_mail_array> ("alice_mail_array", 1000);
 
-	ros::Rate loopRate(10); //sets the publishing rate
+	ros::Rate loopRate(20); //sets the publishing rate
 
 	Hub alice_hub(0); // Creates a hub object for the conversion
 
