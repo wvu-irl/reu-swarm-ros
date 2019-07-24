@@ -719,8 +719,13 @@ bool Rules::avoidNeighbors()
 		vec_crr = getUVect(vec_crr);
 		vector2f_t circle_center = findIntersect(vec_crr, vec_bot);
 
-		double self_tti = (circle_center.x - vec_crr.x) / vec_crr.dx;
-		double bot_tti = (circle_center.x - vec_bot.x) / vec_bot.dx;
+		float self_tti = (model->cur_pose.heading
+				- atan2(model->goTo.y, model->goTo.x) / model->MAX_AV
+				+ calcDis(circle_center.x, circle_center.y, model->cur_pose.x,
+						model->cur_pose.y) / model->MAX_LV);
+		float bot_tti = (bot.ang - atan2(bot.tar_y, bot.tar_x) / model->MAX_AV
+				+ calcDis(circle_center.x, circle_center.y, bot.x, bot.y)
+						/ model->MAX_LV);
 
 #if DEBUG_NEI_AVD
 		PRINT_VEC(vec_crr);
@@ -732,6 +737,7 @@ bool Rules::avoidNeighbors()
 		PRINTF_DBG("Bot: %i - tti_val: %lf < tim: %lf", model->name,
 				abs(self_tti - bot_tti),
 				checkTiming(circle_center, vec_bot) / model->MAX_LV);
+		PRINTF_DBG("MAX_LV: %f", model->MAX_LV);
 #endif
 
 		if (circle_center.valid
@@ -739,18 +745,18 @@ bool Rules::avoidNeighbors()
 						< checkTiming(circle_center, vec_bot) / model->MAX_LV)
 		{
 #if DEBUG_NEI_AVD
-			PRINTF_DBG("Avoiding N:%d", i);
-			PRINTF_DBG("Margin %f", margin);
+			PRINTF_DBG("%d Avoiding N:%d -> %d", model->name, i,
+					model->neighbors[i].name);
 #endif
 			vector2f_t conjunct = { circle_center.x, circle_center.y, -vec_bot.dy,
 					vec_bot.dx }; // same point in perpendicular direction
-			conjunct = getUVect(conjunct);
 			vector2f_t new_center = { conjunct.dx * -margin + conjunct.x, conjunct.dy
 					* -margin + conjunct.y, 0, 0 };
 
 			model->goTo.x = new_center.x;
 			model->goTo.y = new_center.y;
 #if DEBUG_NEI_AVD
+			PRINT_VEC(conjunct);
 			PRINT_VEC(new_center);
 
 #endif
@@ -783,8 +789,6 @@ float Rules::checkTiming(vector2f_t center, vector2f_t bot)
 	if (adj.valid && center.valid)
 	{
 		printf("\033[35m");
-		PRINT_VEC(center);
-		PRINT_VEC(bot);
 		PRINT_VEC(conjunct);
 		PRINT_VEC(new_center);
 		PRINT_VEC(parallel);

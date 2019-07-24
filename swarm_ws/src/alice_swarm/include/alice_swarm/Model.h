@@ -18,8 +18,8 @@ public:
 	/*
 	 * Constant values used mostly for path planning
 	 */
-	float MAX_LV;
-	float MAX_AV;
+	float MAX_LV = 5;
+	float MAX_AV = 5;
 	float SIZE = 5;
 	float SAFE_DIS = 2;
 

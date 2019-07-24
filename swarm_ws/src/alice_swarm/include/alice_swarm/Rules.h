@@ -41,7 +41,7 @@ public:
 	AliceStructs::vel final_vel;
 	std::vector<float> testers;
 	Model *model;
-	float margin = 4; //2*model.SIZE + model.SAFE_DIS; this won't work the way you want it to, you have it defined before model is initialezed
+	float margin = 5; //2*model.SIZE + model.SAFE_DIS; this won't work the way you want it to, you have it defined before model is initialezed
 	AliceStructs::pnt cur_go_to;
 	/*
 	 * Determines which state Alice is in
