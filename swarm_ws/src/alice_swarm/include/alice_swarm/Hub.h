@@ -17,7 +17,7 @@
 #include "alice_swarm/aliceStructs.h"
 #include <contour_node/level_description.h>
 
-typedef struct Bot //The Bot struct holds the pose of a robot, along with its distance from another.
+typedef struct Bot //The Bot struct holds the pose of a robot on the absolute frame, along with its distance from another.
 {
 	Bot() //Default Constructor
 	{
@@ -26,10 +26,10 @@ typedef struct Bot //The Bot struct holds the pose of a robot, along with its di
 		y = 0;
 		heading = 0;
 		distance = 10000;
-		swarm_id = -1;
+		swarm_id = -1; //deprecated
 	}
 
-	Bot(int _id, float _x, float _y, float _heading, float _distance,int _sid, ros::Time _time) //Alternate Constructor
+	Bot(int _id, float _x, float _y, float _heading, float _distance, int _sid, ros::Time _time) //Alternate Constructor
 	{
 		id = _id;
 
@@ -37,29 +37,26 @@ typedef struct Bot //The Bot struct holds the pose of a robot, along with its di
 		y = _y;
 		heading = _heading;
 		distance = _distance;
-		swarm_id=_sid;
-		time=_time;
+		swarm_id = _sid;
+		time = _time;
 	}
 
 	int id; //the id's are the 50 states, from 0 to 49
-	int swarm_id;//which swarm...
-	float x; //position
-	float y; //position
+	int swarm_id; //which swarm it's in
+	float x; //x position
+	float y; //y position
 	float heading; //in radians
-	float distance;
-	ros::Time time;
+	float distance; //
+	ros::Time time; //timestamp of the observation
 } Bot;
 
-bool compareTwoBots(Bot &a, Bot &b) // Reverses the > operator to sort smallest first instead
-{
-	return (float) a.distance > (float) b.distance;
-}
+static const int NEIGHBOR_COUNT = 4; // Maximum number of neighbors for each robot
+static const int VISION = 30; //Distance the robots can see
 
-//static const int BOT_COUNT = 50; // Number of bots in the system
-static const int NEIGHBOR_COUNT = 4; // Number of neighbors desired
-static const int VISION = 20;
-//Acts as a parser for the data coming out of the VICON or the simulation, turning the bundle of data into 50 packets
-// of individualized information for each swarm bot, allowing them to enact their agent level rules.
+/*
+ *Acts as a parser for the data coming out of the VICON or the simulation, turning the bundle of data into 50 packets
+ *of individualized information for each swarm bot, allowing them to enact their agent level rules.
+ */
 class Hub
 {
 
@@ -74,30 +71,18 @@ private:
 	std::vector<wvu_swarm_std_msgs::sensor_data> sensor_datas;
 
 	std::vector<Bot> bots; //holds locations of all of the bots
-	std::vector<std::vector<Bot>> neighbors; //holds locations of all of the closests bots relative to each other
 
-	//Finds the distance between a bot and some object
-	std::pair<float,float> getSeparation(Bot _bot, std::pair<float, float> _obs);
+	std::vector<std::vector<Bot>> neighbors; //holds locations of all of the neighboring bots relative to each other
+
+	std::pair<float, float> getSeparation(Bot _bot, std::pair<float, float> _obs); 	//Finds the distance between a bot and some object
+
 	void processVicon(); //Fills in bots[], converst vicon to just the pose data needed
-public:
-	std::vector<int> ridOrder; //holds the order of the id's of the bots
-
-
-	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?
-
-	//Adds the msgs gather from various topics to the private fields of Hub
-	void update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
-			wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f, wvu_swarm_std_msgs::chargers &_c,
-			wvu_swarm_std_msgs::energy &_e, wvu_swarm_std_msgs::sensor_data &_sd);
-
 
 	void updateSensorDatas(); //updates the sensor_datas vector by adding new elements, replacing old, and keeping order.
 
-	bool validRID(); //helper function for updateSensorDatas.
+	bool validRID(); //checks the sensor data comes from a robot currently in operation
 
-	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out botMail[]
-
-//	void printAliceMail(wvu_swarm_std_msgs::alice_mail_array _mail); //Prints mail for debug purposes
+	void findNeighbors(); // Finds each robot's nearest neighbors, and thus fills out the neighbors vector
 
 	void addFlowMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Adds the flows within a robot's VISION range
 
@@ -110,11 +95,18 @@ public:
 	void addContMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Gives each robot it's value on the contour map
 
 	void addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail); //Gives each robot charger station info
+public:
+	std::vector<int> ridOrder; //holds the order of the id's of the bots
+
+	Hub(int a); //Default constructor, dummy parameter is there for compile reasons?
+
+	//Adds the msgs gather from various topics to the private fields of Hub
+	void update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
+			wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f, wvu_swarm_std_msgs::chargers &_c,
+			wvu_swarm_std_msgs::energy &_e, wvu_swarm_std_msgs::sensor_data &_sd);
 
 	wvu_swarm_std_msgs::alice_mail_array getAliceMail(); //Gathers all the relative information for a robot into one msg
 
-	void clearHub(); //Clears bot information
+	void clearHub(); //Clears neighbor information
 };
-
-//#include "Hub.cpp"
 #endif

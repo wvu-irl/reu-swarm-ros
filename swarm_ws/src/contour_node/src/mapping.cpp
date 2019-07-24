@@ -31,8 +31,7 @@ const double boundsX = 25.0, boundsY = 50.0; // Bounds before the origin will st
 const double originShift = 0.02; // Rate to move the origin towards user's hand if out of bounds
 
 // Find x,y where the line passing between alpha and beta intercepts an xy plane at z
-geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
-		geometry_msgs::Point _beta, double _zed)
+geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha, geometry_msgs::Point _beta, double _zed)
 {
 	/* THEORY
 	 * Equation of line: r(t) = v*t+v0
@@ -46,13 +45,11 @@ geometry_msgs::Point findZIntercept(geometry_msgs::Point _alpha,
 	// Check if no solution
 	if (_alpha.z == _beta.z)
 	{
-		printf(
-				"\033[1;31mhand_pointer: \033[0;31mNo solution for intercept\033[0m\n");
+		printf("\033[1;31mhand_pointer: \033[0;31mNo solution for intercept\033[0m\n");
 		ret.x = 0;
 		ret.y = 0;
 		ret.z = 0;
-	}
-	else
+	} else
 	{
 		double t = (_zed - _alpha.z) / (_alpha.z - _beta.z);
 		double x = _alpha.x * (t + 1) - _beta.x * t;
@@ -70,8 +67,7 @@ static Universe universe; // creates a universe
 void additionCallback(wvu_swarm_std_msgs::obstacle obs)
 {
 #if DEBUG
-	std::cout << "Adding: " << obs.characteristic << " , " << obs.level
-			<< std::endl;
+	std::cout << "Adding: " << obs.characteristic << " , " << obs.level << std::endl;
 #endif
 	universe += obs;
 }
@@ -98,8 +94,7 @@ void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 	rightProjected.y += originOffset.second;
 
 #if DEBUG
-	std::cout << "lx = " << leftProjected.x << "\tly = " << leftProjected.y
-			<< std::endl;
+	std::cout << "lx = " << leftProjected.x << "\tly = " << leftProjected.y << std::endl;
 #endif
 
 	// Check if left hand is out of bounds only if hand is open
@@ -115,8 +110,7 @@ void nuiCallback(wvu_swarm_std_msgs::nuitrack_data nui)
 		else if (leftProjected.y > boundsY)
 			originOffset.second -= originShift * (leftProjected.y - boundsY);
 #if DEBUG
-		std::cout << "ox = " << originOffset.first << "\toy = "
-				<< originOffset.second << std::endl;
+		std::cout << "ox = " << originOffset.first << "\toy = " << originOffset.second << std::endl;
 #endif
 		// Don't bother applying shift yet, that will occur next iteration
 	}
@@ -132,15 +126,11 @@ int main(int argc, char **argv)
 	bool use_keyboard;
 	n_priv.param<bool>("use_keyboard", use_keyboard, false);
 
-	ros::Publisher map_pub = n.advertise < wvu_swarm_std_msgs::map_levels
-			> ("/map_data", 1000);
+	ros::Publisher map_pub = n.advertise < wvu_swarm_std_msgs::map_levels > ("/map_data", 1000);
 
-	ros::Publisher left_pub = n.advertise < geometry_msgs::Point
-			> ("hand_1", 1000);
-	ros::Publisher right_pub = n.advertise < geometry_msgs::Point
-			> ("hand_2", 1000);
-	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge/rolling_average", 1000,
-			nuiCallback);
+	ros::Publisher left_pub = n.advertise < geometry_msgs::Point > ("hand_1", 1000);
+	ros::Publisher right_pub = n.advertise < geometry_msgs::Point > ("hand_2", 1000);
+	ros::Subscriber nuiSub = n.subscribe("/nuitrack_bridge/rolling_average", 1000, nuiCallback);
 	ros::Subscriber n_obs = n.subscribe("add_obstacle", 1000, additionCallback);
 	ros::Subscriber r_obs = n.subscribe("rem_obstacle", 1000, removeCallback);
 #if DEBUG
@@ -148,13 +138,30 @@ int main(int argc, char **argv)
 #endif
 
 	levelObject *ptr;
+	levelObject *ptr2; //@vos, I don't know why, but using one pointer and the wall SKIPS objects and I have no idea how that even happens ;-;
 
-	ptr = new gaussianObject(0, 0, "Gary", 10, 10, M_PI / 4.0, 10,
-			map_ns::TARGET);
+	ptr = new gaussianObject(0, 0, "Gary", 10, 10, M_PI / 4.0, 10, map_ns::TARGET);
 	universe += ptr;
 
 	ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::TARGET);
 	universe += ptr;
+
+	for (int i = 0; i < 20; i++)
+	{
+
+		ptr = new gaussianObject(45, 90 - 9 * i, "a"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
+		universe += ptr;
+		ptr = new gaussianObject(-45, 90 - 9 * i, "b"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
+		universe += ptr;
+		if (i < 10)
+		{
+			ptr = new gaussianObject(-45+9*i, -90, "c"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
+			universe += ptr;
+			ptr = new gaussianObject(-45+9*i, 90,"d"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
+			universe += ptr;
+		}
+		ptr=nullptr;
+	}
 
 #if DEBUG
 	std::cout << "\033[30;42mdone adding equation\033[0m" << std::endl;
@@ -180,8 +187,7 @@ int main(int argc, char **argv)
 				//   This will return a pointer to a modifiable COPY of the
 				//   object selected. Be sure to add it back into universe
 				//   after altering.
-				std::pair<double, double> leftProjPair(leftProjected.x,
-						leftProjected.y);
+				std::pair<double, double> leftProjPair(leftProjected.x, leftProjected.y);
 				g_selected = universe.findWithinRadius(leftProjPair, 10.0);
 
 				// If something is selected, lock hand to it
@@ -196,23 +202,19 @@ int main(int argc, char **argv)
 					std::cout << (int) g_nui.gestureData << std::endl;
 
 					// Add a new feature if PUSH is detected
-					if (g_nui.gestureData == (char) gestureType::PUSH
-							&& !prevGestureFound)
+					if (g_nui.gestureData == (char) gestureType::PUSH && !prevGestureFound)
 					{
 						std::cout << "ADDING GAUSSIAN" << std::endl;
 						prevGestureFound = true; // Change flag to prevent duplicates
 
-						std::string gausName = "nui_"
-								+ std::to_string(ros::Time::now().sec);
+						std::string gausName = "nui_" + std::to_string(ros::Time::now().sec);
 
 						// Construct new object at right (left) hand
-						ptr = new gaussianObject(leftProjected.x, leftProjected.y, gausName,
-								10, 10, 0, 10, map_ns::TARGET);
+						ptr = new gaussianObject(leftProjected.x, leftProjected.y, gausName, 10, 10, 0, 10, map_ns::TARGET);
 						universe += ptr; // Add to universe
 
 //					std::cout << universe << std::endl;
-					}
-					else if (g_nui.gestureData != (char) gestureType::PUSH)
+					} else if (g_nui.gestureData != (char) gestureType::PUSH)
 					{
 						prevGestureFound = false;
 					}
@@ -239,12 +241,11 @@ int main(int argc, char **argv)
 					}
 
 					// Manipulate the object
-					g_selected->nuiManipulate(g_nui.leftHand.x - anchor->x,
-							g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
+					g_selected->nuiManipulate(g_nui.leftHand.x - anchor->x, g_nui.leftHand.y - anchor->y,
+							g_nui.leftHand.z - anchor->z);
 					universe += g_selected; // Update changes in universe
 
-					ROS_INFO("Moved %s by %03.1f, %03.1f, %03.1f!",
-							g_selected->getName().c_str(), g_nui.leftHand.x - anchor->x,
+					ROS_INFO("Moved %s by %03.1f, %03.1f, %03.1f!", g_selected->getName().c_str(), g_nui.leftHand.x - anchor->x,
 							g_nui.leftHand.y - anchor->y, g_nui.leftHand.z - anchor->z);
 
 					// Update anchor so it's one iteration behind hand

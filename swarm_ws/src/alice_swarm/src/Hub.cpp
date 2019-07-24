@@ -13,7 +13,11 @@
 #define DEBUG_HUB 1
 #define DEBUG_ChargerMail 0
 
-std::pair<float, float> Hub::getSeparation(Bot _bot, std::pair<float, float> _obs) //helper function for finding obstacle points.
+Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reasons?
+{
+}
+
+std::pair<float, float> Hub::getSeparation(Bot _bot, std::pair<float, float> _obs)
 {
 	float loc_r; //|distance| b/w bot and current obstacle point.
 	float theta; //in radians
@@ -30,19 +34,15 @@ std::pair<float, float> Hub::getSeparation(Bot _bot, std::pair<float, float> _ob
 	return to_return;
 }
 
-Hub::Hub(int a) //Default constructor, dummy parameter is there for compile reasons?
-{
-}
-
 void Hub::updateSensorDatas()
 {
-	if(ridOrder.size() != sensor_datas.size())
+	if (ridOrder.size() != sensor_datas.size()) //if the number of bots and number of received packets don't match up
 	{
 		bool init = false;
 		int i = 0;
-		while(i <sensor_datas.size()) //checks if its in the vector.
+		while (i < sensor_datas.size()) //checks if this sensor data is already in the vector.
 		{
-			if(sensor_data.rid == sensor_datas.at(i).rid)
+			if (sensor_data.rid == sensor_datas.at(i).rid)
 			{
 				sensor_datas.at(i) = sensor_data;
 				i = sensor_datas.size() + 1;
@@ -50,10 +50,10 @@ void Hub::updateSensorDatas()
 			}
 			i++;
 		}
-		if(!init && validRID())
+		if (!init && validRID()) //if the id matches a bot in the sim, and the sensor_data is not in senor_datas
 		{
 			std::vector<wvu_swarm_std_msgs::sensor_data> temp_sds;
-			for(int i = 0; i < sensor_datas.size(); i ++) //copies sensor_datas.
+			for (int i = 0; i < sensor_datas.size(); i++) //copies sensor_datas into a temperary structure for sorting.
 			{
 				temp_sds.push_back(sensor_datas.at(i));
 			}
@@ -61,36 +61,36 @@ void Hub::updateSensorDatas()
 			temp_sds.push_back(sensor_data);
 
 			int temp_index = 0;
-			for(int i = 0; i < ridOrder.size(); i ++)//sort in same order as ridOrder.
+			for (int i = 0; i < ridOrder.size(); i++) //sensor_datas in same order as ridOrder. temp_sds is used as a place holder for the old sensor_datas vecoter.
 			{
-				for(int j = 0; j < temp_sds.size(); j ++)
+				for (int j = 0; j < temp_sds.size(); j++)
 				{
-					if(ridOrder.at(i) == temp_sds.at(j).rid)
+					if (ridOrder.at(i) == temp_sds.at(j).rid)
 					{
 						sensor_datas.at(temp_index) = temp_sds.at(j);
-						temp_index ++;
+						temp_index++;
 					}
 				}
 			}
 		}
-	}
-	else
+	} else //check more matching id in sensor_datas, replace that data if matched. If no match does nothing.
 	{
-		for(int i = 0; i < sensor_datas.size(); i++)
+		for (int i = 0; i < sensor_datas.size(); i++)
 		{
-			if(sensor_datas.at(i).rid == sensor_data.rid)
+			if (sensor_datas.at(i).rid == sensor_data.rid)
 			{
 				sensor_datas.at(i) = sensor_data;
 			}
 		}
 	}
 }
-bool Hub::validRID()
+
+bool Hub::validRID() //returns if the id of the current sensor_data message is in the sensor_datas vector.
 {
 	bool result = false;
-	for(int i = 0; i < ridOrder.size(); i++)
+	for (int i = 0; i < ridOrder.size(); i++)
 	{
-		if(ridOrder.at(i) == sensor_data.rid)
+		if (ridOrder.at(i) == sensor_data.rid) //checks if the sensor's id matches a robot in operation.
 		{
 			result = true;
 		}
@@ -98,27 +98,12 @@ bool Hub::validRID()
 	return result;
 }
 
-void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b, wvu_swarm_std_msgs::vicon_points &_t,
-		wvu_swarm_std_msgs::map_levels &_o, wvu_swarm_std_msgs::flows &_f, wvu_swarm_std_msgs::chargers &_c,
-		wvu_swarm_std_msgs::energy &_e, wvu_swarm_std_msgs::sensor_data &_sd)
-{
-	clearHub();
-	viconBotArray = _b;
-	targets = _t;
-	map = _o;
-	flows = _f;
-	chargers = _c;
-	energy = _e;
-	sensor_data = _sd;
-	processVicon(); //needed cause this data needs to be converted first
-	findNeighbors();
-}
-
-void Hub::processVicon() //Fills in bots[]
+void Hub::processVicon()
 {
 
 	for (size_t i = 0; i < viconBotArray.poseVect.size(); i++)
 	{
+
 		//This char bs-ery is for converting the state initials to numbers in our map
 		char bid[3] =
 		{ '\0' };
@@ -133,42 +118,69 @@ void Hub::processVicon() //Fills in bots[]
 
 		// the tf::Quaternion has a method to access roll pitch and yaw (yaw is all we need in a 2D plane)
 		double roll, pitch, yaw;
-
 		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-		bots.push_back(
-				Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
-						viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, i % 2 + 1,
-						viconBotArray.poseVect[i].botPose.header.stamp));
-		std::vector<Bot> temp;
-		ridOrder.push_back(numID); //storing the order of insertion
-		neighbors.push_back(temp); //adds an empty vector to neighbors for future use
+
+		// a check to find if the robot has been seen before
+		bool foundID = false;
+		int j;
+		for (j = 0; j < ridOrder.size(); j++)
+		{
+			if (ridOrder.at(j) == numID)
+			{
+				foundID = true;
+				break;
+			}
+		}
+
+		if (foundID) //if the robot has been seen before...
+		{
+			//simply replace the old bot struct with the one with new information
+			bots.at(j) = Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
+					viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, numID % 2 + 1,
+					viconBotArray.poseVect[i].botPose.header.stamp);
+
+		} else
+		{
+			//otherwise insert a new bot within the vector
+			bots.push_back(
+					Bot(numID, viconBotArray.poseVect[i].botPose.transform.translation.x,
+							viconBotArray.poseVect[i].botPose.transform.translation.y, yaw, 10000, numID % 2 + 1,
+							viconBotArray.poseVect[i].botPose.header.stamp));
+
+			ridOrder.push_back(numID); //record the insertion of this new robot
+		}
 	}
 }
 
-/*
- Exactly what it sounds like
- This function finds the nearest few neighbors
- The number of neighbors can be set by NEIGHBOR_COUNT
- */
 void Hub::findNeighbors()
 {
-	for (int botIndex = 0; botIndex < viconBotArray.poseVect.size(); botIndex++)
+	//neighbors is empty prior to this
+	for (int i = 0; i < ridOrder.size(); i++)
 	{
-		for (int curIndex = 0; curIndex < viconBotArray.poseVect.size(); curIndex++)
+		std::vector<Bot> temp;
+		neighbors.push_back(temp); //adds an empty vector to neighbors for future use
+	}
+
+	for (int botIndex = 0; botIndex < ridOrder.size(); botIndex++) //iterate through list of active robots
+	{
+		for (int curIndex = 0; curIndex < ridOrder.size(); curIndex++) //iterate through list of active robots
 		{
 			if (botIndex == curIndex) // Check for duplicates
 			{
 				continue;
 			}
-			Bot temp(bots.at(curIndex));
+
+			Bot temp(bots.at(curIndex)); //make a copy of the bot at cur
 
 			//Finds the distance between two bots
 			temp.distance = sqrt(
 					pow((bots.at(curIndex).x - bots.at(botIndex).x), 2) + pow((bots.at(curIndex).y - bots.at(botIndex).y), 2));
-			if (temp.distance>VISION)continue;
+
+			if (temp.distance > VISION * 2) continue; //if the robot is outside of vision range, exit. Vision range for other bots was enlarged
+
 			bool done = false; //keeps track of whether or not the bot has been inserted as a neighbor
 
-			for (std::vector<Bot>::iterator it = neighbors.at(botIndex).begin(); it != neighbors.at(botIndex).end(); it++)
+			for (std::vector<Bot>::iterator it = neighbors.at(botIndex).begin(); it != neighbors.at(botIndex).end(); it++)//iterate throught the list of known neighbors
 			{
 				if (temp.distance < it->distance) //Checks if the current bot is closer than the bot stored as a neighbor
 				{
@@ -269,6 +281,7 @@ void Hub::addObsMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Adds obstac
 				_mail.obsMail.push_back(temp3);
 			}
 		}
+
 	}
 }
 
@@ -284,16 +297,18 @@ void Hub::addContMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //Gives each
 		_mail.contVal = 0;
 }
 
-void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
-{//converts each charger into relative coordinates of the current bot. Adds it to mail.
+void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail) //converts each charger into relative coordinates of the current bot. Adds it to mail.
+{
 #if DEBUG_ChargerMail
 	std::cout<<"############### FROM THE HUB ################"<<std::endl;
 #endif
-	for(int j = 0; j < chargers.charger.size(); j++)
+	for (int j = 0; j < chargers.charger.size(); j++)
 	{
 		//makes the x coord that of the way point of that charger, for charge() rule. (Needs to be 5 cm in front).
-		std::pair<float, float> temp_t = {chargers.charger.at(j).x + 10, chargers.charger.at(j).y};
-		std::pair<float, float> temp_a = {chargers.charger.at(j).x + 3, chargers.charger.at(j).y};
+		std::pair<float, float> temp_t =
+		{ chargers.charger.at(j).x + 10, chargers.charger.at(j).y };
+		std::pair<float, float> temp_a =
+		{ chargers.charger.at(j).x + 3, chargers.charger.at(j).y };
 		std::pair<float, float> temp2t = getSeparation(bots[i], temp_t);
 		std::pair<float, float> temp2a = getSeparation(bots[i], temp_a);
 
@@ -317,23 +332,24 @@ void Hub::addChargerMail(int i, wvu_swarm_std_msgs::alice_mail &_mail)
 #endif
 }
 
-//void Hub::printAliceMail(wvu_swarm_std_msgs::alice_mail _mail) //Prints mail for debug purposes
-//{
-//	std::cout << "--- Mail for Alice " << _mail.name << "," << _mail.sid << " ---" << std::endl;
-//	std::cout << "Neighbors - " << _mail.neighbors.size() << std::endl;
-//	for (std::vector<AliceStructs::neighbor>::iterator it = _mail.neighbors.begin(); it != _mail.neighbors.end(); ++it)
-//	{
-//
-//		std::cout << it->dir << " " << it->dis << " " << it->ang << " " << it->name << std::endl;
-//	}
-////	std::cout << "Obstacles - " << _mail.obstacles.size() << std::endl;
-////	for (std::vector<AliceStructs::obj>::iterator it = _mail.obstacles.begin(); it != _mail.obstacles.end(); ++it)
-////	{
-////
-////		std::cout << it->dir << " " << it->dis << " " << it->ang << " " << it->name << std::endl;
-////	}
-//	//will finish if necessary but seems unnecessary...
-//}
+//--------------------------------- PUBLIC METHODS ---------------------------------------\\
+
+void Hub::update(wvu_swarm_std_msgs::vicon_bot_array &_b,
+wvu_swarm_std_msgs::vicon_points &_t, wvu_swarm_std_msgs::map_levels &_o,
+wvu_swarm_std_msgs::flows &_f, wvu_swarm_std_msgs::chargers &_c,
+wvu_swarm_std_msgs::energy &_e, wvu_swarm_std_msgs::sensor_data &_sd)
+{
+	clearHub();
+	viconBotArray = _b;
+	targets = _t;
+	map = _o;
+	flows = _f;
+	chargers = _c;
+	//energy = _e;
+	sensor_data = _sd;
+	processVicon();//needed cause this data needs to be converted first
+	findNeighbors();
+}
 
 wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relative information for a robot into one msg
 {
@@ -341,55 +357,41 @@ wvu_swarm_std_msgs::alice_mail_array Hub::getAliceMail() //Gathers all the relat
 	updateSensorDatas();
 
 	wvu_swarm_std_msgs::alice_mail_array to_return;
-	for (std::vector<int>::iterator it = ridOrder.begin(); it != ridOrder.end(); ++it)
+	for (int i = 0; i < ridOrder.size(); i++)
 	{
+
 		wvu_swarm_std_msgs::alice_mail temp;
-		addObsMail(*it, temp);
-		addNeighborMail(*it, temp);
-		addTargetMail(*it, temp);
-		addFlowMail(*it, temp);
-		addContMail(*it, temp);
-		addChargerMail(*it, temp);
+		addObsMail(i, temp);
+		addNeighborMail(i, temp);
+		addTargetMail(i, temp);
+		addFlowMail(i, temp);
+		addContMail(i, temp);
+		addChargerMail(i, temp);
 
-		temp.name = *it;
-		temp.sid = bots[*it].swarm_id;
-		temp.time = bots[*it].time;
-		temp.x= bots[*it].x;
-		temp.y=bots[*it].y;
-		temp.heading=bots[*it].heading;
-		temp.vision=VISION;
+		temp.name = ridOrder.at(i);
+		temp.sid = bots[i].swarm_id;
+		temp.time = bots[i].time;
+		temp.x = bots[i].x;
+		temp.y = bots[i].y;
+		temp.heading = bots[i].heading;
+		temp.vision = VISION;
 
-		if(*it<energy.energies.size())
-		{temp.energy = energy.energies.at(*it);}
-
-		if(cur_sd_index < sensor_datas.size())
+		if (cur_sd_index < sensor_datas.size())
 		{
-			if(sensor_datas.at(cur_sd_index).rid == *it)
+			if (sensor_datas.at(cur_sd_index).rid == ridOrder.at(i))
 			{
 				temp.sensor_data = sensor_datas.at(cur_sd_index);
 				cur_sd_index++;
-//				std::cout<<"================matched====================== "<<std::endl;
-//				std::cout<<"position: "<<cur_sd_index<<"| for rid:<<sensor_datas.at(cur_sd_index).rid"<<", "<<*it<<std::endl;
-			}
-			else
-			{
-		//			std::cout<<"++++++++++++++++++++++++++++WAS NOT IN THE ridOrder vector++++++++++++++++++++++++++++++"<<std::endl;
 			}
 		}
 
-
 		to_return.mails.push_back(temp);
 	}
-#if DEBUG_HUB
-	//printAliceMail(temp);
-#endif
 	return to_return;
-
 }
 
 void Hub::clearHub() //Clears information about the robots
 {
-	ridOrder.clear();
-	bots.clear();
 	neighbors.clear();
+
 }

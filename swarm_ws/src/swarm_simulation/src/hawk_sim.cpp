@@ -186,8 +186,8 @@ void Hawk_Sim::makeTargets(ros::Publisher _pub)
 	if (food_targets.size() < 4)
 	{ //create another location with food if there are too few
 		wvu_swarm_std_msgs::vicon_point temp1;
-		temp1.x = rand() % 100 - 50; //randomize the location.
-		temp1.y = rand() % 200 - 100;
+		temp1.x = rand() % 80 - 40; //randomize the location.
+		temp1.y = rand() % 160 - 80;
 		std::pair<float, wvu_swarm_std_msgs::vicon_point> temp2(1, temp1); //start with a quantity of 1
 		food_targets.push_back(temp2);
 	}

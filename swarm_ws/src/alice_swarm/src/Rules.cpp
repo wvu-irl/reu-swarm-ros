@@ -84,7 +84,7 @@ void Rules::stateLoop(Model &_model)
 
 		// add other rules here
 		go_to_list.push_back(findContour());
-		//go_to_list.push_back(goToTar());
+		go_to_list.push_back(goToTar());
 		//go_to_list.push_back(charge());
 		go_to_list.push_back(rest());
 		go_to_list.push_back(explore());
