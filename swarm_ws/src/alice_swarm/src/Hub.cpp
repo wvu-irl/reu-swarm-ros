@@ -9,6 +9,7 @@
 #include <tf/LinearMath/Matrix3x3.h>
 #include <math.h>
 #include <swarm_server/robot_id.h>
+
 #define DEBUG_HUB 1
 #define DEBUG_ChargerMail 0
 

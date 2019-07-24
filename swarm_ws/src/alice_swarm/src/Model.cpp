@@ -284,7 +284,6 @@ void Model::pass(ros::Publisher _pub)
 void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<int> &_ids)
 {
 	auto start = std::chrono::high_resolution_clock::now(); //timer for measuring the runtime of map
-	neighbor_go_to.clear(); //for now, reset the goto's every run around, no memory
 	int max_pass = 3; //maximum amount of information transfers
 	for (int i = 0; i < neighbors.size(); i++) //iterate through neighbors
 	{
@@ -295,11 +294,8 @@ void Model::receiveMap(std::vector<wvu_swarm_std_msgs::map> &_maps, std::vector<
 				//adds the neighbor's waypoint, transformed to its' own first frame.
 				std::pair<float, float> n_go_to = transformFtF(_maps.at(j).goToX, _maps.at(j).goToY, _maps.at(j).ox,
 						_maps.at(j).oy, _maps.at(j).oheading);
-				AliceStructs::pnt n_pnt;
-				n_pnt.x = n_go_to.first;
-				n_pnt.y = n_go_to.second;
-				n_pnt.observer_names.push_back(neighbors.at(i).name);
-				neighbor_go_to.push_back(n_pnt);
+				neighbors.at(i).tar_x=n_go_to.first;
+				neighbors.at(i).tar_y=n_go_to.second;
 
 				for (int k = 0; k < _maps.at(j).obsMsg.size(); k++) //copy over all of the obstacles
 				{
