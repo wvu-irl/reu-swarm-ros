@@ -115,7 +115,7 @@ public:
 	void forgetTargets(int TOLERANCE);
 	void forgetContour(int TOLERANCE);
 
-private:
+public:
 
 	/*
 	 * Information about Alice herself

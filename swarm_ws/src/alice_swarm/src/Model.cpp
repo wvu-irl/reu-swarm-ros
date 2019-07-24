@@ -157,9 +157,6 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 				energy = 1; //caps energy at 1.
 		}
 //		std::cout << name << " NRG: " << energy << std::endl;
-
-		if (name == 0)
-			energy = 0;
 	}
 	cur_pose.x = _toAdd.xpos; //update the current pose
 	cur_pose.y = _toAdd.ypos;

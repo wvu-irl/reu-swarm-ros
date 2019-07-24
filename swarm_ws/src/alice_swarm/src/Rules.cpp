@@ -117,11 +117,11 @@ void Rules::stateLoop(Model &_model)
 		_model.goTo.time = ros::Time::now(); //time stamps when the goto is created
 	}
 	goToTimeout();
-	avoidNeighbors();
 	std::pair<float, float> back_to_fir = _model.transformCur(cur_go_to.x,
 			cur_go_to.y);
 	_model.goTo.x = back_to_fir.first;
 	_model.goTo.y = back_to_fir.second;
+	avoidNeighbors();
 }
 
 //===================================================================================================================
@@ -699,85 +699,75 @@ vector2f_t findIntersect(vector2f_t a, vector2f_t b)
 bool Rules::avoidNeighbors()
 {
 	bool to_return = false;
+	vector2f_t curr_vect = CURR_VECT;
+	curr_vect = getUVect(curr_vect);
+
+	double closest_dist = -1;
+
 	for (size_t i = 0; i < model->neighbors.size(); i++)
 	{
 		AliceStructs::neighbor &bot = model->neighbors[i];
-		struct AliceStructs::vector_2f vec_bot;
-		vec_bot.x = bot.x;
-		vec_bot.y = bot.y;
-		vec_bot.dx = (double) bot.tar_x - (double) bot.x;
-		vec_bot.dy = (double) bot.tar_y - (double) bot.y;
-		vec_bot.valid = true;
-		vector2f_t vec_crr = CURR_VECT;
-		vec_bot = getUVect(vec_bot);
-		vec_crr = getUVect(vec_crr);
-		vector2f_t circle_center = findIntersect(vec_bot, vec_crr);
+		vector2f_t bot_vect = { bot.x, bot.y, bot.tar_x, bot.tar_y, true };
 
-		if (!circle_center.valid)
-		{
-#if DEBUG_NEI_AVD
-			PRINT_DBG("invalid");
-#endif
+		vector2f_t intersect = findIntersect(curr_vect, bot_vect);
+
+#define origDist(a, b) calcDis(a.x, a.y, b.x, b.y)
+
+		if ((closest_dist != -1 && origDist(bot_vect, curr_vect) > closest_dist)
+				|| !intersect.valid)
 			continue;
-		}
 
-		double self_tti = circle_center.x / vec_crr.dx;
-		double bot_tti = circle_center.x / vec_bot.dx;
+		closest_dist = origDist(bot_vect, curr_vect);
 
-		if (abs(self_tti - bot_tti)
-				< checkTiming(circle_center, vec_bot) / model->MAX_LV)
-		{
-			// TODO reverse the order of these to make the parallel
-			// parallel to the curr not the bot
-			vector2f_t conjunct = { circle_center.x, circle_center.y, -vec_bot.dy,
-					vec_bot.dx, true }; // same point in perpendicular direction
-			conjunct = getUVect(conjunct);
-			vector2f_t new_center = { conjunct.dx * -margin + conjunct.x, conjunct.dy
-					* -margin + conjunct.y, 0, 0, true };
-
-			///
-			if (calcDis(new_center.x, new_center.y, model->cur_pose.x,
-					model->cur_pose.y)
-					< calcDis(model->goTo.x, model->goTo.y, model->cur_pose.x,
-							model->cur_pose.y))
-			{
-				vector2f_t parallel = { new_center.x, new_center.y, center.dx,
-						center.dy, true };
-
-				vector2f_t adj = findIntersect(vec_bot, parallel);
-				model->goTo.x = adj.x;
-				model->goTo.y = adj.y;
 #if DEBUG_NEI_AVD
-				PRINTF_DBG("Got nieghbor %d -- %d", i, model->neighbors.size() - 1);
-				PRINTF_DBG("New waypoint: (%lf, %lf)", new_center.x, new_center.y);
+//			PRINTF_DBG("%d Checking: %d && (%d || %d)", model->name, intersect.valid, origDist(intersect, curr_vect) < margin * 2, origDist(curr_vect, bot_vect) < margin * 4);
 #endif
-				to_return = true;
+
+		if (intersect.valid
+				&& (origDist(intersect, curr_vect) < margin * 2
+						|| origDist(curr_vect, bot_vect) < margin * 4))
+		{
+#if DEBUG_NEI_AVD
+			PRINTF_DBG("%d Avoiding nei: %d", model->name, i);
+#endif
+			vector2f_t conjunct = { intersect.x, intersect.y, -bot_vect.dy,
+					bot_vect.dx, true }; // same point in perpendicular direction
+			conjunct = getUVect(conjunct);
+			vector2f_t parallel_l = { conjunct.dx * -margin + conjunct.x, conjunct.dy
+					* -margin + conjunct.y, bot_vect.dx, bot_vect.dy, true };
+
+			vector2f_t parallel_h = { conjunct.dx * margin + conjunct.x, conjunct.dy
+					* margin + conjunct.y, bot_vect.dx, bot_vect.dy, true };
+
+			vector2f_t adj;
+
+			if (origDist(parallel_l, curr_vect) < origDist(parallel_h, curr_vect))
+			{
+				adj.x = parallel_l.x;
+				adj.y = parallel_l.y;
 			}
+			else
+			{
+				adj.x = parallel_h.x;
+				adj.y = parallel_h.y;
+			}
+
+			model->goTo.x = adj.x;
+			model->goTo.y = adj.y;
+
+#if DEBUG_NEI_AVD
+			PRINTF_DBG("setting waypoint to: (%lf, %lf)", model->goTo.x,
+					model->goTo.y);
+#endif
+
 		}
+
+		to_return = true;
 	}
 	return to_return;
 }
 
 float Rules::checkTiming(vector2f_t center, vector2f_t bot)
 {
-	vector2f_t conjunct = { center.x, center.y, -bot.dy, bot.dx }; // same point in perpendicular direction
-	conjunct = getUVect(conjunct);
-	vector2f_t new_center = { conjunct.dx * -margin + conjunct.x, conjunct.dy
-			* -margin + conjunct.y, 0, 0, true };
 
-	vector2f_t parallel =
-			{ new_center.x, new_center.y, center.dx, center.dy, true };
-	vector2f_t vec_crr = CURR_VECT;
-	vec_crr = getUVect(vec_crr);
-
-	vector2f_t adj = findIntersect(vec_crr, parallel);
-
-	if (bot.dy > 0)
-	{
-		return -calcDis(adj.x, adj.y, center.x, center.y);
-	}
-	else
-	{
-		return calcDis(adj.x, adj.y, center.x, center.y);
-	}
 }

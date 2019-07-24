@@ -25,16 +25,15 @@ private:
 //	vector<sf::Text> texts;
 //	vector<sf::CircleShape> obs_shapes; //for new obstacles
 
-
-	//text related stuff
-	//void addText();
+//text related stuff
+//void addText();
 	float bodiesSize;
 
 	//subscriber input handleing
 	void mailCallback(const wvu_swarm_std_msgs::alice_mail_array &msg);
 	void mapCallback(const wvu_swarm_std_msgs::map &msg);
 	void HandleInput();
-	void drawMail();
+	void drawMail(ros::ServiceClient _client);
 	void drawMsg(ros::ServiceClient _client);
 public:
 	AlicePOV();
