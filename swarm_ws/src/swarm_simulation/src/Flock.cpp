@@ -32,7 +32,7 @@ void Flock::applyPhysics(wvu_swarm_std_msgs::vicon_points *_targets)
 
 wvu_swarm_std_msgs::vicon_bot_array Flock::createMessages() //generates an array of vicon_bot msgs.
 {
-	wvu_swarm_std_msgs::vicon_bot_array vb_array;
+	wvu_swarm_std_msgs::vicon_bot_array vb_array = real_bots;
 	for (int i = 0; i < bodies.size();i++)
 	{
 		//initializes necessary variables for each iteration.

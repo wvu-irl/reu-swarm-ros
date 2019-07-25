@@ -32,7 +32,7 @@ class Sim
 {
 
 private:
-	int NUMBOTS = 4; //number of bots in the simulation; the WHOLE simulation (hub & alice), not just this file.
+	int NUMBOTS = 3; //number of bots in the simulation; the WHOLE simulation (hub & alice), not just this file.
 	sf::RenderWindow window;
 	int window_width;
 	int window_height;
