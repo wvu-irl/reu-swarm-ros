@@ -37,10 +37,12 @@
 	<!-- Launching server node -->
 	<node pkg="swarm_server" name="ard_serv" type="ros_to_arduino_server" output="screen"/>
 
-        <node ns="vis" pkg="visualization" type="table_vis" name="table"
+        <node pkg="visualization" type="table_vis" name="table"
 		output="screen">
 
 		<param name="use_keyboard" value="true" type="bool"/>
+
+                <param name="draw_level" value="1" type="int"/>
 
 		<!-- Location of assets and config files respectively -->
 		<param name="asset_path"

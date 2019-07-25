@@ -139,8 +139,8 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 	else
 	{
 		//bandaging method, instead of passing this value through the software, for simplicity we just keep energy updated here only.
-		if (energy > 0) //only update if the bot isn't dead
-		{
+		//if (energy > 0) //only update if the bot isn't dead
+		//{
 			if (_toAdd.contVal < 0.0001)
 				energy -= (float) (_toAdd.time.toSec() - time.toSec()) * 0.05; //sets the rate of energy decrease constant
 			else
@@ -155,7 +155,7 @@ void Model::sensorUpdate(AliceStructs::mail &_toAdd)
 			}
 			if (energy > 1)
 				energy = 1; //caps energy at 1.
-		}
+		//}
 //		std::cout << name << " NRG: " << energy << std::endl;
 	}
 	cur_pose.x = _toAdd.xpos; //update the current pose

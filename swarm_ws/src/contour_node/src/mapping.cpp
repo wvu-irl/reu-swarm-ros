@@ -138,30 +138,29 @@ int main(int argc, char **argv)
 #endif
 
 	levelObject *ptr;
-	levelObject *ptr2; //@vos, I don't know why, but using one pointer and the wall SKIPS objects and I have no idea how that even happens ;-;
-
-	ptr = new gaussianObject(0, 0, "Gary", 10, 10, M_PI / 4.0, 10, map_ns::TARGET);
+//	levelObject *ptr2; //@vos, I don't know why, but using one pointer and the wall SKIPS objects and I have no idea how that even happens ;-;
+//
+	ptr = new gaussianObject(0, -50, "Gary", 10, 10, M_PI / 4.0, 10, map_ns::TARGET);
 	universe += ptr;
+//
+//	ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::TARGET);
+//	universe += ptr;
 
-	ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::TARGET);
-	universe += ptr;
-
-	for (int i = 0; i < 20; i++)
-	{
-
-		ptr = new gaussianObject(45, 90 - 9 * i, "a"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
-		universe += ptr;
-		ptr = new gaussianObject(-45, 90 - 9 * i, "b"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
-		universe += ptr;
-		if (i < 10)
-		{
-			ptr = new gaussianObject(-45+9*i, -90, "c"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
-			universe += ptr;
-			ptr = new gaussianObject(-45+9*i, 90,"d"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
-			universe += ptr;
-		}
-		ptr=nullptr;
-	}
+//	for (int i = 0; i < 20; i++)
+//	{
+//
+//		ptr = new gaussianObject(45, 90 - 9 * i, "a"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
+//		universe += ptr;
+//		ptr = new gaussianObject(-45, 90 - 9 * i, "b"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
+//		universe += ptr;
+//		if (i < 10)
+//		{
+//			ptr = new gaussianObject(-45+9*i, -90, "c"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
+//			universe += ptr;
+//			ptr = new gaussianObject(-45+9*i, 90,"d"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
+//			universe += ptr;
+//		}
+//	}
 
 #if DEBUG
 	std::cout << "\033[30;42mdone adding equation\033[0m" << std::endl;

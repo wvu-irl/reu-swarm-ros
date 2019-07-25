@@ -18,14 +18,16 @@
 	<node ns="vis" pkg="visualization" type="table_vis" name="table"
 		output="screen">
 
+                <param name="draw_level" value="1" type="int"/>
+
 		<param name="use_keyboard" value="true" type="bool"/>
 
 		<!-- Location of assets and config files respectively -->
 		<param name="asset_path"
-			value="/home/the_pun_king/git/reu-swarm-ros/swarm_ws/src/visualization/assets"
+			value="/home/air/reu-swarm-ros/swarm_ws/src/visualization/assets"
 			type="str" />
 		<param name="config_path"
-			value="/home/the_pun_king/git/reu-swarm-ros/swarm_ws/src/visualization/cfg/calib.config"
+			value="/home/air/reu-swarm-ros/swarm_ws/src/visualization/cfg/calib.config"
 			type="str" />
 
 		<!-- Background - setting to "None" will not draw a background - setting 

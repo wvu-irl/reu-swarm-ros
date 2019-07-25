@@ -9,7 +9,7 @@ using namespace std::chrono;
 
 #define distance(v0, v1) (sqrt(pow(v0.x - v1.x, 2) + pow(v0.y - v1.y, 2)))
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG
 #include <stdio.h>
@@ -184,9 +184,9 @@ void interaction::mousePressedEvent(sf::Event e)
 					sizeof(wvu_swarm_std_msgs::obstacle));
 
 	closest->characteristic =
-			universe->levels[map_ns::COMBINED].functions[0];
+			universe->levels[WORKING_LEVEL].functions[0];
 
-	closest->level = 0;
+	closest->level = WORKING_LEVEL;
 
 	sf::Vector2f ellip(-100000, -100000);
 
@@ -243,11 +243,8 @@ void interaction::mouseReleasedEvent(sf::Event e)
 
 void interaction::mouseMovedEvent(sf::Event e)
 {
-#if DEBUG
-	puts("Mouse moved");
-#endif
 	sf::Vector2f mloc = interaction::getMouseCordinate(
-			sf::Vector2f(e.mouseMove.x, e.mouseMove.y), table);
+	sf::Vector2f(e.mouseMove.x, e.mouseMove.y), table);
 
 	x = mloc.x;
 	y = mloc.y;

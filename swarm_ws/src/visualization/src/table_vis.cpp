@@ -90,7 +90,9 @@ sf::Vector2f convertCoordinate(sf::Vector2f a)
 
 void nuiUpdate(geometry_msgs::Point msg)
 {
+#if TAB_DEBUG
 	ROS_INFO("Got point: (%lf, %lf)", msg.x, msg.y);
+#endif
 	nui_points.clear();
 	nui_points.push_back(convertCoordinate(sf::Vector2f(msg.x, msg.y)));
 }

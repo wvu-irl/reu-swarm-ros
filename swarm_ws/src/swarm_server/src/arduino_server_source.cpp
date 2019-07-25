@@ -258,7 +258,7 @@ void* runClient(void *args)
 
 		free(buffer); // freeing buffer
 	}
-	write(connection_descriptor, "0.000,-1.0,discon", 7);
+	write(connection_descriptor, "0.000,-1.0,discon", 18);
 #if DEBUG_CPP
 printf("\033[1;32mExiting thread: %d -- RID: %d\033[0m\n", id, sockets->at(id).getRID());
 #endif

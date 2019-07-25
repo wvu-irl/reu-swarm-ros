@@ -86,7 +86,7 @@ void Rules::stateLoop(Model &_model)
 		go_to_list.push_back(findContour());
 		go_to_list.push_back(goToTar());
 		//go_to_list.push_back(charge());
-		go_to_list.push_back(rest());
+		//go_to_list.push_back(rest());
 		go_to_list.push_back(explore());
 
 		////////////////////////////////////////////////////////////////////////////////////////
@@ -254,7 +254,7 @@ AliceStructs::pnt Rules::findContour()
 	AliceStructs::pnt to_return;
 	to_return.x = 0;
 	to_return.y = 0;
-	to_return.z = 0;
+	to_return.z = 0;                                                                   
 	float pri = 0; //uses a formula based on distance, recency(confidence), and strength
 	std::pair<float, float> temp = model->transformCur(0, 0); //transforms the cur_pose to the first_pose
 	bool init = false;
@@ -277,11 +277,10 @@ AliceStructs::pnt Rules::findContour()
 		std::pair<float, float> go = model->transformFir(best.x, best.y);
 		to_return.x = go.first;
 		to_return.y = go.second;
-
 		to_return.z = 1 - model->energy;	//sets the initial priority to its' hunger
 
 		to_return.z /= crowding; //divide by the number of robots crowding the area
-		to_return.z *= (log10(best.z / model->cur_pose.z)); //scale by the appreciable change in the contour.
+		to_return.z *= 10*(log10(best.z / model->cur_pose.z)); //scale by the appreciable change in the contour.
 		if (to_return.z >= 0.9)
 			to_return.z = 0.9;
 	}
