@@ -169,8 +169,8 @@ void Rules::avoidCollisions()
 	bool checker = true;
 //	while (checker && ros::ok())
 //	{
-		cur_go_to = findPath(cur_go_to, findDeadZones());
-		checker = avoidNeighbors();
+		//cur_go_to = findPath(cur_go_to, findDeadZones());
+		//checker = avoidNeighbors();
 //	}
 }
 //------------------Basic Rules------------------------------------------
@@ -192,8 +192,8 @@ AliceStructs::pnt Rules::explore()
 	float mag = calcDis(sum.first, sum.second, 0, 0);
 	if (mag > 0.001) // set the magnitude to 10 unless the vector is 0 (or very close).
 	{
-		sum.first *= 50 / mag;
-		sum.second *= 50 / mag;
+		sum.first *= 20 / mag;
+		sum.second *= 20 / mag;
 	}
 	AliceStructs::pnt to_return;
 	to_return.x = -sum.first;
