@@ -139,13 +139,13 @@ int main(int argc, char **argv)
 
 	levelObject *ptr;
 //	levelObject *ptr2; //@vos, I don't know why, but using one pointer and the wall SKIPS objects and I have no idea how that even happens ;-;
-//
-	ptr = new gaussianObject(0, -50, "Gary", 10, 10, M_PI / 4.0, 10, map_ns::TARGET);
+
+	ptr = new gaussianObject(0, 0, "Gary", 10, 10, M_PI / 4.0, 10, map_ns::TARGET);
 	universe += ptr;
-//
+
 //	ptr = new gaussianObject(50, 0, "Larry", 5, 5, 0, 10, map_ns::TARGET);
 //	universe += ptr;
-
+//
 //	for (int i = 0; i < 20; i++)
 //	{
 //
@@ -160,6 +160,7 @@ int main(int argc, char **argv)
 //			ptr = new gaussianObject(-45+9*i, 90,"d"+std::to_string(i), 5, 5, 0, 20, map_ns::OBSTACLE);
 //			universe += ptr;
 //		}
+//		ptr=nullptr;
 //	}
 
 #if DEBUG
