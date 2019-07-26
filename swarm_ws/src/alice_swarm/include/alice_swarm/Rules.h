@@ -4,6 +4,7 @@
  * A finite state machine that takes data from the model and outputs vectors.
  *
  * Author: Casey Edmonds-Estes
+ * If you have questions, email me: cedmonds2018@gmail.com
  */
 
 #ifndef RULES_H

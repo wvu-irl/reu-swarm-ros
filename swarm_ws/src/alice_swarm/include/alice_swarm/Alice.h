@@ -5,6 +5,7 @@
  * Not very functional; mainly exists for organizational reasons.
  *
  * Author: Casey Edmonds-Estes
+ * If you have questions, email me: cedmonds2018@gmail.com
  */
 
 #ifndef ALICE_H
