@@ -33,63 +33,53 @@
 //  Pvector Cohesion(vector<Body> Bodies): Computes a vector that causes the
 //      current body to seek the center of mass of nearby bodies.
 
-class Body {
+class Body
+{
 
 private:
-		float l; //distance between wheels
-		bool applyForce(bool _aorb,float _rel_theta);
+	float l; //distance between wheels
+	bool applyForce(bool _aorb, float _rel_theta);
 
-		//Physics helper functions.
-		float angleConvert(float _x);
-		int quadrant(float phi);
-		bool aboveOrBelow(float _dx, float _dy, int _Q);
-		float getRelTheta(float _abs_theta, float _phi, int _Q);
+	//Physics helper functions.
+	float angleConvert(float _x);
+	int quadrant(float phi);
+	bool aboveOrBelow(float _dx, float _dy, int _Q);
+	float getRelTheta(float _abs_theta, float _phi, int _Q);
 
 public:
-		bool bodyPause;
-		char id [2];
-		wvu_swarm_std_msgs::vicon_points *targets;
-		float heading;
-		int sid;
-		float force;
-		float a;//left wheel speed
-		float b;//right wheel speed
-    bool predator;
-    int numid;
-    ros::Time curTime;
-    Pvector location;
-    Pvector prev_location;
-    Pvector velocity;
-    Pvector acceleration;
-    float maxSpeed;
-    float maxForce;
-    bool updatedCommand;
-    bool updatedPosition;
-    bool collision;
+	bool bodyPause;
+	char id[2];
+	int numid;
+	wvu_swarm_std_msgs::vicon_points *targets;
+	float heading;
+	int sid;
+	float force;
+	float a; //left wheel speed
+	float b; //right wheel speed
+//	bool predator;
+	ros::Time curTime;
+	Pvector location;
+	Pvector prev_location;
+	Pvector velocity;
+	Pvector acceleration;
+	float maxSpeed;
+	float maxForce;
+//	bool updatedCommand;
+//	bool updatedPosition;
+	bool collision;
 
+	Body()
+	{
+	}
+	Body(float x, float y, char _id[2], int _numid);
 
-    Body() {}
-    Body(float x, float y, char _id[2], int _numid);
- //   Body(float x, float y, bool predCheck);
-
-    // Three Laws that bodies follow
-    Pvector Separation(vector<Body> Bodies);
-    Pvector Alignment(vector<Body> Bodies);
-    Pvector Cohesion(vector<Body> Bodies);
-
-    //Functions involving SFML and visualisation linking
-    Pvector seek(Pvector v);
-    void run(vector <Body> v);
-    void update();
-    void borders();
-    std::pair<float,float> borders(float _fx, float _fy);
-    void seperation(vector<Body> _bodies);
-    void inElasticCollisions(vector<Body> _bodies);
-    void elasticCollisions(vector<Body> _bodies);
-    void targetCollision(int i, float _t_sep);
-    void targetInElastic(int i, float _t_sep);
-    float targetSeperation(wvu_swarm_std_msgs::vicon_point);
-    float angle(Pvector v);
+	//Functions involving SFML and visualisation linking
+	void run(vector<Body> v);
+	void update();
+	void borders();
+	std::pair<float, float> borders(float _fx, float _fy);
+	void inElasticCollisions(vector<Body> _bodies);
+	float angle(Pvector v);
 };
 
 #endif
