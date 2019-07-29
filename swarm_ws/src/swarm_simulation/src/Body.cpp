@@ -4,6 +4,7 @@
 #include <math.h>
 #include <SFML/Graphics.hpp>
 #include <swarm_simulation/Body.h>
+#include <swarm_simulation/sim_settings.h>
 
 // Global Variables for borders()
 // desktopTemp gets screen resolution of PC running the program
@@ -13,23 +14,19 @@ const int window_width = desktopTemp.width;
 
 #define BOD_DEBUG 0
 
-#define w_height 600
-#define w_width 300
-#define PI 3.141592635
-
 // Body Functions from Body.h
 // ----------------------------
 
 Body::Body(float x, float y, char _id[2], int _numid) //constructor for each of the bodies (represent bots).
 {
-	numid=_numid;
+	numid = _numid;
 	acceleration = Pvector(0, 0);
 	velocity = Pvector(0, 0);
 	location = Pvector(x, y);
 	prev_location = Pvector(x, y);
-	a=0;
-	b=0;
-	bodyPause=false;
+	a = 0;
+	b = 0;
+	bodyPause = false;
 	maxForce = 0.5;
 	id[0] = _id[0];
 	id[1] = _id[1];
@@ -57,13 +54,16 @@ int Body::quadrant(float _phi) //accepts angle of plane, returns quadrant of tha
 	if ((_phi >= 0) && (_phi < M_PI_2))
 	{
 		Q = 1;
-	} else if ((_phi >= M_PI_2) && (_phi <= M_PI))
+	}
+	else if ((_phi >= M_PI_2) && (_phi <= M_PI))
 	{
 		Q = 2;
-	} else if ((_phi > M_PI) && (_phi < 3 * M_PI_2))
+	}
+	else if ((_phi > M_PI) && (_phi < 3 * M_PI_2))
 	{
 		Q = 3;
-	} else
+	}
+	else
 	{
 		Q = 4;
 	}
@@ -84,13 +84,15 @@ bool Body::aboveOrBelow(float _dx, float _dy, int _Q) //returns whether bot is a
 			std::cout<<"&- Bot is above the plane -&"<<std::endl;
 #endif
 			place = true;
-		} else
+		}
+		else
 		{
 #if BOD_DEBUG
 			std::cout<<"&- Bot is below the plane -&"<<std::endl;
 #endif
 		}
-	} else if ((_Q == 2) || (_Q == 4))
+	}
+	else if ((_Q == 2) || (_Q == 4))
 	{
 		if ((_dx <= 0) && (_dy >= 0))
 		{
@@ -99,7 +101,8 @@ bool Body::aboveOrBelow(float _dx, float _dy, int _Q) //returns whether bot is a
 #endif
 			place = true;
 
-		} else
+		}
+		else
 		{
 #if BOD_DEBUG
 				std::cout<<"&- Bot is below the plane -&"<<std::endl;
@@ -110,15 +113,17 @@ bool Body::aboveOrBelow(float _dx, float _dy, int _Q) //returns whether bot is a
 }
 
 float Body::getRelTheta(float _abs_theta, float _phi, int _Q) //converts global theta into frame of collision plane, with collision plane
-{                                                                 //as the vertical axis.
+{                                                        //as the vertical axis.
 	float rel_theta;
 	if ((_Q == 1) || (_Q == 4))
 	{
 		rel_theta = _abs_theta - _phi - M_PI_2;
-	} else if ((_Q == 2) || (_Q == 3))
+	}
+	else if ((_Q == 2) || (_Q == 3))
 	{
 		rel_theta = _abs_theta - _phi + M_PI_2;
-	} else
+	}
+	else
 	{
 #if BOD_DEBUG
 		std::cout<<"the program broke getRelTheta()"<<std::endl;
@@ -135,9 +140,9 @@ float Body::getRelTheta(float _abs_theta, float _phi, int _Q) //converts global 
 bool Body::applyForce(bool _aorb, float _rel_theta) //decides whether a bot is going towards or away from the plane. Decides if force
 {                                                    //needs to be applied.
 	bool apply = false;
-	if (_aorb == true)                                                    //above the plane
+	if (_aorb == true)                                           //above the plane
 	{
-		if((_rel_theta > M_PI_2) && (_rel_theta < 3*M_PI_2))
+		if ((_rel_theta > M_PI_2) && (_rel_theta < 3 * M_PI_2))
 		{
 #if BOD_DEBUG
 			std::cout<<"will apply force"<<std::endl;
@@ -151,9 +156,10 @@ bool Body::applyForce(bool _aorb, float _rel_theta) //decides whether a bot is g
 #endif
 		}
 	}
-	else if(_aorb == false) //bot is below plane
+	else if (_aorb == false) //bot is below plane
 	{
-		if(((_rel_theta >=0) && (_rel_theta < M_PI_2)) || ((_rel_theta> 3*M_PI_2) && (_rel_theta < 2*M_PI)))
+		if (((_rel_theta >= 0) && (_rel_theta < M_PI_2))
+				|| ((_rel_theta > 3 * M_PI_2) && (_rel_theta < 2 * M_PI)))
 		{
 #if BOD_DEBUG
 			std::cout<<"will apply force"<<std::endl;
@@ -170,7 +176,7 @@ bool Body::applyForce(bool _aorb, float _rel_theta) //decides whether a bot is g
 	else
 	{
 #if BOD_DEBUG
-		std::cout<<"shit is broke in applyForce()"<<std::endl; //LMAO
+		std::cout<<"broke in applyForce()"<<std::endl; //LMAO
 #endif
 	}
 	return apply;
@@ -187,18 +193,20 @@ void Body::update()
 	// Limit speed
 //	velocity.limit(1);
 //	velocity.mulScalar(maxSpeed);
-	prev_location.set(location.x,location.y);
+	prev_location.set(location.x, location.y);
 	ros::Time newTime = ros::Time::now();
-	double tstep = newTime.toSec()-curTime.toSec();
-	curTime=newTime;
-	if (bodyPause) {
-		bodyPause=false;
+	double tstep = newTime.toSec() - curTime.toSec();
+	curTime = newTime;
+	if (bodyPause)
+	{
+		bodyPause = false;
 		return;
 	}
 
-	heading +=(b-a)/l*tstep;
-	if (heading>2*M_PI || heading <0) heading=fmod(heading+2*M_PI,2*M_PI);
-	velocity.set((a+b)/2*cos(heading),-(a+b)/2*sin(heading));
+	heading += (b - a) / l * tstep;
+	if (heading > 2 * M_PI || heading < 0)
+		heading = fmod(heading + 2 * M_PI, 2 * M_PI);
+	velocity.set((a + b) / 2 * cos(heading), -(a + b) / 2 * sin(heading));
 	Pvector temp(velocity);
 	temp.mulScalar(tstep);
 	location.addVector(temp);
@@ -208,65 +216,75 @@ void Body::update()
 // Run flock() on the flock of bodies.
 // This applies the three rules, modifies velocities accordingly, updates data,
 // and corrects bodies which are sitting outside of the SFML window
-void Body::run(vector <Body> v)
+void Body::run(vector<Body> v)
 {
-		update();
-		//elasticCollisions(v);
-		inElasticCollisions(v);
-		//seperation(v);
-		borders();
+	update();
+	//elasticCollisions(v);
+	inElasticCollisions(v);
+	//seperation(v);
+	borders();
 }
 
 // Checks if bodies go out of the window and if so, wraps them around to
 // the other side.
 void Body::borders()
 {
-	//code for boundary wrapping
-	/*if (location.x < 0) location.x += w_width;
-	 if (location.y < 0) location.y += w_height;
-	 if (location.x > 300) location.x -= w_width;
-	 if (location.y > 600) location.y -= w_height;*/
 
 	//code for hard boundary conditions. Nulls velocity component orthogonal to boundary.
-	if ((location.x <=12) ||(location.x >=288))
+	if ((location.x <= 12) || (location.x >= 288))
 	{
 		//velocity.x = 0;
-		if(location.x <= 12)
-		{ location.x = 12;}
-		if(location.x >= 288)
-		{ location.x = 288;}
+		if (location.x <= 12)
+		{
+			location.x = 12;
+		}
+		if (location.x >= 288)
+		{
+			location.x = 288;
+		}
 	}
-	if ((location.y <=12) ||(location.y >=588))
+	if ((location.y <= 12) || (location.y >= 588))
 	{
 		//velocity.y = 0;
-		if(location.y <=12)
-		{ location.y = 12;}
-		if(location.y >=588)
-		{ location.y = 588;}
+		if (location.y <= 12)
+		{
+			location.y = 12;
+		}
+		if (location.y >= 588)
+		{
+			location.y = 588;
+		}
 	}
 }
 
-std::pair<float,float> Body::borders(float _fx, float _fy) //applys bounds for the physics engine (adjusts forces)
+std::pair<float, float> Body::borders(float _fx, float _fy) //applys bounds for the physics engine (adjusts forces)
 {
 	//code for hard boundary conditions. Nulls velocity component orthogonal to boundary.
-	if ((location.x <=12) ||(location.x >=288))
+	if ((location.x <= 12) || (location.x >= 288))
 	{
 		_fx = -_fx;
-		if(location.x <= 12)
-		{ location.x = 12;}
-		if(location.x >= 288)
-		{ location.x = 288;}
+		if (location.x <= 12)
+		{
+			location.x = 12;
+		}
+		if (location.x >= 288)
+		{
+			location.x = 288;
+		}
 	}
-	if ((location.y <=12) ||(location.y >=588))
+	if ((location.y <= 12) || (location.y >= 588))
 	{
 		_fy = -_fy;
-		if(location.y <=12)
-		{ location.y = 12;}
-		if(location.y >=588)
-		{ location.y = 588;}
+		if (location.y <= 12)
+		{
+			location.y = 12;
+		}
+		if (location.y >= 588)
+		{
+			location.y = 588;
+		}
 	}
-	std::pair<float,float> that =
-	{ _fx,_fy};
+	std::pair<float, float> that = { _fx, _fy };
 	return that;
 }
 
@@ -274,23 +292,17 @@ void Body::inElasticCollisions(vector<Body> _bodies) //for collisions between bo
 {
 	//Magnitude of separation between bodies
 	float desiredseparation = 21;
-	for (int i = 0; i < _bodies.size(); i++)// For every body in the system, check if it's too close
+	for (int i = 0; i < _bodies.size(); i++) // For every body in the system, check if it's too close
 	{
 		collision = false;
 		// Calculate distance from current body to body we're looking at
 		float d = location.distance(_bodies.at(i).location);
 		float target_sep;
-//		if(i<targets->point.size())
-//		{
-//			target_sep = targetSeperation(targets->point.at(i));
-////	    		 targetCollision(i,target_sep);
-//			targetInElastic(i,target_sep);
-//
-//		}
 		// If this is a fellow body and it's too close, move away from it
-		if ((d <= desiredseparation) && !((id[0] ==_bodies.at(i).id[0]) && (id[1] ==_bodies.at(i).id[1])))// (&&d>0))
+		if ((d <= desiredseparation)
+				&& !((id[0] == _bodies.at(i).id[0]) && (id[1] == _bodies.at(i).id[1]))) // (&&d>0))
 		{
-			if(collision == false)
+			if (collision == false)
 			{
 				collision = true;
 			}
@@ -298,7 +310,7 @@ void Body::inElasticCollisions(vector<Body> _bodies) //for collisions between bo
 			std::cout<<"---BOT-- "<<id[0]<<id[1]<<" With Bot: "<<_bodies.at(i).id[0]<<_bodies.at(i).id[1]<<std::endl;
 #endif
 			float fnx; //force to be applied (x).
-			float fny;//force to be applied (y).
+			float fny; //force to be applied (y).
 
 			float dy = _bodies.at(i).location.y - location.y;
 			float dx = _bodies.at(i).location.x - location.x;
@@ -306,7 +318,7 @@ void Body::inElasticCollisions(vector<Body> _bodies) //for collisions between bo
 			std::cout<<"dx,dy: "<<dx<<","<<dy<<std::endl;
 #endif
 			//angle b/w d and origin.
-			float d_angle = angle(Pvector(dx,dy));
+			float d_angle = angle(Pvector(dx, dy));
 			d_angle = angleConvert(d_angle);
 
 			float phi = M_PI_2 + d_angle;
@@ -318,32 +330,32 @@ void Body::inElasticCollisions(vector<Body> _bodies) //for collisions between bo
 #endif
 
 			int h = quadrant(heading);
-			float fx = force*cos(heading);//bot force in heading direction(x).
-			float fy = abs(force*sin(heading));//bot force in heading direction (y).
+			float fx = force * cos(heading); //bot force in heading direction(x).
+			float fy = abs(force * sin(heading)); //bot force in heading direction (y).
 
-			if((h == 1)||(h==2))
+			if ((h == 1) || (h == 2))
 			{
 				fy = -fy;
 			}
-			float mag = sqrt(pow(fx,2) + pow(fy,2));
-			std::pair<float,float> forces = borders(fx,fy);
+			float mag = sqrt(pow(fx, 2) + pow(fy, 2));
+			std::pair<float, float> forces = borders(fx, fy);
 			fx = forces.first;
 			fy = forces.second;
 
-			float abs_theta = angleConvert(angle(Pvector(fx,fy)));//angle of force in absolute position.
+			float abs_theta = angleConvert(angle(Pvector(fx, fy))); //angle of force in absolute position.
 			abs_theta = angleConvert(abs_theta);
 
-			int Q = quadrant(phi);//quadrant bot is in
-			bool above_below = aboveOrBelow(dx,dy,Q);//gets quadrant collision is happening.
-			float rel_theta = getRelTheta(abs_theta,phi,Q);//velocity direction in frame of the collision plane.
-			bool apply_force = applyForce(above_below, rel_theta);//finds if force points towards the plane.
+			int Q = quadrant(phi); //quadrant bot is in
+			bool above_below = aboveOrBelow(dx, dy, Q); //gets quadrant collision is happening.
+			float rel_theta = getRelTheta(abs_theta, phi, Q); //velocity direction in frame of the collision plane.
+			bool apply_force = applyForce(above_below, rel_theta); //finds if force points towards the plane.
 
-			if(apply_force == true)
+			if (apply_force == true)
 			{
 				location.x = prev_location.x;
 				location.y = prev_location.y;
-				fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-				fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+				fnx = fx - (fx * pow(sin(phi), 2) + fy * sin(phi) * cos(phi));
+				fny = fy - (fy * pow(cos(phi), 2) + fx * sin(phi) * cos(phi));
 			}
 			else
 			{
@@ -375,14 +387,16 @@ void Body::seperation(vector<Body> _bodies)
 	// Distance of field of vision for separation between bodies
 	float desiredseparation = 15;
 	Pvector steer(0, 0);
-	int count = 0;//iterator
-	for (int i = 0; i < _bodies.size(); i++)// For every body in the system, check if it's too close
+	int count = 0; //iterator
+	for (int i = 0; i < _bodies.size(); i++) // For every body in the system, check if it's too close
 	{
 		// Calculate distance from current body to body we're looking at
 		float d = location.distance(_bodies.at(i).location);
 		// If this is a fellow body and it's too close, move away from it
-		if ((d < desiredseparation) && !((id[0] ==_bodies.at(i).id[0]) && (id[1] ==_bodies.at(i).id[1])))// (&&d>0))
-		{ _bodies.at(i).location.x = _bodies.at(i).prev_location.x;
+		if ((d < desiredseparation)
+				&& !((id[0] == _bodies.at(i).id[0]) && (id[1] == _bodies.at(i).id[1]))) // (&&d>0))
+		{
+			_bodies.at(i).location.x = _bodies.at(i).prev_location.x;
 			_bodies.at(i).location.x = _bodies.at(i).prev_location.x;
 			location.x = prev_location.x;
 			_bodies.at(i).location.y = _bodies.at(i).prev_location.y;
@@ -392,21 +406,21 @@ void Body::seperation(vector<Body> _bodies)
 	}
 }
 
-void Body::targetCollision(int i,float _t_sep)
+void Body::targetCollision(int i, float _t_sep)
 {
 	//std::cout << _t_sep << std::endl;
-	if(_t_sep<= 17.5)
+	if (_t_sep <= 17.5)
 	{
 
-		float dy = 300 - targets->point.at(i).y * 3 - location.y;
-		float dx = 150 + targets->point.at(i).x * 3 - location.x;
-		float theta = angle(Pvector(dy,dx)); //angle from bot to the target
-		theta = angleConvert(theta);//scaled positive
+		float dy = O_SIM_HEI_2 - targets->point.at(i).y * 3 - location.y;
+		float dx = O_SIM_WID_2 + targets->point.at(i).x * 3 - location.x;
+		float theta = angle(Pvector(dy, dx)); //angle from bot to the target
+		theta = angleConvert(theta); //scaled positive
 
 		//calculates force to be applied to the bot
 		float force = 1;
-		float fx = -force*cos(theta);
-		float fy = force*sin(theta);
+		float fx = -force * cos(theta);
+		float fy = force * sin(theta);
 
 		//applies force to bot
 		location.x += fx;
@@ -421,21 +435,21 @@ void Body::targetCollision(int i,float _t_sep)
 
 void Body::targetInElastic(int i, float _t_sep) //Collision between bots and puck. Not truely elastic or inelastic.
 {
-	if(_t_sep<= 17.5)
+	if (_t_sep <= 17.5)
 	{
 		float fnx;
 		float fny;
 
-		float dy = 300 - targets->point.at(i).y * 3 - location.y;
-		float dx = 150 + targets->point.at(i).x * 3 - location.x;
+		float dy = O_SIM_HEI_2 - targets->point.at(i).y * 3 - location.y;
+		float dx = O_SIM_WID_2 + targets->point.at(i).x * 3 - location.x;
 		float abs_theta = angleConvert(heading); //angle from bot to the target
-		float phi = angleConvert(angle(Pvector(dx,dy)) + M_PI_2);
+		float phi = angleConvert(angle(Pvector(dx, dy)) + M_PI_2);
 #if BOD_DEBUG
 		std::cout<<"\033[32m---BOT-- \033[0m"<<id[0]<<id[1]<<" With the puck"<<std::endl;
 		std::cout<<"dx,dy: "<<dx<<","<<dy<<std::endl;
 		std::cout<<"heading: "<<heading*180/M_PI<<std::endl;
 #endif
-		float sep_a = angleConvert(angle(Pvector(dx,dy)));
+		float sep_a = angleConvert(angle(Pvector(dx, dy)));
 #if BOD_DEBUG
 		std::cout<<"seperation angle: "<<sep_a*180/M_PI<<std::endl;
 		std::cout<<"abs_theta: "<<abs_theta*180/M_PI<<std::endl;
@@ -443,26 +457,28 @@ void Body::targetInElastic(int i, float _t_sep) //Collision between bots and puc
 #endif
 		//calculates force to be applied by the bot
 		float force = 1;
-		float fx = force*cos(abs_theta);
-		float fy = -force*sin(abs_theta);
+		float fx = force * cos(abs_theta);
+		float fy = -force * sin(abs_theta);
 #if BOD_DEBUG
 		std::cout<<"force: "<<fx<<","<<fy<<std::endl;
 #endif
 		int Q = quadrant(phi); //quadrant bot is in
-		bool above_below = aboveOrBelow(dx,dy,Q);//gets quadrant collision is happening.
-		float rel_theta = getRelTheta(abs_theta,phi,Q);//velocity direction in frame of the collision plane.
-		bool apply_force = applyForce(above_below, rel_theta);//finds if force points towards the plane.
+		bool above_below = aboveOrBelow(dx, dy, Q); //gets quadrant collision is happening.
+		float rel_theta = getRelTheta(abs_theta, phi, Q); //velocity direction in frame of the collision plane.
+		bool apply_force = applyForce(above_below, rel_theta); //finds if force points towards the plane.
 
-		if(apply_force == true)
+		if (apply_force == true)
 		{
 			location.x = prev_location.x;
 			location.y = prev_location.y;
-			fnx = fx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-			fny = fy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+			fnx = fx - (fx * pow(sin(phi), 2) + fy * sin(phi) * cos(phi));
+			fny = fy - (fy * pow(cos(phi), 2) + fx * sin(phi) * cos(phi));
 
 			//applies velocity to puck
-			targets->point.at(i).vx += (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi))-targets->point.at(i).vx;
-			targets->point.at(i).vy += (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi))-targets->point.at(i).vy;
+			targets->point.at(i).vx += (fx * pow(sin(phi), 2)
+					+ fy * sin(phi) * cos(phi)) - targets->point.at(i).vx;
+			targets->point.at(i).vy += (fy * pow(cos(phi), 2)
+					+ fx * sin(phi) * cos(phi)) - targets->point.at(i).vy;
 		}
 		else
 		{
@@ -471,10 +487,12 @@ void Body::targetInElastic(int i, float _t_sep) //Collision between bots and puc
 			fnx = fx;
 			fny = fy;
 
-			targets->point.at(i).vx = targets->point.at(i).vx - (fx*pow(sin(phi),2) + fy * sin(phi) * cos(phi));
-			targets->point.at(i).vy = targets->point.at(i).vy - (fy*pow(cos(phi),2) + fx * sin(phi) * cos(phi));
+			targets->point.at(i).vx = targets->point.at(i).vx
+					- (fx * pow(sin(phi), 2) + fy * sin(phi) * cos(phi));
+			targets->point.at(i).vy = targets->point.at(i).vy
+					- (fy * pow(cos(phi), 2) + fx * sin(phi) * cos(phi));
 		}
-		location.addVector(Pvector(fnx,fny));
+		location.addVector(Pvector(fnx, fny));
 #if BOD_DEBUG
 		std::cout<<"force applied bot: "<<fnx<<","<<fny<<std::endl;
 		std::cout<<"new puck velocity: "<<targets->point.at(i).vx<<","<<targets->point.at(i).vy<<std::endl;
@@ -485,15 +503,15 @@ void Body::targetInElastic(int i, float _t_sep) //Collision between bots and puc
 
 float Body::targetSeperation(wvu_swarm_std_msgs::vicon_point target)
 {
-	float x = target.x * 3 + 150;
-	float y = 300 - target.y * 3;
-	float target_sep = location.distance(Pvector(x,y));
+	float x = target.x * 3 + O_SIM_WID_2;
+	float y = O_SIM_HEI_2 - target.y * 3;
+	float target_sep = location.distance(Pvector(x, y));
 	return target_sep;
 
 }
 float Body::angle(Pvector v)
 {
 	// From the definition of the dot product. negated to transform to first quadrant from 4th.
-	float angle = -1*(float)(atan2(v.y,v.x) );
+	float angle = -1 * (float) (atan2(v.y, v.x));
 	return angle;
 }

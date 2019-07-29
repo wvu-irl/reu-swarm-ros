@@ -28,7 +28,6 @@
 class Flock {
 public:
 	  wvu_swarm_std_msgs::vicon_bot_array createMessages(wvu_swarm_std_msgs::vicon_bot_array);//vector<Body> _flock); //operates on flock
-	  void printMessage(wvu_swarm_std_msgs::vicon_bot_array _vb_array);
 	  vector<Body> bodies;
     //Constructors
     Flock() {}

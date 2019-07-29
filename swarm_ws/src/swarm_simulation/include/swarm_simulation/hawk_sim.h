@@ -12,13 +12,14 @@
 #include <wvu_swarm_std_msgs/vicon_bot_array.h>
 #include <wvu_swarm_std_msgs/vicon_points.h>
 
+#include "sim_settings.h"
+
 class Hawk_Sim
 {
 private:
 	float counter = 0;
 	float prev_counter = 1;
 
-	int NUMBOTS;
 	bool first = true;
 	bool energy_first = true;
 	bool new_chargers;
@@ -43,7 +44,6 @@ private:
 	//initializer functions
 	void makeChargers(ros::Publisher _pub);
 	void makePriority(ros::Publisher _pub);
-	void makeEnergy(ros::Publisher _pub);
 	void makeSensorData(ros::Publisher _pub);
 	void makeTargets(ros::Publisher _pub);
 

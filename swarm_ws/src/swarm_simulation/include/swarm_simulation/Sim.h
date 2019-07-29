@@ -9,6 +9,8 @@
 #include <wvu_swarm_std_msgs/flows.h>
 #include <wvu_swarm_std_msgs/virtual_objects.h>
 #include <wvu_swarm_std_msgs/chargers.h>
+
+#include "sim_settings.h"
 //#include <swarm_server/robot_id.h>
 
 #ifndef SIM_H
@@ -32,7 +34,6 @@ class Sim
 {
 
 private:
-	int NUMBOTS = 1; //number of bots in the simulation; the WHOLE simulation (hub & alice), not just this file.
 	sf::RenderWindow window;
 	int window_width;
 	int window_height;
