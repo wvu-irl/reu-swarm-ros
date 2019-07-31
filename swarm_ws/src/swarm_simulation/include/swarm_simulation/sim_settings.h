@@ -5,6 +5,7 @@
 #define NUMBOTS 20
 
 // Main sim window
+// 	O is for overall
 #define O_SIM_WID 300
 #define O_SIM_HEI 600
 

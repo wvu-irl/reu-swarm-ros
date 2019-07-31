@@ -229,30 +229,29 @@ void Body::run(vector<Body> v)
 // the other side.
 void Body::borders()
 {
-
 	//code for hard boundary conditions. Nulls velocity component orthogonal to boundary.
-	if ((location.x <= 12) || (location.x >= 288))
+	if ((location.x <= 12) || (location.x >= O_SIM_WID - 12))
 	{
 		//velocity.x = 0;
 		if (location.x <= 12)
 		{
 			location.x = 12;
 		}
-		if (location.x >= 288)
+		if (location.x >= O_SIM_WID - 12)
 		{
-			location.x = 288;
+			location.x = O_SIM_WID - 12;
 		}
 	}
-	if ((location.y <= 12) || (location.y >= 588))
+	if ((location.y <= 12) || (location.y >= O_SIM_HEI - 12))
 	{
 		//velocity.y = 0;
 		if (location.y <= 12)
 		{
 			location.y = 12;
 		}
-		if (location.y >= 588)
+		if (location.y >= O_SIM_HEI - 12)
 		{
-			location.y = 588;
+			location.y = O_SIM_HEI - 12;
 		}
 	}
 }
@@ -260,28 +259,28 @@ void Body::borders()
 std::pair<float, float> Body::borders(float _fx, float _fy) //applys bounds for the physics engine (adjusts forces)
 {
 	//code for hard boundary conditions. Nulls velocity component orthogonal to boundary.
-	if ((location.x <= 12) || (location.x >= 288))
+	if ((location.x <= 12) || (location.x >= O_SIM_WID - 12))
 	{
 		_fx = -_fx;
 		if (location.x <= 12)
 		{
 			location.x = 12;
 		}
-		if (location.x >= 288)
+		if (location.x >= O_SIM_WID - 12)
 		{
-			location.x = 288;
+			location.x = O_SIM_WID - 12;
 		}
 	}
-	if ((location.y <= 12) || (location.y >= 588))
+	if ((location.y <= 12) || (location.y >= O_SIM_HEI - 12))
 	{
 		_fy = -_fy;
 		if (location.y <= 12)
 		{
 			location.y = 12;
 		}
-		if (location.y >= 588)
+		if (location.y >= O_SIM_HEI - 12)
 		{
-			location.y = 588;
+			location.y = O_SIM_HEI - 12;
 		}
 	}
 	std::pair<float, float> that = { _fx, _fy };

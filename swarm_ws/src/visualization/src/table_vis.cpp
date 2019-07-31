@@ -379,8 +379,8 @@ int main(int argc, char **argv)
 			> ("config_path", config, "/home/ssvnormandy/git/reu-swarm-ros/swarm_ws/src/visualization/cfg/calib.config");
 	n_priv.param < std::string
 			> ("background", g_background, assets + "/HockeyRink.png");
-	n_priv.param<int>("table_width", g_table_width, 200);
-	n_priv.param<int>("table_height", g_table_height, 100);
+	n_priv.param<int>("table_width", g_table_width, TAB_HEIGHT);
+	n_priv.param<int>("table_height", g_table_height, TAB_WIDTH);
 	n_priv.param<int>("robot_diameter", g_robot_diameter, 5);
 	n_priv.param<int>("draw_level", g_draw_level, map_ns::COMBINED);
 	n_priv.param<bool>("use_keyboard", use_keyboard, false);

@@ -6,6 +6,9 @@
 #include <swarm_simulation/Font.h>
 #include <visualization/alice_pov.h>
 #include <alice_swarm/get_map.h>
+
+#include <swarm_simulation/sim_settings.h>
+
 bool overlap = true;
 
 //#include "ros/ros.h"
@@ -19,12 +22,13 @@ AlicePOV::AlicePOV(void)
 {
 	bodiesSize = 10.5;
 	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-	window_height = 600;
-	window_width = 600;
+	window_height = O_SIM_HEI;
+	window_width = O_SIM_HEI;
 	this->window.create(
 			sf::VideoMode(window_width, window_height, desktop.bitsPerPixel),
 			"Alice POV", sf::Style::Titlebar);
-	this->window2.create(sf::VideoMode(300, window_height, desktop.bitsPerPixel),
+	this->window2.create(
+			sf::VideoMode(O_SIM_WID, window_height, desktop.bitsPerPixel),
 			"Alice POV", sf::Style::Titlebar);
 }
 
@@ -98,7 +102,8 @@ void AlicePOV::drawMail(ros::ServiceClient _client)
 					ellipse.setPoint(i, sf::Vector2f(newx, newy));
 				}
 
-				ellipse.setPosition(300 + 3 * temp.offset_x, 300 - 3 * temp.offset_y);
+				ellipse.setPosition(O_SIM_HEI_2 + 3 * temp.offset_x,
+				O_SIM_HEI_2 - 3 * temp.offset_y);
 				ellipse.setFillColor(sf::Color::Yellow);
 				ellipse.setOutlineColor(sf::Color::White);
 				ellipse.setOutlineThickness(1);
@@ -111,7 +116,7 @@ void AlicePOV::drawMail(ros::ServiceClient _client)
 						mail.mails.at(i).neighborMail.at(j);
 				sf::CircleShape shape(0);
 				// Changing the Visual Properties of the (neighboring) robot
-				shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
+				shape.setPosition(O_SIM_HEI_2 + 3 * temp.x, O_SIM_HEI_2 - 3 * temp.y);
 				shape.setOrigin(bodiesSize, bodiesSize);
 				float inten = 0;
 				//unused:
@@ -126,7 +131,7 @@ void AlicePOV::drawMail(ros::ServiceClient _client)
 
 				sf::RectangleShape line(sf::Vector2f(5, 2));
 				line.setFillColor(sf::Color::Black);
-				line.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
+				line.setPosition(O_SIM_HEI_2 + 3 * temp.x, O_SIM_HEI_2 - 3 * temp.y);
 				line.setOrigin(-2, 1);
 				line.setRotation(180.0 / M_PI * (-temp.ang));
 				window.draw(line);
@@ -136,7 +141,7 @@ void AlicePOV::drawMail(ros::ServiceClient _client)
 				wvu_swarm_std_msgs::point_mail temp = mail.mails.at(i).targetMail.at(j);
 				sf::CircleShape shape(0);
 				// Changing the Visual Properties of the obstacle
-				shape.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
+				shape.setPosition(O_SIM_HEI_2 + 3 * temp.x, O_SIM_HEI_2 - 3 * temp.y);
 				shape.setOrigin(bodiesSize, bodiesSize);
 				shape.setFillColor(sf::Color::Green);
 				shape.setRadius(bodiesSize);
@@ -150,7 +155,7 @@ void AlicePOV::drawMail(ros::ServiceClient _client)
 
 				sf::RectangleShape line(sf::Vector2f(temp.pri * 10, 1));
 				line.setFillColor(sf::Color::Cyan);
-				line.setPosition(300 + 3 * temp.x, 300 - 3 * temp.y);
+				line.setPosition(O_SIM_HEI_2 + 3 * temp.x, O_SIM_HEI_2 - 3 * temp.y);
 				line.setRotation(180.0 / M_PI * (-temp.dir));
 				window.draw(line);
 				line.setOutlineColor(sf::Color::White);
@@ -158,7 +163,7 @@ void AlicePOV::drawMail(ros::ServiceClient _client)
 			}
 			sf::CircleShape shape(0);
 			// Changing the Visual Properties of the robot
-			shape.setPosition(300, 300); // Sets position of shape to the middle
+			shape.setPosition(O_SIM_HEI_2, O_SIM_HEI_2); // Sets position of shape to the middle
 			shape.setOrigin(bodiesSize, bodiesSize);
 			float inten = 255 * mail.mails.at(name).contVal;
 			if (inten > 255)
@@ -171,7 +176,7 @@ void AlicePOV::drawMail(ros::ServiceClient _client)
 
 			sf::RectangleShape line(sf::Vector2f(5, 2));
 			line.setFillColor(sf::Color::Black);
-			line.setPosition(300, 300);
+			line.setPosition(O_SIM_HEI_2, O_SIM_HEI_2);
 			line.setOrigin(-2, 1);
 			line.setRotation(0);
 			window.draw(line);
@@ -183,11 +188,11 @@ void AlicePOV::drawMail(ros::ServiceClient _client)
 			sf::CircleShape wp_shape(3);
 			// Changing the Visual Properties of the obstacle
 			wp_shape.setPosition(
-					150
+					O_SIM_WID_2
 							+ 3
 									* (map.ox + cos(map.oheading) * map.goToX
 											- sin(map.oheading) * map.goToY),
-					300
+					O_SIM_HEI_2
 							- 3
 									* (map.oy + sin(map.oheading) * map.goToX
 											+ cos(map.oheading) * map.goToY));
@@ -222,11 +227,11 @@ void AlicePOV::drawMsg(ros::ServiceClient _client)
 		}
 
 		ellipse.setPosition(
-				150
+				O_SIM_WID_2
 						+ 3
 								* (map.ox + cos(map.oheading) * temp.offset_x
 										- sin(map.oheading) * temp.offset_y),
-				300
+				O_SIM_HEI_2
 						- 3
 								* (map.oy + sin(map.oheading) * temp.offset_x
 										+ cos(map.oheading) * temp.offset_y));
@@ -242,11 +247,11 @@ void AlicePOV::drawMsg(ros::ServiceClient _client)
 		sf::CircleShape shape(0);
 		// Changing the Visual Properties of the target
 		shape.setPosition(
-				150
+				O_SIM_WID_2
 						+ 3
 								* (map.ox + cos(map.oheading) * temp.x
 										- sin(map.oheading) * temp.y),
-				300
+				O_SIM_HEI_2
 						- 3
 								* (map.oy + sin(map.oheading) * temp.x
 										+ cos(map.oheading) * temp.y));
@@ -264,11 +269,11 @@ void AlicePOV::drawMsg(ros::ServiceClient _client)
 
 		// Changing the Visual Properties of the contour point
 		shape.setPosition(
-				150
+				O_SIM_WID_2
 						+ 3
 								* (map.ox + cos(map.oheading) * temp.x
 										- sin(map.oheading) * temp.y),
-				300
+				O_SIM_HEI_2
 						- 3
 								* (map.oy + sin(map.oheading) * temp.x
 										+ cos(map.oheading) * temp.y));
@@ -290,11 +295,11 @@ void AlicePOV::drawMsg(ros::ServiceClient _client)
 	sf::CircleShape shape(3);
 	// Changing the Visual Properties of the obstacle
 	shape.setPosition(
-			150
+			O_SIM_WID_2
 					+ 3
 							* (map.ox + cos(map.oheading) * map.goToX
 									- sin(map.oheading) * map.goToY),
-			300
+			O_SIM_HEI_2
 					- 3
 							* (map.oy + sin(map.oheading) * map.goToX
 									+ cos(map.oheading) * map.goToY));

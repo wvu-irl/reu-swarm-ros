@@ -13,7 +13,7 @@
 #include <string>
 
 // toggles verbose option
-#define DEBUG 1
+#define DEBUG 0
 
 // toggles if the main loop has a rate
 #define RATE_LIMIT 1
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
 	ros::Subscriber n_obs = n.subscribe("add_obstacle", 1000, additionCallback);
 	ros::Subscriber r_obs = n.subscribe("rem_obstacle", 1000, removeCallback);
 #if DEBUG
-	std::cout << "Adding equation" << std::endl;
+	std::cout << "Adding equation(s)" << std::endl;
 #endif
 
 	levelObject *ptr;

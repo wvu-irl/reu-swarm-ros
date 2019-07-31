@@ -13,6 +13,7 @@
 #include "calculation.cu"
 
 #include <visualization/contour.h>
+#include <visualization/visualization_settings.h>
 #include <contour_node/level_description.h>
 
 // toggles verbose option
@@ -119,10 +120,10 @@ void ContourMap::tick()
 #endif
 		double x = (double)((int)idx % (int)bounds.width);
 		double y = (double)((int)idx / (int)bounds.width);
-		x -= 640;
-		y -= 400;
-		x *= 200.0 / (double)bounds.width;
-		y *= 100.0 / (double)bounds.height;
+		x -= WIDTH_2;
+		y -= HEIGHT_2;
+		x *= (double)TAB_HEIGHT_2 / (double)bounds.width;
+		y *= (double)TAB_WIDTH_2 / (double)bounds.height;
 #if DEBUG_CONT_SRC
 				std::cout << " \033[33mCompleted shift\033[0m" << std::endl;
 #endif

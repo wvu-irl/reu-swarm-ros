@@ -52,10 +52,10 @@ sf::Vector2f interaction::getMouseCordinate(sf::Vector2f initial,
 	double unified_x = initial.x;
 	double unified_y = initial.y;
 
-	unified_x *= 200.0 / (double) WIDTH;
-	unified_y *= 100.0 / (double) HEIGHT;
-	unified_x -= 200.0 / 2.0;
-	unified_y -= 100.0 / 2.0;
+	unified_x *= (double)TAB_HEIGHT / (double) WIDTH;
+	unified_y *= (double)TAB_WIDTH / (double) HEIGHT;
+	unified_x -= (double)TAB_HEIGHT / 2.0;
+	unified_y -= (double)TAB_WIDTH / 2.0;
 
 	return sf::Vector2f((float) unified_y, (float) unified_x);
 }

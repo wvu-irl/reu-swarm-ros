@@ -32,8 +32,6 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
-add_library(robot_id src/robot_id.cpp)
-target_link_libraries(robot_id ${catkin_LIBRARIES})
 
 add_library(arduino_server src/arduino_server_source.cpp)
 target_link_libraries(arduino_server ${catkin_LIBRARIES})
@@ -41,7 +39,3 @@ target_link_libraries(arduino_server ${catkin_LIBRARIES})
 add_executable(ros_to_arduino_server src/ros_to_arduino_server.cpp)
 add_dependencies(ros_to_arduino_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} wvu_swarm_std_msgs_generate_messages_cpp)  
 target_link_libraries(ros_to_arduino_server ${catkin_LIBRARIES})
-
-#add_executable(funnel src/funnel.cpp)
-#target_link_libraries(funnel ${catkin_LIBRARIES})
-#add_dependencies(funnel ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}) 
