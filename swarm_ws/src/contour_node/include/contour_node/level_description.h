@@ -9,13 +9,15 @@ namespace map_ns
 {
 
 
+
 // current levels that are included in the overall map
 enum LEVEL
 {
-	TARGET,
-	OBSTACLE,
-	COMBINED
+	NONE, TARGET, OBSTACLE, COMBINED
 };
+
+typedef enum LEVEL levelType;
+
 
 /**
  * Calculates the z value at a given point for a given map

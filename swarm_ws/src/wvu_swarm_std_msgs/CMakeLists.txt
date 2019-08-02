@@ -22,37 +22,37 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
   add_message_files(
     FILES
-    neighbor_mail.msg
+	alice_mail.msg
     alice_mail_array.msg
-    alice_mail.msg
-    rtheta.msg
+    charger.msg
+    chargers.msg
+    cont_msg.msg
+    ellipse.msg
+    energy.msg
+    flow.msg
+    flows.msg
+    flow_mail.msg
+    gaussian.msg
+    map.msg
+    map_level.msg
+    map_levels.msg
+    neighbor_mail.msg
+    nuitrack_data.msg
+    obs_msg.msg
+    obstacle.msg
+    point_mail.msg
+    priority.msg
+    priorities.msg
+    robot_command.msg
+    robot_command_array.msg
+    sensor_data.msg
+    tar_msg.msg
     vicon_bot.msg
     vicon_bot_array.msg
     vicon_point.msg
     vicon_points.msg
-    robot_command.msg
-    robot_command_array.msg
-    sensor_data.msg
-    point_mail.msg
-    flow_mail.msg
-    flows.msg
-    flow.msg
     virtual_objects.msg
     virtual_object.msg
-    ellipse.msg
-    gaussian.msg
-    map_level.msg
-    map_levels.msg
-    obstacle.msg
-    map.msg
-    obs_msg.msg
-    tar_msg.msg
-    cont_msg.msg
-    charger.msg
-    chargers.msg
-    priority.msg
-    priorities.msg
-    energy.msg
   )
 
 ## Generate added messages and services with any dependencies listed here

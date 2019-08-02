@@ -29,22 +29,20 @@ add_library(Pvector src/Pvector.cpp)
 add_library(Hawk_Sim src/hawk_sim.cpp)
 
 add_executable(main src/main.cpp)
-add_executable(virtual_objects src/virtual_objects.cpp)
 add_executable(hawk_sim_execute src/hawk_sim_execute.cpp)   ##runs hawk sim stuff
 
 add_dependencies(Body wvu_swarm_std_msgs_generate_messages_cpp)
 add_dependencies(Flock wvu_swarm_std_msgs_generate_messages_cpp)
-add_dependencies(virtual_objects wvu_swarm_std_msgs_generate_messages_cpp)
 add_dependencies(Hawk_Sim ${catkin_LIBRARIES} wvu_swarm_std_msgs_generate_messages_cpp)
+add_dependencies(hawk_sim_execute ${catkin_LIBRARIES} wvu_swarm_std_msgs_generate_messages_cpp)
 
 target_link_libraries(main ${catkin_LIBRARIES} Sim)
 target_link_libraries(Sim ${catkin_LIBRARIES} Flock Body Pvector)
 target_link_libraries(Body ${catkin_LIBRARIES}) 
 target_link_libraries(Flock ${catkin_LIBRARIES})
-target_link_libraries(virtual_objects ${catkin_LIBRARIES})
 
 target_link_libraries(hawk_sim_execute ${catkin_LIBRARIES} Hawk_Sim) ##runs hawk sim stuff
-
+	
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 #Find any version 2.X of SFML
