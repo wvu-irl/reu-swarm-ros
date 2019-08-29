@@ -14,16 +14,16 @@
 
 		<!-- Location of assets and config files respectively -->
 		<param name="asset_path"
-			value="/home/air/swarm_ws/src/visualization/assets"
+			value="/home/air/reu-swarm-ros/swarm_ws/src/visualization/assets"
 			type="str" />
 		<param name="config_path"
-			value="/home/air/swarm_ws/src/visualization/cfg/calib.config"
+			value="/home/air/reu-swarm-ros/swarm_ws/src/visualization/cfg/calib.config"
 			type="str" />
 
 		<!-- Background - setting to "None" will not draw a background - setting 
 			to "Contour" will draw a contour map - setting to a file path will draw the 
 			image in the path -->
-		<param name="background" value="/home/air/swarm_ws/src/visualization/assets/HockeyRink.png" type="str" />
+		<param name="background" value="/home/air/reu-swarm-ros/swarm_ws/src/visualization/assets/HockeyRink.png" type="str" />
 		
 		<param name="num_levels" value="9" type="int"/>
 		<param name="range_top" value="20.0" type="double"/>
