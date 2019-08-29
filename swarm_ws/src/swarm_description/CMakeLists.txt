@@ -1,24 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(vicon_demo)
+project(swarm_description)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-  add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-  vicon_bridge
-  geometry_msgs
-  tf2
-  tf2_ros
-  message_generation
-  visualization_msgs
-  wvu_swarm_std_msgs
-)
+find_package(catkin REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -54,9 +42,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-#  add_message_files(
-#    FILES
-#  )
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -72,12 +62,11 @@ find_package(catkin REQUIRED COMPONENTS
 #   Action2.action
 # )
 
-# Generate added messages and services with any dependencies listed here
-  generate_messages(
-    DEPENDENCIES
-    std_msgs
-    vicon_demo
-  )
+## Generate added messages and services with any dependencies listed here
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs  # Or other packages containing msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -110,8 +99,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES vicon_demo
-#   CATKIN_DEPENDS message_runtime
+#  LIBRARIES swarm_description
+#  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
 
@@ -123,12 +112,12 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ${catkin_INCLUDE_DIRS}
+# ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/vicon_demo.cpp
+#   src/${PROJECT_NAME}/swarm_description.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -139,25 +128,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/vicon_demo_node.cpp)
-
-  add_executable(tracking_demo src/tracking_demo.cpp)
-  target_link_libraries(tracking_demo
-    ${catkin_LIBRARIES}
-  )
-  add_dependencies(tracking_demo ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-#  add_executable(multitrack_demo src/multitrack_demo.cpp)
-#  target_link_libraries(multitrack_demo
-#    ${catkin_LIBRARIES}
-#  )
-#  add_dependencies(multitrack_demo ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-  add_executable(alicetrack_demo src/alicetrack_demo.cpp)
-  target_link_libraries(alicetrack_demo
-    ${catkin_LIBRARIES}
-  )
-  add_dependencies(alicetrack_demo ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_executable(${PROJECT_NAME}_node src/swarm_description_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -178,6 +149,12 @@ include_directories(
 ## Install ##
 #############
 
+install(DIRECTORY launch urdf DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY meshes
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+   FILES_MATCHING PATTERN "*.dae"
+ )
+ 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
@@ -214,7 +191,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_vicon_demo.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_swarm_description.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
