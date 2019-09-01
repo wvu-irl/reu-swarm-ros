@@ -9,7 +9,6 @@
   <author>WVU Interactive Robotics Laboratory</author>
   <license>BSD</license>
   <url>https://github.com/wvu-irl/reu-swarm-ros</url>
-  <url>https://web.statler.wvu.edu/~irl/</url>
   <maintainer email="nhewitt@uncc.edu">Nathan Hewitt</maintainer>
 
   <buildtool_depend>catkin</buildtool_depend>
