@@ -1,31 +1,16 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>visualization</name>
-  <version>0.0.0</version>
-  <description>The visualization package is designed to draw onto the tabletop the robots are on</description>
+  <version>0.0.1</version>
+  <description>
+    This package allows drawing the robot posistions, information, or a map onto the tabletop. It also includes software to calibrate the tabletop's projection.
+  </description>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag -->
-  <!-- Example:  -->
-  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="hlv0002@mix.wvu.edu">Henry Vos</maintainer>
-
-
-  <!-- One license tag required, multiple allowed, one license per tag -->
-  <!-- Commonly used license strings: -->
-  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <author>WVU Interactive Robotics Laboratory</author>
   <license>BSD</license>
-
-
-  <!-- Url tags are optional, but multiple are allowed, one per tag -->
-  <!-- Optional attribute type can be: website, bugtracker, or repository -->
-  <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/visualization</url> -->
-
-
-  <!-- Author tags are optional, multiple are allowed, one per tag -->
-  <!-- Authors do not have to be maintainers, but could be -->
-  <!-- Example: -->
-  <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
+  <url>https://github.com/wvu-irl/reu-swarm-ros</url>
+  <url>https://web.statler.wvu.edu/~irl/</url>
+  <maintainer email="hlv0002@mix.wvu.edu">Henry Vos</maintainer>
 
 
   <!-- The *depend tags are used to specify dependencies -->

@@ -1,32 +1,16 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>alice_swarm</name>
-  <version>0.0.0</version>
-  <description>Contains a hub for changing absolute data to relative data, and the agent level rules to create commands</description>
+  <version>0.0.1</version>
+  <description>
+    Contains a hub for changing absolute world data to relative data for each agent, and the processes the agent-level rules to create commands for each robot.
+  </description>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag -->
-  <!-- Example:  -->
-  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="smart4@todo.todo">smart4</maintainer>
-
-
-  <!-- One license tag required, multiple allowed, one license per tag -->
-  <!-- Commonly used license strings: -->
-  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>TODO</license>
-
-
-  <!-- Url tags are optional, but multiple are allowed, one per tag -->
-  <!-- Optional attribute type can be: website, bugtracker, or repository -->
-  <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/beginner_tutorials</url> -->
-
-
-  <!-- Author tags are optional, multiple are allowed, one per tag -->
-  <!-- Authors do not have to be maintainers, but could be -->
-  <!-- Example: -->
-  <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
-
+  <author>WVU Interactive Robotics Laboratory</author>
+  <license>BSD</license>
+  <url>https://github.com/wvu-irl/reu-swarm-ros</url>
+  <url>https://web.statler.wvu.edu/~irl/</url>
+  <maintainer email="cedmonds2018@gmail.com"> Casey Edmonds-Estes</maintainer>
 
   <!-- The *depend tags are used to specify dependencies -->
   <!-- Dependencies can be catkin packages or system dependencies -->
