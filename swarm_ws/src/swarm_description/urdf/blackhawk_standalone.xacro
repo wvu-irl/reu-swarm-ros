@@ -30,7 +30,7 @@
         <xacro:body/>
       </collision>
     <inertial>
-      <mass value="0.2"/>
+      <mass value="0.05"/>
       <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="0.5"/>
     </inertial>
   </link>
@@ -79,17 +79,22 @@
   </link>
   
   <!-- Plugin to simulate driving motion -->  
+
   <gazebo>
-    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    </plugin>
+
+    <!-- <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
       <alwaysOn>true</alwaysOn>
-      <updateRate>100</updateRate>
+      <updateRate>100</updateRate>s
       <leftJoint>base_link_to_left_wheel</leftJoint>
       <rightJoint>base_link_to_right_wheel</rightJoint>
       <wheelSeparation>${wheel_separation}</wheelSeparation>
       <wheelDiameter>${wheel_diameter}</wheelDiameter>
-      <wheelTorque>2</wheelTorque>
+      <wheelTorque>200</wheelTorque>
       <commandTopic>cmd_diff_vel</commandTopic>
       <broadcastTF>false</broadcastTF>
-    </plugin>
+    </plugin> -->
   </gazebo>
 </robot>
