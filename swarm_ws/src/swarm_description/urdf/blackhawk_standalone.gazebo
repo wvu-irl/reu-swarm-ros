@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<robot name="blackhawk" xmlns:xacro="http://ros.org/wiki/xacro">
+    
+    <gazebo reference="base_link">
+        <mu1 value="0.0"/>
+        <mu2 value="0.0"/>
+        <kp  value="10000000.0" />
+        <kd  value="1.0" />
+    </gazebo>
+    
+    <gazebo reference="base_link_to_left_wheel">
+        <mu1 value="1.0"/>
+        <mu2 value="1.0"/>
+        <kp  value="10000000.0" />
+        <kd  value="1.0" />
+        <fdir1 value="1 0 0"/>
+    </gazebo>
+
+    <gazebo reference="base_link_to_right_wheel">
+        <mu1 value="1.0"/>
+        <mu2 value="1.0"/>
+        <kp  value="10000000.0" />
+        <kd  value="1.0" />
+        <fdir1 value="1 0 0"/>
+    </gazebo>
+
+     <!-- Plugin to simulate driving motion -->  
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotNamespace>/swarm_bot</robotNamespace>
+            <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+        </plugin>
+    </gazebo>
+</robot>

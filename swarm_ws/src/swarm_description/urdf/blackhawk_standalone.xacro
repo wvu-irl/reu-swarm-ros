@@ -1,23 +1,16 @@
 <?xml version="1.0"?>
-
 <robot name="blackhawk" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Values for different components of the robot-->
+  <xacro:property name="wheel_separation" value="0.02"/>
+  <xacro:property name="wheel_diameter" value="0.025"/>
+  <xacro:property name="wheel_width" value="0.005"/>
+  <xacro:property name="wheel_standoff" value="0.01"/>
+  <xacro:property name="body_length" value="0.06"/>
+
+  <xacro:include filename="$(find swarm_description)/urdf/macros.xacro"/>
+
   <link name="base_link">
-    <!-- Body geometry macro -->
-    <!-- <mesh filename="package://swarm_description/meshes/Blackhawk_resized.dae"/> -->
-    <xacro:property name="body_length" value="0.06"/>
-    <xacro:macro name="body">
-      <geometry>
-        <!--<cylinder length="${body_length}" radius="0.5" /> -->
-        <mesh filename="package://swarm_description/meshes/Blackhawk_resized.dae"/>
-      </geometry>
-    </xacro:macro>
-
-    <!-- Values for different components of the robot-->
-    <xacro:property name="wheel_separation" value="0.02"/>
-    <xacro:property name="wheel_diameter" value="0.025"/>
-    <xacro:property name="wheel_width" value="0.005"/>
-    <xacro:property name="wheel_standoff" value="0.01"/>
-
     <!-- visual -->
     <visual>
 	    <origin rpy="0.0 0 0" xyz="0 0 ${body_length / 2}"/>
@@ -46,13 +39,6 @@
 	  <parent link="base_link"/>
   </joint>
 
-  <!-- Wheel geometry macro -->
-  <xacro:macro name="wheel_geometry">
-    <geometry>
-	    <cylinder length="${wheel_width}" radius="${wheel_diameter / 2}"/>
-    </geometry>
-  </xacro:macro>
-
   <!-- Wheel geometries -->
   <link name="left_wheel">
     <visual>
@@ -77,24 +63,12 @@
       <xacro:wheel_geometry/>
     </collision> 
   </link>
+
+  <!-- Setting up transmissions for differential driving -->
+  <xacro:mk_transmission side="right"/>
+  <xacro:mk_transmission side="left"/>
+
+  <!-- Using separate file to set up Gazebo properties and plugins -->
+  <xacro:include filename="$(find swarm_description)/urdf/blackhawk_standalone.gazebo"/>
   
-  <!-- Plugin to simulate driving motion -->  
-
-  <gazebo>
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
-    </plugin>
-
-    <!-- <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
-      <alwaysOn>true</alwaysOn>
-      <updateRate>100</updateRate>s
-      <leftJoint>base_link_to_left_wheel</leftJoint>
-      <rightJoint>base_link_to_right_wheel</rightJoint>
-      <wheelSeparation>${wheel_separation}</wheelSeparation>
-      <wheelDiameter>${wheel_diameter}</wheelDiameter>
-      <wheelTorque>200</wheelTorque>
-      <commandTopic>cmd_diff_vel</commandTopic>
-      <broadcastTF>false</broadcastTF>
-    </plugin> -->
-  </gazebo>
 </robot>
