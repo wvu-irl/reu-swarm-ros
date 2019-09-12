@@ -10,13 +10,25 @@
 
   <xacro:include filename="$(find swarm_description)/urdf/macros.xacro"/>
 
+  <!-- This is here to give RVIS a fixed global frame -->
+  <link name="map">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </visual>
+  </link>
+  <joint name="map_to_base_link" type="fixed">
+    <child link="base_link"/>
+    <parent link="map"/>
+  </joint>
+
+  <!-- Main link for the robot_description -->
   <link name="base_link">
     <!-- visual -->
     <visual>
 	    <origin rpy="0.0 0 0" xyz="0 0 ${body_length / 2}"/>
 	    <xacro:body/>
     </visual>
-    
+
     <!-- inertial & collision -->
     <collision>
 	    <origin rpy="0.0 0 0" xyz="0 0 ${body_length / 2}"/>
@@ -28,16 +40,6 @@
     </inertial>
   </link>
 
-  <!-- wheel joints -->
-  <joint name="base_link_to_left_wheel" type="fixed">
-    <child link="left_wheel" />
-    <parent link="base_link" /> 
-  </joint>
-
-  <joint name="base_link_to_right_wheel" type="fixed">
-	  <child link="right_wheel"/>
-	  <parent link="base_link"/>
-  </joint>
 
   <!-- Wheel geometries -->
   <link name="left_wheel">
@@ -61,14 +63,27 @@
     <collision>
 	    <origin rpy="-1.57079 0 0" xyz="-${wheel_standoff} ${wheel_separation} 0"/>
       <xacro:wheel_geometry/>
-    </collision> 
+    </collision>
   </link>
 
+  <!-- wheel joints -->
+  <joint name="base_link_to_left_wheel" type="fixed">
+    <child link="left_wheel" />
+    <parent link="base_link" />
+    <axis xyz="0 1 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="base_link_to_right_wheel" type="fixed">
+    <child link="right_wheel"/>
+    <parent link="base_link"/>
+    <axis xyz="0 1 0" rpy="0 0 0"/>
+  </joint>
+
   <!-- Setting up transmissions for differential driving -->
-  <xacro:mk_transmission side="right"/>
-  <xacro:mk_transmission side="left"/>
+  <xacro:mk_transmission joint="base_link_to_right_wheel"/>
+  <xacro:mk_transmission joint="base_link_to_left_wheel"/>
 
   <!-- Using separate file to set up Gazebo properties and plugins -->
   <xacro:include filename="$(find swarm_description)/urdf/blackhawk_standalone.gazebo"/>
-  
+
 </robot>

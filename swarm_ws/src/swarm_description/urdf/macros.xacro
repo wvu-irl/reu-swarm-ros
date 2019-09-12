@@ -19,13 +19,13 @@
     </xacro:macro>
 
     <!-- transmission macros -->
-    <xacro:macro name="mk_transmission" params="side">
-        <transmission name="${side}_wheel_transmission">
+    <xacro:macro name="mk_transmission" params="joint">
+        <transmission name="${joint}_transmission">
             <type>transmission_interface/SimpleTransmission</type>
-            <joint name="base_link_to_${side}_wheel">
-                <hardwareInteface>EffortJointInterface</hardwareInteface>
-            </joint>
-            <actuator name="${side}_wheel_actuator">
+	    <joint name="${joint}">
+		<hardwareInteface>EffortJointInterface</hardwareInteface>
+	    </joint>
+            <actuator name="${joint}_actuator">
                 <mechanicalReduction>1</mechanicalReduction>
                 <hardwareInteface>EffortJointInterface</hardwareInteface>
             </actuator>

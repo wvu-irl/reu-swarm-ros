@@ -1,5 +1,6 @@
 <launch>
 
+  <!-- launching drive controller -->
   <include file="$(find swarm_description)/launch/display_robot.launch"/>
 
   <!-- these are the arguments you can pass this launch file, for example paused:=true -->
@@ -19,18 +20,20 @@
     <arg name="headless" value="$(arg headless)"/>
   </include>
 
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find swarm_description)/urdf/blackhawk_standalone.xacro'" />
-
-  <!-- launching drive controller -->
-  <rosparam file="$(find swarm_description)/config/diff_drive.yaml" command="load"/>
-  <!-- <node name="SARA_controller manager" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="swarm_robot_controller"/> -->
+  <rosparam file="$(find swarm_description)/config/swarm_bot_control.yaml" command="load"/>
+  <!-- Creating a controller for the robot -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" ns="/swarm_bot" args="base_link_to_left_wheel_joint_controller base_link_to_right_wheel_joint_controller joint_state_controller"/>
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
         args="-z 1.0 -unpause -urdf -model robot -param robot_description" respawn="false" output="screen" />
 
+  <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/> -->
+
   <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
     <param name="publish_frequency" type="double" value="30.0" />
+    <remap from="/joint_states" to="/swarm_bot/joint_states"/>
   </node>
 
 </launch>
