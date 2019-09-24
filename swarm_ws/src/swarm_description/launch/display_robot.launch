@@ -4,7 +4,7 @@
   <arg name="gui" default="true" />
   <arg name="rvizconfig" default="$(find swarm_description)/rviz/urdf.rviz" />
 
-	<param name="robot_description" command="$(find xacro)/xacro.py '$(find swarm_description)/urdf/blackhawk_standalone.xacro'" />
+	<param name="robot_description" command="$(find xacro)/xacro.py --inorder '$(find swarm_description)/urdf/blackhawk_standalone.xacro'" />
   <param name="use_gui" value="$(arg gui)"/>
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />

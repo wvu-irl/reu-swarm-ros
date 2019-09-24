@@ -1,35 +1,55 @@
 <?xml version="1.0"?>
 <robot name="blackhawk" xmlns:xacro="http://ros.org/wiki/xacro">
-    
+
     <gazebo reference="base_link">
         <mu1 value="0.0"/>
         <mu2 value="0.0"/>
         <kp  value="10000000.0" />
         <kd  value="1.0" />
     </gazebo>
-    
-    <gazebo reference="base_link_to_left_wheel">
+
+    <gazebo reference="left_wheel">
         <mu1 value="1.0"/>
         <mu2 value="1.0"/>
         <kp  value="10000000.0" />
         <kd  value="1.0" />
         <fdir1 value="1 0 0"/>
+        <material>Gazebo/Black</material>
     </gazebo>
 
-    <gazebo reference="base_link_to_right_wheel">
+    <gazebo reference="right_wheel">
         <mu1 value="1.0"/>
         <mu2 value="1.0"/>
         <kp  value="10000000.0" />
         <kd  value="1.0" />
         <fdir1 value="1 0 0"/>
+        <material>Gazebo/Black</material>
     </gazebo>
 
-     <!-- Plugin to simulate driving motion -->  
+     <!-- Plugin to simulate driving motion -->
 
     <gazebo>
         <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
             <robotNamespace>/swarm_bot</robotNamespace>
             <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+            <legacyModeNS>true</legacyModeNS>
         </plugin>
     </gazebo>
+    <!-- <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <robotNamespace>/swarm_bot</robotNamespace>
+      <legacyMode>false</legacyMode>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>10</updateRate>
+      <leftJoint>base_link_to_left_wheel</leftJoint>
+      <rightJoint>base_link_to_right_wheel</rightJoint>
+      <wheelSeparation>0.036</wheelSeparation>
+      <wheelDiameter>0.028</wheelDiameter>
+      <wheelTorque>10</wheelTorque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>base_footprint</robotBaseFrame>
+    </plugin>
+  </gazebo> -->
 </robot>

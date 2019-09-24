@@ -2,34 +2,47 @@
 
 <robot name="blackhawk" xmlns:xacro="http://ros.org/wiki/xacro">
 
-    <!-- Body geometry macro -->
-    <!-- <mesh filename="package://swarm_description/meshes/Blackhawk_resized.dae"/> -->
-    <xacro:macro name="body">
-      <geometry>
-        <!--<cylinder length="${body_length}" radius="0.5" /> -->
-        <mesh filename="package://swarm_description/meshes/Blackhawk_resized.dae"/>
-      </geometry>
-    </xacro:macro>
+  <!-- Body geometry macro -->
+  <xacro:macro name="body">
+    <geometry>
+      <!-- <cylinder length="${body_length}" radius="0.035" /> -->
+      <mesh filename="package://swarm_description/meshes/Blackhawk_Full_resized.dae"/>
+    </geometry>
+  </xacro:macro>
 
-    <!-- Wheel geometry macro -->
-    <xacro:macro name="wheel_geometry">
-        <geometry>
-            <cylinder length="${wheel_width}" radius="${wheel_diameter / 2}"/>
-        </geometry>
-    </xacro:macro>
+  <xacro:macro name="body_inertial">
+    <mass value="${body_mass}"/>
+    <inertia ixx="0.000150942" ixy="0.0" ixz="0.0" iyy="0.000150942" iyz="0.0" izz="0.000115647"/>
+  </xacro:macro>
 
-    <!-- transmission macros -->
-    <xacro:macro name="mk_transmission" params="joint">
-        <transmission name="${joint}_transmission">
-            <type>transmission_interface/SimpleTransmission</type>
-	    <joint name="${joint}">
-		<hardwareInteface>EffortJointInterface</hardwareInteface>
-	    </joint>
-            <actuator name="${joint}_actuator">
-                <mechanicalReduction>1</mechanicalReduction>
-                <hardwareInteface>EffortJointInterface</hardwareInteface>
-            </actuator>
-        </transmission>
-    </xacro:macro>
+  <!-- Wheel geometry macro -->
+  <xacro:macro name="wheel_geometry">
+    <geometry>
+      <cylinder length="${wheel_width}" radius="${wheel_diameter / 2}"/>
+    </geometry>
+  </xacro:macro>
+
+  <xacro:macro name="wheel_inertial">
+    <mass value="${wheel_mass}" />
+    <inertia ixx="1.88e-7"   ixy="0"     ixz="0"
+                          iyy="1.88e-7"  iyz="0"
+                                      izz="3.61e-7" />
+  </xacro:macro>
+
+  <!-- transmission macros -->
+  <xacro:macro name="mk_transmission" params="joint">
+    <transmission name="${joint}_transmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${joint}">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <!-- <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface> -->
+      </joint>
+      <actuator name="${joint}_actuator">
+        <mechanicalReduction>1</mechanicalReduction>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <!-- <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface> -->
+      </actuator>
+    </transmission>
+  </xacro:macro>
 
 </robot>
