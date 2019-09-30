@@ -2,65 +2,62 @@
  * Swarmbot.h
  *
  *  Created on: May 29, 2019
- *      Author: Trevs
+ *      Author: Trev
  */
-//test
+
 #ifndef SWARMBOT_H_
 #define SWARMBOT_H_
 
+#include <cstdlib>
+#include <list>
+
 class Swarmbot {
 private:
-	int foodLevel;
-	int habitatLevel;
-	int old;
-	int coord[2];
+
+	int const empty = 0;
+	int const food = 1;
+	int const habitat = 2;
+	int const human = 3;
+	int const unexplored = 4;
+	int const robot = 5;
+	int const envior = 0;
+	int const robots = 1;
+	int const humans = 2;
+
+	int width;
+	int length;
+	double personality[5];
+	int health[5];
+	int lifetime;
+	int location[2];
+	int ***map;
+	bool isDead;
+
+
+
+	int* findClosest(int type, int robot_enviorment);
+	int* findFurthest(int type, int robot_enviorment);
+	int* avgLocation(int type);
+	int* furtherLessdxdy(int type);
+	void move();
+	void aging();
+	void die();
+
+
 
 public:
-
 	Swarmbot(){};
-	int location[2];
-	Swarmbot(int xy[2], int m[10][10][2]);
+	Swarmbot(int width, int length, int x, int y);
 	virtual ~Swarmbot();
-	int* findFood();
-	int* findHabitat();
-	void move();
-	void age();
-	void printCoord();
-	void die();
-	void updateSMap(int m[10][10][2]);
-
-	const int* getCoord() const {
-		return coord;
-	}
-
-	int getFoodLevel() const {
-		return foodLevel;
-	}
-
-	void setFoodLevel(int foodLevel) {
-		this->foodLevel = foodLevel;
-	}
-
-	int getHabitatLevel() const {
-		return habitatLevel;
-	}
-
-	void setHabitatLevel(int habitatLevel) {
-		this->habitatLevel = habitatLevel;
-	}
-
-	const int* getLocation() const {
-		return location;
-	}
-
-	int getOld() const {
-		return old;
-	}
-
-	void setOld(int old) {
-		this->old = old;
-	}
-
+	void updateMap(int x, int y, int level, int value);
+	int* getHealth();
+	int* getLocation();
+	void setLocation(int x, int y);
+	void exist();
+	int getMap(int x, int y, int level);
+	void knownWorld(int level);
+	void printValues();
+	int** Values;
 
 };
 
