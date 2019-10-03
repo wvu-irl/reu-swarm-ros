@@ -24,8 +24,7 @@
   <!-- Creating a controller for the robot -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
     output="screen" ns="/swarm_bot" args="left_wheel_velocity_controller right_wheel_velocity_controller joint_state_controller"/>
-  <!-- <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" ns="/swarm_bot" args="joint_state_controller swarm_base_controller"/> -->
+
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
@@ -38,4 +37,5 @@
     <remap from="/joint_states" to="/swarm_bot/joint_states"/>
   </node>
 
+  <!-- <node name="diff_controller" pkg="swarm_description" type="swarm_bot_control" output="screen" ns="/swarm_bot"/> -->
 </launch>

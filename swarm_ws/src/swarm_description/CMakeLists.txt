@@ -6,7 +6,17 @@ add_compile_options(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED controller_manager joint_state_controller robot_state_publisher diff_drive_controller)
+find_package(catkin REQUIRED
+  controller_manager
+  joint_state_controller
+  robot_state_publisher
+  diff_drive_controller
+  roscpp
+  rospy
+  std_msgs
+  sensor_msgs
+  wvu_swarm_std_msgs
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -98,10 +108,10 @@ find_package(catkin REQUIRED controller_manager joint_state_controller robot_sta
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES swarm_description
-#  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS system_lib
+  #  INCLUDE_DIRS include
+  #  LIBRARIES swarm_description
+  #  CATKIN_DEPENDS other_catkin_pkg
+  #  DEPENDS system_lib
 )
 
 ###########
@@ -111,8 +121,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
-# ${catkin_INCLUDE_DIRS}
+  # include
+  ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -129,6 +139,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/swarm_description_node.cpp)
+add_executable(swarm_bot_control src/diff_control.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -138,12 +149,12 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(swarm_bot_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} wvu_swarm_std_msgs_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(swarm_bot_control
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -151,9 +162,9 @@ include_directories(
 
 install(DIRECTORY launch urdf DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY meshes
-   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-   FILES_MATCHING PATTERN "*.dae"
- )
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  FILES_MATCHING PATTERN "*.dae"
+)
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
