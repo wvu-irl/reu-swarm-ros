@@ -12,37 +12,60 @@
 #include <list>
 
 
+	//world attributes
 	int const empty = 0;
 	int const food = 1;
 	int const habitat = 2;
 	int const human = 3;
 	int const unexplored = 4;
 	int const robot = 5;
+	// personality constants
+	int const generosity = 6;
+	int const talking = 7
+	int const gamma = 8;
+	int const sightRng = 9;
 
+	//map level
 	int const envior = 0;
 	int const robots = 1;
 	int const humans = 2;
 
-	double personality[5];
+
+	int widthWorld;
+	int lengthWorld;
+	//[space wanted, Food wanted, habitat wanted, human infulence wanted, exploration wanted, communication, share resources, trust in static enviorment, vision range]
+	double personality[9];
+
+	//[space level, food level, habitat level, human influence level, exploration level]
 	int health[5];
+
+	//number of ticks of time lived
 	int lifetime;
+
+	//[x, y] on map
 	int location[2];
-	int ***map;
-	int width;
-	int length;
+
+	//known world Map
+	int ***KnownMap;
+
+	//map you can see
+	int ***LocalMap
+
+	//add in Qtable
+
+	//robot is dead = true, robot is alive = false
 	bool isDead;
+
 	int direction;
 
 
 //-----------------------------------------------------------------constructors
-Swarmbot::Swarmbot(int w, int l, int x, int y) {
+Swarmbot::Swarmbot(int w, int l, int x, int y, int personal[9]) {
 	direction = 0;
 	lifetime = 0;
-	personality[0] = .20;
-	personality[1] = .20;
-	personality[2] = .20;
-	personality[3] = .20;
-	personality[4] = .20;
+for(int g = 0; g < 9; g++){
+	personality[g] = personal[g];
+}
 	health[0]= 100;
 	health[1]= 100;
 	health[2]= 100;
@@ -53,24 +76,36 @@ Swarmbot::Swarmbot(int w, int l, int x, int y) {
 	location[1] = y;
 	width = w;
 	length = l;
-	map = new int**[width];
+	KnownMap = new int**[width];
 	for(int x = 0; x < width; x++){
-		map[x] = new int*[length];
+		KnownMap[x] = new int*[length];
 		for(int y = 0; y < length; y++){
-			map[x][y] = new int[3];
+			KnownMap[x][y] = new int[3];
 		}
-	}
-	Values = new int*[width];
-	for(int x = 0; x < width; x++){
-		Values[x] = new int[length];
 	}
 
 	for(int x = 0; x < width; x++){
 		for(int y = 0; y < length; y++){
-			map[x][y][envior] = unexplored;
-			map[x][y][robots]= 0;
-			map[x][y][humans] = 0;
-			Values[x][y] = 0;
+			KnownMap[x][y][envior] = unexplored;
+			KnownMap[x][y][robots]= empty;
+			KnownMap[x][y][humans] = empty;
+		}
+	}
+	for(int x = 0; x < width; x++){
+		LocalMap[x] = new int*[length];
+		for(int y = 0; y < length; y++){
+			LocalMap[x][y] = new int[3];
+		}
+	}
+	//look around
+
+
+
+	for(int x = 0; x < width; x++){
+		for(int y = 0; y < length; y++){
+			knownMap[x][y][envior] = unexplored;
+			knownMap[x][y][robots]= empty;
+			knownMap[x][y][humans] = empty;
 		}
 	}
 
@@ -80,6 +115,12 @@ Swarmbot::Swarmbot(int w, int l, int x, int y) {
 Swarmbot::~Swarmbot() {
 }
 
+//look around
+void Swarmbot::lookAround(int localWorld[sightRng][sightRng][3]){
+	for(int x = location[0]-personality[sightRng]; x < location[0]+sightRng){
+		if(x > 0 && x < width)
+	}
+}
 
 //------------------------------------------------------finds
 int smallestCoords[2] = {100000,100000};
