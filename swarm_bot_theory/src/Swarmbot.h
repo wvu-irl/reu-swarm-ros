@@ -14,31 +14,32 @@
 class Swarmbot {
 private:
 
-	//world attributes
 	int const empty = 0;
+	// personality constants
+	int const talking = 0;
 	int const food = 1;
 	int const habitat = 2;
 	int const human = 3;
 	int const unexplored = 4;
 	int const robot = 5;
-	// personality constants
 	int const generosity = 6;
-	int const talking = 7
-	int const gamma = 8;
-	int const sightRng = 9;
+	int const gamma = 7;
+	int const sightRng = 8;
 
 	//map level
-	int const envior = 0;
-	int const robots = 1;
-	int const humans = 2;
+	int const foods = 0;
+	int const habitats = 1;
+	int const robots = 2;
+	int const humans = 3;
+	int const unknowns = 4;
 
 
 	int widthWorld;
 	int lengthWorld;
-	//[space wanted, Food wanted, habitat wanted, human infulence wanted, exploration wanted, communication, share resources, trust in static enviorment, vision range]
-	double personality[9];
+	//[communication, Food wanted, habitat wanted, human infulence wanted, exploration wanted, share resources, trust in static enviorment, vision range]
+	double personality[8];
 
-	//[space level, food level, habitat level, human influence level, exploration level]
+	//[communication level, food level, habitat level, human influence level, exploration level]
 	int health[5];
 
 	//number of ticks of time lived
@@ -47,11 +48,11 @@ private:
 	//[x, y] on map
 	int location[2];
 
-	//known world Map
-	int ***KnownMap;
+	//known world Map, [food, habitat, robots, human, unknown]
+	double *****KnownMap;
 
 	//map you can see
-	int ***LocalMap
+	double *****LocalMap;
 
 	//add in Qtable
 
@@ -64,6 +65,8 @@ private:
 	//int* findFurthest(int type, int robot_enviorment);
 	//int* avgLocation(int type);
 	//int* furtherLessdxdy(int type);
+
+	double* resultantResourceVector(int resource);
 
 	//move to desired location
 	void move();
@@ -78,7 +81,7 @@ private:
 	void communicate(Swarmbot otherbot);
 
 	//look around (fill local map)
-	void lookAround(int localWorld[sightRng][sightRng][3]);
+	void lookAround(double localWorld[sightRng][sightRng][5]);
 
 	//die and reset
 	void die();
@@ -87,12 +90,12 @@ private:
 
 public:
 	//constructors / deconstructors
-	Swarmbot(){};
+	//Swarmbot(){};
 	//			world width, world length, location x, location y, personality of the robot
-	Swarmbot(int width, int length, int x, int y, int* personal[7]);
+	Swarmbot(int w, int l, int x, int y, int personal[9]);
 	virtual ~Swarmbot();
 
-	//udate the map at a specific location, what map you are updated, and the new value
+	//update the map at a specific location, what map you are updated, and the new value
 	void updateMap(int x, int y, int level, int value);
 
 	int* getHealth();

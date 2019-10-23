@@ -11,32 +11,32 @@
 #include <cstdlib>
 #include <list>
 
-
-	//world attributes
 	int const empty = 0;
+	// personality constants
+	int const talking = 0;
 	int const food = 1;
 	int const habitat = 2;
 	int const human = 3;
 	int const unexplored = 4;
 	int const robot = 5;
-	// personality constants
 	int const generosity = 6;
-	int const talking = 7
-	int const gamma = 8;
-	int const sightRng = 9;
+	int const gamma = 7;
+	int const sightRng = 8;
 
 	//map level
-	int const envior = 0;
-	int const robots = 1;
-	int const humans = 2;
+	int const foods = 0;
+	int const habitats = 1;
+	int const robots = 2;
+	int const humans = 3;
+	int const unknowns = 4;
 
 
 	int widthWorld;
 	int lengthWorld;
-	//[space wanted, Food wanted, habitat wanted, human infulence wanted, exploration wanted, communication, share resources, trust in static enviorment, vision range]
-	double personality[9];
+	//[communication, Food wanted, habitat wanted, human infulence wanted, exploration wanted, share resources, trust in static enviorment, vision range]
+	double personality[8];
 
-	//[space level, food level, habitat level, human influence level, exploration level]
+	//[communication level, food level, habitat level, human influence level, exploration level]
 	int health[5];
 
 	//number of ticks of time lived
@@ -45,11 +45,11 @@
 	//[x, y] on map
 	int location[2];
 
-	//known world Map
-	int ***KnownMap;
+	//known world Map,x, y,  [food, habitat, robots, human, unknown]
+	double ***KnownMap;
 
 	//map you can see
-	int ***LocalMap
+	double ***LocalMap;
 
 	//add in Qtable
 
@@ -60,10 +60,10 @@
 
 
 //-----------------------------------------------------------------constructors
-Swarmbot::Swarmbot(int w, int l, int x, int y, int personal[9]) {
+Swarmbot::Swarmbot(int w, int l, int x, int y, int personal[8]) {
 	direction = 0;
 	lifetime = 0;
-for(int g = 0; g < 9; g++){
+for(int g = 0; g < 8; g++){
 	personality[g] = personal[g];
 }
 	health[0]= 100;
@@ -74,40 +74,42 @@ for(int g = 0; g < 9; g++){
 	isDead = false;
 	location[0] = x;
 	location[1] = y;
-	width = w;
-	length = l;
-	KnownMap = new int**[width];
-	for(int x = 0; x < width; x++){
-		KnownMap[x] = new int*[length];
-		for(int y = 0; y < length; y++){
-			KnownMap[x][y] = new int[3];
+	widthWorld = w;
+	lengthWorld = l;
+	KnownMap = new double**[widthWorld];
+	LocalMap = new double**[widthWorld];
+	for(int x = 0; x < widthWorld; x++){
+		KnownMap[x] = new double*[lengthWorld];
+		for(int y = 0; y < lengthWorld; y++){
+			KnownMap[x][y] = new double[5];
 		}
 	}
 
-	for(int x = 0; x < width; x++){
-		for(int y = 0; y < length; y++){
-			KnownMap[x][y][envior] = unexplored;
+	for(int x = 0; x < widthWorld; x++){
+		for(int y = 0; y < lengthWorld; y++){
+			KnownMap[x][y][foods] = empty;
+			KnownMap[x][y][habitats] = empty;
 			KnownMap[x][y][robots]= empty;
 			KnownMap[x][y][humans] = empty;
+			KnownMap[x][y][unknowns] = 1;
 		}
 	}
-	for(int x = 0; x < width; x++){
-		LocalMap[x] = new int*[length];
-		for(int y = 0; y < length; y++){
-			LocalMap[x][y] = new int[3];
+	for(int x = 0; x < widthWorld; x++){
+		LocalMap[x] = new double*[lengthWorld];
+		for(int y = 0; y < lengthWorld; y++){
+			LocalMap[x][y] = new double[5];
 		}
 	}
-	//look around
-
-
-
-	for(int x = 0; x < width; x++){
-		for(int y = 0; y < length; y++){
-			knownMap[x][y][envior] = unexplored;
-			knownMap[x][y][robots]= empty;
-			knownMap[x][y][humans] = empty;
+	for(int x = 0; x < sightRng; x++){
+		for(int y = 0; y < sightRng; y++){
+			KnownMap[x][y][foods] = empty;
+			KnownMap[x][y][habitats] = empty;
+			KnownMap[x][y][robots]= empty;
+			KnownMap[x][y][humans] = empty;
+			KnownMap[x][y][unknowns] = 1;
 		}
 	}
+
 
 }
 
@@ -116,13 +118,15 @@ Swarmbot::~Swarmbot() {
 }
 
 //look around
-void Swarmbot::lookAround(int localWorld[sightRng][sightRng][3]){
-	for(int x = location[0]-personality[sightRng]; x < location[0]+sightRng){
-		if(x > 0 && x < width)
-	}
+void Swarmbot::lookAround(double localWorld[sightRng][sightRng][5]){
+	for(int x = 0; x< sightRng; x++)
+		for(int y = 0; y < sightRng; y++)
+			for(int i = 0; i < 5; i++)
+				LocalMap[x][y][i] = localWorld[x][y][i];
 }
 
 //------------------------------------------------------finds
+/*
 int smallestCoords[2] = {100000,100000};
 int* Swarmbot::findClosest(int type,int robot_enviorment) {
 	smallestCoords[0] = 100000;
@@ -159,107 +163,48 @@ int* Swarmbot::findFurthest(int type, int robot_enviorment){
 
 }
 
+*/
+
+double* ResourceVector;
+double* Swarmbot::resultantResourceVector(int resource){
+
+	double dx = 0;
+	double dy = 0;
+	double mag = 0;
+
+	for(int x = 0; x < widthWorld; x++){
+		for (int y = 0; y < lengthWorld; y++){
+			double value = KnownMap[x][y][resource];
+			double dist =  sqrt(x^2 + y^2);
+			if(dist != 0){
+				dx += value* x/dist;
+				dy += value * y/dist;
+			}
+		}
+	}
+	ResourceVector = new double[dx, dy];
+	return ResourceVector;
+
+}
 
 //----------------------------------------------------actions
 void Swarmbot::move() {
 
 	double dx = 0;
 	double dy = 0;
-	double vdx =0;
-	double vdy = 0;
-	int notFound = 0;
-	int* coordPointer;
 
-
-	for(int i = 0; i < 5; i++){
-		bool foundOne = true;
-		int x;
-		int y;
-		if(i == empty){
-			int* avgLoc = furtherLessdxdy(robot);
-			int rDx = *(avgLoc);
-			int rDy = *(avgLoc+1);
-
-			x = location[0] -rDx;
-			y = location[1]-rDy;
-			if(x ==location[0] && y == location[1]){
-				foundOne = false;
-				x = -1;     //keep convention
-				y = -1;     //keep convention
-			}
-
-
-		}
-		else if(i == human){
-			int* avgLoc = findClosest(i,humans);
-			x = *(avgLoc);
-			y = *(avgLoc+1);
-			if(x == -1 || y == -1){
-				notFound++;
-				foundOne = false;
-			}
-		}
-		else{
-			coordPointer = findClosest(i, envior);
-			x = *coordPointer;
-			y = *(coordPointer+1);
-			if(x == -1 || y == -1){
-				notFound++;
-				foundOne = false;
-			}
-		}
-		std::cout<<"x = "<< x << " y= "<< y<<std::endl;
-		double dist = sqrt(pow(x - location[0],2) + pow(y - location[1],2));
-		if(foundOne){
-
-			if(i == unexplored && !(x == -1 && y == -1) && dist != 0){
-				//movment vector
-				double unexpX = personality[i] * (100-health[i]) * ((x-location[0])/dist);
-				double unexpY = personality[i] * (100-health[i]) * ((y-location[1])/dist);
-				double notFoundX = notFound * .20 * 100 *((x-location[0])/dist);
-				double notFoundY = notFound * .20 * 100 *((y-location[1])/dist);
-				dx = dx + unexpX + notFoundX;
-				dy = dy+ unexpY+ notFoundY;
-				//value vector
-				double ValunexpX = personality[i] *100* ((x-location[0])/dist);
-				double ValunexpY =   personality[i] *100* ((y-location[1])/dist);
-				double ValnotFoundX = notFound * .20 * 100 *((x-location[0])/dist);
-				double ValnotFoundY = notFound * .20 *100* ((y-location[1])/dist);
-				vdx = vdx + ValunexpX + ValnotFoundX;
-				vdy = vdy+ ValunexpY+ ValnotFoundY;
-
-				}
-			else if(dist != 0){
-				//movement vector
-				dx = dx + personality[i] * (100-health[i]) * ((x-location[0])/dist);
-				dy = dy + personality[i] * (100-health[i]) * ((y-location[1])/dist);
-				//value vector
-				vdx = vdx + personality[i] *100*  ((x-location[0])/dist);
-				vdy = vdy + personality[i] * 100* ((y-location[1])/dist);
-			}
-			std::cout<<"dx = "<< dx << " dy= "<< dy<<" not found "<< notFound<<std::endl;
-		}
-
+	for(int h = 0; h < 5; h++){
+		double*resVectPointer = resultantResourceVector(h);
+		double ResourceVect = new double[*resVectPointer, *(resVectPointer+1)];
+		dx+= personality[h]*ResourceVect[0];
+		dy+= personality[h]*ResourceVect[1];
+		//[communication level,
+		//food level,
+		//habitat level,
+		//human influence level,
+		//exploration level,
 	}
-		Values[location[0]][location[1]] = sqrt(pow(vdx,2) + pow(vdy,2));
-		map[location[0]][location[1]][robots] = empty;
-	if(abs(dx) > abs(dy)){
-			if(dx > 0 && location[0]< width-1 && map[location[0] + 1][location[1]][robots] != robot){
-				location[0]+= 1;
-			}
-			else if(dx < 0 && location[0]>0 && map[location[0] - 1][location[1]][robots] != robot){
-				location[0] -= 1;
-			}
-		}
-		else{
-			if(dy > 0 && location[1] < length-1 && map[location[0]][location[1]+1][robots] != robot){
-				location[1]+=1;
-			}
-			else if(dy < 0 && location[1] >0 && map[location[0]][location[1]-1][robots] != robot){
-				location[1] -=1;
-			}
-		}
-		map[location[0]][location[1]][robots] = robot;
+
 
 }
 
