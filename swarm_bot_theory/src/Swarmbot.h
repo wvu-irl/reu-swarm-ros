@@ -71,6 +71,9 @@ private:
 	//move to desired location
 	void move();
 
+	// get required resource
+	void getResource(int resource);
+
 	//age with time
 	void aging();
 
